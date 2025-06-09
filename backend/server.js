@@ -17,8 +17,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
 
-// JSON Body Parser
-app.use(express.json({ limit: '50mb' }));
+// JSON Body Parser mit größerem Limit für PDFs
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // IONOS SMTP Konfiguration
 const SMTP_CONFIG = {
