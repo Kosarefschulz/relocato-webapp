@@ -9,17 +9,12 @@ dotenv.config();
 
 const app = express();
 
-// CORS konfigurieren für Ihre React-App
+// CORS konfigurieren für Ihre React-App - Erlaubt alle Vercel URLs
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://relocato-frontend.vercel.app',
-    'https://relocato-app.vercel.app',
-    'https://umzugs-webapp-kosarefschulz-sergej-schulzs-projects.vercel.app',
-    'https://ihre-domain.de',
-    'https://www.ihre-domain.de'
-  ],
-  credentials: true
+  origin: true, // Erlaubt alle Origins für Entwicklung
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
 
 // JSON Body Parser
