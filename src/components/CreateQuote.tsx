@@ -92,26 +92,16 @@ const CreateQuote: React.FC = () => {
         status: 'sent' as const
       };
 
-      // PDF mit HTML-Template aus Python-Script generieren
-      const htmlContent = calculation 
-        ? quoteCalculationService.generateQuoteHTML(customer, calculation, quoteDetails)
-        : '';
-      
-      const pdfBlob = await generatePDF(customer, quoteData, htmlContent);
-      
-      // E-Mail mit Ihrem Template senden
+      // E-Mail mit Ihrem Template senden (vorerst ohne PDF wegen Vercel Größenlimit)
       const emailText = calculation 
         ? quoteCalculationService.generateEmailText(customer, calculation)
-        : `Sehr geehrte/r ${customer.name},\n\nanbei finden Sie Ihr persönliches Umzugsangebot für € ${finalPrice.toFixed(2).replace('.', ',')}.`;
+        : `Sehr geehrte/r ${customer.name},\n\nanbei finden Sie Ihr persönliches Umzugsangebot:\n\n💰 Preis: € ${finalPrice.toFixed(2).replace('.', ',')}\n📦 Volumen: ${quoteDetails.volume} m³\n📍 Entfernung: ${quoteDetails.distance} km\n\nRELOCATO® Umzugsservice\nE-Mail: bielefeld@relocato.de\n\nMit freundlichen Grüßen,\nIhr RELOCATO® Team`;
       
       await sendEmailViaSMTP({
         to: customer.email,
         subject: `Ihr Umzugsangebot - RELOCATO® - ${customer.name}`,
         content: emailText,
-        attachments: [{
-          filename: `RELOCATO_Angebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`,
-          content: pdfBlob
-        }]
+        attachments: [] // Vorerst ohne PDF wegen Vercel Größenlimit
       });
 
       // Angebot in Google Sheets speichern
