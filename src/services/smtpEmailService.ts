@@ -51,27 +51,8 @@ class SMTPEmailService {
     // Prüfe ob Backend verfügbar ist
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
     
-    try {
-      const healthCheck = await fetch(`${API_URL}/api/health`);
-      if (!healthCheck.ok) {
-        throw new Error('Backend nicht verfügbar');
-      }
-    } catch (error) {
-      console.warn('⚠️ Backend nicht verfügbar - E-Mail wird simuliert');
-      console.log('📧 E-Mail würde gesendet werden:', {
-        to: emailData.to,
-        subject: emailData.subject,
-        from: 'Relocato Umzugsservice <bielefeld@relocato.de>',
-        hasAttachments: emailData.attachments ? emailData.attachments.length : 0
-      });
-      
-      console.log('💡 Um echte E-Mails zu senden:');
-      console.log('1. Backend online deployen');
-      console.log('2. Oder lokales Backend im Terminal starten: cd backend && npm start');
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return true;
-    }
+    // Backend ist verfügbar - direkt zur E-Mail senden
+    console.log('🚀 Backend erkannt - sende echte E-Mail...');
 
     try {
       // Für Production: Backend-API Endpunkt aufrufen
