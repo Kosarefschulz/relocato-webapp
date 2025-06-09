@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Umzugs-App",
+  "name": "Umzugs-Angebote WebApp",
+  "description": "Mobile WebApp für automatisierte Umzugsangebote",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +21,11 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait-primary",
+  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "categories": ["business", "productivity"],
+  "lang": "de-DE",
+  "scope": "/",
+  "prefer_related_applications": false
 }

@@ -13,7 +13,6 @@ import CreateQuote from './components/CreateQuote';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
-import SimpleEmailTest from './components/SimpleEmailTest';
 
 const theme = createTheme({
   palette: {
@@ -87,12 +86,9 @@ function App() {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('App.tsx: Starting login process...');
       setAuthError('');
-      const user = await authService.login({ email, password });
-      console.log('App.tsx: Login successful, user:', user);
+      await authService.login({ email, password });
     } catch (error: any) {
-      console.error('App.tsx: Login failed:', error);
       setAuthError(error.message);
       throw error;
     }
@@ -165,10 +161,6 @@ function App() {
             <Route 
               path="/customers" 
               element={user ? <CustomersList /> : <Navigate to="/login" />} 
-            />
-            <Route 
-              path="/email-test" 
-              element={user ? <SimpleEmailTest /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/" 

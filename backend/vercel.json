@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/server.js"
+    }
+  ],
+  "env": {
+    "SMTP_HOST": "smtp.ionos.de",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "bielefeld@relocato.de",
+    "SMTP_PASS": "Bicm1308",
+    "SMTP_FROM": "bielefeld@relocato.de",
+    "NODE_ENV": "production"
+  }
+}
