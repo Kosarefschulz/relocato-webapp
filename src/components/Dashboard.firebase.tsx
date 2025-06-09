@@ -138,9 +138,9 @@ const Dashboard: React.FC = () => {
           Willkommen zurück! Was möchten Sie heute erledigen?
         </Typography>
         
-        <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 2 }}>
           {dashboardItems.map((item, index) => (
-            <Grid xs={12} sm={6} md={6} key={index}>
+            <Box key={index} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 45%' } }}>
               <Paper
                 sx={{
                   p: 3,
@@ -167,9 +167,9 @@ const Dashboard: React.FC = () => {
                   {item.description}
                 </Typography>
               </Paper>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </>
   );

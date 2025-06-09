@@ -10,7 +10,6 @@ import {
   Alert,
   CircularProgress,
   IconButton,
-  Grid,
   FormControlLabel,
   Checkbox,
   MenuItem
@@ -125,8 +124,8 @@ const NewCustomer: React.FC = () => {
             Kontaktdaten
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid xs={12} md={6}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+            <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 48%' } }}>
               <TextField
                 required
                 fullWidth
@@ -134,8 +133,8 @@ const NewCustomer: React.FC = () => {
                 value={formData.name}
                 onChange={handleInputChange('name')}
               />
-            </Grid>
-            <Grid xs={12} md={6}>
+            </Box>
+            <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 48%' } }}>
               <TextField
                 required
                 fullWidth
@@ -144,8 +143,8 @@ const NewCustomer: React.FC = () => {
                 value={formData.email}
                 onChange={handleInputChange('email')}
               />
-            </Grid>
-            <Grid xs={12} md={6}>
+            </Box>
+            <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 48%' } }}>
               <TextField
                 required
                 fullWidth
@@ -153,8 +152,8 @@ const NewCustomer: React.FC = () => {
                 value={formData.phone}
                 onChange={handleInputChange('phone')}
               />
-            </Grid>
-            <Grid xs={12} md={6}>
+            </Box>
+            <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 48%' } }}>
               <TextField
                 fullWidth
                 label="Umzugsdatum"
@@ -165,87 +164,81 @@ const NewCustomer: React.FC = () => {
                   shrink: true,
                 }}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
 
           <Typography variant="h6" gutterBottom color="primary">
             Umzugsdetails
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="Von (Adresse)"
-                value={formData.fromAddress}
-                onChange={handleInputChange('fromAddress')}
-                multiline
-                rows={2}
-              />
-            </Grid>
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="Nach (Adresse)"
-                value={formData.toAddress}
-                onChange={handleInputChange('toAddress')}
-                multiline
-                rows={2}
-              />
-            </Grid>
-            <Grid xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Anzahl Zimmer"
-                type="number"
-                value={formData.rooms}
-                onChange={handleInputChange('rooms')}
-                inputProps={{ min: 1, max: 10 }}
-              />
-            </Grid>
-            <Grid xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Wohnfläche (m²)"
-                type="number"
-                value={formData.area}
-                onChange={handleInputChange('area')}
-                inputProps={{ min: 10, max: 500 }}
-              />
-            </Grid>
-            <Grid xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Stockwerk"
-                type="number"
-                value={formData.floor}
-                onChange={handleInputChange('floor')}
-                inputProps={{ min: 0, max: 50 }}
-              />
-            </Grid>
-            <Grid xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.hasElevator}
-                    onChange={handleInputChange('hasElevator')}
-                  />
-                }
-                label="Aufzug vorhanden"
-              />
-            </Grid>
-            <Grid xs={12}>
-              <TextField
-                fullWidth
-                label="Notizen"
-                multiline
-                rows={3}
-                value={formData.notes}
-                onChange={handleInputChange('notes')}
-                placeholder="Besonderheiten, zusätzliche Services..."
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Von (Adresse)"
+              value={formData.fromAddress}
+              onChange={handleInputChange('fromAddress')}
+              multiline
+              rows={2}
+            />
+            <TextField
+              fullWidth
+              label="Nach (Adresse)"
+              value={formData.toAddress}
+              onChange={handleInputChange('toAddress')}
+              multiline
+              rows={2}
+            />
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 30%' } }}>
+                <TextField
+                  fullWidth
+                  label="Anzahl Zimmer"
+                  type="number"
+                  value={formData.rooms}
+                  onChange={handleInputChange('rooms')}
+                  inputProps={{ min: 1, max: 10 }}
+                />
+              </Box>
+              <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 30%' } }}>
+                <TextField
+                  fullWidth
+                  label="Wohnfläche (m²)"
+                  type="number"
+                  value={formData.area}
+                  onChange={handleInputChange('area')}
+                  inputProps={{ min: 10, max: 500 }}
+                />
+              </Box>
+              <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 30%' } }}>
+                <TextField
+                  fullWidth
+                  label="Stockwerk"
+                  type="number"
+                  value={formData.floor}
+                  onChange={handleInputChange('floor')}
+                  inputProps={{ min: 0, max: 50 }}
+                />
+              </Box>
+            </Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.hasElevator}
+                  onChange={handleInputChange('hasElevator')}
+                />
+              }
+              label="Aufzug vorhanden"
+            />
+            <TextField
+              fullWidth
+              label="Notizen"
+              multiline
+              rows={3}
+              value={formData.notes}
+              onChange={handleInputChange('notes')}
+              placeholder="Besonderheiten, zusätzliche Services..."
+            />
+          </Box>
 
           <Button
             type="submit"

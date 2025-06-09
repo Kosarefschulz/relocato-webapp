@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../App.firebase';
+import { AuthContext } from '../App.simple';
 import {
   Container,
-  Grid,
   Paper,
   Typography,
   Button,
@@ -27,7 +26,7 @@ import {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -99,7 +98,7 @@ const Dashboard: React.FC = () => {
           
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
-              {user?.email}
+              Benutzer
             </Typography>
             <IconButton
               size="large"
@@ -110,7 +109,7 @@ const Dashboard: React.FC = () => {
               color="inherit"
             >
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-                {user?.email?.charAt(0).toUpperCase()}
+                U
               </Avatar>
             </IconButton>
             <Menu
@@ -130,7 +129,7 @@ const Dashboard: React.FC = () => {
             >
               <MenuItem onClick={handleClose} disabled>
                 <AccountCircleIcon sx={{ mr: 1 }} />
-                {user?.email}
+                Benutzer
               </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <LogoutIcon sx={{ mr: 1 }} />
@@ -149,9 +148,9 @@ const Dashboard: React.FC = () => {
           Willkommen zurück! Was möchten Sie heute erledigen?
         </Typography>
         
-        <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 2 }}>
           {dashboardItems.map((item, index) => (
-            <Grid xs={12} sm={6} md={6} key={index}>
+            <Box key={index} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 45%' } }}>
               <Paper
                 sx={{
                   p: 3,
@@ -178,9 +177,9 @@ const Dashboard: React.FC = () => {
                   {item.description}
                 </Typography>
               </Paper>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </>
   );

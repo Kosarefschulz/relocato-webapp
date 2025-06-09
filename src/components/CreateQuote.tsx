@@ -9,7 +9,6 @@ import {
   Alert,
   CircularProgress,
   IconButton,
-  Grid2 as Grid,
   Card,
   CardContent,
   InputAdornment,
@@ -154,8 +153,8 @@ const CreateQuote: React.FC = () => {
       </Box>
 
       {activeTab === 0 && (
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 48%' } }}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -196,9 +195,9 @@ const CreateQuote: React.FC = () => {
                 />
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
 
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 48%' } }}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -225,8 +224,8 @@ const CreateQuote: React.FC = () => {
                   sx={{ mb: 2 }}
                 />
                 
-                <Grid container spacing={2}>
-                  <Grid size={4}>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <Box sx={{ flex: '1 1 30%' }}>
                     <TextField
                       fullWidth
                       label="Zimmer"
@@ -237,8 +236,8 @@ const CreateQuote: React.FC = () => {
                         apartment: {...customer.apartment, rooms: Number(e.target.value)}
                       })}
                     />
-                  </Grid>
-                  <Grid size={4}>
+                  </Box>
+                  <Box sx={{ flex: '1 1 30%' }}>
                     <TextField
                       fullWidth
                       label="Fläche m²"
@@ -249,8 +248,8 @@ const CreateQuote: React.FC = () => {
                         apartment: {...customer.apartment, area: Number(e.target.value)}
                       })}
                     />
-                  </Grid>
-                  <Grid size={4}>
+                  </Box>
+                  <Box sx={{ flex: '1 1 30%' }}>
                     <TextField
                       fullWidth
                       label="Etage"
@@ -261,8 +260,8 @@ const CreateQuote: React.FC = () => {
                         apartment: {...customer.apartment, floor: Number(e.target.value)}
                       })}
                     />
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
                 
                 <FormControlLabel
                   control={
@@ -279,21 +278,21 @@ const CreateQuote: React.FC = () => {
                 />
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       )}
 
       {activeTab === 1 && (
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 8 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 65%' } }}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
                   Umzugsdetails
                 </Typography>
                 
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid size={6}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                  <Box sx={{ flex: '1 1 48%' }}>
                     <TextField
                       fullWidth
                       label="Geschätztes Volumen (m³)"
@@ -302,8 +301,8 @@ const CreateQuote: React.FC = () => {
                       onChange={(e) => setQuoteDetails({...quoteDetails, volume: Number(e.target.value)})}
                       helperText={`Standard: 20 m³ (85% aller Umzüge) • Bei ${customer.apartment?.area || 50} m²: ca. ${quoteCalculationService.estimateVolumeFromArea(customer.apartment?.area || 50)} m³`}
                     />
-                  </Grid>
-                  <Grid size={6}>
+                  </Box>
+                  <Box sx={{ flex: '1 1 48%' }}>
                     <TextField
                       fullWidth
                       label="Entfernung (km)"
@@ -311,8 +310,8 @@ const CreateQuote: React.FC = () => {
                       value={quoteDetails.distance}
                       onChange={(e) => setQuoteDetails({...quoteDetails, distance: Number(e.target.value)})}
                     />
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
                 
                 <FormControlLabel
                   control={
@@ -336,9 +335,9 @@ const CreateQuote: React.FC = () => {
                 />
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
 
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 32%' } }}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -436,8 +435,8 @@ const CreateQuote: React.FC = () => {
                 </Button>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       )}
     </Container>
   );
