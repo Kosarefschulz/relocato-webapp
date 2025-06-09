@@ -155,7 +155,7 @@ const CreateQuote: React.FC = () => {
 
       {activeTab === 0 && (
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -198,7 +198,7 @@ const CreateQuote: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -226,7 +226,7 @@ const CreateQuote: React.FC = () => {
                 />
                 
                 <Grid container spacing={2}>
-                  <Grid item xs={4}>
+                  <Grid xs={4}>
                     <TextField
                       fullWidth
                       label="Zimmer"
@@ -238,7 +238,7 @@ const CreateQuote: React.FC = () => {
                       })}
                     />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid xs={4}>
                     <TextField
                       fullWidth
                       label="Fläche m²"
@@ -250,7 +250,7 @@ const CreateQuote: React.FC = () => {
                       })}
                     />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid xs={4}>
                     <TextField
                       fullWidth
                       label="Etage"
@@ -285,7 +285,7 @@ const CreateQuote: React.FC = () => {
 
       {activeTab === 1 && (
         <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
+          <Grid xs={12} md={8}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -293,7 +293,7 @@ const CreateQuote: React.FC = () => {
                 </Typography>
                 
                 <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={6}>
+                  <Grid xs={6}>
                     <TextField
                       fullWidth
                       label="Geschätztes Volumen (m³)"
@@ -303,7 +303,7 @@ const CreateQuote: React.FC = () => {
                       helperText={`Standard: 20 m³ (85% aller Umzüge) • Bei ${customer.apartment?.area || 50} m²: ca. ${quoteCalculationService.estimateVolumeFromArea(customer.apartment?.area || 50)} m³`}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid xs={6}>
                     <TextField
                       fullWidth
                       label="Entfernung (km)"
@@ -338,7 +338,7 @@ const CreateQuote: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Card elevation={3}>
               <CardContent>
                 <Typography variant="h6" gutterBottom color="primary">
