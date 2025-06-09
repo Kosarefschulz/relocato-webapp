@@ -89,25 +89,6 @@ class SMTPEmailService {
         }
       }
 
-      const payload = {
-        smtp: {
-          host: this.config.host,
-          port: this.config.port,
-          secure: this.config.secure,
-          auth: {
-            user: this.config.user,
-            pass: this.config.pass
-          }
-        },
-        message: {
-          from: `RELOCATO® <${this.config.from}>`,
-          to: emailData.to,
-          subject: emailData.subject,
-          text: emailData.content,
-          attachments: attachments
-        }
-      };
-
       console.log('📮 Sende E-Mail via IONOS SMTP...');
       console.log('Von:', this.config.from);
       console.log('An:', emailData.to);
@@ -116,10 +97,13 @@ class SMTPEmailService {
       // API-URL bestimmen (Development oder Production)
       const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
       
-      // E-Mail über Backend senden
+      // E-Mail über Backend senden (einfaches Format)
       const response = await fetch(`${API_URL}/api/send-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin
+        },
         body: JSON.stringify({
           to: emailData.to,
           subject: emailData.subject,

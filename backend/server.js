@@ -14,6 +14,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'https://relocato-frontend.vercel.app',
+    'https://relocato-app.vercel.app',
+    'https://umzugs-webapp-kosarefschulz-sergej-schulzs-projects.vercel.app',
     'https://ihre-domain.de',
     'https://www.ihre-domain.de'
   ],
