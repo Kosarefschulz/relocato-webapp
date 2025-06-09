@@ -306,8 +306,8 @@ const CreateQuote: React.FC = () => {
                     variant="contained"
                     disabled={loading || success}
                     startIcon={loading ? undefined : <SendIcon />}
-                    sx={{ flex: 2 }}
                     {...getButtonProps()}
+                    sx={{ flex: 2 }}
                   >
                     {loading ? <CircularProgress size={24} /> : 'Angebot senden'}
                   </Button>
