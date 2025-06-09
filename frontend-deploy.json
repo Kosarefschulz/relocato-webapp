@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "framework": "create-react-app",
+  "installCommand": "npm install",
+  "devCommand": "npm start",
+  "env": {
+    "REACT_APP_API_URL": "https://relocato-backend.vercel.app",
+    "REACT_APP_FIREBASE_API_KEY": "AIzaSyDCeOBZw96klWFkolRQMnhr5DG4Ol2eMjY",
+    "REACT_APP_FIREBASE_AUTH_DOMAIN": "umzugsapp.firebaseapp.com", 
+    "REACT_APP_FIREBASE_PROJECT_ID": "umzugsapp",
+    "REACT_APP_GOOGLE_SHEETS_ID": "178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU",
+    "REACT_APP_SMTP_FROM": "bielefeld@relocato.de"
+  }
+}
