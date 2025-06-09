@@ -5,7 +5,7 @@
   "installCommand": "npm install",
   "devCommand": "npm start",
   "env": {
-    "REACT_APP_API_URL": "https://relocato-backend.vercel.app",
+    "REACT_APP_API_URL": "https://relocato-webapp-83zh.vercel.app",
     "REACT_APP_FIREBASE_API_KEY": "AIzaSyDCeOBZw96klWFkolRQMnhr5DG4Ol2eMjY",
     "REACT_APP_FIREBASE_AUTH_DOMAIN": "umzugsapp.firebaseapp.com", 
     "REACT_APP_FIREBASE_PROJECT_ID": "umzugsapp",
