@@ -13,6 +13,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'https://relocato-frontend.vercel.app',
     'https://ihre-domain.de',
     'https://www.ihre-domain.de'
   ],
