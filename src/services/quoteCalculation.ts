@@ -33,7 +33,7 @@ export interface QuoteDetails {
   boxCount: number;
   parkingZonePrice: number;
   storagePrice: number;
-  manualTotalPrice?: number;
+  manualBasePrice?: number; // Manueller Preis nur für Be- und Entladen
 }
 
 class QuoteCalculationService {
@@ -132,6 +132,11 @@ class QuoteCalculationService {
     const volume = quoteDetails.volume || this.estimateVolumeFromArea(customer.apartment.area);
     const basePriceInfo = this.getBasePrice(volume);
     
+    // Verwende manuellen Preis für Be- und Entladen, falls vorhanden
+    const basePrice = quoteDetails.manualBasePrice !== undefined && quoteDetails.manualBasePrice > 0 
+      ? quoteDetails.manualBasePrice 
+      : basePriceInfo.price;
+    
     // Etagen aus Adresse extrahieren oder Standardwerte verwenden
     const fromFloor = this.extractFloorFromAddress(customer.fromAddress) || customer.apartment.floor || 1;
     const toFloor = this.extractFloorFromAddress(customer.toAddress) || 1;
@@ -149,15 +154,13 @@ class QuoteCalculationService {
     const parkingZonePrice = quoteDetails.parkingZonePrice || 0;
     const storagePrice = quoteDetails.storagePrice || 0;
     
-    const totalPrice = basePriceInfo.price + floorSurcharge + distanceSurcharge + packingService + boxesPrice + parkingZonePrice + storagePrice;
-    
-    // Wenn manueller Preis gesetzt ist, diesen verwenden
-    const finalPrice = quoteDetails.manualTotalPrice || totalPrice;
+    // Gesamtpreis ist Summe aller Komponenten
+    const totalPrice = basePrice + floorSurcharge + distanceSurcharge + packingService + boxesPrice + parkingZonePrice + storagePrice;
     
     return {
       volumeBase: volume,
       volumeRange: basePriceInfo.range,
-      basePrice: basePriceInfo.price,
+      basePrice: basePrice,
       floorSurcharge,
       distanceSurcharge,
       packingService,
@@ -165,10 +168,10 @@ class QuoteCalculationService {
       parkingZonePrice,
       storagePrice,
       totalPrice,
-      manualPrice: quoteDetails.manualTotalPrice,
-      finalPrice,
+      manualPrice: quoteDetails.manualBasePrice,
+      finalPrice: totalPrice, // finalPrice ist jetzt immer die Summe
       priceBreakdown: {
-        base: basePriceInfo.price,
+        base: basePrice,
         floors: floorSurcharge,
         distance: distanceSurcharge,
         packing: packingService,

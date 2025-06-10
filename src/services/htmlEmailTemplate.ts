@@ -322,7 +322,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
         <tbody>
             <tr>
                 <td>1,00</td>
-                <td>Transport inkl. Be- und Entladen pauschal</td>
+                <td>Transport inkl. Be- und Entladen pauschal${calculation.manualPrice ? ' (manueller Preis)' : ''}</td>
                 <td style="text-align: right;">${calculation.basePrice.toFixed(2).replace('.', ',')} €</td>
                 <td style="text-align: right;">${calculation.basePrice.toFixed(2).replace('.', ',')} €</td>
             </tr>
@@ -378,14 +378,40 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
     <table class="price-table">
         <tbody>
             <tr>
-                <td colspan="3">Transport inkl. Be- und Entladen</td>
+                <td colspan="3">Transport inkl. Be- und Entladen${calculation.manualPrice ? ' (manueller Preis)' : ''}</td>
                 <td style="text-align: right;">${calculation.basePrice.toFixed(2).replace('.', ',')} €</td>
             </tr>
+            ${calculation.floorSurcharge > 0 ? `
+            <tr>
+                <td colspan="3">Etagen-Zuschlag</td>
+                <td style="text-align: right;">${calculation.floorSurcharge.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.distanceSurcharge > 0 ? `
+            <tr>
+                <td colspan="3">Entfernungs-Zuschlag</td>
+                <td style="text-align: right;">${calculation.distanceSurcharge.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.packingService > 0 ? `
+            <tr>
+                <td colspan="3">Verpackungsservice</td>
+                <td style="text-align: right;">${calculation.packingService.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.parkingZonePrice > 0 ? `
+            <tr>
+                <td colspan="3">Halteverbotszone</td>
+                <td style="text-align: right;">${calculation.parkingZonePrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.storagePrice > 0 ? `
+            <tr>
+                <td colspan="3">Lagerung</td>
+                <td style="text-align: right;">${calculation.storagePrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${materialSumme > 0 ? `
             <tr>
                 <td colspan="3">Summe Packmaterialien</td>
                 <td style="text-align: right;">${materialSumme.toFixed(2).replace('.', ',')} €</td>
-            </tr>
-            <tr>
+            </tr>` : ''}
+            <tr style="border-top: 1px solid #ddd;">
                 <td colspan="3">Gesamtsumme netto</td>
                 <td style="text-align: right;">${nettoPreis.toFixed(2).replace('.', ',')} €</td>
             </tr>

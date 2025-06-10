@@ -51,7 +51,7 @@ const CreateQuote: React.FC = () => {
     boxCount: 0,
     parkingZonePrice: 0,
     storagePrice: 0,
-    manualTotalPrice: undefined
+    manualBasePrice: undefined
   });
   
   // UI State
@@ -68,7 +68,7 @@ const CreateQuote: React.FC = () => {
     if (customer.id) {
       const updatedQuoteDetails = {
         ...quoteDetails,
-        manualTotalPrice: manualPriceMode ? Number(manualPrice) : undefined
+        manualBasePrice: manualPriceMode ? Number(manualPrice) : undefined
       };
       const calc = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
       setCalculation(calc);
@@ -450,19 +450,20 @@ const CreateQuote: React.FC = () => {
                       onChange={(e) => setManualPriceMode(e.target.checked)}
                     />
                   }
-                  label="Manueller Preis"
+                  label="Manueller Preis für Be- und Entladen"
                   sx={{ mb: 2 }}
                 />
                 
                 {manualPriceMode ? (
                   <TextField
                     fullWidth
-                    label="Preis eingeben"
+                    label="Preis für Be- und Entladen eingeben"
                     type="number"
                     value={manualPrice}
                     onChange={(e) => setManualPrice(e.target.value)}
+                    helperText="Dieser Preis ersetzt nur den Basispreis. Zusatzleistungen werden addiert."
                     InputProps={{
-                      startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                      startAdornment: <InputAdornment position="start">€</InputAdornament>,
                     }}
                     sx={{ mb: 2 }}
                   />
@@ -474,7 +475,8 @@ const CreateQuote: React.FC = () => {
                     
                     <Box sx={{ mb: 1 }}>
                       <Typography variant="body2">
-                        Basis ({calculation.volumeRange}): €{calculation.priceBreakdown.base.toFixed(2)}
+                        Be- und Entladen ({calculation.volumeRange}): €{calculation.priceBreakdown.base.toFixed(2)}
+                        {calculation.manualPrice && ' (manuell)'}
                       </Typography>
                     </Box>
                     
@@ -528,18 +530,11 @@ const CreateQuote: React.FC = () => {
                     
                     <Divider sx={{ my: 2 }} />
                     
-                    <Typography variant="body2" color="text.secondary">
-                      Kalkuliert: €{calculation.totalPrice.toFixed(2)}
-                    </Typography>
-                    
-                    {calculation.manualPrice && (
-                      <Typography variant="body2" color="text.secondary">
-                        Manuell: €{calculation.manualPrice.toFixed(2)}
-                      </Typography>
-                    )}
-                    
                     <Typography variant="h6" color="primary">
-                      Endpreis: €{calculation.finalPrice.toFixed(2)}
+                      Gesamtpreis: €{calculation.totalPrice.toFixed(2)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      inkl. 19% MwSt.
                     </Typography>
                   </Box>
                 )}
