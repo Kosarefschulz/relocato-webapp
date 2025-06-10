@@ -69,7 +69,8 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 40px;
+            margin: 20px;
+            padding-top: 0;
             color: #333;
             font-size: 10pt;
         }
@@ -77,8 +78,8 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
         /* Logo Header */
         .logo-header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #8BC34A;
         }
         
@@ -103,7 +104,8 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
         h1 {
             color: #8BC34A;
             text-align: center;
-            margin-bottom: 30px;
+            margin-top: 10px;
+            margin-bottom: 20px;
             font-size: 24pt;
         }
         
