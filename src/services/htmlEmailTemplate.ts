@@ -2,9 +2,9 @@ import { Customer } from '../types';
 import { QuoteCalculation } from './quoteCalculation';
 
 export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculation, quoteDetails: any): string => {
-  // Berechne Preise
-  const nettoPreis = calculation.totalPrice / 1.19;
-  const mwst = calculation.totalPrice - nettoPreis;
+  // Berechne Preise mit finalPrice
+  const nettoPreis = calculation.finalPrice / 1.19;
+  const mwst = calculation.finalPrice - nettoPreis;
   const rabatt = calculation.basePrice * 0.05; // 5% Rabatt
   const grundhaftung = Math.round(quoteDetails.volume * 620);
   
@@ -14,6 +14,19 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
   
   // Material-Liste für die Tabelle erstellen
   let materialListe = '';
+  
+  // Kartons hinzufügen wenn vorhanden
+  if (calculation.boxesPrice > 0) {
+    materialListe += `
+            <tr>
+                <td>${quoteDetails.boxCount.toFixed(2).replace('.', ',')}</td>
+                <td>Umzugskartons</td>
+                <td style="text-align: right;">2,50 €</td>
+                <td style="text-align: right;">${calculation.boxesPrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>`;
+  }
+  
+  // Weitere Materialien wenn vorhanden
   if (quoteDetails.materials && quoteDetails.materials.length > 0) {
     quoteDetails.materials.forEach((material: any) => {
       materialListe += `
@@ -24,21 +37,6 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
                 <td style="text-align: right;">${material.totalPrice ? material.totalPrice.toFixed(2).replace('.', ',') : '0,00'} €</td>
             </tr>`;
     });
-  } else {
-    // Standard-Materialien wenn keine angegeben
-    materialListe = `
-            <tr>
-                <td>10,00</td>
-                <td>Umzugskartons Standard</td>
-                <td style="text-align: right;">3,45 €</td>
-                <td style="text-align: right;">34,50 €</td>
-            </tr>
-            <tr>
-                <td>5,00</td>
-                <td>Kleiderboxen</td>
-                <td style="text-align: right;">10,68 €</td>
-                <td style="text-align: right;">53,40 €</td>
-            </tr>`;
   }
 
   // Zusatzleistungen für die Tabelle
@@ -56,9 +54,9 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
   }
 
   // Material-Summe berechnen
-  const materialSumme = quoteDetails.materials 
+  const materialSumme = calculation.boxesPrice + (quoteDetails.materials 
     ? quoteDetails.materials.reduce((sum: number, m: any) => sum + (m.totalPrice || 0), 0)
-    : 87.90;
+    : 0);
 
   // HTML Template - 1:1 Übernahme des bereitgestellten Templates
   let html = `<!DOCTYPE html>
@@ -328,6 +326,41 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
                 <td style="text-align: right;">${calculation.basePrice.toFixed(2).replace('.', ',')} €</td>
                 <td style="text-align: right;">${calculation.basePrice.toFixed(2).replace('.', ',')} €</td>
             </tr>
+            ${calculation.floorSurcharge > 0 ? `
+            <tr>
+                <td>1,00</td>
+                <td>Etagen-Zuschlag</td>
+                <td style="text-align: right;">${calculation.floorSurcharge.toFixed(2).replace('.', ',')} €</td>
+                <td style="text-align: right;">${calculation.floorSurcharge.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.distanceSurcharge > 0 ? `
+            <tr>
+                <td>1,00</td>
+                <td>Entfernungs-Zuschlag (über 50km)</td>
+                <td style="text-align: right;">${calculation.distanceSurcharge.toFixed(2).replace('.', ',')} €</td>
+                <td style="text-align: right;">${calculation.distanceSurcharge.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.packingService > 0 ? `
+            <tr>
+                <td>1,00</td>
+                <td>Verpackungsservice</td>
+                <td style="text-align: right;">${calculation.packingService.toFixed(2).replace('.', ',')} €</td>
+                <td style="text-align: right;">${calculation.packingService.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.parkingZonePrice > 0 ? `
+            <tr>
+                <td>1,00</td>
+                <td>Halteverbotszone</td>
+                <td style="text-align: right;">${calculation.parkingZonePrice.toFixed(2).replace('.', ',')} €</td>
+                <td style="text-align: right;">${calculation.parkingZonePrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.storagePrice > 0 ? `
+            <tr>
+                <td>1,00</td>
+                <td>Lagerung</td>
+                <td style="text-align: right;">${calculation.storagePrice.toFixed(2).replace('.', ',')} €</td>
+                <td style="text-align: right;">${calculation.storagePrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
             ${zusatzLeistungen}
         </tbody>
     </table>
@@ -362,7 +395,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
             </tr>
             <tr class="total-row">
                 <td colspan="3"><strong>Gesamtsumme Festpreis inkl. MwSt.</strong></td>
-                <td style="text-align: right;"><strong>${calculation.totalPrice.toFixed(2).replace('.', ',')} €</strong></td>
+                <td style="text-align: right;"><strong>${calculation.finalPrice.toFixed(2).replace('.', ',')} €</strong></td>
             </tr>
         </tbody>
     </table>

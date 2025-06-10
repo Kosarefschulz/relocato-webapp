@@ -24,7 +24,30 @@ export interface Quote {
   comment?: string;
   createdAt: Date;
   createdBy: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'invoiced';
+}
+
+export interface Invoice {
+  id: string;
+  quoteId: string;
+  customerId: string;
+  customerName: string;
+  invoiceNumber: string;
+  price: number;
+  taxAmount: number;
+  totalPrice: number;
+  items: InvoiceItem[];
+  createdAt: Date;
+  dueDate: Date;
+  paidDate?: Date;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+}
+
+export interface InvoiceItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
 }
 
 export interface Consultant {

@@ -7,12 +7,20 @@ export interface QuoteCalculation {
   floorSurcharge: number;
   distanceSurcharge: number;
   packingService: number;
+  boxesPrice: number;
+  parkingZonePrice: number;
+  storagePrice: number;
   totalPrice: number;
+  manualPrice?: number;
+  finalPrice: number;
   priceBreakdown: {
     base: number;
     floors: number;
     distance: number;
     packing: number;
+    boxes: number;
+    parkingZone: number;
+    storage: number;
   };
 }
 
@@ -22,6 +30,10 @@ export interface QuoteDetails {
   packingRequested: boolean;
   additionalServices: string[];
   notes: string;
+  boxCount: number;
+  parkingZonePrice: number;
+  storagePrice: number;
+  manualTotalPrice?: number;
 }
 
 class QuoteCalculationService {
@@ -110,6 +122,11 @@ class QuoteCalculationService {
     return Math.max(volume * 15, 150);
   }
 
+  // Karton-Preis berechnen
+  calculateBoxesPrice(boxCount: number): number {
+    return boxCount * 2.50;
+  }
+
   // Haupt-Kalkulationsfunktion
   calculateQuote(customer: Customer, quoteDetails: QuoteDetails): QuoteCalculation {
     const volume = quoteDetails.volume || this.estimateVolumeFromArea(customer.apartment.area);
@@ -128,8 +145,14 @@ class QuoteCalculationService {
     
     const distanceSurcharge = this.calculateDistanceSurcharge(quoteDetails.distance);
     const packingService = this.calculatePackingService(volume, quoteDetails.packingRequested);
+    const boxesPrice = this.calculateBoxesPrice(quoteDetails.boxCount || 0);
+    const parkingZonePrice = quoteDetails.parkingZonePrice || 0;
+    const storagePrice = quoteDetails.storagePrice || 0;
     
-    const totalPrice = basePriceInfo.price + floorSurcharge + distanceSurcharge + packingService;
+    const totalPrice = basePriceInfo.price + floorSurcharge + distanceSurcharge + packingService + boxesPrice + parkingZonePrice + storagePrice;
+    
+    // Wenn manueller Preis gesetzt ist, diesen verwenden
+    const finalPrice = quoteDetails.manualTotalPrice || totalPrice;
     
     return {
       volumeBase: volume,
@@ -138,12 +161,20 @@ class QuoteCalculationService {
       floorSurcharge,
       distanceSurcharge,
       packingService,
+      boxesPrice,
+      parkingZonePrice,
+      storagePrice,
       totalPrice,
+      manualPrice: quoteDetails.manualTotalPrice,
+      finalPrice,
       priceBreakdown: {
         base: basePriceInfo.price,
         floors: floorSurcharge,
         distance: distanceSurcharge,
-        packing: packingService
+        packing: packingService,
+        boxes: boxesPrice,
+        parkingZone: parkingZonePrice,
+        storage: storagePrice
       }
     };
   }

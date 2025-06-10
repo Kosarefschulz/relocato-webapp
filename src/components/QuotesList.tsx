@@ -19,7 +19,8 @@ import {
   ArrowBack as ArrowBackIcon,
   Search as SearchIcon,
   Download as DownloadIcon,
-  Email as EmailIcon
+  Email as EmailIcon,
+  Receipt as ReceiptIcon
 } from '@mui/icons-material';
 import { Quote } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
@@ -52,6 +53,7 @@ const QuotesList: React.FC = () => {
       case 'sent': return 'primary';
       case 'accepted': return 'success';
       case 'rejected': return 'error';
+      case 'invoiced': return 'info';
       default: return 'default';
     }
   };
@@ -62,7 +64,27 @@ const QuotesList: React.FC = () => {
       case 'accepted': return 'Angenommen';
       case 'rejected': return 'Abgelehnt';
       case 'draft': return 'Entwurf';
+      case 'invoiced': return 'Rechnung erstellt';
       default: return status;
+    }
+  };
+
+  const handleConvertToInvoice = async (quote: Quote) => {
+    try {
+      // Generate invoice number
+      const invoiceNumber = `RE-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+      
+      // Update quote status
+      const updatedQuote = { ...quote, status: 'invoiced' as const };
+      
+      // TODO: Save invoice and update quote status
+      console.log('Rechnung erstellen:', invoiceNumber, quote);
+      
+      // Refresh quotes
+      const quotes = await googleSheetsService.getQuotes();
+      setQuotes(quotes);
+    } catch (error) {
+      console.error('Fehler beim Erstellen der Rechnung:', error);
     }
   };
 
@@ -158,6 +180,16 @@ const QuotesList: React.FC = () => {
                         >
                           Erneut senden
                         </Button>
+                        {quote.status === 'accepted' && (
+                          <Button
+                            size="small"
+                            startIcon={<ReceiptIcon />}
+                            onClick={() => handleConvertToInvoice(quote)}
+                            color="success"
+                          >
+                            Rechnung erstellen
+                          </Button>
+                        )}
                       </Box>
                     </Box>
                   }

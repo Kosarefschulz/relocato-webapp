@@ -47,7 +47,11 @@ const CreateQuote: React.FC = () => {
     distance: 25,
     packingRequested: false,
     additionalServices: [],
-    notes: ''
+    notes: '',
+    boxCount: 0,
+    parkingZonePrice: 0,
+    storagePrice: 0,
+    manualTotalPrice: undefined
   });
   
   // UI State
@@ -61,11 +65,15 @@ const CreateQuote: React.FC = () => {
 
   // Automatische Kalkulation bei Änderungen
   React.useEffect(() => {
-    if (!manualPriceMode && customer.id) {
-      const calc = quoteCalculationService.calculateQuote(customer, quoteDetails);
+    if (customer.id) {
+      const updatedQuoteDetails = {
+        ...quoteDetails,
+        manualTotalPrice: manualPriceMode ? Number(manualPrice) : undefined
+      };
+      const calc = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
       setCalculation(calc);
     }
-  }, [customer, quoteDetails, manualPriceMode]);
+  }, [customer, quoteDetails, manualPriceMode, manualPrice]);
 
   if (!initialCustomer) {
     navigate('/search-customer');
@@ -123,9 +131,14 @@ const CreateQuote: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const finalPrice = manualPriceMode ? Number(manualPrice) : calculation?.totalPrice;
+    if (!calculation) {
+      setError('Bitte warten Sie auf die Preisberechnung');
+      return;
+    }
+
+    const finalPrice = calculation.finalPrice;
     
-    if (!finalPrice || finalPrice <= 0 || !calculation) {
+    if (!finalPrice || finalPrice <= 0) {
       setError('Bitte geben Sie einen gültigen Preis ein oder lassen Sie ihn berechnen');
       return;
     }
@@ -369,6 +382,56 @@ const CreateQuote: React.FC = () => {
                   onChange={(e) => setQuoteDetails({...quoteDetails, notes: e.target.value})}
                   placeholder="z.B. schwere Möbel, besondere Anforderungen..."
                 />
+                
+                <Divider sx={{ my: 3 }} />
+                
+                <Typography variant="h6" gutterBottom color="primary">
+                  Zusatzleistungen
+                </Typography>
+                
+                <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+                  <Box sx={{ flex: '1 1 48%' }}>
+                    <TextField
+                      fullWidth
+                      label="Anzahl Kartons"
+                      type="number"
+                      value={quoteDetails.boxCount}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, boxCount: Number(e.target.value)})}
+                      helperText="2,50 € pro Karton"
+                      InputProps={{
+                        inputProps: { min: 0 }
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: '1 1 48%' }}>
+                    <TextField
+                      fullWidth
+                      label="Halteverbotszone"
+                      type="number"
+                      value={quoteDetails.parkingZonePrice}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, parkingZonePrice: Number(e.target.value)})}
+                      helperText="Preis manuell eingeben"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                        inputProps: { min: 0 }
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: '1 1 48%' }}>
+                    <TextField
+                      fullWidth
+                      label="Lagerung"
+                      type="number"
+                      value={quoteDetails.storagePrice}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, storagePrice: Number(e.target.value)})}
+                      helperText="Preis manuell eingeben"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                        inputProps: { min: 0 }
+                      }}
+                    />
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
           </Box>
@@ -439,10 +502,44 @@ const CreateQuote: React.FC = () => {
                       </Box>
                     )}
                     
+                    {calculation.priceBreakdown.boxes > 0 && (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2">
+                          Kartons ({quoteDetails.boxCount}x): €{calculation.priceBreakdown.boxes.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    {calculation.priceBreakdown.parkingZone > 0 && (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2">
+                          Halteverbotszone: €{calculation.priceBreakdown.parkingZone.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    {calculation.priceBreakdown.storage > 0 && (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2">
+                          Lagerung: €{calculation.priceBreakdown.storage.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    )}
+                    
                     <Divider sx={{ my: 2 }} />
                     
+                    <Typography variant="body2" color="text.secondary">
+                      Kalkuliert: €{calculation.totalPrice.toFixed(2)}
+                    </Typography>
+                    
+                    {calculation.manualPrice && (
+                      <Typography variant="body2" color="text.secondary">
+                        Manuell: €{calculation.manualPrice.toFixed(2)}
+                      </Typography>
+                    )}
+                    
                     <Typography variant="h6" color="primary">
-                      Gesamt: €{calculation.totalPrice.toFixed(2)}
+                      Endpreis: €{calculation.finalPrice.toFixed(2)}
                     </Typography>
                   </Box>
                 )}
@@ -465,8 +562,7 @@ const CreateQuote: React.FC = () => {
                     variant="outlined"
                     onClick={async () => {
                       try {
-                        const finalPrice = manualPriceMode ? Number(manualPrice) : calculation?.totalPrice;
-                        if (!finalPrice || !calculation) return;
+                        if (!calculation) return;
                         
                         setLoading(true);
                         
@@ -515,7 +611,7 @@ const CreateQuote: React.FC = () => {
                         setLoading(false);
                       }
                     }}
-                    disabled={loading || !calculation?.totalPrice}
+                    disabled={loading || !calculation?.finalPrice}
                     size="large"
                     sx={{ height: 48 }}
                   >
