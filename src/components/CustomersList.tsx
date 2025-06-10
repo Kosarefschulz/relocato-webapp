@@ -13,14 +13,23 @@ import {
   Divider,
   TextField,
   InputAdornment,
-  Chip
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import { 
   ArrowBack as ArrowBackIcon,
   Search as SearchIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  Home as HomeIcon
+  Home as HomeIcon,
+  Upload as UploadIcon,
+  ContentCopy as ContentCopyIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
@@ -29,6 +38,10 @@ const CustomersList: React.FC = () => {
   const navigate = useNavigate();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportData, setExportData] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     const loadCustomers = async () => {
@@ -59,6 +72,36 @@ const CustomersList: React.FC = () => {
     return moveDate > today;
   };
 
+  const handleExportClick = () => {
+    const csvData = googleSheetsService.exportLocalCustomersForSheets();
+    setExportData(csvData);
+    setExportDialogOpen(true);
+  };
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(exportData);
+      setSnackbarMessage('Daten wurden in die Zwischenablage kopiert!');
+      setSnackbarOpen(true);
+      setExportDialogOpen(false);
+    } catch (error) {
+      console.error('Fehler beim Kopieren:', error);
+      setSnackbarMessage('Fehler beim Kopieren in die Zwischenablage');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleClearLocalCustomers = () => {
+    googleSheetsService.clearLocalCustomers();
+    setExportDialogOpen(false);
+    setSnackbarMessage('Lokale Kunden wurden gelöscht');
+    setSnackbarOpen(true);
+    // Reload customers
+    window.location.reload();
+  };
+
+  const hasLocalCustomers = customers.some(customer => customer.id.startsWith('local_'));
+
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Box sx={{ mb: 3 }}>
@@ -74,21 +117,34 @@ const CustomersList: React.FC = () => {
       </Box>
 
       <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <TextField
-          fullWidth
-          label="Kunde suchen"
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Name, ID oder Email"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
+          <TextField
+            fullWidth
+            label="Kunde suchen"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Name, ID oder Email"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+          {hasLocalCustomers && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<UploadIcon />}
+              onClick={handleExportClick}
+              sx={{ minWidth: 200 }}
+            >
+              Export für Google Sheets
+            </Button>
+          )}
+        </Box>
       </Paper>
 
       <Paper elevation={3}>
@@ -111,6 +167,13 @@ const CustomersList: React.FC = () => {
                           {customer.name}
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 1 }}>
+                          {customer.id.startsWith('local_') && (
+                            <Chip 
+                              label="Lokal" 
+                              color="warning" 
+                              size="small"
+                            />
+                          )}
                           {isUpcomingMove(customer.movingDate) && (
                             <Chip 
                               label="Bevorstehend" 
@@ -179,6 +242,64 @@ const CustomersList: React.FC = () => {
           </Box>
         )}
       </Paper>
+
+      {/* Export Dialog */}
+      <Dialog 
+        open={exportDialogOpen} 
+        onClose={() => setExportDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Lokale Kunden für Google Sheets exportieren
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Kopieren Sie die folgenden Daten und fügen Sie sie in Ihr Google Sheet ein:
+          </Alert>
+          <TextField
+            multiline
+            fullWidth
+            value={exportData}
+            rows={10}
+            variant="outlined"
+            InputProps={{
+              readOnly: true,
+              sx: { fontFamily: 'monospace', fontSize: '12px' }
+            }}
+          />
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            Nach dem Export und Einfügen in Google Sheets können Sie die lokalen Kunden löschen, 
+            um Duplikate zu vermeiden.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setExportDialogOpen(false)}>
+            Abbrechen
+          </Button>
+          <Button 
+            onClick={handleClearLocalCustomers}
+            color="error"
+          >
+            Lokale Kunden löschen
+          </Button>
+          <Button 
+            onClick={handleCopyToClipboard}
+            variant="contained"
+            startIcon={<ContentCopyIcon />}
+          >
+            In Zwischenablage kopieren
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar für Benachrichtigungen */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </Container>
   );
 };

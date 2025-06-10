@@ -293,6 +293,57 @@ class GoogleSheetsPublicService {
     ];
   }
 
+  // Export lokale Kunden für Google Sheets
+  exportLocalCustomersForSheets(): string {
+    const localCustomers = this.getLocalCustomers();
+    
+    if (localCustomers.length === 0) {
+      return 'Keine lokalen Kunden zum Exportieren vorhanden.';
+    }
+    
+    // Formatiere die Daten im Google Sheets CSV Format
+    const headers = ['Kontakt Name', 'Kontakt Telefon', 'Kontakt Email', 'Whatsapp', 'Von Adresse', 'Von Etage', 'Von Flaeche M 2', 'Nach Adresse', 'Nach Etage', 'Umzugstag', 'Eingang', 'Quelle', 'Datum/Zeit', 'Nachricht gesendet'];
+    
+    const rows = localCustomers.map(customer => {
+      const fromFloor = customer.fromAddress.match(/Etage (\d+)/)?.[1] || customer.apartment.floor.toString();
+      const toFloor = customer.toAddress.match(/Etage (\d+)/)?.[1] || '';
+      const fromAddressClean = customer.fromAddress.replace(/ - Etage \d+/, '');
+      const toAddressClean = customer.toAddress.replace(/ - Etage \d+/, '');
+      
+      return [
+        customer.name,
+        customer.phone,
+        customer.email,
+        customer.phone, // WhatsApp gleich wie Telefon
+        fromAddressClean,
+        fromFloor,
+        `${customer.apartment.area} m²`,
+        toAddressClean,
+        toFloor,
+        customer.movingDate,
+        new Date().toLocaleDateString('de-DE'),
+        'Web-App',
+        new Date().toLocaleString('de-DE'),
+        'Nein'
+      ].map(field => {
+        // Escape fields that contain commas or quotes
+        const str = String(field);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }).join(',');
+    });
+    
+    return [headers.join(','), ...rows].join('\n');
+  }
+
+  // Lösche lokale Kunden nach erfolgreichem Export
+  clearLocalCustomers(): void {
+    this.saveLocalCustomers([]);
+    console.log('✅ Lokale Kunden wurden gelöscht');
+  }
+
   // Test-Methode
   async testConnection(): Promise<boolean> {
     try {
