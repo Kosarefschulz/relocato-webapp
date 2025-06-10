@@ -2,6 +2,25 @@ import { Customer, Quote } from '../types';
 
 class GoogleSheetsPublicService {
   private spreadsheetId = '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
+  private localStorageKey = 'relocato_local_customers';
+
+  private getLocalCustomers(): Customer[] {
+    try {
+      const stored = localStorage.getItem(this.localStorageKey);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Fehler beim Laden lokaler Kunden:', error);
+      return [];
+    }
+  }
+
+  private saveLocalCustomers(customers: Customer[]): void {
+    try {
+      localStorage.setItem(this.localStorageKey, JSON.stringify(customers));
+    } catch (error) {
+      console.error('Fehler beim Speichern lokaler Kunden:', error);
+    }
+  }
 
   async getCustomers(): Promise<Customer[]> {
     try {
@@ -31,9 +50,13 @@ class GoogleSheetsPublicService {
             console.log('📋 CSV Daten erhalten:', csvText.substring(0, 300) + '...');
             
             if (csvText && !csvText.includes('<HTML>') && !csvText.includes('Temporary Redirect')) {
-              const customers = this.parseCSVToCustomers(csvText);
-              console.log(`✅ ${customers.length} Kunden erfolgreich geladen!`);
-              return customers;
+              const sheetsCustomers = this.parseCSVToCustomers(csvText);
+              const localCustomers = this.getLocalCustomers();
+              
+              // Kombiniere Google Sheets Kunden mit lokalen Kunden
+              const allCustomers = [...sheetsCustomers, ...localCustomers];
+              console.log(`✅ ${sheetsCustomers.length} Kunden aus Google Sheets + ${localCustomers.length} lokale Kunden = ${allCustomers.length} total`);
+              return allCustomers;
             }
           }
         } catch (fetchError) {
@@ -47,7 +70,12 @@ class GoogleSheetsPublicService {
     } catch (error) {
       console.error('❌ Fehler beim Laden der öffentlichen Daten:', error);
       console.log('🔄 Zeige Demo-Daten basierend auf Ihrer Struktur...');
-      return this.getDemoCustomersFromYourStructure();
+      
+      // Lade lokale Kunden auch wenn Google Sheets nicht verfügbar ist
+      const localCustomers = this.getLocalCustomers();
+      const demoCustomers = this.getDemoCustomersFromYourStructure();
+      
+      return [...demoCustomers, ...localCustomers];
     }
   }
 
@@ -137,10 +165,31 @@ class GoogleSheetsPublicService {
   }
 
   async addCustomer(customer: Omit<Customer, 'id'>): Promise<boolean> {
-    console.log('💾 Neuer Kunde würde zu Google Sheets hinzugefügt werden:', customer.name);
-    console.log('📝 Zum Schreiben benötigen Sie API-Zugriff oder manuelles Hinzufügen');
-    console.log('🔗 Öffnen Sie: https://docs.google.com/spreadsheets/d/' + this.spreadsheetId);
-    return true;
+    try {
+      // Generiere eine eindeutige ID
+      const newCustomer: Customer = {
+        ...customer,
+        id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Lade existierende lokale Kunden
+      const localCustomers = this.getLocalCustomers();
+      
+      // Füge neuen Kunden hinzu
+      localCustomers.push(newCustomer);
+      
+      // Speichere aktualisierte Liste
+      this.saveLocalCustomers(localCustomers);
+      
+      console.log('💾 Neuer Kunde lokal gespeichert:', customer.name);
+      console.log('📝 Zum Synchronisieren mit Google Sheets benötigen Sie API-Zugriff');
+      console.log('🔗 Manuell hinzufügen: https://docs.google.com/spreadsheets/d/' + this.spreadsheetId);
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Speichern des Kunden:', error);
+      return false;
+    }
   }
 
   async addQuote(quote: Omit<Quote, 'id'>): Promise<boolean> {
