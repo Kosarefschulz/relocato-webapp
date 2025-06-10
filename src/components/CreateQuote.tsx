@@ -26,6 +26,7 @@ import {
 import { Customer } from '../types';
 import { generatePDF } from '../services/pdfService';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
+import { sendQuoteEmailWithPDFShift } from '../services/emailServiceWithPDFShift';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
@@ -146,38 +147,8 @@ const CreateQuote: React.FC = () => {
       // Generate HTML content for both email and PDF
       const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
       
-      // Generate PDF from HTML
-      const pdfBlob = await generatePDFFromHTML(htmlContent);
-      
-      // Try to send email with small PDF attachment, fallback to email without PDF
-      try {
-        const pdfSizeKB = pdfBlob.size / 1024;
-        console.log(`PDF Größe: ${pdfSizeKB.toFixed(0)} KB`);
-        
-        // Only attach PDF if under 15MB (leaves room for Base64 encoding)
-        if (pdfBlob.size < 15 * 1024 * 1024) {
-          await sendEmailViaSMTP({
-            to: customer.email,
-            subject: `Ihr Umzugsangebot - RELOCATO® - ${customer.name}`,
-            content: `Sehr geehrte/r ${customer.name},\n\nanbei finden Sie Ihr persönliches Umzugsangebot als PDF.\n\n💰 Preis: € ${finalPrice.toFixed(2).replace('.', ',')}\n📦 Volumen: ${quoteDetails.volume} m³\n📍 Entfernung: ${quoteDetails.distance} km\n\nMit freundlichen Grüßen,\nIhr RELOCATO® Team`,
-            attachments: [{
-              filename: `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`,
-              content: pdfBlob
-            }]
-          });
-        } else {
-          throw new Error('PDF zu groß für E-Mail-Anhang');
-        }
-      } catch (emailError) {
-        console.log('PDF-Anhang zu groß, sende E-Mail ohne PDF');
-        // Send email without PDF attachment
-        await sendEmailViaSMTP({
-          to: customer.email,
-          subject: `Ihr Umzugsangebot - RELOCATO® - ${customer.name}`,
-          content: `Sehr geehrte/r ${customer.name},\n\nvielen Dank für Ihr Interesse. Hier sind die Details Ihres Umzugsangebots:\n\n💰 Preis: € ${finalPrice.toFixed(2).replace('.', ',')}\n📦 Volumen: ${quoteDetails.volume} m³\n📍 Entfernung: ${quoteDetails.distance} km\n📍 Von: ${customer.fromAddress}\n📍 Nach: ${customer.toAddress}\n\nDas detaillierte PDF-Angebot erhalten Sie auf Anfrage.\n\nMit freundlichen Grüßen,\nIhr RELOCATO® Team\n\nRELOCATO® Bielefeld\nTel: (0521) 1200551-0\nE-Mail: bielefeld@relocato.de`,
-          attachments: []
-        });
-      }
+      // Send email with PDFShift service (handles PDF generation and email)
+      await sendQuoteEmailWithPDFShift(customer, calculation, quoteDetails);
 
       // Angebot in Google Sheets speichern
       await googleSheetsService.addQuote(quoteData);
