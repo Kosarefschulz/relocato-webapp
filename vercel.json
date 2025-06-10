@@ -3,16 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "framework": "create-react-app",
-  "installCommand": "npm install",
-  "devCommand": "npm start",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

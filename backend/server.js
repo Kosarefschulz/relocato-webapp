@@ -11,7 +11,14 @@ const app = express();
 
 // CORS konfigurieren für Ihre React-App - Erlaubt alle Vercel URLs
 app.use(cors({
-  origin: true, // Erlaubt alle Origins für Entwicklung
+  origin: [
+    'https://relocato.ruempel-schmiede.com',
+    'https://ruempel-schmiede.com',
+    'https://umzugs-webapp-jgns7q61s-sergej-schulzs-projects.vercel.app',
+    'https://umzugs-webapp-1acwl6e1x-sergej-schulzs-projects.vercel.app',
+    'http://localhost:3000',
+    /\.vercel\.app$/  // Alle Vercel Preview URLs
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']

@@ -1,7 +1,8 @@
 {
-  "name": "umzugs-webapp",
-  "version": "0.1.0",
+  "name": "relocato-webapp",
+  "version": "1.0.0",
   "private": true,
+  "homepage": "https://ruempel-schmiede.com",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -20,6 +21,7 @@
     "firebase": "^11.9.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
+    "nodemailer": "^7.0.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.57.0",

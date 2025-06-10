@@ -28,6 +28,9 @@ import { generatePDF } from '../services/pdfService';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
+import { generateEmailHTML } from '../services/htmlEmailTemplate';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const CreateQuote: React.FC = () => {
   const location = useLocation();
@@ -68,12 +71,60 @@ const CreateQuote: React.FC = () => {
     return null;
   }
 
+  const generatePDFFromHTML = async (htmlContent: string): Promise<Blob> => {
+    // Create temporary div to render HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.width = '750px'; // Schmaler für bessere Darstellung
+    tempDiv.style.backgroundColor = 'white';
+    document.body.appendChild(tempDiv);
+
+    try {
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2, // Höhere Qualität für bessere Lesbarkeit
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 750,
+        height: tempDiv.scrollHeight
+      });
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png', 1.0); // PNG mit maximaler Qualität
+      const imgWidth = 190; // Kleinere Breite für Ränder
+      const pageHeight = 270; // A4 Höhe minus Ränder (optimiert)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 10; // Oberer Rand
+      let pageNumber = 1;
+
+      // Erste Seite
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Weitere Seiten mit besserem Rand-Management
+      while (heightLeft >= 0) {
+        pageNumber++;
+        position = heightLeft - imgHeight + 15; // Besserer oberer Rand für Folgeseiten
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      return pdf.output('blob');
+    } finally {
+      document.body.removeChild(tempDiv);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const finalPrice = manualPriceMode ? Number(manualPrice) : calculation?.totalPrice;
     
-    if (!finalPrice || finalPrice <= 0) {
+    if (!finalPrice || finalPrice <= 0 || !calculation) {
       setError('Bitte geben Sie einen gültigen Preis ein oder lassen Sie ihn berechnen');
       return;
     }
@@ -92,17 +143,41 @@ const CreateQuote: React.FC = () => {
         status: 'sent' as const
       };
 
-      // E-Mail mit Ihrem Template senden (vorerst ohne PDF wegen Vercel Größenlimit)
-      const emailText = calculation 
-        ? quoteCalculationService.generateEmailText(customer, calculation)
-        : `Sehr geehrte/r ${customer.name},\n\nanbei finden Sie Ihr persönliches Umzugsangebot:\n\n💰 Preis: € ${finalPrice.toFixed(2).replace('.', ',')}\n📦 Volumen: ${quoteDetails.volume} m³\n📍 Entfernung: ${quoteDetails.distance} km\n\nRELOCATO® Umzugsservice\nE-Mail: bielefeld@relocato.de\n\nMit freundlichen Grüßen,\nIhr RELOCATO® Team`;
+      // Generate HTML content for both email and PDF
+      const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
       
-      await sendEmailViaSMTP({
-        to: customer.email,
-        subject: `Ihr Umzugsangebot - RELOCATO® - ${customer.name}`,
-        content: emailText,
-        attachments: [] // Vorerst ohne PDF wegen Vercel Größenlimit
-      });
+      // Generate PDF from HTML
+      const pdfBlob = await generatePDFFromHTML(htmlContent);
+      
+      // Try to send email with small PDF attachment, fallback to email without PDF
+      try {
+        const pdfSizeKB = pdfBlob.size / 1024;
+        console.log(`PDF Größe: ${pdfSizeKB.toFixed(0)} KB`);
+        
+        // Only attach PDF if under 15MB (leaves room for Base64 encoding)
+        if (pdfBlob.size < 15 * 1024 * 1024) {
+          await sendEmailViaSMTP({
+            to: customer.email,
+            subject: `Ihr Umzugsangebot - RELOCATO® - ${customer.name}`,
+            content: `Sehr geehrte/r ${customer.name},\n\nanbei finden Sie Ihr persönliches Umzugsangebot als PDF.\n\n💰 Preis: € ${finalPrice.toFixed(2).replace('.', ',')}\n📦 Volumen: ${quoteDetails.volume} m³\n📍 Entfernung: ${quoteDetails.distance} km\n\nMit freundlichen Grüßen,\nIhr RELOCATO® Team`,
+            attachments: [{
+              filename: `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`,
+              content: pdfBlob
+            }]
+          });
+        } else {
+          throw new Error('PDF zu groß für E-Mail-Anhang');
+        }
+      } catch (emailError) {
+        console.log('PDF-Anhang zu groß, sende E-Mail ohne PDF');
+        // Send email without PDF attachment
+        await sendEmailViaSMTP({
+          to: customer.email,
+          subject: `Ihr Umzugsangebot - RELOCATO® - ${customer.name}`,
+          content: `Sehr geehrte/r ${customer.name},\n\nvielen Dank für Ihr Interesse. Hier sind die Details Ihres Umzugsangebots:\n\n💰 Preis: € ${finalPrice.toFixed(2).replace('.', ',')}\n📦 Volumen: ${quoteDetails.volume} m³\n📍 Entfernung: ${quoteDetails.distance} km\n📍 Von: ${customer.fromAddress}\n📍 Nach: ${customer.toAddress}\n\nDas detaillierte PDF-Angebot erhalten Sie auf Anfrage.\n\nMit freundlichen Grüßen,\nIhr RELOCATO® Team\n\nRELOCATO® Bielefeld\nTel: (0521) 1200551-0\nE-Mail: bielefeld@relocato.de`,
+          attachments: []
+        });
+      }
 
       // Angebot in Google Sheets speichern
       await googleSheetsService.addQuote(quoteData);
@@ -413,16 +488,48 @@ const CreateQuote: React.FC = () => {
                   </Alert>
                 )}
                 
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={handleSubmit}
-                  disabled={loading || success}
-                  size="large"
-                  sx={{ mt: 3, height: 48 }}
-                >
-                  {loading ? <CircularProgress size={24} /> : 'Angebot per E-Mail senden'}
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={async () => {
+                      try {
+                        const finalPrice = manualPriceMode ? Number(manualPrice) : calculation?.totalPrice;
+                        if (!finalPrice || !calculation) return;
+                        
+                        // Generate HTML content and PDF
+                        const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
+                        const pdfBlob = await generatePDFFromHTML(htmlContent);
+                        
+                        // Download PDF
+                        const url = URL.createObjectURL(pdfBlob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      } catch (err) {
+                        setError('Fehler beim Erstellen der PDF');
+                      }
+                    }}
+                    disabled={loading || !calculation?.totalPrice}
+                    size="large"
+                    sx={{ height: 48 }}
+                  >
+                    PDF herunterladen
+                  </Button>
+                  
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={handleSubmit}
+                    disabled={loading || success}
+                    size="large"
+                    sx={{ height: 48 }}
+                  >
+                    {loading ? <CircularProgress size={24} /> : 'Per E-Mail senden'}
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           </Box>

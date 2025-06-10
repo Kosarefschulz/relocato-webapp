@@ -75,8 +75,8 @@ class SMTPEmailService {
       console.log('An:', emailData.to);
       console.log('Betreff:', emailData.subject);
       
-      // API-URL bestimmen (Development oder Production)
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      // API-URL für Vercel Hosting
+      const API_URL = process.env.REACT_APP_API_URL || 'https://api.ruempel-schmiede.com';
       
       // E-Mail über Backend senden (einfaches Format)
       const response = await fetch(`${API_URL}/api/send-email`, {
