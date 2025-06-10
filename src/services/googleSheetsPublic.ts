@@ -556,7 +556,7 @@ class GoogleSheetsPublicService {
         ],
         createdAt: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000),
         dueDate: dueDate,
-        status: 'pending' as const
+        status: 'sent' as const
       },
       {
         id: 'demo_invoice_3',
@@ -577,7 +577,7 @@ class GoogleSheetsPublicService {
         ],
         createdAt: new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000),
         dueDate: overdueDate,
-        status: 'pending' as const
+        status: 'sent' as const
       }
     ];
   }

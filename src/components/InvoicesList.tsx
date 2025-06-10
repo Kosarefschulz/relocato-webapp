@@ -52,9 +52,10 @@ const InvoicesList: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid': return 'success';
-      case 'pending': return 'warning';
+      case 'sent': return 'warning';
       case 'overdue': return 'error';
       case 'cancelled': return 'default';
+      case 'draft': return 'default';
       default: return 'default';
     }
   };
@@ -62,9 +63,10 @@ const InvoicesList: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'paid': return 'Bezahlt';
-      case 'pending': return 'Offen';
+      case 'sent': return 'Offen';
       case 'overdue': return 'Überfällig';
       case 'cancelled': return 'Storniert';
+      case 'draft': return 'Entwurf';
       default: return status;
     }
   };
@@ -176,7 +178,7 @@ const InvoicesList: React.FC = () => {
                             color={getStatusColor(invoice.status) as any}
                             size="small"
                           />
-                          {invoice.status === 'pending' && getDaysUntilDue(invoice.dueDate) <= 0 && (
+                          {invoice.status === 'sent' && getDaysUntilDue(invoice.dueDate) <= 0 && (
                             <Chip 
                               label={`${Math.abs(getDaysUntilDue(invoice.dueDate))} Tage überfällig`} 
                               color="error"
@@ -214,7 +216,7 @@ const InvoicesList: React.FC = () => {
                         >
                           PDF
                         </Button>
-                        {invoice.status === 'pending' && (
+                        {invoice.status === 'sent' && (
                           <>
                             <Button
                               size="small"
