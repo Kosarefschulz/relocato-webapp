@@ -3,6 +3,7 @@ import { Customer, Quote } from '../types';
 class GoogleSheetsPublicService {
   private spreadsheetId = '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
   private localStorageKey = 'relocato_local_customers';
+  private localQuotesKey = 'relocato_local_quotes';
 
   private getLocalCustomers(): Customer[] {
     try {
@@ -19,6 +20,31 @@ class GoogleSheetsPublicService {
       localStorage.setItem(this.localStorageKey, JSON.stringify(customers));
     } catch (error) {
       console.error('Fehler beim Speichern lokaler Kunden:', error);
+    }
+  }
+
+  private getLocalQuotes(): Quote[] {
+    try {
+      const stored = localStorage.getItem(this.localQuotesKey);
+      if (!stored) return [];
+      
+      // Parse und konvertiere Date-Strings zurück zu Date-Objekten
+      const quotes = JSON.parse(stored);
+      return quotes.map((quote: any) => ({
+        ...quote,
+        createdAt: new Date(quote.createdAt)
+      }));
+    } catch (error) {
+      console.error('Fehler beim Laden lokaler Angebote:', error);
+      return [];
+    }
+  }
+
+  private saveLocalQuotes(quotes: Quote[]): void {
+    try {
+      localStorage.setItem(this.localQuotesKey, JSON.stringify(quotes));
+    } catch (error) {
+      console.error('Fehler beim Speichern lokaler Angebote:', error);
     }
   }
 
@@ -193,22 +219,47 @@ class GoogleSheetsPublicService {
   }
 
   async addQuote(quote: Omit<Quote, 'id'>): Promise<boolean> {
-    console.log('💰 Angebot erfolgreich erstellt:', {
-      kunde: quote.customerName,
-      preis: `€ ${quote.price.toFixed(2)}`,
-      datum: quote.createdAt.toLocaleDateString('de-DE'),
-      status: quote.status,
-      kommentar: quote.comment || 'Kein Kommentar'
-    });
-    
-    console.log('📊 Angebot wurde lokal gespeichert. Für echte Google Sheets Integration:');
-    console.log('🔗 Fügen Sie das Angebot manuell hinzu: https://docs.google.com/spreadsheets/d/' + this.spreadsheetId);
-    
-    return true;
+    try {
+      // Generiere eine eindeutige ID
+      const newQuote: Quote = {
+        ...quote,
+        id: `local_quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Lade existierende lokale Angebote
+      const localQuotes = this.getLocalQuotes();
+      
+      // Füge neues Angebot hinzu
+      localQuotes.push(newQuote);
+      
+      // Speichere aktualisierte Liste
+      this.saveLocalQuotes(localQuotes);
+      
+      console.log('💰 Angebot erfolgreich erstellt und lokal gespeichert:', {
+        kunde: quote.customerName,
+        preis: `€ ${quote.price.toFixed(2)}`,
+        datum: quote.createdAt.toLocaleDateString('de-DE'),
+        status: quote.status,
+        kommentar: quote.comment || 'Kein Kommentar'
+      });
+      
+      console.log('📊 Für Google Sheets Integration:');
+      console.log('🔗 Fügen Sie das Angebot manuell hinzu: https://docs.google.com/spreadsheets/d/' + this.spreadsheetId);
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Speichern des Angebots:', error);
+      return false;
+    }
   }
 
   async getQuotes(): Promise<Quote[]> {
-    return this.getDemoQuotes();
+    // Lade lokale Angebote
+    const localQuotes = this.getLocalQuotes();
+    const demoQuotes = this.getDemoQuotes();
+    
+    // Kombiniere Demo-Angebote mit lokalen Angeboten
+    return [...demoQuotes, ...localQuotes];
   }
 
   private getDemoCustomersFromYourStructure(): Customer[] {
@@ -342,6 +393,44 @@ class GoogleSheetsPublicService {
   clearLocalCustomers(): void {
     this.saveLocalCustomers([]);
     console.log('✅ Lokale Kunden wurden gelöscht');
+  }
+
+  // Export lokale Angebote für Google Sheets
+  exportLocalQuotesForSheets(): string {
+    const localQuotes = this.getLocalQuotes();
+    
+    if (localQuotes.length === 0) {
+      return 'Keine lokalen Angebote zum Exportieren vorhanden.';
+    }
+    
+    // Formatiere die Daten im CSV Format
+    const headers = ['Angebots-ID', 'Kunde', 'Preis', 'Status', 'Erstellt am', 'Kommentar'];
+    
+    const rows = localQuotes.map(quote => {
+      return [
+        quote.id,
+        quote.customerName,
+        quote.price.toFixed(2).replace('.', ','),
+        quote.status,
+        quote.createdAt.toLocaleDateString('de-DE'),
+        quote.comment || ''
+      ].map(field => {
+        // Escape fields that contain commas or quotes
+        const str = String(field);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }).join(',');
+    });
+    
+    return [headers.join(','), ...rows].join('\n');
+  }
+
+  // Lösche lokale Angebote nach erfolgreichem Export
+  clearLocalQuotes(): void {
+    this.saveLocalQuotes([]);
+    console.log('✅ Lokale Angebote wurden gelöscht');
   }
 
   // Test-Methode

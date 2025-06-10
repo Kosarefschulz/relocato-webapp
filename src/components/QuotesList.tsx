@@ -145,9 +145,18 @@ const QuotesList: React.FC = () => {
                   secondary={
                     <Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Angebot #{quote.id}
-                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Angebot #{quote.id}
+                          </Typography>
+                          {quote.id.startsWith('local_') && (
+                            <Chip 
+                              label="Lokal" 
+                              color="warning" 
+                              size="small"
+                            />
+                          )}
+                        </Box>
                         <Chip 
                           label={getStatusText(quote.status)} 
                           color={getStatusColor(quote.status) as any}
