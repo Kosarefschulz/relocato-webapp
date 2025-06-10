@@ -53,7 +53,7 @@ export const sendQuoteEmailWithPDFShift = async (
           </div>
           
           <div style="background-color: #8BC34A; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-            <h2 style="margin: 0; font-size: 36px;">Gesamtpreis: ${calculation.totalPrice.toFixed(2).replace('.', ',')} €</h2>
+            <h2 style="margin: 0; font-size: 36px;">Gesamtpreis: ${calculation.finalPrice.toFixed(2).replace('.', ',')} €</h2>
             <p style="margin: 5px 0; opacity: 0.9;">inkl. 19% MwSt.</p>
           </div>
           

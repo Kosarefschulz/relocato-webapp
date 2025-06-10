@@ -350,7 +350,7 @@ class QuoteCalculationService {
     </table>
 
     <div class="total-price">
-        <strong>Ihr Umzugspreis: € ${calculation.totalPrice.toFixed(2).replace('.', ',')} 🚛</strong>
+        <strong>Ihr Umzugspreis: € ${calculation.finalPrice.toFixed(2).replace('.', ',')} 🚛</strong>
     </div>
 
     <div class="conditions">
@@ -396,7 +396,7 @@ Hiermit übersenden wir Ihnen wie besprochen Ihr persönliches Umzugsangebot:
 📅 Umzugsdatum: ${customer.movingDate}
 📦 Geschätztes Volumen: ca. ${calculation.volumeBase} m³
 
-💰 Ihr Umzugspreis: € ${calculation.totalPrice.toFixed(2).replace('.', ',')}
+💰 Ihr Umzugspreis: € ${calculation.finalPrice.toFixed(2).replace('.', ',')}
 
 Im Anhang finden Sie die detaillierte Aufstellung aller Leistungen.
 
