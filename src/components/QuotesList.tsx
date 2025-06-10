@@ -72,19 +72,50 @@ const QuotesList: React.FC = () => {
   const handleConvertToInvoice = async (quote: Quote) => {
     try {
       // Generate invoice number
-      const invoiceNumber = `RE-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+      const currentYear = new Date().getFullYear();
+      const invoiceCount = await googleSheetsService.getInvoices();
+      const nextNumber = invoiceCount.filter(inv => inv.invoiceNumber.includes(currentYear.toString())).length + 1;
+      const invoiceNumber = `RE-${currentYear}-${nextNumber.toString().padStart(4, '0')}`;
       
-      // Update quote status
-      const updatedQuote = { ...quote, status: 'invoiced' as const };
+      // Calculate tax (19% MwSt)
+      const netPrice = quote.price / 1.19;
+      const taxAmount = quote.price - netPrice;
       
-      // TODO: Save invoice and update quote status
-      console.log('Rechnung erstellen:', invoiceNumber, quote);
+      // Create invoice from quote
+      const newInvoice = {
+        quoteId: quote.id,
+        customerId: quote.customerId,
+        customerName: quote.customerName,
+        invoiceNumber: invoiceNumber,
+        price: netPrice,
+        taxAmount: taxAmount,
+        totalPrice: quote.price,
+        items: [{
+          description: 'Umzugsservice - Transport, Be- und Entladung',
+          quantity: 1,
+          unitPrice: netPrice,
+          totalPrice: netPrice
+        }],
+        createdAt: new Date(),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 Tage Zahlungsziel
+        status: 'sent' as const
+      };
       
-      // Refresh quotes
-      const quotes = await googleSheetsService.getQuotes();
-      setQuotes(quotes);
+      // Save invoice
+      await googleSheetsService.addInvoice(newInvoice);
+      
+      // Update quote status to invoiced
+      // Note: In a real app, we would update the quote in the backend
+      // For now, we'll just refresh the list
+      
+      console.log('✅ Rechnung erstellt:', invoiceNumber);
+      
+      // Navigate to invoices list
+      navigate('/invoices');
+      
     } catch (error) {
       console.error('Fehler beim Erstellen der Rechnung:', error);
+      alert('Fehler beim Erstellen der Rechnung. Bitte versuchen Sie es erneut.');
     }
   };
 

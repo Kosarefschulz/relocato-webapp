@@ -12,6 +12,8 @@ import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
 import InvoicesList from './components/InvoicesList';
 import GoogleSheetsTest from './components/GoogleSheetsTest';
+import MobilePhotoUpload from './components/MobilePhotoUpload';
+import CustomerDetails from './components/CustomerDetails';
 
 const theme = createTheme({
   palette: {
@@ -108,12 +110,20 @@ function App() {
               element={isAuthenticated ? <CustomersList /> : <Navigate to="/login" />} 
             />
             <Route 
+              path="/customer/:customerId" 
+              element={isAuthenticated ? <CustomerDetails /> : <Navigate to="/login" />} 
+            />
+            <Route 
               path="/invoices" 
               element={isAuthenticated ? <InvoicesList /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/test" 
               element={isAuthenticated ? <GoogleSheetsTest /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/photo-upload/:token" 
+              element={<MobilePhotoUpload />} 
             />
             <Route 
               path="/" 

@@ -29,7 +29,9 @@ import {
   Email as EmailIcon,
   Home as HomeIcon,
   Upload as UploadIcon,
-  ContentCopy as ContentCopyIcon
+  ContentCopy as ContentCopyIcon,
+  Info as InfoIcon,
+  Description as DescriptionIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
@@ -163,9 +165,21 @@ const CustomersList: React.FC = () => {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="h6">
-                          {customer.name}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="h6">
+                            {customer.name}
+                          </Typography>
+                          <IconButton 
+                            size="small" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/customer/${customer.id}`);
+                            }}
+                            sx={{ ml: 1 }}
+                          >
+                            <InfoIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           {customer.id.startsWith('local_') && (
                             <Chip 
@@ -186,6 +200,16 @@ const CustomersList: React.FC = () => {
                             variant="outlined" 
                             size="small"
                           />
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/create-quote', { state: { customer } });
+                            }}
+                          >
+                            <DescriptionIcon fontSize="small" />
+                          </IconButton>
                         </Box>
                       </Box>
                     }
