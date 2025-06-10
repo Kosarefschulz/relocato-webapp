@@ -26,10 +26,10 @@ export const sendQuoteEmailWithPDFShift = async (
     
     // PDF mit PDFShift generieren
     console.log('🔄 Generiere PDF mit PDFShift...');
-    const pdfBuffer = await generatePDFWithPDFShift(htmlContent);
+    const pdfArrayBuffer = await generatePDFWithPDFShift(htmlContent);
     
-    // Buffer zu Blob konvertieren
-    const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+    // ArrayBuffer zu Blob konvertieren
+    const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
     
     // E-Mail-Objekt erstellen
     const emailData: EmailData = {

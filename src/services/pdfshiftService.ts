@@ -18,7 +18,7 @@ interface PDFShiftOptions {
   css?: string;
 }
 
-export const generatePDFWithPDFShift = async (html: string): Promise<Buffer> => {
+export const generatePDFWithPDFShift = async (html: string): Promise<ArrayBuffer> => {
   try {
     const options: PDFShiftOptions = {
       source: html,
@@ -45,19 +45,22 @@ export const generatePDFWithPDFShift = async (html: string): Promise<Buffer> => 
       `
     };
 
+    // Base64 encoding for browser environment
+    const authString = btoa(`api:${PDFSHIFT_API_KEY}`);
+
     const response = await axios.post(
       PDFSHIFT_API_URL,
       options,
       {
         headers: {
-          'Authorization': `Basic ${Buffer.from(`api:${PDFSHIFT_API_KEY}`).toString('base64')}`,
+          'Authorization': `Basic ${authString}`,
           'Content-Type': 'application/json'
         },
         responseType: 'arraybuffer'
       }
     );
 
-    return Buffer.from(response.data);
+    return response.data;
   } catch (error) {
     console.error('PDFShift Error:', error);
     throw new Error('PDF-Generierung fehlgeschlagen');
