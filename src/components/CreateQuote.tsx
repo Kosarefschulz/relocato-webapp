@@ -463,7 +463,7 @@ const CreateQuote: React.FC = () => {
                     onChange={(e) => setManualPrice(e.target.value)}
                     helperText="Dieser Preis ersetzt nur den Basispreis. Zusatzleistungen werden addiert."
                     InputProps={{
-                      startAdornment: <InputAdornment position="start">€</InputAdornament>,
+                      startAdornment: <InputAdornment position="start">€</InputAdornment>,
                     }}
                     sx={{ mb: 2 }}
                   />
