@@ -10,6 +10,8 @@ export interface QuoteCalculation {
   boxesPrice: number;
   parkingZonePrice: number;
   storagePrice: number;
+  furnitureAssemblyPrice: number;
+  furnitureDisassemblyPrice: number;
   totalPrice: number;
   manualPrice?: number;
   finalPrice: number;
@@ -21,6 +23,8 @@ export interface QuoteCalculation {
     boxes: number;
     parkingZone: number;
     storage: number;
+    furnitureAssembly: number;
+    furnitureDisassembly: number;
   };
 }
 
@@ -33,6 +37,8 @@ export interface QuoteDetails {
   boxCount: number;
   parkingZonePrice: number;
   storagePrice: number;
+  furnitureAssemblyPrice: number; // Möbelmontage
+  furnitureDisassemblyPrice: number; // Möbeldemontage
   manualBasePrice?: number; // Manueller Preis nur für Be- und Entladen
 }
 
@@ -153,9 +159,11 @@ class QuoteCalculationService {
     const boxesPrice = this.calculateBoxesPrice(quoteDetails.boxCount || 0);
     const parkingZonePrice = quoteDetails.parkingZonePrice || 0;
     const storagePrice = quoteDetails.storagePrice || 0;
+    const furnitureAssemblyPrice = quoteDetails.furnitureAssemblyPrice || 0;
+    const furnitureDisassemblyPrice = quoteDetails.furnitureDisassemblyPrice || 0;
     
     // Gesamtpreis ist Summe aller Komponenten
-    const totalPrice = basePrice + floorSurcharge + distanceSurcharge + packingService + boxesPrice + parkingZonePrice + storagePrice;
+    const totalPrice = basePrice + floorSurcharge + distanceSurcharge + packingService + boxesPrice + parkingZonePrice + storagePrice + furnitureAssemblyPrice + furnitureDisassemblyPrice;
     
     return {
       volumeBase: volume,
@@ -167,6 +175,8 @@ class QuoteCalculationService {
       boxesPrice,
       parkingZonePrice,
       storagePrice,
+      furnitureAssemblyPrice,
+      furnitureDisassemblyPrice,
       totalPrice,
       manualPrice: quoteDetails.manualBasePrice,
       finalPrice: totalPrice, // finalPrice ist jetzt immer die Summe
@@ -177,7 +187,9 @@ class QuoteCalculationService {
         packing: packingService,
         boxes: boxesPrice,
         parkingZone: parkingZonePrice,
-        storage: storagePrice
+        storage: storagePrice,
+        furnitureAssembly: furnitureAssemblyPrice,
+        furnitureDisassembly: furnitureDisassemblyPrice
       }
     };
   }

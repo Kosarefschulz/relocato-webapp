@@ -51,6 +51,8 @@ const CreateQuote: React.FC = () => {
     boxCount: 0,
     parkingZonePrice: 0,
     storagePrice: 0,
+    furnitureAssemblyPrice: 0,
+    furnitureDisassemblyPrice: 0,
     manualBasePrice: undefined
   });
   
@@ -431,6 +433,34 @@ const CreateQuote: React.FC = () => {
                       }}
                     />
                   </Box>
+                  <Box sx={{ flex: '1 1 48%' }}>
+                    <TextField
+                      fullWidth
+                      label="Möbelmontage"
+                      type="number"
+                      value={quoteDetails.furnitureAssemblyPrice}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, furnitureAssemblyPrice: Number(e.target.value)})}
+                      helperText="Preis manuell eingeben"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                        inputProps: { min: 0 }
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: '1 1 48%' }}>
+                    <TextField
+                      fullWidth
+                      label="Möbeldemontage"
+                      type="number"
+                      value={quoteDetails.furnitureDisassemblyPrice}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, furnitureDisassemblyPrice: Number(e.target.value)})}
+                      helperText="Preis manuell eingeben"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                        inputProps: { min: 0 }
+                      }}
+                    />
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
@@ -524,6 +554,22 @@ const CreateQuote: React.FC = () => {
                       <Box sx={{ mb: 1 }}>
                         <Typography variant="body2">
                           Lagerung: €{calculation.priceBreakdown.storage.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    {calculation.priceBreakdown.furnitureAssembly > 0 && (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2">
+                          Möbelmontage: €{calculation.priceBreakdown.furnitureAssembly.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    {calculation.priceBreakdown.furnitureDisassembly > 0 && (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2">
+                          Möbeldemontage: €{calculation.priceBreakdown.furnitureDisassembly.toFixed(2)}
                         </Typography>
                       </Box>
                     )}

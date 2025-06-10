@@ -21,7 +21,7 @@ import {
   Description as DescriptionIcon,
   People as PeopleIcon,
   AccountCircle as AccountCircleIcon,
-  Email as EmailIcon
+  Receipt as ReceiptIcon
 } from '@mui/icons-material';
 
 const Dashboard: React.FC = () => {
@@ -77,13 +77,10 @@ const Dashboard: React.FC = () => {
       color: '#9c27b0'
     },
     {
-      title: 'E-Mail Test',
-      description: 'SendGrid E-Mail-System testen',
-      icon: <EmailIcon sx={{ fontSize: 48 }} />,
-      action: () => {
-        console.log('📧 E-Mail Test wird gestartet...');
-        alert('📧 E-Mail-Test:\n\n1. Gehen Sie zu einem Kunden\n2. Erstellen Sie ein Angebot\n3. Das System sendet automatisch eine E-Mail\n\nOder testen Sie direkt die CreateQuote Funktion!');
-      },
+      title: 'Rechnungen',
+      description: 'Alle Rechnungen anzeigen',
+      icon: <ReceiptIcon sx={{ fontSize: 48 }} />,
+      action: () => navigate('/invoices'),
       color: '#d32f2f'
     }
   ];

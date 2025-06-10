@@ -1,9 +1,10 @@
-import { Customer, Quote } from '../types';
+import { Customer, Quote, Invoice } from '../types';
 
 class GoogleSheetsPublicService {
   private spreadsheetId = '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
   private localStorageKey = 'relocato_local_customers';
   private localQuotesKey = 'relocato_local_quotes';
+  private localInvoicesKey = 'relocato_local_invoices';
 
   private getLocalCustomers(): Customer[] {
     try {
@@ -431,6 +432,190 @@ class GoogleSheetsPublicService {
   clearLocalQuotes(): void {
     this.saveLocalQuotes([]);
     console.log('✅ Lokale Angebote wurden gelöscht');
+  }
+
+  // Invoice methods
+  private getLocalInvoices(): Invoice[] {
+    try {
+      const stored = localStorage.getItem(this.localInvoicesKey);
+      if (!stored) return [];
+      
+      // Parse und konvertiere Date-Strings zurück zu Date-Objekten
+      const invoices = JSON.parse(stored);
+      return invoices.map((invoice: any) => ({
+        ...invoice,
+        createdAt: new Date(invoice.createdAt),
+        dueDate: new Date(invoice.dueDate),
+        paidDate: invoice.paidDate ? new Date(invoice.paidDate) : undefined
+      }));
+    } catch (error) {
+      console.error('Fehler beim Laden lokaler Rechnungen:', error);
+      return [];
+    }
+  }
+
+  private saveLocalInvoices(invoices: Invoice[]): void {
+    try {
+      localStorage.setItem(this.localInvoicesKey, JSON.stringify(invoices));
+    } catch (error) {
+      console.error('Fehler beim Speichern lokaler Rechnungen:', error);
+    }
+  }
+
+  async getInvoices(): Promise<Invoice[]> {
+    // Lade lokale Rechnungen
+    const localInvoices = this.getLocalInvoices();
+    const demoInvoices = this.getDemoInvoices();
+    
+    // Kombiniere Demo-Rechnungen mit lokalen Rechnungen
+    return [...demoInvoices, ...localInvoices];
+  }
+
+  async addInvoice(invoice: Omit<Invoice, 'id'>): Promise<boolean> {
+    try {
+      // Generiere eine eindeutige ID
+      const newInvoice: Invoice = {
+        ...invoice,
+        id: `local_invoice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Lade existierende lokale Rechnungen
+      const localInvoices = this.getLocalInvoices();
+      
+      // Füge neue Rechnung hinzu
+      localInvoices.push(newInvoice);
+      
+      // Speichere aktualisierte Liste
+      this.saveLocalInvoices(localInvoices);
+      
+      console.log('💸 Rechnung erfolgreich erstellt und lokal gespeichert:', {
+        kunde: invoice.customerName,
+        rechnungsnummer: invoice.invoiceNumber,
+        betrag: `€ ${invoice.totalPrice.toFixed(2)}`,
+        datum: invoice.createdAt.toLocaleDateString('de-DE'),
+        status: invoice.status
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Speichern der Rechnung:', error);
+      return false;
+    }
+  }
+
+  private getDemoInvoices(): Invoice[] {
+    const today = new Date();
+    const dueDate = new Date(today);
+    dueDate.setDate(dueDate.getDate() + 30);
+    
+    const paidDate = new Date(today);
+    paidDate.setDate(paidDate.getDate() - 5);
+    
+    const overdueDate = new Date(today);
+    overdueDate.setDate(overdueDate.getDate() - 45);
+    
+    return [
+      {
+        id: 'demo_invoice_1',
+        quoteId: 'demo_quote_1',
+        customerId: 'demo_1',
+        customerName: 'Familie Weber (Demo)',
+        invoiceNumber: 'RE-2024-0001',
+        price: 1615.13,
+        taxAmount: 306.87,
+        totalPrice: 1922.00,
+        items: [
+          {
+            description: 'Umzugsservice - Transport, Be- und Entladung',
+            quantity: 1,
+            unitPrice: 1615.13,
+            totalPrice: 1615.13
+          }
+        ],
+        createdAt: new Date(today.getTime() - 35 * 24 * 60 * 60 * 1000),
+        dueDate: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000),
+        paidDate: paidDate,
+        status: 'paid' as const
+      },
+      {
+        id: 'demo_invoice_2',
+        quoteId: 'demo_quote_2',
+        customerId: 'demo_2',
+        customerName: 'Max Schmidt (Demo)',
+        invoiceNumber: 'RE-2024-0002',
+        price: 756.30,
+        taxAmount: 143.70,
+        totalPrice: 900.00,
+        items: [
+          {
+            description: 'Umzugsservice - Transport, Be- und Entladung',
+            quantity: 1,
+            unitPrice: 756.30,
+            totalPrice: 756.30
+          }
+        ],
+        createdAt: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000),
+        dueDate: dueDate,
+        status: 'pending' as const
+      },
+      {
+        id: 'demo_invoice_3',
+        quoteId: 'demo_quote_3',
+        customerId: 'demo_3',
+        customerName: 'Anna Müller (Demo)',
+        invoiceNumber: 'RE-2024-0003',
+        price: 1058.82,
+        taxAmount: 201.18,
+        totalPrice: 1260.00,
+        items: [
+          {
+            description: 'Umzugsservice - Transport, Be- und Entladung',
+            quantity: 1,
+            unitPrice: 1058.82,
+            totalPrice: 1058.82
+          }
+        ],
+        createdAt: new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000),
+        dueDate: overdueDate,
+        status: 'pending' as const
+      }
+    ];
+  }
+
+  // Export-Funktion für Rechnungen
+  exportInvoicesToCSV(): string {
+    const localInvoices = this.getLocalInvoices();
+    
+    if (localInvoices.length === 0) {
+      console.log('⚠️ Keine lokalen Rechnungen zum Exportieren');
+      return '';
+    }
+    
+    // Formatiere die Daten im CSV Format
+    const headers = ['Rechnungsnummer', 'Kunde', 'Netto', 'MwSt', 'Brutto', 'Status', 'Erstellt am', 'Fällig am', 'Bezahlt am'];
+    
+    const rows = localInvoices.map(invoice => {
+      return [
+        invoice.invoiceNumber,
+        invoice.customerName,
+        invoice.price.toFixed(2).replace('.', ','),
+        invoice.taxAmount.toFixed(2).replace('.', ','),
+        invoice.totalPrice.toFixed(2).replace('.', ','),
+        invoice.status,
+        invoice.createdAt.toLocaleDateString('de-DE'),
+        invoice.dueDate.toLocaleDateString('de-DE'),
+        invoice.paidDate ? invoice.paidDate.toLocaleDateString('de-DE') : ''
+      ].map(field => {
+        // Escape fields that contain commas or quotes
+        const str = String(field);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }).join(',');
+    });
+    
+    return [headers.join(','), ...rows].join('\n');
   }
 
   // Test-Methode

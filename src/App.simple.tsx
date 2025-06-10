@@ -10,6 +10,7 @@ import CreateQuote from './components/CreateQuote';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
+import InvoicesList from './components/InvoicesList';
 import GoogleSheetsTest from './components/GoogleSheetsTest';
 
 const theme = createTheme({
@@ -105,6 +106,10 @@ function App() {
             <Route 
               path="/customers" 
               element={isAuthenticated ? <CustomersList /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/invoices" 
+              element={isAuthenticated ? <InvoicesList /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/test" 

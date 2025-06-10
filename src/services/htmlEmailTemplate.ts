@@ -361,6 +361,20 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
                 <td style="text-align: right;">${calculation.storagePrice.toFixed(2).replace('.', ',')} €</td>
                 <td style="text-align: right;">${calculation.storagePrice.toFixed(2).replace('.', ',')} €</td>
             </tr>` : ''}
+            ${calculation.furnitureAssemblyPrice > 0 ? `
+            <tr>
+                <td>1,00</td>
+                <td>Möbelmontage</td>
+                <td style="text-align: right;">${calculation.furnitureAssemblyPrice.toFixed(2).replace('.', ',')} €</td>
+                <td style="text-align: right;">${calculation.furnitureAssemblyPrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.furnitureDisassemblyPrice > 0 ? `
+            <tr>
+                <td>1,00</td>
+                <td>Möbeldemontage</td>
+                <td style="text-align: right;">${calculation.furnitureDisassemblyPrice.toFixed(2).replace('.', ',')} €</td>
+                <td style="text-align: right;">${calculation.furnitureDisassemblyPrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
             ${zusatzLeistungen}
         </tbody>
     </table>
@@ -405,6 +419,16 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
             <tr>
                 <td colspan="3">Lagerung</td>
                 <td style="text-align: right;">${calculation.storagePrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.furnitureAssemblyPrice > 0 ? `
+            <tr>
+                <td colspan="3">Möbelmontage</td>
+                <td style="text-align: right;">${calculation.furnitureAssemblyPrice.toFixed(2).replace('.', ',')} €</td>
+            </tr>` : ''}
+            ${calculation.furnitureDisassemblyPrice > 0 ? `
+            <tr>
+                <td colspan="3">Möbeldemontage</td>
+                <td style="text-align: right;">${calculation.furnitureDisassemblyPrice.toFixed(2).replace('.', ',')} €</td>
             </tr>` : ''}
             ${materialSumme > 0 ? `
             <tr>
