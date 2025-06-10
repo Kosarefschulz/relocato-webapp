@@ -468,26 +468,58 @@ const CreateQuote: React.FC = () => {
                         const finalPrice = manualPriceMode ? Number(manualPrice) : calculation?.totalPrice;
                         if (!finalPrice || !calculation) return;
                         
-                        // Generate HTML content and PDF
-                        const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
-                        const pdfBlob = await generatePDFFromHTML(htmlContent);
+                        setLoading(true);
                         
-                        // Download PDF
-                        const url = URL.createObjectURL(pdfBlob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`;
-                        a.click();
-                        URL.revokeObjectURL(url);
+                        // Generate HTML content
+                        const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
+                        
+                        // Call backend PDF generation endpoint
+                        const API_URL = process.env.REACT_APP_API_URL || 'https://api.ruempel-schmiede.com';
+                        
+                        const response = await fetch(`${API_URL}/api/generate-pdf`, {
+                          method: 'POST',
+                          headers: { 
+                            'Content-Type': 'application/json',
+                            'Origin': window.location.origin
+                          },
+                          body: JSON.stringify({
+                            html: htmlContent
+                          })
+                        });
+                        
+                        if (response.ok) {
+                          // Create download for iOS compatibility
+                          const blob = await response.blob();
+                          const url = URL.createObjectURL(blob);
+                          
+                          // For iOS: Try to open in new window first
+                          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                            window.open(url, '_blank');
+                          } else {
+                            // For desktop: Normal download
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`;
+                            a.click();
+                          }
+                          
+                          URL.revokeObjectURL(url);
+                        } else {
+                          throw new Error('PDF-Generierung fehlgeschlagen');
+                        }
+                        
+                        setLoading(false);
                       } catch (err) {
+                        console.error('PDF Download Error:', err);
                         setError('Fehler beim Erstellen der PDF');
+                        setLoading(false);
                       }
                     }}
                     disabled={loading || !calculation?.totalPrice}
                     size="large"
                     sx={{ height: 48 }}
                   >
-                    PDF herunterladen
+                    {loading ? <CircularProgress size={24} /> : 'PDF herunterladen'}
                   </Button>
                   
                   <Button

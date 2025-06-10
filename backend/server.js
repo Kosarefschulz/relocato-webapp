@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const axios = require('axios');
 
 // Umgebungsvariablen laden
 dotenv.config();
@@ -122,6 +123,69 @@ app.post('/api/send-email', async (req, res) => {
       success: false, 
       error: error.message,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// PDF-Download Endpoint für iOS-kompatible Downloads
+app.post('/api/generate-pdf', async (req, res) => {
+  try {
+    const { html } = req.body;
+    
+    if (!html) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'HTML content ist erforderlich' 
+      });
+    }
+
+    // PDFShift API konfigurieren
+    const PDFSHIFT_API_KEY = 'sk_14a4ecfc1ba71f54456ab30bf80897383eeb714e';
+    const PDFSHIFT_API_URL = 'https://api.pdfshift.io/v3/convert/pdf';
+
+    const options = {
+      source: html,
+      landscape: false,
+      use_print: true,
+      format: 'A4',
+      margin: {
+        top: '10mm',
+        bottom: '10mm',
+        left: '10mm',
+        right: '10mm'
+      }
+    };
+
+    const response = await axios.post(
+      PDFSHIFT_API_URL,
+      options,
+      {
+        headers: {
+          'Authorization': `Basic ${Buffer.from(`api:${PDFSHIFT_API_KEY}`).toString('base64')}`,
+          'Content-Type': 'application/json'
+        },
+        responseType: 'arraybuffer'
+      }
+    );
+
+    // Korrekte Headers für iOS PDF-Download setzen
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="Umzugsangebot.pdf"',
+      'Content-Length': response.data.length,
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
+    res.send(Buffer.from(response.data));
+
+  } catch (error) {
+    console.error('❌ PDF-Generierung fehlgeschlagen:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'PDF-Generierung fehlgeschlagen',
+      details: error.message
     });
   }
 });
