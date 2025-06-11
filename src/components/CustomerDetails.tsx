@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -56,6 +56,7 @@ function TabPanel(props: TabPanelProps) {
 const CustomerDetails: React.FC = () => {
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [tabValue, setTabValue] = useState(0);
@@ -96,8 +97,8 @@ const CustomerDetails: React.FC = () => {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Typography>Kunde nicht gefunden</Typography>
-        <Button onClick={() => navigate('/customers')} sx={{ mt: 2 }}>
-          Zurück zur Kundenliste
+        <Button onClick={() => navigate(-1)} sx={{ mt: 2 }}>
+          Zurück
         </Button>
       </Container>
     );
@@ -106,7 +107,7 @@ const CustomerDetails: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Box sx={{ mb: 3 }}>
-        <IconButton onClick={() => navigate('/customers')} sx={{ mb: 2 }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ mb: 2 }}>
           <ArrowBackIcon />
         </IconButton>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
