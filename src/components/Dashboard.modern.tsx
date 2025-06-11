@@ -1,12 +1,5 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Try to import from App first, fallback to App.simple
-let AuthContext: any;
-try {
-  AuthContext = require('../App').AuthContext;
-} catch {
-  AuthContext = require('../App.simple').AuthContext;
-}
 import {
   Container,
   Paper,
@@ -24,7 +17,6 @@ import {
   useTheme,
   alpha,
   Chip,
-  LinearProgress,
   CircularProgress,
 } from '@mui/material';
 import { 
@@ -41,6 +33,14 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { glassmorphism, animations } from '../styles/modernTheme';
+
+// Try to import from App first, fallback to App.simple
+let AuthContext: any;
+try {
+  AuthContext = require('../App').AuthContext;
+} catch {
+  AuthContext = require('../App.simple').AuthContext;
+}
 
 // Motion components
 const MotionCard = motion(Card);

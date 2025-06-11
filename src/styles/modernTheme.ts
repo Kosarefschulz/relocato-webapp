@@ -323,11 +323,10 @@ export const modernTheme = createTheme({
       },
       styleOverrides: {
         root: {
-          backgroundColor: colors.background.paper,
+          backgroundColor: alpha(colors.background.paper, 0.8),
           color: colors.text.primary,
           borderBottom: `1px solid ${colors.grey[200]}`,
           backdropFilter: 'blur(8px)',
-          backgroundColor: alpha(colors.background.paper, 0.8),
         },
       },
     },
