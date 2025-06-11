@@ -6,37 +6,47 @@ import {
   Card,
   CardMedia,
   CardContent,
+  CardActions,
   Chip,
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogActions,
   IconButton,
   CircularProgress,
   Alert,
   Tabs,
   Tab,
-  Grid
+  TextField,
+  MenuItem,
+  LinearProgress
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import {
   Close as CloseIcon,
   Download as DownloadIcon,
-  QrCode2 as QrCodeIcon
+  Upload as UploadIcon,
+  Delete as DeleteIcon,
+  AddAPhoto as AddAPhotoIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { googleDriveService, PHOTO_CATEGORIES } from '../services/googleDriveService';
-import QRCode from 'react-qr-code';
+import { googleDriveService, PHOTO_CATEGORIES, StoredPhoto } from '../services/googleDriveService';
 
 interface CustomerPhotosProps {
   customer: Customer;
 }
 
 const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
-  const [photos, setPhotos] = useState<any[]>([]);
+  const [photos, setPhotos] = useState<StoredPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('alle');
-  const [showQRDialog, setShowQRDialog] = useState(false);
-  const [uploadToken, setUploadToken] = useState<any>(null);
-  const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [selectedPhoto, setSelectedPhoto] = useState<StoredPhoto | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadCategory, setUploadCategory] = useState('');
+  const [uploadDescription, setUploadDescription] = useState('');
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     loadPhotos();
@@ -54,15 +64,57 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     }
   };
 
-  const generateUploadToken = async () => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setUploadFiles(files);
+  };
+
+  const handleUpload = async () => {
+    if (uploadFiles.length === 0 || !uploadCategory) return;
+
+    setUploading(true);
+    setUploadProgress(0);
+
     try {
-      const token = await googleDriveService.generateUploadToken(customer);
-      setUploadToken(token);
-      const url = googleDriveService.generateQRCodeData(token);
-      setQrCodeUrl(url);
-      setShowQRDialog(true);
+      let uploadedCount = 0;
+      
+      for (const file of uploadFiles) {
+        const result = await googleDriveService.uploadPhotoDirect(
+          customer.id,
+          file,
+          uploadCategory,
+          uploadDescription
+        );
+        
+        if (result) {
+          uploadedCount++;
+          setUploadProgress((uploadedCount / uploadFiles.length) * 100);
+        }
+      }
+
+      // Fotos neu laden
+      await loadPhotos();
+      
+      // Dialog schließen und zurücksetzen
+      setShowUploadDialog(false);
+      setUploadFiles([]);
+      setUploadCategory('');
+      setUploadDescription('');
+      setUploadProgress(0);
+      
     } catch (error) {
-      console.error('Fehler beim Generieren des Upload-Tokens:', error);
+      console.error('Fehler beim Upload:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (window.confirm('Möchten Sie dieses Foto wirklich löschen?')) {
+      const success = await googleDriveService.deletePhoto(photoId);
+      if (success) {
+        await loadPhotos();
+      }
     }
   };
 
@@ -102,16 +154,16 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
         </Typography>
         <Button
           variant="contained"
-          startIcon={<QrCodeIcon />}
-          onClick={generateUploadToken}
+          startIcon={<AddAPhotoIcon />}
+          onClick={() => setShowUploadDialog(true)}
         >
-          Upload QR-Code
+          Fotos hochladen
         </Button>
       </Box>
 
       {photos.length === 0 ? (
         <Alert severity="info">
-          Noch keine Fotos vorhanden. Generieren Sie einen QR-Code für den Upload.
+          Noch keine Fotos vorhanden. Klicken Sie auf "Fotos hochladen" um Bilder hinzuzufügen.
         </Alert>
       ) : (
         <>
@@ -146,9 +198,9 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                   <CardMedia
                     component="img"
                     height="200"
-                    image={photo.thumbnailLink || photo.webContentLink}
-                    alt={photo.name}
-                    sx={{ cursor: 'pointer' }}
+                    image={photo.base64Thumbnail}
+                    alt={photo.fileName}
+                    sx={{ cursor: 'pointer', objectFit: 'cover' }}
                     onClick={() => setSelectedPhoto(photo)}
                   />
                   <CardContent>
@@ -158,13 +210,26 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                         label={PHOTO_CATEGORIES.find(c => c.value === photo.category)?.label || photo.category}
                         icon={<span>{PHOTO_CATEGORIES.find(c => c.value === photo.category)?.icon}</span>}
                       />
-                      <IconButton
-                        size="small"
-                        href={photo.webContentLink}
-                        target="_blank"
-                      >
-                        <DownloadIcon />
-                      </IconButton>
+                      <Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = photo.base64Full;
+                            link.download = photo.fileName;
+                            link.click();
+                          }}
+                        >
+                          <DownloadIcon />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDeletePhoto(photo.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
                     </Box>
                     {photo.description && (
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -172,7 +237,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                       </Typography>
                     )}
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(photo.createdTime).toLocaleDateString('de-DE')}
+                      {new Date(photo.uploadDate).toLocaleDateString('de-DE')}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -182,45 +247,93 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
         </>
       )}
 
-      {/* QR-Code Dialog */}
+      {/* Upload Dialog */}
       <Dialog
-        open={showQRDialog}
-        onClose={() => setShowQRDialog(false)}
+        open={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
         maxWidth="sm"
         fullWidth
       >
-        <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+        <DialogTitle>
+          Fotos hochladen
           <IconButton
             sx={{ position: 'absolute', right: 8, top: 8 }}
-            onClick={() => setShowQRDialog(false)}
+            onClick={() => setShowUploadDialog(false)}
           >
             <CloseIcon />
           </IconButton>
-          
-          <Typography variant="h6" gutterBottom>
-            QR-Code für Foto-Upload
-          </Typography>
-          
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Scannen Sie diesen Code mit dem Smartphone des Beraters
-          </Typography>
-          
-          <Box sx={{ p: 2, bgcolor: 'white', display: 'inline-block' }}>
-            <QRCode value={qrCodeUrl} size={256} />
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+              startIcon={<UploadIcon />}
+              sx={{ height: 100, border: '2px dashed', borderColor: 'primary.main' }}
+            >
+              {uploadFiles.length > 0 
+                ? `${uploadFiles.length} Datei${uploadFiles.length > 1 ? 'en' : ''} ausgewählt`
+                : 'Dateien auswählen oder hier ablegen'
+              }
+              <input
+                type="file"
+                hidden
+                multiple
+                accept="image/*"
+                onChange={handleFileSelect}
+              />
+            </Button>
+            
+            <TextField
+              select
+              fullWidth
+              label="Kategorie"
+              value={uploadCategory}
+              onChange={(e) => setUploadCategory(e.target.value)}
+              margin="normal"
+              required
+            >
+              {PHOTO_CATEGORIES.map((category) => (
+                <MenuItem key={category.value} value={category.value}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <span>{category.icon}</span>
+                    <span>{category.label}</span>
+                  </Box>
+                </MenuItem>
+              ))}
+            </TextField>
+            
+            <TextField
+              fullWidth
+              label="Beschreibung (optional)"
+              value={uploadDescription}
+              onChange={(e) => setUploadDescription(e.target.value)}
+              margin="normal"
+              multiline
+              rows={2}
+            />
+            
+            {uploading && (
+              <Box sx={{ mt: 2 }}>
+                <LinearProgress variant="determinate" value={uploadProgress} />
+                <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+                  {Math.round(uploadProgress)}% hochgeladen
+                </Typography>
+              </Box>
+            )}
           </Box>
-          
-          <Typography variant="body2" sx={{ mt: 2 }}>
-            <strong>Kunde:</strong> {customer.name}
-          </Typography>
-          
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Gültig bis: {uploadToken?.validUntil.toLocaleString('de-DE')}
-          </Typography>
-          
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-            Oder öffnen Sie direkt: {qrCodeUrl}
-          </Typography>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowUploadDialog(false)}>Abbrechen</Button>
+          <Button
+            onClick={handleUpload}
+            variant="contained"
+            disabled={uploadFiles.length === 0 || !uploadCategory || uploading}
+          >
+            Hochladen
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Foto-Viewer Dialog */}
@@ -239,8 +352,8 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           </IconButton>
           {selectedPhoto && (
             <img
-              src={selectedPhoto.webContentLink}
-              alt={selectedPhoto.name}
+              src={selectedPhoto.base64Full}
+              alt={selectedPhoto.fileName}
               style={{ width: '100%', height: 'auto' }}
             />
           )}

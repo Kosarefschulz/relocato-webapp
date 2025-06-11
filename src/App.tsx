@@ -16,7 +16,6 @@ import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
 import CustomerDetails from './components/CustomerDetails';
 import InvoicesList from './components/InvoicesList';
-import MobilePhotoUpload from './components/MobilePhotoUpload';
 
 const theme = createTheme({
   palette: {
@@ -204,10 +203,6 @@ function App() {
             <Route 
               path="/invoices" 
               element={user ? <InvoicesList /> : <Navigate to="/login" />} 
-            />
-            <Route 
-              path="/photo-upload/:token" 
-              element={<MobilePhotoUpload />} 
             />
             <Route 
               path="/" 
