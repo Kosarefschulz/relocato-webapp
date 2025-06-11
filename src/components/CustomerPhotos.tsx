@@ -19,8 +19,7 @@ import {
   Tab,
   TextField,
   MenuItem,
-  LinearProgress,
-  Grid
+  LinearProgress
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -190,10 +189,16 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
             ))}
           </Tabs>
 
-          {/* Foto-Grid */}
-          <Grid container spacing={2}>
+          {/* Foto-Grid mit Box statt Grid */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
             {filteredPhotos.map((photo, index) => (
-              <Grid item xs={12} sm={6} md={4} key={photo.id}>
+              <Box 
+                key={photo.id} 
+                sx={{ 
+                  width: { xs: '100%', sm: 'calc(50% - 8px)', md: 'calc(33.333% - 11px)' },
+                  minWidth: 0
+                }}
+              >
                 <Card sx={{ height: '100%' }}>
                   <CardMedia
                     component="img"
@@ -241,9 +246,9 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                     </Typography>
                   </CardContent>
                 </Card>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         </>
       )}
 
