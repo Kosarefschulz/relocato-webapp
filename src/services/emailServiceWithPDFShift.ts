@@ -102,7 +102,8 @@ export const sendQuoteEmailWithPDFShift = async (
             content: await blobToBase64(att.content),
             encoding: 'base64'
           }))
-        ) : []
+        ) : [],
+        bcc: process.env.REACT_APP_SMTP_FROM || 'bielefeld@relocato.de' // BCC für Gesendet-Ordner
       })
     });
 

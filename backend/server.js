@@ -74,7 +74,7 @@ app.get('/api/health', (req, res) => {
 // E-Mail senden Endpoint
 app.post('/api/send-email', async (req, res) => {
   try {
-    const { to, subject, content, attachments } = req.body;
+    const { to, subject, content, attachments, bcc } = req.body;
     
     if (!to || !subject || !content) {
       return res.status(400).json({ 
@@ -92,6 +92,12 @@ app.post('/api/send-email', async (req, res) => {
       html: content.replace(/\n/g, '<br>'), // Einfache HTML-Konvertierung
       attachments: []
     };
+
+    // BCC hinzufügen (für Gesendet-Ordner)
+    if (bcc) {
+      mailOptions.bcc = bcc;
+      console.log('📋 BCC an:', bcc);
+    }
 
     // PDF-Anhänge verarbeiten
     if (attachments && attachments.length > 0) {

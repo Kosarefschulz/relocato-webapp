@@ -6,6 +6,7 @@ interface EmailData {
     filename: string;
     content: Blob;
   }[];
+  bcc?: string; // Blindkopie für Gesendet-Ordner
 }
 
 interface SMTPConfig {
@@ -89,7 +90,8 @@ class SMTPEmailService {
           to: emailData.to,
           subject: emailData.subject,
           content: emailData.content,
-          attachments: attachments
+          attachments: attachments,
+          bcc: emailData.bcc || this.config.from // BCC an Absender für Gesendet-Ordner
         })
       });
 
