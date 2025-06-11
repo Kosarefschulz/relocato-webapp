@@ -166,20 +166,26 @@ Email: rechnung@relocato.de
       const pdfBlob = await generatePDFFromHTML(htmlContent);
       
       // Sende E-Mail mit Rechnung als Anhang
-      const success = await sendEmailViaSMTP({
-        to: customer.email,
-        subject: subject,
-        content: content,
-        attachments: [{
-          filename: `Rechnung_${invoice.invoiceNumber}.pdf`,
-          content: pdfBlob
-        }]
-      });
-      
-      if (success) {
-        alert('Zahlungserinnerung wurde erfolgreich versendet!');
-      } else {
-        alert('Fehler beim Versenden der Zahlungserinnerung. Bitte versuchen Sie es erneut.');
+      try {
+        const success = await sendEmailViaSMTP({
+          to: customer.email,
+          subject: subject,
+          content: content,
+          attachments: [{
+            filename: `Rechnung_${invoice.invoiceNumber}.pdf`,
+            content: pdfBlob
+          }]
+        });
+        
+        if (success) {
+          alert('Zahlungserinnerung wurde erfolgreich versendet!');
+        } else {
+          console.error('E-Mail-Versand fehlgeschlagen');
+          alert('Fehler beim Versenden der Zahlungserinnerung.\n\nBitte prüfen Sie:\n- Internetverbindung\n- E-Mail-Server Einstellungen\n- Browser-Konsole für Details');
+        }
+      } catch (emailError) {
+        console.error('E-Mail-Fehler:', emailError);
+        alert(`Fehler beim Versenden:\n${emailError instanceof Error ? emailError.message : 'Unbekannter Fehler'}`);
       }
       
     } catch (error) {
@@ -191,43 +197,64 @@ Email: rechnung@relocato.de
   };
 
   const generatePDFFromHTML = async (htmlContent: string): Promise<Blob> => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.width = '750px';
-    document.body.appendChild(tempDiv);
-
     try {
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        width: 750,
-        height: tempDiv.scrollHeight
+      const API_URL = process.env.REACT_APP_API_URL || 'https://api.ruempel-schmiede.com';
+      
+      const response = await fetch(`${API_URL}/api/generate-pdf`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin
+        },
+        body: JSON.stringify({ html: htmlContent })
       });
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      const imgWidth = 190;
-      const pageHeight = 270;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 10;
-
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight + 15;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      if (!response.ok) {
+        throw new Error('PDF-Generierung fehlgeschlagen');
       }
 
-      return pdf.output('blob');
-    } finally {
-      document.body.removeChild(tempDiv);
+      return await response.blob();
+    } catch (error) {
+      console.error('Fehler bei PDF-Generierung:', error);
+      // Fallback zur lokalen Generierung
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '750px';
+      document.body.appendChild(tempDiv);
+
+      try {
+        const canvas = await html2canvas(tempDiv, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          width: 750,
+          height: tempDiv.scrollHeight
+        });
+
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const imgWidth = 190;
+        const pageHeight = 270;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 10;
+
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight + 15;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        return pdf.output('blob');
+      } finally {
+        document.body.removeChild(tempDiv);
+      }
     }
   };
 

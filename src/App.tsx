@@ -82,23 +82,29 @@ function App() {
   useEffect(() => {
     console.log('🔄 App.tsx: Setting up auth state listener...');
     
-    // Warte auf Auth-Persistenz bevor Auth-State-Listener startet
-    authPersistencePromise.then(() => {
-      const unsubscribe = authService.onAuthStateChange((user) => {
-        console.log('👤 App.tsx: Auth state changed:', user ? `User: ${user.email}` : 'No user');
-        setUser(user);
-        setLoading(false);
-      });
-
-      // Cleanup
-      return () => {
-        console.log('🛑 App.tsx: Cleaning up auth state listener');
-        unsubscribe();
-      };
-    }).catch(() => {
-      // Bei Fehler trotzdem fortfahren
+    // Auth-State-Listener direkt starten
+    const unsubscribe = authService.onAuthStateChange((user) => {
+      console.log('👤 App.tsx: Auth state changed:', user ? `User: ${user.email}` : 'No user');
+      setUser(user);
       setLoading(false);
+      
+      // User-State in localStorage speichern als Backup
+      if (user) {
+        localStorage.setItem('authUser', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName
+        }));
+      } else {
+        localStorage.removeItem('authUser');
+      }
     });
+
+    // Cleanup
+    return () => {
+      console.log('🛑 App.tsx: Cleaning up auth state listener');
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {

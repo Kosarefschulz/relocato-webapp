@@ -27,15 +27,16 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Auth-Persistenz Promise exportieren, damit App.tsx darauf warten kann
-export const authPersistencePromise = setPersistence(auth, browserLocalPersistence)
+// Auth-Persistenz sofort nach Initialisierung setzen
+setPersistence(auth, browserLocalPersistence)
   .then(() => {
     console.log('✅ Auth-Persistenz aktiviert');
   })
   .catch((error) => {
     console.error('❌ Fehler beim Setzen der Auth-Persistenz:', error);
-    // Fallback auf Session-Persistenz
-    return setPersistence(auth, browserLocalPersistence);
   });
+
+// Auth-Persistenz Promise für App.tsx
+export const authPersistencePromise = Promise.resolve();
 
 export default app;

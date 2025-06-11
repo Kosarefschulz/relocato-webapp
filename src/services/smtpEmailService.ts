@@ -49,9 +49,6 @@ class SMTPEmailService {
     // Da wir im Browser sind, müssen wir einen Backend-Endpunkt verwenden
     // Für die Entwicklung simulieren wir den E-Mail-Versand
     
-    // Prüfe ob Backend verfügbar ist
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-    
     // Backend ist verfügbar - direkt zur E-Mail senden
     console.log('🚀 Backend erkannt - sende echte E-Mail...');
 
