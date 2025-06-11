@@ -3,7 +3,7 @@ import {
   Box,
   Typography,
   Button,
-  Grid2 as Grid,
+  Grid,
   Card,
   CardMedia,
   CardContent,
@@ -141,7 +141,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           {/* Foto-Grid */}
           <Grid container spacing={2}>
             {filteredPhotos.map((photo, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={photo.id}>
+              <Grid xs={12} sm={6} md={4} key={photo.id}>
                 <Card sx={{ height: '100%' }}>
                   <CardMedia
                     component="img"
