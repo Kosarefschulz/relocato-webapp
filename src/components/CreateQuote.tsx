@@ -350,7 +350,9 @@ const CreateQuote: React.FC = () => {
                       type="number"
                       value={quoteDetails.volume}
                       onChange={(e) => setQuoteDetails({...quoteDetails, volume: Number(e.target.value)})}
-                      helperText={`Standard: 20 m³ (85% aller Umzüge) • Bei ${customer.apartment?.area || 50} m²: ca. ${quoteCalculationService.estimateVolumeFromArea(customer.apartment?.area || 50)} m³`}
+                      helperText={manualPriceMode 
+                        ? "Bei manuellem Preis nur für Information - beeinflusst nicht den Preis"
+                        : `Standard: 20 m³ (85% aller Umzüge) • Bei ${customer.apartment?.area || 50} m²: ca. ${quoteCalculationService.estimateVolumeFromArea(customer.apartment?.area || 50)} m³`}
                     />
                   </Box>
                   <Box sx={{ flex: '1 1 48%' }}>
@@ -360,6 +362,7 @@ const CreateQuote: React.FC = () => {
                       type="number"
                       value={quoteDetails.distance}
                       onChange={(e) => setQuoteDetails({...quoteDetails, distance: Number(e.target.value)})}
+                      helperText={manualPriceMode ? "Bei manuellem Preis keine Kilometerpauschale" : ""}
                     />
                   </Box>
                 </Box>
@@ -491,7 +494,7 @@ const CreateQuote: React.FC = () => {
                     type="number"
                     value={manualPrice}
                     onChange={(e) => setManualPrice(e.target.value)}
-                    helperText="Dieser Preis ersetzt nur den Basispreis. Zusatzleistungen werden addiert."
+                    helperText="Bei manuellem Preis: Keine automatische Kilometerpauschale. Zusatzleistungen werden addiert."
                     InputProps={{
                       startAdornment: <InputAdornment position="start">€</InputAdornment>,
                     }}
@@ -518,7 +521,13 @@ const CreateQuote: React.FC = () => {
                       </Box>
                     )}
                     
-                    {calculation.priceBreakdown.distance > 0 && (
+                    {calculation.manualPrice !== undefined && calculation.manualPrice > 0 ? (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Entfernungs-Zuschlag: €0.00 (bei manuellem Preis entfällt)
+                        </Typography>
+                      </Box>
+                    ) : calculation.priceBreakdown.distance > 0 && (
                       <Box sx={{ mb: 1 }}>
                         <Typography variant="body2">
                           Entfernungs-Zuschlag: €{calculation.priceBreakdown.distance.toFixed(2)}

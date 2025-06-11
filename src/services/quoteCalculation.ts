@@ -154,7 +154,10 @@ class QuoteCalculationService {
       false // Ziel-Aufzug-Info fehlt, konservativ annehmen
     );
     
-    const distanceSurcharge = this.calculateDistanceSurcharge(quoteDetails.distance);
+    // Bei manuellem Preis keine automatische Kilometerpauschale
+    const distanceSurcharge = quoteDetails.manualBasePrice !== undefined && quoteDetails.manualBasePrice > 0
+      ? 0
+      : this.calculateDistanceSurcharge(quoteDetails.distance);
     const packingService = this.calculatePackingService(volume, quoteDetails.packingRequested);
     const boxesPrice = this.calculateBoxesPrice(quoteDetails.boxCount || 0);
     const parkingZonePrice = quoteDetails.parkingZonePrice || 0;
