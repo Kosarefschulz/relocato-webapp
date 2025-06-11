@@ -40,6 +40,40 @@ class GoogleDriveService {
     // API Keys werden später aus Umgebungsvariablen geladen
     this.apiKey = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY || '';
     this.folderId = process.env.REACT_APP_GOOGLE_DRIVE_FOLDER_ID || '';
+    
+    // Gespeicherte Tokens aus localStorage laden
+    this.loadTokensFromStorage();
+  }
+  
+  // Tokens aus localStorage laden
+  private loadTokensFromStorage() {
+    try {
+      const savedTokens = localStorage.getItem('googleDriveUploadTokens');
+      if (savedTokens) {
+        const tokensArray = JSON.parse(savedTokens);
+        tokensArray.forEach((token: any) => {
+          // Datum-Strings zurück zu Date-Objekten konvertieren
+          token.validUntil = new Date(token.validUntil);
+          // Nur gültige Tokens laden
+          if (new Date() < token.validUntil) {
+            this.uploadTokens.set(token.token, token);
+          }
+        });
+        console.log(`📥 ${this.uploadTokens.size} Tokens aus Storage geladen`);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Tokens:', error);
+    }
+  }
+  
+  // Tokens in localStorage speichern
+  private saveTokensToStorage() {
+    try {
+      const tokensArray = Array.from(this.uploadTokens.values());
+      localStorage.setItem('googleDriveUploadTokens', JSON.stringify(tokensArray));
+    } catch (error) {
+      console.error('Fehler beim Speichern der Tokens:', error);
+    }
   }
 
   // Token für Upload generieren
@@ -48,15 +82,19 @@ class GoogleDriveService {
       token: this.generateSecureToken(),
       customerId: customer.id,
       customerName: customer.name,
-      validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 Stunden
+      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 Tage
       maxFiles: 50,
       usedFiles: 0
     };
     
     this.uploadTokens.set(token.token, token);
     
+    // Token in localStorage speichern
+    this.saveTokensToStorage();
+    
     console.log('📸 Upload-Token erstellt:', {
       kunde: customer.name,
+      token: token.token,
       gültigBis: token.validUntil.toLocaleString('de-DE')
     });
     
@@ -71,15 +109,21 @@ class GoogleDriveService {
 
   // Token validieren
   validateToken(tokenString: string): UploadToken | null {
+    console.log('🔍 Validiere Token:', tokenString);
+    console.log('📦 Verfügbare Tokens:', Array.from(this.uploadTokens.keys()));
+    
     const token = this.uploadTokens.get(tokenString);
     
     if (!token) {
-      console.error('❌ Token nicht gefunden');
+      console.error('❌ Token nicht gefunden:', tokenString);
+      console.error('Verfügbare Tokens:', this.uploadTokens.size);
       return null;
     }
     
     if (new Date() > token.validUntil) {
       console.error('❌ Token abgelaufen');
+      console.error('Token gültig bis:', token.validUntil);
+      console.error('Aktuelle Zeit:', new Date());
       this.uploadTokens.delete(tokenString);
       return null;
     }
@@ -88,6 +132,12 @@ class GoogleDriveService {
       console.error('❌ Maximale Anzahl Uploads erreicht');
       return null;
     }
+    
+    console.log('✅ Token gültig:', {
+      kunde: token.customerName,
+      gültigBis: token.validUntil.toLocaleString('de-DE'),
+      verwendeteUploads: `${token.usedFiles}/${token.maxFiles}`
+    });
     
     return token;
   }
