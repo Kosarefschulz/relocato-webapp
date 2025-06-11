@@ -13,6 +13,7 @@ import CreateQuote from './components/CreateQuote';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
+import CustomerDetails from './components/CustomerDetails';
 
 const theme = createTheme({
   palette: {
@@ -158,12 +159,20 @@ function App() {
               element={user ? <NewCustomer /> : <Navigate to="/login" />} 
             />
             <Route 
+              path="/edit-customer/:customerId" 
+              element={user ? <NewCustomer /> : <Navigate to="/login" />} 
+            />
+            <Route 
               path="/quotes" 
               element={user ? <QuotesList /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/customers" 
               element={user ? <CustomersList /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/customer/:customerId" 
+              element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/" 

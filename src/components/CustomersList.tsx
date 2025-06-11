@@ -93,13 +93,14 @@ const CustomersList: React.FC = () => {
     }
   };
 
-  const handleClearLocalCustomers = () => {
+  const handleClearLocalCustomers = async () => {
     googleSheetsService.clearLocalCustomers();
     setExportDialogOpen(false);
     setSnackbarMessage('Lokale Kunden wurden gelöscht');
     setSnackbarOpen(true);
-    // Reload customers
-    window.location.reload();
+    // Aktualisiere die Kundenliste ohne Reload
+    const allCustomers = await googleSheetsService.getCustomers();
+    setCustomers(allCustomers);
   };
 
   const hasLocalCustomers = customers.some(customer => customer.id.startsWith('local_'));

@@ -113,13 +113,22 @@ const CustomerDetails: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             {customer.name}
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<DescriptionIcon />}
-            onClick={() => navigate('/create-quote', { state: { customer } })}
-          >
-            Angebot erstellen
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              onClick={() => navigate(`/edit-customer/${customer.id}`)}
+            >
+              Bearbeiten
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<DescriptionIcon />}
+              onClick={() => navigate('/create-quote', { state: { customer } })}
+            >
+              Angebot erstellen
+            </Button>
+          </Box>
         </Box>
       </Box>
 

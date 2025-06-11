@@ -219,6 +219,38 @@ class GoogleSheetsPublicService {
     }
   }
 
+  async updateCustomer(customerId: string, updatedData: Partial<Customer>): Promise<boolean> {
+    try {
+      // Lade existierende Kunden
+      const customers = this.getLocalCustomers();
+      
+      // Finde den Index des zu aktualisierenden Kunden
+      const index = customers.findIndex(c => c.id === customerId);
+      
+      if (index === -1) {
+        console.error('❌ Kunde nicht gefunden:', customerId);
+        return false;
+      }
+      
+      // Aktualisiere die Kundendaten
+      customers[index] = {
+        ...customers[index],
+        ...updatedData,
+        id: customerId // ID beibehalten
+      };
+      
+      // Speichere die aktualisierte Liste
+      this.saveLocalCustomers(customers);
+      
+      console.log('✅ Kunde erfolgreich aktualisiert:', customers[index].name);
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Kunden:', error);
+      return false;
+    }
+  }
+
   async addQuote(quote: Omit<Quote, 'id'>): Promise<boolean> {
     try {
       // Generiere eine eindeutige ID

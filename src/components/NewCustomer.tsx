@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -19,6 +19,8 @@ import { googleSheetsPublicService as googleSheetsService } from '../services/go
 
 const NewCustomer: React.FC = () => {
   const navigate = useNavigate();
+  const { customerId } = useParams<{ customerId: string }>();
+  const isEditMode = !!customerId;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -36,6 +38,44 @@ const NewCustomer: React.FC = () => {
     hasElevator: false,
     notes: ''
   });
+
+  useEffect(() => {
+    if (isEditMode && customerId) {
+      loadCustomer();
+    }
+  }, [customerId, isEditMode]);
+
+  const loadCustomer = async () => {
+    try {
+      setLoading(true);
+      const customers = await googleSheetsService.getCustomers();
+      const customer = customers.find(c => c.id === customerId);
+      
+      if (customer) {
+        setFormData({
+          name: customer.name || '',
+          email: customer.email || '',
+          phone: customer.phone || '',
+          movingDate: customer.movingDate || '',
+          fromAddress: customer.fromAddress || '',
+          toAddress: customer.toAddress || '',
+          rooms: customer.apartment?.rooms || 2,
+          area: customer.apartment?.area || 50,
+          floor: customer.apartment?.floor || 1,
+          hasElevator: customer.apartment?.hasElevator || false,
+          notes: customer.notes || ''
+        });
+      } else {
+        setError('Kunde nicht gefunden');
+        setTimeout(() => navigate('/customers'), 2000);
+      }
+    } catch (err) {
+      console.error('Fehler beim Laden des Kunden:', err);
+      setError('Kunde konnte nicht geladen werden');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
@@ -74,17 +114,27 @@ const NewCustomer: React.FC = () => {
         notes: formData.notes
       };
 
-      const success = await googleSheetsService.addCustomer(customerData);
+      let success;
+      
+      if (isEditMode && customerId) {
+        // Update existing customer
+        success = await googleSheetsService.updateCustomer(customerId, customerData);
+      } else {
+        // Add new customer
+        success = await googleSheetsService.addCustomer(customerData);
+      }
       
       if (success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/customers');
         }, 1500);
       } else {
-        setError('Kunde wurde lokal gespeichert (Google Sheets nicht verfügbar)');
+        setError(isEditMode 
+          ? 'Fehler beim Aktualisieren des Kunden' 
+          : 'Kunde wurde lokal gespeichert (Google Sheets nicht verfügbar)');
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/customers');
         }, 2000);
       }
       
@@ -102,7 +152,7 @@ const NewCustomer: React.FC = () => {
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="h4" gutterBottom>
-          Neuer Kunde
+          {isEditMode ? 'Kunde bearbeiten' : 'Neuer Kunde'}
         </Typography>
       </Box>
 
@@ -115,7 +165,9 @@ const NewCustomer: React.FC = () => {
 
         {success && (
           <Alert severity="success" sx={{ mb: 2 }}>
-            Kunde wurde erfolgreich erstellt!
+            {isEditMode 
+              ? 'Kunde wurde erfolgreich aktualisiert!' 
+              : 'Kunde wurde erfolgreich erstellt!'}
           </Alert>
         )}
 
@@ -248,7 +300,7 @@ const NewCustomer: React.FC = () => {
             size="large"
             sx={{ height: 48 }}
           >
-            {loading ? <CircularProgress size={24} /> : 'Kunde erstellen'}
+            {loading ? <CircularProgress size={24} /> : (isEditMode ? 'Änderungen speichern' : 'Kunde erstellen')}
           </Button>
         </Box>
       </Paper>
