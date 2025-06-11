@@ -220,16 +220,15 @@ const QuotesList: React.FC = () => {
                         >
                           Erneut senden
                         </Button>
-                        {quote.status === 'accepted' && (
-                          <Button
-                            size="small"
-                            startIcon={<ReceiptIcon />}
-                            onClick={() => handleConvertToInvoice(quote)}
-                            color="success"
-                          >
-                            Rechnung erstellen
-                          </Button>
-                        )}
+                        <Button
+                          size="small"
+                          startIcon={<ReceiptIcon />}
+                          onClick={() => handleConvertToInvoice(quote)}
+                          color="success"
+                          variant={quote.status === 'accepted' ? 'contained' : 'outlined'}
+                        >
+                          Rechnung erstellen
+                        </Button>
                       </Box>
                     </Box>
                   }
