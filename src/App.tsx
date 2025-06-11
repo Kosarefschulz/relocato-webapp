@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { CircularProgress, Box, Typography } from '@mui/material';
 import { User } from 'firebase/auth';
 import { authService } from './services/authService';
+import { authPersistencePromise } from './config/firebase';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -14,6 +15,8 @@ import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
 import CustomerDetails from './components/CustomerDetails';
+import InvoicesList from './components/InvoicesList';
+import MobilePhotoUpload from './components/MobilePhotoUpload';
 
 const theme = createTheme({
   palette: {
@@ -78,16 +81,24 @@ function App() {
 
   useEffect(() => {
     console.log('🔄 App.tsx: Setting up auth state listener...');
-    const unsubscribe = authService.onAuthStateChange((user) => {
-      console.log('👤 App.tsx: Auth state changed:', user ? `User: ${user.email}` : 'No user');
-      setUser(user);
+    
+    // Warte auf Auth-Persistenz bevor Auth-State-Listener startet
+    authPersistencePromise.then(() => {
+      const unsubscribe = authService.onAuthStateChange((user) => {
+        console.log('👤 App.tsx: Auth state changed:', user ? `User: ${user.email}` : 'No user');
+        setUser(user);
+        setLoading(false);
+      });
+
+      // Cleanup
+      return () => {
+        console.log('🛑 App.tsx: Cleaning up auth state listener');
+        unsubscribe();
+      };
+    }).catch(() => {
+      // Bei Fehler trotzdem fortfahren
       setLoading(false);
     });
-
-    return () => {
-      console.log('🛑 App.tsx: Cleaning up auth state listener');
-      unsubscribe();
-    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -183,6 +194,14 @@ function App() {
             <Route 
               path="/customer/:customerId" 
               element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/invoices" 
+              element={user ? <InvoicesList /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/photo-upload/:token" 
+              element={<MobilePhotoUpload />} 
             />
             <Route 
               path="/" 

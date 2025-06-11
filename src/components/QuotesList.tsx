@@ -13,7 +13,8 @@ import {
   Divider,
   Button,
   TextField,
-  InputAdornment
+  InputAdornment,
+  CircularProgress
 } from '@mui/material';
 import { 
   ArrowBack as ArrowBackIcon,
@@ -24,11 +25,16 @@ import {
 } from '@mui/icons-material';
 import { Quote } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { generateEmailHTML } from '../services/htmlEmailTemplate';
+import { quoteCalculationService } from '../services/quoteCalculation';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const QuotesList: React.FC = () => {
   const navigate = useNavigate();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loadingPdf, setLoadingPdf] = useState<string | null>(null);
 
   useEffect(() => {
     const loadQuotes = async () => {
@@ -116,6 +122,124 @@ const QuotesList: React.FC = () => {
     } catch (error) {
       console.error('Fehler beim Erstellen der Rechnung:', error);
       alert('Fehler beim Erstellen der Rechnung. Bitte versuchen Sie es erneut.');
+    }
+  };
+
+  const generatePDFFromHTML = async (htmlContent: string): Promise<Blob> => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.width = '750px';
+    document.body.appendChild(tempDiv);
+
+    try {
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: 750,
+        height: tempDiv.scrollHeight
+      });
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const imgWidth = 190;
+      const pageHeight = 270;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 10;
+
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight + 15;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      return pdf.output('blob');
+    } finally {
+      document.body.removeChild(tempDiv);
+    }
+  };
+
+  const handleDownloadPDF = async (quote: Quote) => {
+    try {
+      setLoadingPdf(quote.id);
+      
+      // Lade Kundendaten
+      const customers = await googleSheetsService.getCustomers();
+      const customer = customers.find(c => c.id === quote.customerId);
+      
+      if (!customer) {
+        console.error('Kunde nicht gefunden');
+        return;
+      }
+
+      // Generiere Kalkulation (vereinfacht, da wir die Details nicht haben)
+      const calculation = {
+        volumeBase: 20,
+        volumeRange: '15-20 m³',
+        basePrice: quote.price * 0.84, // Netto (ohne MwSt)
+        floorSurcharge: 0,
+        distanceSurcharge: 0,
+        packingService: 0,
+        boxesPrice: 0,
+        parkingZonePrice: 0,
+        storagePrice: 0,
+        furnitureAssemblyPrice: 0,
+        furnitureDisassemblyPrice: 0,
+        totalPrice: quote.price,
+        finalPrice: quote.price,
+        priceBreakdown: {
+          base: quote.price * 0.84,
+          floors: 0,
+          distance: 0,
+          packing: 0,
+          boxes: 0,
+          parkingZone: 0,
+          storage: 0,
+          furnitureAssembly: 0,
+          furnitureDisassembly: 0
+        }
+      };
+
+      const quoteDetails = {
+        volume: 20,
+        distance: 50,
+        packingRequested: false,
+        additionalServices: [],
+        notes: quote.comment || '',
+        boxCount: 0,
+        parkingZonePrice: 0,
+        storagePrice: 0,
+        furnitureAssemblyPrice: 0,
+        furnitureDisassemblyPrice: 0
+      };
+
+      // Generiere HTML
+      const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
+      
+      // Konvertiere zu PDF
+      const pdfBlob = await generatePDFFromHTML(htmlContent);
+      
+      // Download
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Angebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Fehler beim PDF-Download:', error);
+    } finally {
+      setLoadingPdf(null);
     }
   };
 
@@ -208,10 +332,11 @@ const QuotesList: React.FC = () => {
                       <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
                         <Button
                           size="small"
-                          startIcon={<DownloadIcon />}
-                          onClick={() => console.log('PDF herunterladen:', quote.id)}
+                          startIcon={loadingPdf === quote.id ? <CircularProgress size={16} /> : <DownloadIcon />}
+                          onClick={() => handleDownloadPDF(quote)}
+                          disabled={loadingPdf === quote.id}
                         >
-                          PDF
+                          {loadingPdf === quote.id ? 'Erstelle PDF...' : 'PDF'}
                         </Button>
                         <Button
                           size="small"

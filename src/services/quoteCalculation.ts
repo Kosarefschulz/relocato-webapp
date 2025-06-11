@@ -98,14 +98,14 @@ class QuoteCalculationService {
   calculateFloorSurcharge(fromFloor: number, toFloor: number, hasElevatorFrom: boolean, hasElevatorTo: boolean): number {
     let surcharge = 0;
     
-    // Zuschlag für Auszug ohne Aufzug
-    if (!hasElevatorFrom && fromFloor > 1) {
-      surcharge += (fromFloor - 1) * 50;
+    // Zuschlag für Auszug ohne Aufzug (ab 1. Stock, EG = 0 zählt nicht)
+    if (!hasElevatorFrom && fromFloor > 0) {
+      surcharge += fromFloor * 50;
     }
     
-    // Zuschlag für Einzug ohne Aufzug  
-    if (!hasElevatorTo && toFloor > 1) {
-      surcharge += (toFloor - 1) * 50;
+    // Zuschlag für Einzug ohne Aufzug (ab 1. Stock, EG = 0 zählt nicht)
+    if (!hasElevatorTo && toFloor > 0) {
+      surcharge += toFloor * 50;
     }
     
     return surcharge;
@@ -143,9 +143,9 @@ class QuoteCalculationService {
       ? quoteDetails.manualBasePrice 
       : basePriceInfo.price;
     
-    // Etagen aus Adresse extrahieren oder Standardwerte verwenden
-    const fromFloor = this.extractFloorFromAddress(customer.fromAddress) || customer.apartment.floor || 1;
-    const toFloor = this.extractFloorFromAddress(customer.toAddress) || 1;
+    // Etagen aus apartment Daten verwenden (nicht aus Adresse)
+    const fromFloor = customer.apartment.floor || 0; // Default zu EG (0) wenn nicht angegeben
+    const toFloor = 0; // Ziel-Etage standardmäßig EG, könnte später erweitert werden
     
     const floorSurcharge = this.calculateFloorSurcharge(
       fromFloor, 
@@ -199,10 +199,17 @@ class QuoteCalculationService {
 
   // Hilfsfunktion: Etage aus Adresse extrahieren
   private extractFloorFromAddress(address: string): number | null {
-    const floorMatch = address.match(/etage\s+(\d+)|(\d+)\.\s*stock/i);
-    if (floorMatch) {
-      return parseInt(floorMatch[1] || floorMatch[2]);
+    // Check for EG (Erdgeschoss/Ground floor)
+    if (address.toLowerCase().includes('eg') || address.toLowerCase().includes('erdgeschoss')) {
+      return 0;
     }
+    
+    // Check for floor numbers
+    const floorMatch = address.match(/etage\s+(\d+)|(\d+)\.\s*stock|(\d+)\.\s*etage|stock\s+(\d+)/i);
+    if (floorMatch) {
+      return parseInt(floorMatch[1] || floorMatch[2] || floorMatch[3] || floorMatch[4]);
+    }
+    
     return null;
   }
 

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
@@ -12,9 +12,14 @@ import {
   IconButton,
   FormControlLabel,
   Checkbox,
-  MenuItem
+  MenuItem,
+  Snackbar
 } from '@mui/material';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { 
+  ArrowBack as ArrowBackIcon,
+  Save as SaveIcon,
+  CheckCircle as CheckCircleIcon 
+} from '@mui/icons-material';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 
 const NewCustomer: React.FC = () => {
@@ -24,6 +29,10 @@ const NewCustomer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [autoSaveSuccess, setAutoSaveSuccess] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [formChanged, setFormChanged] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -34,7 +43,7 @@ const NewCustomer: React.FC = () => {
     toAddress: '',
     rooms: 2,
     area: 50,
-    floor: 1,
+    floor: 0, // EG (Erdgeschoss) als Standard
     hasElevator: false,
     notes: ''
   });
@@ -61,7 +70,7 @@ const NewCustomer: React.FC = () => {
           toAddress: customer.toAddress || '',
           rooms: customer.apartment?.rooms || 2,
           area: customer.apartment?.area || 50,
-          floor: customer.apartment?.floor || 1,
+          floor: customer.apartment?.floor || 0, // EG als Standard
           hasElevator: customer.apartment?.hasElevator || false,
           notes: customer.notes || ''
         });
@@ -77,12 +86,64 @@ const NewCustomer: React.FC = () => {
     }
   };
 
+  // Auto-save Funktion
+  const autoSave = useCallback(async () => {
+    if (!isEditMode || !formChanged || !formData.name || !formData.email || !formData.phone) {
+      return;
+    }
+
+    setAutoSaving(true);
+    try {
+      const customerData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        movingDate: formData.movingDate,
+        fromAddress: formData.fromAddress,
+        toAddress: formData.toAddress,
+        apartment: {
+          rooms: formData.rooms,
+          area: formData.area,
+          floor: formData.floor,
+          hasElevator: formData.hasElevator
+        },
+        services: [],
+        notes: formData.notes
+      };
+
+      const success = await googleSheetsService.updateCustomer(customerId!, customerData);
+      
+      if (success) {
+        setLastSaved(new Date());
+        setAutoSaveSuccess(true);
+        setFormChanged(false);
+        setTimeout(() => setAutoSaveSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error('Auto-save Fehler:', err);
+    } finally {
+      setAutoSaving(false);
+    }
+  }, [customerId, formData, isEditMode, formChanged]);
+
+  // Debounced auto-save
+  useEffect(() => {
+    if (!formChanged || !isEditMode) return;
+
+    const timer = setTimeout(() => {
+      autoSave();
+    }, 2000); // 2 Sekunden Verzögerung
+
+    return () => clearTimeout(timer);
+  }, [formData, formChanged, autoSave, isEditMode]);
+
   const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+    setFormChanged(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,9 +209,36 @@ const NewCustomer: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Box sx={{ mb: 3 }}>
-        <IconButton onClick={() => navigate('/dashboard')} sx={{ mb: 2 }}>
-          <ArrowBackIcon />
-        </IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <IconButton onClick={() => navigate('/dashboard')}>
+            <ArrowBackIcon />
+          </IconButton>
+          {isEditMode && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {autoSaving && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={16} />
+                  <Typography variant="body2" color="text.secondary">
+                    Speichert...
+                  </Typography>
+                </Box>
+              )}
+              {autoSaveSuccess && !autoSaving && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'success.main' }}>
+                  <CheckCircleIcon fontSize="small" />
+                  <Typography variant="body2">
+                    Automatisch gespeichert
+                  </Typography>
+                </Box>
+              )}
+              {lastSaved && !autoSaving && !autoSaveSuccess && (
+                <Typography variant="body2" color="text.secondary">
+                  Zuletzt gespeichert: {lastSaved.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Box>
         <Typography variant="h4" gutterBottom>
           {isEditMode ? 'Kunde bearbeiten' : 'Neuer Kunde'}
         </Typography>
@@ -265,11 +353,22 @@ const NewCustomer: React.FC = () => {
                 <TextField
                   fullWidth
                   label="Stockwerk"
-                  type="number"
+                  select
                   value={formData.floor}
                   onChange={handleInputChange('floor')}
-                  inputProps={{ min: 0, max: 50 }}
-                />
+                >
+                  <MenuItem value={0}>EG (Erdgeschoss)</MenuItem>
+                  <MenuItem value={1}>1. Stock</MenuItem>
+                  <MenuItem value={2}>2. Stock</MenuItem>
+                  <MenuItem value={3}>3. Stock</MenuItem>
+                  <MenuItem value={4}>4. Stock</MenuItem>
+                  <MenuItem value={5}>5. Stock</MenuItem>
+                  <MenuItem value={6}>6. Stock</MenuItem>
+                  <MenuItem value={7}>7. Stock</MenuItem>
+                  <MenuItem value={8}>8. Stock</MenuItem>
+                  <MenuItem value={9}>9. Stock</MenuItem>
+                  <MenuItem value={10}>10. Stock+</MenuItem>
+                </TextField>
               </Box>
             </Box>
             <FormControlLabel
