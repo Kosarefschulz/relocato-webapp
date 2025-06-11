@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   LinearProgress,
   Alert,
   Chip,
@@ -20,7 +19,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Fab
+  Fab,
+  Grid
 } from '@mui/material';
 import {
   Camera as CameraIcon,
@@ -217,7 +217,7 @@ const MobilePhotoUpload: React.FC = () => {
       {/* Foto-Grid */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
         {photos.map((photo, index) => (
-          <Grid xs={6} key={index}>
+          <Grid size={6} key={index}>
             <Card sx={{ position: 'relative' }}>
               <img
                 src={photo.preview}
@@ -286,7 +286,7 @@ const MobilePhotoUpload: React.FC = () => {
       {/* Action Buttons */}
       <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, p: 2, bgcolor: 'background.paper', boxShadow: 3 }}>
         <Grid container spacing={2}>
-          <Grid xs={6}>
+          <Grid size={6}>
             <Button
               fullWidth
               variant="contained"
@@ -304,7 +304,7 @@ const MobilePhotoUpload: React.FC = () => {
               />
             </Button>
           </Grid>
-          <Grid xs={6}>
+          <Grid size={6}>
             <Button
               fullWidth
               variant="outlined"

@@ -9,10 +9,10 @@ import {
   Tabs,
   Tab,
   Button,
-  Grid,
   Card,
   CardContent,
-  Chip
+  Chip,
+  Grid
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -135,7 +135,7 @@ const CustomerDetails: React.FC = () => {
           <Box sx={{ p: 3 }}>
             <Grid container spacing={3}>
               {/* Kontaktdaten */}
-              <Grid xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Card>
                   <CardContent>
                     <Typography variant="h6" gutterBottom color="primary">
@@ -181,7 +181,7 @@ const CustomerDetails: React.FC = () => {
               </Grid>
 
               {/* Adressen */}
-              <Grid xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Card>
                   <CardContent>
                     <Typography variant="h6" gutterBottom color="primary">
@@ -223,7 +223,7 @@ const CustomerDetails: React.FC = () => {
                       Wohnungsdetails
                     </Typography>
                     <Grid container spacing={2} sx={{ mt: 1 }}>
-                      <Grid xs={6} sm={3}>
+                      <Grid size={{ xs: 6, sm: 3 }}>
                         <Typography variant="body2" color="text.secondary">
                           Zimmer
                         </Typography>
@@ -231,7 +231,7 @@ const CustomerDetails: React.FC = () => {
                           {customer.apartment?.rooms || '-'}
                         </Typography>
                       </Grid>
-                      <Grid xs={6} sm={3}>
+                      <Grid size={{ xs: 6, sm: 3 }}>
                         <Typography variant="body2" color="text.secondary">
                           Fläche
                         </Typography>
@@ -239,7 +239,7 @@ const CustomerDetails: React.FC = () => {
                           {customer.apartment?.area || '-'} m²
                         </Typography>
                       </Grid>
-                      <Grid xs={6} sm={3}>
+                      <Grid size={{ xs: 6, sm: 3 }}>
                         <Typography variant="body2" color="text.secondary">
                           Etage
                         </Typography>
@@ -247,7 +247,7 @@ const CustomerDetails: React.FC = () => {
                           {customer.apartment?.floor || 'EG'}
                         </Typography>
                       </Grid>
-                      <Grid xs={6} sm={3}>
+                      <Grid size={{ xs: 6, sm: 3 }}>
                         <Typography variant="body2" color="text.secondary">
                           Aufzug
                         </Typography>
@@ -265,7 +265,7 @@ const CustomerDetails: React.FC = () => {
 
               {/* Notizen */}
               {customer.notes && (
-                <Grid xs={12}>
+                <Grid size={12}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary">
