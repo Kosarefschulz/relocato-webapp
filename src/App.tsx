@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { CircularProgress, Box } from '@mui/material';
+import { CircularProgress, Box, Typography } from '@mui/material';
 import { User } from 'firebase/auth';
 import { authService } from './services/authService';
 
@@ -77,12 +77,17 @@ function App() {
   const [authError, setAuthError] = useState<string>('');
 
   useEffect(() => {
+    console.log('🔄 App.tsx: Setting up auth state listener...');
     const unsubscribe = authService.onAuthStateChange((user) => {
+      console.log('👤 App.tsx: Auth state changed:', user ? `User: ${user.email}` : 'No user');
       setUser(user);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log('🛑 App.tsx: Cleaning up auth state listener');
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -122,11 +127,16 @@ function App() {
         <CssBaseline />
         <Box 
           display="flex" 
+          flexDirection="column"
           justifyContent="center" 
           alignItems="center" 
           minHeight="100vh"
+          gap={2}
         >
           <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Authentifizierung wird überprüft...
+          </Typography>
         </Box>
       </ThemeProvider>
     );

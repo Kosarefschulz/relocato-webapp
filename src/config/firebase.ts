@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -26,5 +26,14 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Auth-Persistenz explizit setzen
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log('✅ Auth-Persistenz aktiviert');
+  })
+  .catch((error) => {
+    console.error('❌ Fehler beim Setzen der Auth-Persistenz:', error);
+  });
 
 export default app;
