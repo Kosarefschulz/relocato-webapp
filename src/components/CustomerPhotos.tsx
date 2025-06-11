@@ -19,9 +19,9 @@ import {
   Tab,
   TextField,
   MenuItem,
-  LinearProgress
+  LinearProgress,
+  Grid
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import {
   Close as CloseIcon,
   Download as DownloadIcon,
@@ -193,7 +193,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           {/* Foto-Grid */}
           <Grid container spacing={2}>
             {filteredPhotos.map((photo, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={photo.id}>
+              <Grid item xs={12} sm={6} md={4} key={photo.id}>
                 <Card sx={{ height: '100%' }}>
                   <CardMedia
                     component="img"
