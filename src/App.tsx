@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { CircularProgress, Box, Typography } from '@mui/material';
 import { User } from 'firebase/auth';
 import { authService } from './services/authService';
 import { authPersistencePromise } from './config/firebase';
+import { modernTheme } from './styles/modernTheme';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -16,50 +17,6 @@ import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
 import CustomerDetails from './components/CustomerDetails';
 import InvoicesList from './components/InvoicesList';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-  typography: {
-    fontFamily: [
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-    ].join(','),
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          minHeight: 44,
-        },
-      },
-    },
-    MuiTextField: {
-      defaultProps: {
-        variant: 'outlined',
-      },
-      styleOverrides: {
-        root: {
-          '& .MuiInputBase-input': {
-            minHeight: '1.4375em',
-          },
-        },
-      },
-    },
-  },
-});
 
 export const AuthContext = React.createContext<{
   user: User | null;
@@ -159,7 +116,7 @@ function App() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={modernTheme}>
       <CssBaseline />
       <AuthContext.Provider value={{ user, login, logout, resetPassword }}>
         <Router>
