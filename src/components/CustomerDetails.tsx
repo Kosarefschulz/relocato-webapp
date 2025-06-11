@@ -56,10 +56,20 @@ function TabPanel(props: TabPanelProps) {
 const CustomerDetails: React.FC = () => {
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation() as { state?: { from?: string } };
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [tabValue, setTabValue] = useState(0);
+  
+  // Determine where to navigate back to
+  const navigateBack = () => {
+    const from = location.state?.from;
+    if (from) {
+      navigate(from);
+    } else {
+      navigate('/customers');
+    }
+  };
 
   useEffect(() => {
     loadCustomer();
@@ -97,8 +107,8 @@ const CustomerDetails: React.FC = () => {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Typography>Kunde nicht gefunden</Typography>
-        <Button onClick={() => navigate(-1)} sx={{ mt: 2 }}>
-          Zurück
+        <Button onClick={navigateBack} sx={{ mt: 2 }}>
+          Zurück zur Kundenliste
         </Button>
       </Container>
     );
@@ -107,7 +117,7 @@ const CustomerDetails: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Box sx={{ mb: 3 }}>
-        <IconButton onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+        <IconButton onClick={navigateBack} sx={{ mb: 2 }}>
           <ArrowBackIcon />
         </IconButton>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

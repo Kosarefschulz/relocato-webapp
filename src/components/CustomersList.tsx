@@ -30,7 +30,6 @@ import {
   Home as HomeIcon,
   Upload as UploadIcon,
   ContentCopy as ContentCopyIcon,
-  Info as InfoIcon,
   Description as DescriptionIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
@@ -65,7 +64,7 @@ const CustomersList: React.FC = () => {
   );
 
   const handleSelectCustomer = (customer: Customer) => {
-    navigate('/create-quote', { state: { customer } });
+    navigate(`/customer/${customer.id}`, { state: { from: '/customers' } });
   };
 
   const isUpcomingMove = (movingDate: string) => {
@@ -166,21 +165,9 @@ const CustomersList: React.FC = () => {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="h6">
-                            {customer.name}
-                          </Typography>
-                          <IconButton 
-                            size="small" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/customer/${customer.id}`);
-                            }}
-                            sx={{ ml: 1 }}
-                          >
-                            <InfoIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
+                        <Typography variant="h6">
+                          {customer.name}
+                        </Typography>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           {customer.id.startsWith('local_') && (
                             <Chip 
