@@ -641,6 +641,81 @@ const CustomerDetails: React.FC = () => {
           </Collapse>
         </HeroSection>
 
+        {/* Quick Actions Bar */}
+        {!editMode && (
+          <Box sx={{ mb: 3 }}>
+            <Paper 
+              elevation={2}
+              sx={{ 
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+              }}
+            >
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <ArrowUpIcon color="primary" />
+                Schnellaktionen
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Button
+                  variant="contained"
+                  startIcon={<PhoneIcon />}
+                  onClick={() => window.open(`tel:${customer.phone}`, '_self')}
+                  disabled={!customer.phone}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Anrufen
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<EmailIcon />}
+                  onClick={() => setTabValue(4)} // Switch to email tab
+                  disabled={!customer.email}
+                  sx={{ textTransform: 'none' }}
+                >
+                  E-Mail schreiben
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<WhatsAppIcon />}
+                  onClick={() => {
+                    const message = `Hallo ${customer.name}, hier ist Ihr RELOCATO® Team Bielefeld. Wie können wir Ihnen helfen?`;
+                    const phone = customer.phone?.replace(/\D/g, ''); // Remove non-digits
+                    window.open(`https://wa.me/49${phone?.startsWith('0') ? phone.slice(1) : phone}?text=${encodeURIComponent(message)}`, '_blank');
+                  }}
+                  disabled={!customer.phone}
+                  sx={{ textTransform: 'none' }}
+                >
+                  WhatsApp
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<DescriptionIcon />}
+                  onClick={() => navigate(`/create-quote/${customer.id}`, { state: { customer } })}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Angebot erstellen
+                </Button>
+                {customer.fromAddress && customer.toAddress && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<LocationIcon />}
+                    onClick={() => {
+                      const routeUrl = `https://maps.google.com/maps/dir/${encodeURIComponent(customer.fromAddress)}/${encodeURIComponent(customer.toAddress)}`;
+                      window.open(routeUrl, '_blank');
+                    }}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Route planen
+                  </Button>
+                )}
+              </Box>
+            </Paper>
+          </Box>
+        )}
+
         {/* Premium Tabs */}
         <Paper 
           elevation={0} 
@@ -827,7 +902,20 @@ const CustomerDetails: React.FC = () => {
                                   type="email"
                                   sx={{ mt: 0.5 }}
                                 />
-                              ) : customer.email
+                              ) : (
+                                <Typography 
+                                  component="a"
+                                  href={`mailto:${customer.email}`}
+                                  sx={{ 
+                                    color: 'primary.main',
+                                    fontWeight: 600,
+                                    textDecoration: 'none',
+                                    '&:hover': { textDecoration: 'underline' }
+                                  }}
+                                >
+                                  {customer.email}
+                                </Typography>
+                              )
                             }
                           />
                         </ListItem>
@@ -897,9 +985,18 @@ const CustomerDetails: React.FC = () => {
                                 rows={2}
                               />
                             ) : (
-                              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                {customer.fromAddress}
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="body1" sx={{ fontWeight: 500, flex: 1 }}>
+                                  {customer.fromAddress}
+                                </Typography>
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => window.open(`https://maps.google.com/maps?q=${encodeURIComponent(customer.fromAddress)}`, '_blank')}
+                                  sx={{ color: 'primary.main' }}
+                                >
+                                  <LocationIcon />
+                                </IconButton>
+                              </Box>
                             )}
                           </Box>
                         </motion.div>
@@ -920,12 +1017,42 @@ const CustomerDetails: React.FC = () => {
                                 rows={2}
                               />
                             ) : (
-                              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                {customer.toAddress}
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="body1" sx={{ fontWeight: 500, flex: 1 }}>
+                                  {customer.toAddress}
+                                </Typography>
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => window.open(`https://maps.google.com/maps?q=${encodeURIComponent(customer.toAddress)}`, '_blank')}
+                                  sx={{ color: 'success.main' }}
+                                >
+                                  <LocationIcon />
+                                </IconButton>
+                              </Box>
                             )}
                           </Box>
                         </motion.div>
+                        
+                        {/* Routenplaner Button */}
+                        {customer.fromAddress && customer.toAddress && !editMode && (
+                          <Box sx={{ mt: 3, textAlign: 'center' }}>
+                            <Button
+                              variant="outlined"
+                              startIcon={<LocationIcon />}
+                              onClick={() => {
+                                const routeUrl = `https://maps.google.com/maps/dir/${encodeURIComponent(customer.fromAddress)}/${encodeURIComponent(customer.toAddress)}`;
+                                window.open(routeUrl, '_blank');
+                              }}
+                              sx={{ 
+                                borderRadius: 2,
+                                textTransform: 'none',
+                                fontWeight: 600
+                              }}
+                            >
+                              Route planen
+                            </Button>
+                          </Box>
+                        )}
                       </Box>
                     </CardContent>
                   </AnimatedCard>
@@ -1120,6 +1247,176 @@ const CustomerDetails: React.FC = () => {
                     <DescriptionIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                   </motion.div>
                   <Typography variant="h6" color="text.secondary" gutterBottom>
+                    Noch keine Angebote erstellt
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate(`/create-quote/${customer.id}`, { state: { customer } })}
+                    sx={{ mt: 2 }}
+                    size="large"
+                  >
+                    Erstes Angebot erstellen
+                  </Button>
+                </Box>
+              ) : (
+                <Grid container spacing={2}>
+                  {quotes.map((quote, index) => (
+                    <Grid size={{ xs: 12, md: 6 }} key={quote.id}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card
+                          sx={{
+                            height: '100%',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: theme.shadows[8]
+                            }
+                          }}
+                          onClick={() => {
+                            // Hier könnten Sie zur Angebot-Detail-Seite navigieren
+                            console.log('Angebot anklicken:', quote.id);
+                          }}
+                        >
+                          <CardContent>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Angebot #{quote.id}
+                              </Typography>
+                              <Chip 
+                                label={quote.status}
+                                color={quote.status === 'accepted' ? 'success' : quote.status === 'pending' ? 'warning' : 'default'}
+                                size="small"
+                              />
+                            </Box>
+                            
+                            <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
+                              €{quote.price.toFixed(2)}
+                            </Typography>
+                            
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                              Erstellt am {quote.createdAt.toLocaleDateString('de-DE')}
+                            </Typography>
+                            
+                            {quote.comment && (
+                              <Typography variant="body2" sx={{ 
+                                mb: 2,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                              }}>
+                                {quote.comment}
+                              </Typography>
+                            )}
+                            
+                            <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<PdfIcon />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // PDF Download
+                                  console.log('PDF Download für Angebot:', quote.id);
+                                }}
+                              >
+                                PDF
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<EmailIcon />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // E-Mail senden
+                                  setTabValue(4); // Zur E-Mail-Tab
+                                }}
+                              >
+                                Senden
+                              </Button>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </Grid>
+                  ))}
+                  
+                  {/* Add New Quote Card */}
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: quotes.length * 0.1 }}
+                    >
+                      <Card
+                        sx={{
+                          height: '100%',
+                          cursor: 'pointer',
+                          border: `2px dashed ${theme.palette.primary.main}`,
+                          backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minHeight: 200,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                            transform: 'translateY(-2px)'
+                          }
+                        }}
+                        onClick={() => navigate(`/create-quote/${customer.id}`, { state: { customer } })}
+                      >
+                        <CardContent sx={{ textAlign: 'center' }}>
+                          <AddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                          <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                            Neues Angebot erstellen
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </Grid>
+                </Grid>
+              )}
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3} onSwipe={!editMode ? handleSwipe : () => {}}>
+            <Box sx={{ p: { xs: 2, md: 3 } }}>
+              {invoices.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 8 }}>
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <ReceiptIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  </motion.div>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    Noch keine Rechnungen erstellt
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<ReceiptIcon />}
+                    sx={{ mt: 2 }}
+                    size="large"
+                    onClick={() => {
+                      // Hier würde die Rechnung-Erstellung starten
+                      console.log('Rechnung erstellen für Kunde:', customer.id);
+                    }}
+                  >
+                    Erste Rechnung erstellen
+                  </Button>
                     Noch keine Angebote vorhanden
                   </Typography>
                   <Button
