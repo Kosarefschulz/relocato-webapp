@@ -1,142 +1,124 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
-  Paper,
-  Typography,
   Box,
   AppBar,
   Toolbar,
   IconButton,
-  Avatar,
-  Menu,
-  MenuItem,
-  Grid,
-  Card,
-  CardContent,
+  Typography,
+  BottomNavigation,
+  BottomNavigationAction,
+  Paper,
   useTheme,
   alpha,
-  Chip,
+  InputBase,
+  Fade,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
   CircularProgress,
+  Popover,
 } from '@mui/material';
 import { 
-  Search as SearchIcon, 
-  Add as AddIcon,
-  Logout as LogoutIcon,
+  Search as SearchIcon,
   Description as DescriptionIcon,
   People as PeopleIcon,
-  AccountCircle as AccountCircleIcon,
   Receipt as ReceiptIcon,
-  TrendingUp as TrendingUpIcon,
-  Schedule as ScheduleIcon,
-  CheckCircle as CheckCircleIcon,
+  CalendarMonth as CalendarIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
-import { glassmorphism, animations } from '../styles/modernTheme';
 
-// Try to import from App first, fallback to App.simple
-let AuthContext: any;
-try {
-  AuthContext = require('../App').AuthContext;
-} catch {
-  AuthContext = require('../App.simple').AuthContext;
-}
+// Styled components
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
 
-// Motion components
-const MotionCard = motion(Card);
-const MotionBox = motion(Box);
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  width: '100%',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
+}));
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
   const theme = useTheme();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [bottomNavValue, setBottomNavValue] = useState('dashboard');
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      handleClose();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
-  // Get current time for greeting
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Guten Morgen';
-    if (hour < 18) return 'Guten Tag';
-    return 'Guten Abend';
-  };
-
-  const dashboardItems = [
+  const navigationItems = [
     {
-      title: 'Kunde suchen',
-      description: 'Bestehenden Kunden finden',
-      icon: <SearchIcon sx={{ fontSize: 32 }} />,
-      action: () => navigate('/search-customer'),
-      color: theme.palette.secondary.main,
-      gradient: `linear-gradient(135deg, ${theme.palette.secondary.light} 0%, ${theme.palette.secondary.main} 100%)`,
-    },
-    {
-      title: 'Neuer Kunde',
-      description: 'Neuen Kunden anlegen',
-      icon: <AddIcon sx={{ fontSize: 32 }} />,
-      action: () => navigate('/new-customer'),
-      color: theme.palette.success.main,
-      gradient: `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`,
-    },
-    {
-      title: 'Angebote',
-      description: 'Alle versendeten Angebote',
-      icon: <DescriptionIcon sx={{ fontSize: 32 }} />,
+      label: 'Angebote',
+      value: 'quotes',
+      icon: <DescriptionIcon />,
       action: () => navigate('/quotes'),
       color: theme.palette.warning.main,
-      gradient: `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.main} 100%)`,
     },
     {
-      title: 'Kunden',
-      description: 'Kundenliste anzeigen',
-      icon: <PeopleIcon sx={{ fontSize: 32 }} />,
+      label: 'Kunden',
+      value: 'customers',
+      icon: <PeopleIcon />,
       action: () => navigate('/customers'),
-      color: '#8B5CF6',
-      gradient: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
+      color: theme.palette.secondary.main,
     },
     {
-      title: 'Rechnungen',
-      description: 'Alle Rechnungen anzeigen',
-      icon: <ReceiptIcon sx={{ fontSize: 32 }} />,
+      label: 'Kalender',
+      value: 'calendar',
+      icon: <CalendarIcon />,
+      action: () => console.log('Kalender noch nicht implementiert'),
+      color: theme.palette.success.main,
+    },
+    {
+      label: 'Rechnungen',
+      value: 'invoices',
+      icon: <ReceiptIcon />,
       action: () => navigate('/invoices'),
       color: theme.palette.error.main,
-      gradient: `linear-gradient(135deg, ${theme.palette.error.light} 0%, ${theme.palette.error.main} 100%)`,
-    }
-  ];
-
-  // Mock statistics
-  const stats = [
-    { label: 'Aktive Kunden', value: '24', change: '+12%', icon: <PeopleIcon /> },
-    { label: 'Offene Angebote', value: '7', change: '+3%', icon: <ScheduleIcon /> },
-    { label: 'Abgeschlossen', value: '18', change: '+25%', icon: <CheckCircleIcon /> },
-    { label: 'Umsatz (Monat)', value: '€12.5k', change: '+18%', icon: <TrendingUpIcon /> },
+    },
   ];
 
   return (
-    <>
-      {/* Modern AppBar with glassmorphism */}
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* App Bar */}
       <AppBar 
-        position="static" 
+        position="fixed" 
         sx={{ 
-          ...glassmorphism.light,
-          borderBottom: 'none',
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          boxShadow: 1,
         }}
       >
         <Toolbar>
@@ -144,214 +126,150 @@ const Dashboard: React.FC = () => {
             Relocato
           </Typography>
           
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
-              Benutzer
-            </Typography>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <Avatar 
-                sx={{ 
-                  width: 36, 
-                  height: 36, 
-                  background: theme.palette.secondary.main,
-                  fontSize: '1rem',
-                }}
-              >
-                U
-              </Avatar>
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              PaperProps={{
-                sx: {
-                  mt: 1.5,
-                  minWidth: 200,
-                },
-              }}
-            >
-              <MenuItem onClick={handleClose} disabled>
-                <AccountCircleIcon sx={{ mr: 2 }} />
-                Benutzer
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <LogoutIcon sx={{ mr: 2 }} />
-                Abmelden
-              </MenuItem>
-            </Menu>
-          </Box>
+          {/* Search - führt direkt zur Kundenliste */}
+          <IconButton
+            size="large"
+            onClick={() => navigate('/customers')}
+            color="inherit"
+            sx={{ 
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              }
+            }}
+          >
+            <SearchIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <MotionBox {...animations.fadeIn}>
-          {/* Welcome Section */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
-              {getGreeting()}, Benutzer!
+      {/* Main Content */}
+      <Container 
+        component="main" 
+        sx={{ 
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          pt: 8,
+          pb: 10,
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+              Willkommen bei Relocato
             </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Was möchten Sie heute erledigen?
+            <Typography variant="h6" color="text.secondary">
+              Wählen Sie eine Option aus dem Menü unten
             </Typography>
           </Box>
 
-          {/* Statistics Cards */}
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            {stats.map((stat, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <MotionCard
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+          {/* Quick Action Cards for Desktop */}
+          <Box 
+            sx={{ 
+              display: { xs: 'none', md: 'grid' },
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 3,
+              mb: 4,
+            }}
+          >
+            {navigationItems.map((item, index) => (
+              <motion.div
+                key={item.value}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Paper
                   sx={{
-                    height: '100%',
-                    background: theme.palette.background.paper,
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: theme.shadows[4],
-                    },
-                  }}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                      <Box 
-                        sx={{ 
-                          p: 1, 
-                          borderRadius: 2,
-                          background: alpha(theme.palette.secondary.main, 0.1),
-                          color: theme.palette.secondary.main,
-                        }}
-                      >
-                        {stat.icon}
-                      </Box>
-                      <Chip
-                        label={stat.change}
-                        size="small"
-                        sx={{
-                          background: alpha(theme.palette.success.main, 0.1),
-                          color: theme.palette.success.main,
-                          fontWeight: 600,
-                        }}
-                      />
-                    </Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                      {stat.value}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {stat.label}
-                    </Typography>
-                  </CardContent>
-                </MotionCard>
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Action Cards */}
-          <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-            Schnellzugriff
-          </Typography>
-          
-          <Grid container spacing={3}>
-            {dashboardItems.map((item, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <MotionCard
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={item.action}
-                  sx={{
+                    p: 4,
                     cursor: 'pointer',
-                    height: '100%',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: item.gradient,
-                      opacity: 0,
-                      transition: 'opacity 0.3s ease',
-                    },
-                    '&:hover::before': {
-                      opacity: 0.05,
-                    },
+                    textAlign: 'center',
+                    transition: 'all 0.3s ease',
                     '&:hover': {
-                      boxShadow: theme.shadows[8],
+                      boxShadow: 6,
+                      transform: 'translateY(-4px)',
                     },
                   }}
+                  onClick={item.action}
                 >
-                  <CardContent sx={{ position: 'relative', zIndex: 1 }}>
-                    <Box 
-                      sx={{ 
-                        display: 'inline-flex',
-                        p: 2,
-                        borderRadius: 2,
-                        background: alpha(item.color, 0.1),
-                        color: item.color,
-                        mb: 2,
-                      }}
-                    >
-                      {item.icon}
-                    </Box>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                      {item.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {item.description}
-                    </Typography>
-                  </CardContent>
-                </MotionCard>
-              </Grid>
+                  <Box
+                    sx={{
+                      color: item.color,
+                      mb: 2,
+                      '& svg': {
+                        fontSize: 48,
+                      },
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {item.label}
+                  </Typography>
+                </Paper>
+              </motion.div>
             ))}
-          </Grid>
-
-          {/* Activity Timeline (Optional) */}
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-              Letzte Aktivitäten
-            </Typography>
-            <Paper 
-              sx={{ 
-                p: 3,
-                ...glassmorphism.light,
-                border: 'none',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <CircularProgress size={20} variant="indeterminate" />
-                <Typography color="text.secondary">
-                  Aktivitäten werden geladen...
-                </Typography>
-              </Box>
-            </Paper>
           </Box>
-        </MotionBox>
+        </motion.div>
       </Container>
-    </>
+
+      {/* Bottom Navigation for Mobile */}
+      <Paper 
+        sx={{ 
+          position: 'fixed', 
+          bottom: 0, 
+          left: 0, 
+          right: 0,
+          zIndex: 1200,
+        }} 
+        elevation={3}
+      >
+        <BottomNavigation
+          value={bottomNavValue}
+          onChange={(event, newValue) => {
+            setBottomNavValue(newValue);
+            const item = navigationItems.find(i => i.value === newValue);
+            if (item) {
+              item.action();
+            }
+          }}
+          sx={{
+            '& .MuiBottomNavigationAction-root': {
+              minWidth: 'auto',
+              padding: '6px 12px 8px',
+            },
+            '& .Mui-selected': {
+              '& .MuiBottomNavigationAction-label': {
+                fontSize: '0.875rem',
+                fontWeight: 600,
+              },
+            },
+          }}
+        >
+          {navigationItems.map((item) => (
+            <BottomNavigationAction
+              key={item.value}
+              label={item.label}
+              value={item.value}
+              icon={item.icon}
+              sx={{
+                '&.Mui-selected': {
+                  color: item.color,
+                },
+              }}
+            />
+          ))}
+        </BottomNavigation>
+      </Paper>
+    </Box>
   );
 };
 

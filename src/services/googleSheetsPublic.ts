@@ -1,4 +1,4 @@
-import { Customer, Quote, Invoice } from '../types';
+import { Customer, Quote, Invoice, EmailHistory } from '../types';
 
 class GoogleSheetsPublicService {
   private spreadsheetId = '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
@@ -251,6 +251,55 @@ class GoogleSheetsPublicService {
     }
   }
 
+  async deleteCustomer(customerId: string): Promise<boolean> {
+    try {
+      // Lade existierende lokale Kunden
+      const customers = this.getLocalCustomers();
+      
+      // Finde den Index des zu löschenden Kunden
+      const index = customers.findIndex(c => c.id === customerId);
+      
+      if (index === -1) {
+        console.error('❌ Kunde nicht gefunden:', customerId);
+        return false;
+      }
+      
+      const customerName = customers[index].name;
+      
+      // Entferne den Kunden aus der Liste
+      customers.splice(index, 1);
+      
+      // Speichere die aktualisierte Liste
+      this.saveLocalCustomers(customers);
+      
+      // Lösche auch zugehörige Angebote
+      const quotes = this.getLocalQuotes();
+      const updatedQuotes = quotes.filter(quote => quote.customerId !== customerId);
+      this.saveLocalQuotes(updatedQuotes);
+      
+      // Lösche auch zugehörige Rechnungen
+      const invoices = this.getLocalInvoices();
+      const updatedInvoices = invoices.filter(invoice => invoice.customerId !== customerId);
+      this.saveLocalInvoices(updatedInvoices);
+      
+      // Lösche auch zugehörige Fotos (import wird zur Laufzeit aufgelöst)
+      try {
+        const { googleDriveService } = await import('./googleDriveService');
+        await googleDriveService.deleteCustomerPhotos(customerId);
+      } catch (error) {
+        console.warn('Hinweis: Fotos konnten nicht automatisch gelöscht werden:', error);
+      }
+      
+      console.log('✅ Kunde erfolgreich gelöscht:', customerName);
+      console.log('📝 Hinweis: Für Google Sheets Integration manuell löschen: https://docs.google.com/spreadsheets/d/' + this.spreadsheetId);
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Löschen des Kunden:', error);
+      return false;
+    }
+  }
+
   async addQuote(quote: Omit<Quote, 'id'>): Promise<boolean> {
     try {
       // Generiere eine eindeutige ID
@@ -293,6 +342,46 @@ class GoogleSheetsPublicService {
     
     // Kombiniere Demo-Angebote mit lokalen Angeboten
     return [...demoQuotes, ...localQuotes];
+  }
+
+  async getQuotesByCustomerId(customerId: string): Promise<Quote[]> {
+    const allQuotes = await this.getQuotes();
+    return allQuotes.filter(quote => quote.customerId === customerId);
+  }
+
+  async getInvoicesByCustomerId(customerId: string): Promise<Invoice[]> {
+    // Placeholder für zukünftige Implementierung
+    return [];
+  }
+
+  async getEmailHistoryByCustomerId(customerId: string): Promise<EmailHistory[]> {
+    // Demo-Daten für Email-History
+    const demoEmails: EmailHistory[] = [
+      {
+        id: 'email_1',
+        customerId: customerId,
+        subject: 'Ihr Umzugsangebot von Relocato',
+        body: 'Sehr geehrte Damen und Herren, anbei finden Sie Ihr persönliches Umzugsangebot...',
+        sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 Tage her
+        sentBy: 'system',
+        type: 'quote',
+        attachments: ['Angebot_2024_001.pdf'],
+        status: 'opened'
+      },
+      {
+        id: 'email_2',
+        customerId: customerId,
+        subject: 'Erinnerung: Ihr Umzugstermin naht',
+        body: 'Guten Tag, wir möchten Sie daran erinnern, dass Ihr Umzug in 3 Tagen stattfindet...',
+        sentAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 Tag her
+        sentBy: 'system',
+        type: 'reminder',
+        status: 'delivered'
+      }
+    ];
+
+    // Nur Demo-Emails für den angefragten Kunden zurückgeben
+    return demoEmails.filter(email => email.customerId === customerId);
   }
 
   private getDemoCustomersFromYourStructure(): Customer[] {

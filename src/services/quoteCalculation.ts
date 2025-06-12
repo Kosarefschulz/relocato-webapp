@@ -25,6 +25,12 @@ export interface QuoteCalculation {
     storage: number;
     furnitureAssembly: number;
     furnitureDisassembly: number;
+    cleaning: number;
+    clearance: number;
+    renovation: number;
+    piano: number;
+    heavyItems: number;
+    packingMaterials: number;
   };
 }
 
@@ -39,6 +45,15 @@ export interface QuoteDetails {
   storagePrice: number;
   furnitureAssemblyPrice: number; // Möbelmontage
   furnitureDisassemblyPrice: number; // Möbeldemontage
+  cleaningService: boolean;
+  cleaningHours: number;
+  clearanceService: boolean;
+  clearanceVolume: number;
+  renovationService: boolean;
+  renovationHours: number;
+  pianoTransport: boolean;
+  heavyItemsCount: number;
+  packingMaterials: boolean;
   manualBasePrice?: number; // Manueller Preis nur für Be- und Entladen
 }
 
@@ -63,6 +78,34 @@ class QuoteCalculationService {
   // Standard-Volumen für die meisten Umzüge
   getStandardVolume(): number {
     return 20; // Standard 20 m³ für 85% der Umzüge
+  }
+
+  // Entrümpelung Preisberechnung
+  private calculateClearancePrice(volume: number): number {
+    if (volume <= 0) return 0;
+    if (volume <= 5) return 150;
+    if (volume <= 10) return 280;
+    if (volume <= 15) return 420;
+    if (volume <= 20) return 560;
+    return 560 + ((volume - 20) * 25); // 25€ pro m³ über 20m³
+  }
+
+  // Service-Optionen für UI
+  getAvailableServices() {
+    return [
+      { id: 'packing', name: 'Verpackungsservice', description: 'Professionelles Ein- und Auspacken', icon: '📦', basePrice: 0, priceType: 'calculated' },
+      { id: 'boxes', name: 'Umzugskartons', description: '2,50€ pro Karton', icon: '📋', basePrice: 2.5, priceType: 'per_item' },
+      { id: 'cleaning', name: 'Reinigungsservice', description: '35€ pro Stunde', icon: '🧽', basePrice: 35, priceType: 'per_hour' },
+      { id: 'clearance', name: 'Entrümpelung', description: 'Entsorgung von Hausrat', icon: '🗑️', basePrice: 0, priceType: 'by_volume' },
+      { id: 'renovation', name: 'Renovierungsarbeiten', description: '45€ pro Stunde', icon: '🔨', basePrice: 45, priceType: 'per_hour' },
+      { id: 'piano', name: 'Klaviertransport', description: 'Spezialtransport für Klavier/Flügel', icon: '🎹', basePrice: 150, priceType: 'fixed' },
+      { id: 'heavy', name: 'Schwertransport', description: '25€ pro schweres Objekt', icon: '💪', basePrice: 25, priceType: 'per_item' },
+      { id: 'materials', name: 'Verpackungsmaterial', description: 'Luftpolsterfolie, Decken, etc.', icon: '📦', basePrice: 50, priceType: 'fixed' },
+      { id: 'parking', name: 'Halteverbotszone', description: 'Parkplatz-Reservierung', icon: '🚫', basePrice: 0, priceType: 'manual' },
+      { id: 'storage', name: 'Zwischenlagerung', description: 'Temporäre Lagerung', icon: '🏠', basePrice: 0, priceType: 'manual' },
+      { id: 'assembly', name: 'Möbelmontage', description: 'Aufbau von Möbeln', icon: '🔧', basePrice: 0, priceType: 'manual' },
+      { id: 'disassembly', name: 'Möbeldemontage', description: 'Abbau von Möbeln', icon: '🔨', basePrice: 0, priceType: 'manual' }
+    ];
   }
 
   // Optional: Geschätzte Volumen-Berechnung basierend auf Fläche (nur zur Orientierung)
@@ -166,7 +209,17 @@ class QuoteCalculationService {
     const furnitureDisassemblyPrice = quoteDetails.furnitureDisassemblyPrice || 0;
     
     // Gesamtpreis ist Summe aller Komponenten
-    const totalPrice = basePrice + floorSurcharge + distanceSurcharge + packingService + boxesPrice + parkingZonePrice + storagePrice + furnitureAssemblyPrice + furnitureDisassemblyPrice;
+    // Neue Services berechnen
+    const cleaningPrice = quoteDetails.cleaningService ? (quoteDetails.cleaningHours * 35) : 0;
+    const clearancePrice = quoteDetails.clearanceService ? this.calculateClearancePrice(quoteDetails.clearanceVolume) : 0;
+    const renovationPrice = quoteDetails.renovationService ? (quoteDetails.renovationHours * 45) : 0;
+    const pianoPrice = quoteDetails.pianoTransport ? 150 : 0;
+    const heavyItemsPrice = quoteDetails.heavyItemsCount * 25;
+    const packingMaterialsPrice = quoteDetails.packingMaterials ? 50 : 0;
+    
+    const totalPrice = basePrice + floorSurcharge + distanceSurcharge + packingService + boxesPrice + 
+                      parkingZonePrice + storagePrice + furnitureAssemblyPrice + furnitureDisassemblyPrice +
+                      cleaningPrice + clearancePrice + renovationPrice + pianoPrice + heavyItemsPrice + packingMaterialsPrice;
     
     return {
       volumeBase: volume,
@@ -192,7 +245,13 @@ class QuoteCalculationService {
         parkingZone: parkingZonePrice,
         storage: storagePrice,
         furnitureAssembly: furnitureAssemblyPrice,
-        furnitureDisassembly: furnitureDisassemblyPrice
+        furnitureDisassembly: furnitureDisassemblyPrice,
+        cleaning: cleaningPrice,
+        clearance: clearancePrice,
+        renovation: renovationPrice,
+        piano: pianoPrice,
+        heavyItems: heavyItemsPrice,
+        packingMaterials: packingMaterialsPrice
       }
     };
   }

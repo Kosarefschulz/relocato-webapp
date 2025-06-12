@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { modernTheme } from './styles/modernTheme';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -11,9 +10,52 @@ import CreateQuote from './components/CreateQuote';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
-import InvoicesList from './components/InvoicesList';
-import GoogleSheetsTest from './components/GoogleSheetsTest';
 import CustomerDetails from './components/CustomerDetails';
+import InvoicesList from './components/InvoicesList';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: [
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          minHeight: 44,
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        variant: 'outlined',
+      },
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-input': {
+            minHeight: '1.4375em',
+          },
+        },
+      },
+    },
+  },
+});
 
 export const AuthContext = React.createContext<{
   isAuthenticated: boolean;
@@ -26,60 +68,56 @@ export const AuthContext = React.createContext<{
 });
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Immer eingeloggt
 
   const login = () => setIsAuthenticated(true);
   const logout = () => setIsAuthenticated(false);
 
   return (
-    <ThemeProvider theme={modernTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
         <Router>
           <Routes>
             <Route 
               path="/login" 
-              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
+              element={<Navigate to="/dashboard" />} 
             />
             <Route 
               path="/dashboard" 
-              element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
+              element={<Dashboard />} 
             />
             <Route 
               path="/search-customer" 
-              element={isAuthenticated ? <CustomerSearch /> : <Navigate to="/login" />} 
+              element={<CustomerSearch />} 
             />
             <Route 
               path="/create-quote" 
-              element={isAuthenticated ? <CreateQuote /> : <Navigate to="/login" />} 
+              element={<CreateQuote />} 
             />
             <Route 
               path="/new-customer" 
-              element={isAuthenticated ? <NewCustomer /> : <Navigate to="/login" />} 
+              element={<NewCustomer />} 
             />
             <Route 
               path="/quotes" 
-              element={isAuthenticated ? <QuotesList /> : <Navigate to="/login" />} 
+              element={<QuotesList />} 
             />
             <Route 
               path="/customers" 
-              element={isAuthenticated ? <CustomersList /> : <Navigate to="/login" />} 
+              element={<CustomersList />} 
             />
             <Route 
               path="/customer/:customerId" 
-              element={isAuthenticated ? <CustomerDetails /> : <Navigate to="/login" />} 
+              element={<CustomerDetails />} 
             />
             <Route 
               path="/invoices" 
-              element={isAuthenticated ? <InvoicesList /> : <Navigate to="/login" />} 
-            />
-            <Route 
-              path="/test" 
-              element={isAuthenticated ? <GoogleSheetsTest /> : <Navigate to="/login" />} 
+              element={<InvoicesList />} 
             />
             <Route 
               path="/" 
-              element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} 
+              element={<Navigate to="/dashboard" />} 
             />
           </Routes>
         </Router>

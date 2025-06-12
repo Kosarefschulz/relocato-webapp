@@ -23,15 +23,9 @@ import {
   Login as LoginIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { glassmorphism, animations } from '../styles/modernTheme';
-
-// Try to import from App first, fallback to App.simple
-let AuthContext: any;
-try {
-  AuthContext = require('../App').AuthContext;
-} catch {
-  AuthContext = require('../App.simple').AuthContext;
-}
+import { glassmorphism } from '../styles/modernTheme';
+// Import AuthContext - will be provided by parent app
+const AuthContext = React.createContext<any>(null);
 
 const MotionBox = motion(Box);
 const MotionPaper = motion(Paper);

@@ -85,7 +85,12 @@ const CustomerSearch: React.FC = () => {
   };
 
   const handleSelectCustomer = (customer: Customer) => {
-    navigate('/create-quote', { state: { customer } });
+    try {
+      navigate('/create-quote', { state: { customer } });
+    } catch (error) {
+      console.error('Navigation error:', error);
+      setError('Fehler beim Navigieren zur Angebotserstellung');
+    }
   };
 
   return (

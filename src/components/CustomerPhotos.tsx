@@ -46,6 +46,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadPhotos();
@@ -73,9 +74,11 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
 
     setUploading(true);
     setUploadProgress(0);
+    setError('');
 
     try {
       let uploadedCount = 0;
+      let errorCount = 0;
       
       for (const file of uploadFiles) {
         const result = await googleDriveService.uploadPhotoDirect(
@@ -87,12 +90,19 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
         
         if (result) {
           uploadedCount++;
-          setUploadProgress((uploadedCount / uploadFiles.length) * 100);
+        } else {
+          errorCount++;
         }
+        setUploadProgress(((uploadedCount + errorCount) / uploadFiles.length) * 100);
       }
 
       // Fotos neu laden
       await loadPhotos();
+      
+      // Feedback anzeigen
+      if (errorCount > 0) {
+        setError(`${uploadedCount} Fotos erfolgreich hochgeladen, ${errorCount} Fehler aufgetreten.`);
+      }
       
       // Dialog schließen und zurücksetzen
       setShowUploadDialog(false);
@@ -103,6 +113,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
       
     } catch (error) {
       console.error('Fehler beim Upload:', error);
+      setError('Fehler beim Hochladen der Fotos. Bitte versuchen Sie es erneut.');
     } finally {
       setUploading(false);
     }
@@ -110,9 +121,19 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
 
   const handleDeletePhoto = async (photoId: string) => {
     if (window.confirm('Möchten Sie dieses Foto wirklich löschen?')) {
-      const success = await googleDriveService.deletePhoto(photoId);
-      if (success) {
-        await loadPhotos();
+      try {
+        setLoading(true);
+        const success = await googleDriveService.deletePhoto(photoId);
+        if (success) {
+          await loadPhotos();
+          console.log('✅ Foto erfolgreich gelöscht');
+        } else {
+          console.error('❌ Fehler beim Löschen des Fotos');
+        }
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -326,6 +347,12 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                   {Math.round(uploadProgress)}% hochgeladen
                 </Typography>
               </Box>
+            )}
+            
+            {error && (
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
             )}
           </Box>
         </DialogContent>

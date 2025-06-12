@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const PDFSHIFT_API_KEY = 'sk_14a4ecfc1ba71f54456ab30bf80897383eeb714e';
+const PDFSHIFT_API_KEY = process.env.REACT_APP_PDFSHIFT_API_KEY || '';
 const PDFSHIFT_API_URL = 'https://api.pdfshift.io/v3/convert/pdf';
 
 interface PDFShiftOptions {
@@ -20,6 +20,12 @@ interface PDFShiftOptions {
 
 export const generatePDFWithPDFShift = async (html: string): Promise<ArrayBuffer> => {
   try {
+    // Prüfe ob API Key verfügbar ist
+    if (!PDFSHIFT_API_KEY) {
+      console.warn('PDFShift API Key nicht konfiguriert - verwende lokalen Fallback');
+      throw new Error('PDFShift nicht konfiguriert');
+    }
+
     const options: PDFShiftOptions = {
       source: html,
       landscape: false,
@@ -56,13 +62,14 @@ export const generatePDFWithPDFShift = async (html: string): Promise<ArrayBuffer
           'Authorization': `Basic ${authString}`,
           'Content-Type': 'application/json'
         },
-        responseType: 'arraybuffer'
+        responseType: 'arraybuffer',
+        timeout: 30000 // 30 Sekunden Timeout
       }
     );
 
     return response.data;
   } catch (error) {
     console.error('PDFShift Error:', error);
-    throw new Error('PDF-Generierung fehlgeschlagen');
+    throw new Error('PDF-Generierung mit PDFShift fehlgeschlagen');
   }
 };

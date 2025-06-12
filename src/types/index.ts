@@ -14,6 +14,7 @@ export interface Customer {
   };
   services: string[];
   notes?: string;
+  createdAt?: Date;
 }
 
 export interface Quote {
@@ -55,4 +56,16 @@ export interface Consultant {
   name: string;
   email: string;
   role: 'admin' | 'consultant';
+}
+
+export interface EmailHistory {
+  id: string;
+  customerId: string;
+  subject: string;
+  body: string;
+  sentAt: Date;
+  sentBy: string;
+  type: 'quote' | 'invoice' | 'reminder' | 'general';
+  attachments?: string[];
+  status: 'sent' | 'delivered' | 'opened' | 'failed';
 }

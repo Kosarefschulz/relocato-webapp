@@ -96,7 +96,7 @@ function App() {
 
   if (loading) {
     return (
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={modernTheme}>
         <CssBaseline />
         <Box 
           display="flex" 
@@ -143,7 +143,7 @@ function App() {
             />
             <Route 
               path="/edit-customer/:customerId" 
-              element={user ? <NewCustomer /> : <Navigate to="/login" />} 
+              element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/quotes" 
@@ -155,6 +155,10 @@ function App() {
             />
             <Route 
               path="/customer/:customerId" 
+              element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/customer-details/:customerId" 
               element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
             />
             <Route 
