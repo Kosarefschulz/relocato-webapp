@@ -67,7 +67,9 @@ import {
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Customer, Quote, Invoice, EmailHistory } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { emailHistoryService } from '../services/emailHistoryService';
 import CustomerPhotos from './CustomerPhotos';
+import CustomerCommunication from './CustomerCommunication';
 import DarkModeToggle from './DarkModeToggle';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 
@@ -376,10 +378,19 @@ const CustomerDetails: React.FC = () => {
   }
 
   const stats = calculateCustomerStats();
+  // E-Mail-Statistiken für Tab-Counter
+  const emailStats = React.useMemo(() => {
+    try {
+      return emailHistoryService.getEmailStats(customer.id);
+    } catch {
+      return { totalMessages: 0, sentMessages: 0, receivedMessages: 0, activeThreads: 0 };
+    }
+  }, [customer.id]);
+
   const tabCount = {
     quotes: quotes.length,
     invoices: invoices.length,
-    emails: emails.filter(e => e.status === 'sent' || e.status === 'delivered').length
+    emails: emailStats.totalMessages
   };
 
   return (
@@ -1252,108 +1263,7 @@ const CustomerDetails: React.FC = () => {
 
           <TabPanel value={tabValue} index={4} onSwipe={!editMode ? handleSwipe : () => {}}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
-              {emails.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 8 }}>
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.1, 1],
-                    }}
-                    transition={{ 
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  >
-                    <EmailIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                  </motion.div>
-                  <Typography variant="h6" color="text.secondary" gutterBottom>
-                    Noch keine Emails gesendet
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<EmailIcon />}
-                    sx={{ mt: 2 }}
-                    size="large"
-                  >
-                    Email senden
-                  </Button>
-                </Box>
-              ) : (
-                <List sx={{ px: 0 }}>
-                  {emails.map((email, index) => (
-                    <React.Fragment key={email.id}>
-                      {index > 0 && <Divider />}
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                      >
-                        <ListItem
-                          sx={{
-                            py: 2,
-                            px: { xs: 1, md: 2 },
-                            '&:hover': {
-                              backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                              cursor: 'pointer'
-                            }
-                          }}
-                        >
-                          <ListItemAvatar>
-                            <Avatar sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>
-                              {email.type === 'quote' && <DescriptionIcon color="primary" />}
-                              {email.type === 'invoice' && <ReceiptIcon color="warning" />}
-                              {email.type === 'reminder' && <ScheduleIcon color="info" />}
-                              {email.type === 'general' && <EmailIcon color="action" />}
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                  {email.subject}
-                                </Typography>
-                                <Chip
-                                  label={emailStatusConfig[email.status].label}
-                                  color={emailStatusConfig[email.status].color as any}
-                                  size="small"
-                                />
-                              </Box>
-                            }
-                            secondary={
-                              <>
-                                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                  {email.sentAt.toLocaleDateString('de-DE')} • {email.sentAt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
-                                </Typography>
-                                <Typography variant="body2" sx={{ 
-                                  display: '-webkit-box',
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: 'vertical',
-                                  overflow: 'hidden'
-                                }}>
-                                  {email.body}
-                                </Typography>
-                                {email.attachments && email.attachments.length > 0 && (
-                                  <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
-                                    <PdfIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                                    <Typography variant="caption" color="text.secondary">
-                                      {email.attachments.length} Anhang
-                                    </Typography>
-                                  </Box>
-                                )}
-                              </>
-                            }
-                          />
-                          <ListItemSecondaryAction>
-                            <IconButton edge="end" size={isMobile ? "small" : "medium"}>
-                              <MoreIcon />
-                            </IconButton>
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                      </motion.div>
-                    </React.Fragment>
-                  ))}
-                </List>
-              )}
+              <CustomerCommunication customer={customer} />
             </Box>
           </TabPanel>
         </Paper>
