@@ -391,65 +391,55 @@ const CreateQuote: React.FC = () => {
 
   const downloadPDF = async () => {
     try {
-      if (!calculation) return;
+      if (!calculation) {
+        setError('Keine Berechnung verfügbar');
+        return;
+      }
       
       setLoading(true);
       setError('');
       
-      const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
+      console.log('📄 Erstelle PDF...');
       
-      // Versuche zuerst PDFShift (wenn konfiguriert)
-      try {
-        const { generatePDFWithPDFShift } = await import('../services/pdfshiftService');
-        const pdfBuffer = await generatePDFWithPDFShift(htmlContent);
-        const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
-        
-        const url = URL.createObjectURL(blob);
-        
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-          window.open(url, '_blank');
-        } else {
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`;
-          a.click();
-        }
-        
-        URL.revokeObjectURL(url);
-        setLoading(false);
-        return;
-      } catch (pdfShiftError) {
-        console.warn('PDFShift fehlgeschlagen, verwende lokalen Fallback:', pdfShiftError);
-      }
-      
-      // Fallback: Verwende lokalen PDF-Service
+      // Verwende robuste jsPDF-Implementierung
       const quoteData = {
-        customerId: customer.id,
-        customerName: customer.name,
+        customerId: customer.id || 'temp-id',
+        customerName: customer.name || 'Unbekannt',
         price: calculation.finalPrice,
-        comment: quoteDetails.notes,
+        comment: quoteDetails.notes || '',
         createdAt: new Date(),
         createdBy: 'current-user-id',
         status: 'draft' as const
       };
       
-      const pdfBlob = await generatePDF(customer, quoteData, htmlContent);
+      const pdfBlob = await generatePDF(customer, quoteData);
+      console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
+      
       const url = URL.createObjectURL(pdfBlob);
+      const fileName = `Umzugsangebot_${(customer.name || 'Kunde').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        // iOS: Öffne in neuem Tab
         window.open(url, '_blank');
       } else {
+        // Desktop: Download
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`;
+        a.download = fileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
       }
       
-      URL.revokeObjectURL(url);
+      // Cleanup nach kurzer Verzögerung
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
       setLoading(false);
+      console.log('📥 PDF Download gestartet');
       
     } catch (err) {
-      console.error('PDF Download Error:', err);
+      console.error('❌ PDF Download Error:', err);
       setError('Fehler beim Erstellen der PDF. Bitte versuchen Sie es erneut.');
       setLoading(false);
     }
