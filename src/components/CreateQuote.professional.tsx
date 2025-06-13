@@ -14,9 +14,7 @@ import {
   FormControlLabel,
   Switch,
   Divider,
-  Grid,
-  Alert,
-  CircularProgress
+  Grid
 } from '@mui/material';
 import { 
   ArrowBack as ArrowBackIcon,
@@ -30,6 +28,7 @@ import { sendQuoteEmailWithPDFShift } from '../services/emailServiceWithPDFShift
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
+import { generatePDF } from '../services/pdfService';
 
 const CreateQuote: React.FC = () => {
   const location = useLocation();
@@ -63,135 +62,140 @@ const CreateQuote: React.FC = () => {
     manualBasePrice: 0
   });
   
-  // Manuelle Preise für alle Services
-  const [servicePrices, setServicePrices] = useState({
-    packingPrice: 0,
-    boxPrice: 0,
-    cleaningPrice: 0,
-    clearancePrice: 0,
-    renovationPrice: 0,
-    pianoPrice: 0,
-    heavyItemsPrice: 0,
-    packingMaterialsPrice: 0
+  // Services als Switches
+  const [selectedServices, setSelectedServices] = useState({
+    packing: false,
+    boxes: false,
+    cleaning: false,
+    clearance: false,
+    renovation: false,
+    piano: false,
+    heavyItems: false,
+    packingMaterials: false,
+    parking: false,
+    storage: false,
+    assembly: false,
+    disassembly: false
   });
   
-  // UI State
-  const [calculation, setCalculation] = useState<QuoteCalculation | null>(null);
+  // Manueller Gesamtpreis
+  const [useManualPrice, setUseManualPrice] = useState(false);
+  const [manualTotalPrice, setManualTotalPrice] = useState(0);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-
-  // Automatische Kalkulation
+  const [calculation, setCalculation] = useState<QuoteCalculation | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  
+  // Kalkulation aktualisieren
   useEffect(() => {
     if (customer.id) {
-      calculateTotal();
-    }
-  }, [customer, quoteDetails, servicePrices]);
-
-  const calculateTotal = () => {
-    const basePrice = quoteDetails.manualBasePrice || 0;
-    
-    // Etagen-Zuschlag
-    const fromFloor = customer.apartment?.floor || 0;
-    const hasElevator = customer.apartment?.hasElevator || false;
-    const floorSurcharge = !hasElevator && fromFloor > 0 ? fromFloor * 50 : 0;
-    
-    // Entfernungs-Zuschlag
-    let distanceSurcharge = 0;
-    if (quoteDetails.distance > 50) {
-      if (quoteDetails.distance <= 100) distanceSurcharge = 150;
-      else if (quoteDetails.distance <= 200) distanceSurcharge = 300;
-      else if (quoteDetails.distance <= 300) distanceSurcharge = 450;
-      else distanceSurcharge = 600;
-    }
-    
-    // Alle Service-Preise
-    const totalServicePrice = 
-      servicePrices.packingPrice +
-      servicePrices.boxPrice +
-      servicePrices.cleaningPrice +
-      servicePrices.clearancePrice +
-      servicePrices.renovationPrice +
-      servicePrices.pianoPrice +
-      servicePrices.heavyItemsPrice +
-      servicePrices.packingMaterialsPrice +
-      quoteDetails.parkingZonePrice +
-      quoteDetails.storagePrice +
-      quoteDetails.furnitureAssemblyPrice +
-      quoteDetails.furnitureDisassemblyPrice;
-    
-    const totalPrice = basePrice + floorSurcharge + distanceSurcharge + totalServicePrice;
-    
-    const calc: QuoteCalculation = {
-      volumeBase: quoteDetails.volume,
-      volumeRange: `${quoteDetails.volume} m³`,
-      basePrice: basePrice,
-      floorSurcharge,
-      distanceSurcharge,
-      packingService: servicePrices.packingPrice,
-      boxesPrice: servicePrices.boxPrice,
-      parkingZonePrice: quoteDetails.parkingZonePrice,
-      storagePrice: quoteDetails.storagePrice,
-      furnitureAssemblyPrice: quoteDetails.furnitureAssemblyPrice,
-      furnitureDisassemblyPrice: quoteDetails.furnitureDisassemblyPrice,
-      totalPrice,
-      finalPrice: totalPrice,
-      priceBreakdown: {
-        base: basePrice,
-        floors: floorSurcharge,
-        distance: distanceSurcharge,
-        packing: servicePrices.packingPrice,
-        boxes: servicePrices.boxPrice,
-        parkingZone: quoteDetails.parkingZonePrice,
-        storage: quoteDetails.storagePrice,
-        furnitureAssembly: quoteDetails.furnitureAssemblyPrice,
-        furnitureDisassembly: quoteDetails.furnitureDisassemblyPrice,
-        cleaning: servicePrices.cleaningPrice,
-        clearance: servicePrices.clearancePrice,
-        renovation: servicePrices.renovationPrice,
-        piano: servicePrices.pianoPrice,
-        heavyItems: servicePrices.heavyItemsPrice,
-        packingMaterials: servicePrices.packingMaterialsPrice
+      const updatedQuoteDetails = {
+        ...quoteDetails,
+        packingRequested: selectedServices.packing,
+        boxCount: selectedServices.boxes ? quoteDetails.boxCount : 0,
+        cleaningService: selectedServices.cleaning,
+        cleaningHours: selectedServices.cleaning ? quoteDetails.cleaningHours : 0,
+        clearanceService: selectedServices.clearance,
+        clearanceVolume: selectedServices.clearance ? quoteDetails.clearanceVolume : 0,
+        renovationService: selectedServices.renovation,
+        renovationHours: selectedServices.renovation ? quoteDetails.renovationHours : 0,
+        pianoTransport: selectedServices.piano,
+        heavyItemsCount: selectedServices.heavyItems ? quoteDetails.heavyItemsCount : 0,
+        packingMaterials: selectedServices.packingMaterials,
+        parkingZonePrice: selectedServices.parking ? 1 : 0,
+        storagePrice: selectedServices.storage ? 1 : 0,
+        furnitureAssemblyPrice: selectedServices.assembly ? 1 : 0,
+        furnitureDisassemblyPrice: selectedServices.disassembly ? 1 : 0
+      };
+      
+      const calc = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
+      
+      // Manueller Preis überschreibt Berechnung
+      if (useManualPrice && manualTotalPrice > 0) {
+        setCalculation({ ...calc, finalPrice: manualTotalPrice, totalPrice: manualTotalPrice });
+      } else {
+        setCalculation({ ...calc, finalPrice: calc.totalPrice });
       }
-    };
-    
-    setCalculation(calc);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!calculation || calculation.finalPrice <= 0) {
-      setError('Bitte geben Sie einen gültigen Gesamtpreis ein');
-      return;
     }
+  }, [customer, quoteDetails, selectedServices, useManualPrice, manualTotalPrice]);
 
-    setLoading(true);
-    setError('');
-
+  const saveQuote = async () => {
+    if (!calculation) return;
+    
     try {
-      const quoteData = {
+      console.log('💰 Speichere Angebot...');
+      
+      const quote = {
+        id: `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         customerId: customer.id,
         customerName: customer.name,
         price: calculation.finalPrice,
         comment: quoteDetails.notes,
         createdAt: new Date(),
         createdBy: 'current-user-id',
-        status: 'sent' as const
+        status: 'draft' as const,
+        volume: quoteDetails.volume,
+        distance: quoteDetails.distance,
+        calculation: calculation,
+        details: quoteDetails
       };
-
-      await sendQuoteEmailWithPDFShift(customer, calculation, quoteDetails);
-      await googleSheetsService.addQuote(quoteData);
-
-      setSuccess(true);
       
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
+      await googleSheetsService.saveQuote(quote);
+      console.log('💰 Angebot erfolgreich erstellt und lokal gespeichert:', quote);
       
+      // Google Sheets Integration Info
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📊 Für Google Sheets Integration:');
+        console.log('🔗 Fügen Sie das Angebot manuell hinzu: https://docs.google.com/spreadsheets/d/178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU');
+      }
+      
+      return quote;
     } catch (err) {
-      setError('Fehler beim Erstellen des Angebots. Bitte versuchen Sie es erneut.');
-      console.error(err);
+      console.error('Fehler beim Speichern:', err);
+      throw err;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!calculation) {
+      setError('Bitte warten Sie auf die Preisberechnung');
+      return;
+    }
+    
+    if (!customer.email || !customer.email.includes('@')) {
+      setError('Bitte geben Sie eine gültige E-Mail-Adresse ein');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    setSuccess(false);
+    
+    try {
+      // Angebot speichern
+      const quote = await saveQuote();
+      
+      // E-Mail senden
+      const sent = await sendQuoteEmailWithPDFShift(customer, calculation, quoteDetails);
+      
+      if (sent) {
+        setSuccess(true);
+        console.log('✅ Angebot erfolgreich versendet');
+        
+        // Nach 3 Sekunden zurück zur Kundendetails
+        setTimeout(() => {
+          navigate(`/customer/${customer.id}`);
+        }, 3000);
+      } else {
+        setError('E-Mail konnte nicht gesendet werden');
+      }
+    } catch (err) {
+      console.error('❌ Fehler beim E-Mail-Versand:', err);
+      setError('Fehler beim Versenden des Angebots');
     } finally {
       setLoading(false);
     }
@@ -202,44 +206,60 @@ const CreateQuote: React.FC = () => {
       if (!calculation) return;
       
       setLoading(true);
+      setError('');
       
-      const htmlContent = generateEmailHTML(customer, calculation, quoteDetails);
+      console.log('📄 Erstelle PDF lokal...');
       
-      const API_URL = process.env.REACT_APP_API_URL || 'https://api.ruempel-schmiede.com';
+      // Verwende lokale jsPDF-Implementierung statt Server
+      const quoteData = {
+        customerId: customer.id || 'temp-id',
+        customerName: customer.name || 'Unbekannt',
+        price: calculation.finalPrice || 0,
+        comment: quoteDetails.notes || '',
+        createdAt: new Date(),
+        createdBy: 'current-user-id',
+        status: 'draft' as const,
+        volume: quoteDetails.volume,
+        distance: quoteDetails.distance,
+        calculation: calculation,
+        details: quoteDetails
+      };
       
-      const response = await fetch(`${API_URL}/api/generate-pdf`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Origin': window.location.origin
-        },
-        body: JSON.stringify({
-          html: htmlContent
-        })
-      });
+      const pdfBlob = await generatePDF(customer, quoteData);
+      console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
       
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-          window.open(url, '_blank');
-        } else {
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`;
-          a.click();
-        }
-        
-        URL.revokeObjectURL(url);
+      const url = URL.createObjectURL(pdfBlob);
+      const fileName = `Angebot-${customer.name}-${new Date().toISOString().split('T')[0]}.pdf`;
+      
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        // iOS: Öffne in neuem Tab
+        window.open(url, '_blank');
       } else {
-        throw new Error('PDF-Generierung fehlgeschlagen');
+        // Desktop: Download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
       
+      // Cleanup
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
       setLoading(false);
+      console.log('📥 PDF Download gestartet');
+      
     } catch (err) {
-      console.error('PDF Download Error:', err);
-      setError('Fehler beim Erstellen der PDF');
+      console.error('❌ PDF Download Error:', err);
+      
+      let errorMessage = 'Fehler beim Erstellen der PDF. ';
+      if (err instanceof Error) {
+        errorMessage += err.message;
+      }
+      
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -250,477 +270,477 @@ const CreateQuote: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
+    <Container maxWidth="xl" sx={{ mt: { xs: 1, sm: 2 }, mb: 4 }}>
+      {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <IconButton onClick={() => navigate('/search-customer')} sx={{ mb: 2 }}>
+        <IconButton onClick={() => navigate(`/customer/${customer.id}`)} sx={{ mb: 2 }}>
           <ArrowBackIcon />
         </IconButton>
-        <Typography variant="h4" gutterBottom>
+        
+        <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
           Angebot erstellen
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Professionelle Kalkulation mit manueller Preiseingabe
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Kundendaten */}
-        <Grid item xs={12} lg={6} xl={4}>
-          <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 }, height: 'fit-content' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
-              <EditIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+      {/* Kundendaten Card */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
               Kundendaten
             </Typography>
-            
-            <TextField
-              fullWidth
-              label="Name"
-              value={customer.name}
-              onChange={(e) => setCustomer({...customer, name: e.target.value})}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Telefon"
-              value={customer.phone}
-              onChange={(e) => setCustomer({...customer, phone: e.target.value})}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="E-Mail"
-              value={customer.email}
-              onChange={(e) => setCustomer({...customer, email: e.target.value})}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Umzugsdatum"
-              type="date"
-              value={customer.movingDate}
-              onChange={(e) => setCustomer({...customer, movingDate: e.target.value})}
-              InputLabelProps={{ shrink: true }}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Von Adresse"
-              multiline
-              rows={2}
-              value={customer.fromAddress}
-              onChange={(e) => setCustomer({...customer, fromAddress: e.target.value})}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Nach Adresse"
-              multiline
-              rows={2}
-              value={customer.toAddress}
-              onChange={(e) => setCustomer({...customer, toAddress: e.target.value})}
-              sx={{ mb: 2 }}
-            />
-            
-            <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Zimmer"
-                  type="number"
-                  value={customer.apartment?.rooms || ''}
-                  onChange={(e) => setCustomer({
-                    ...customer, 
-                    apartment: {...customer.apartment, rooms: Number(e.target.value)}
-                  })}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Fläche m²"
-                  type="number"
-                  value={customer.apartment?.area || ''}
-                  onChange={(e) => setCustomer({
-                    ...customer, 
-                    apartment: {...customer.apartment, area: Number(e.target.value)}
-                  })}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Etage"
-                  type="number"
-                  value={customer.apartment?.floor || ''}
-                  onChange={(e) => setCustomer({
-                    ...customer, 
-                    apartment: {...customer.apartment, floor: Number(e.target.value)}
-                  })}
-                />
-              </Grid>
+            <IconButton onClick={() => setEditMode(!editMode)} size="small">
+              <EditIcon />
+            </IconButton>
+          </Box>
+          
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Name"
+                value={customer.name}
+                onChange={(e) => setCustomer({...customer, name: e.target.value})}
+                disabled={!editMode}
+                sx={{ mb: 2 }}
+              />
             </Grid>
-            
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={customer.apartment?.hasElevator || false}
-                  onChange={(e) => setCustomer({
-                    ...customer, 
-                    apartment: {...customer.apartment, hasElevator: e.target.checked}
-                  })}
-                />
-              }
-              label="Aufzug vorhanden"
-            />
-          </Paper>
-        </Grid>
-
-        {/* Umzugsdetails */}
-        <Grid item xs={12} lg={6} xl={4}>
-          <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 }, height: 'fit-content' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
-              Umzugsdetails
-            </Typography>
-            
-            <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={6}>
-                <TextField
-                  fullWidth
-                  label="Volumen m³"
-                  type="number"
-                  value={quoteDetails.volume || ''}
-                  onChange={(e) => setQuoteDetails({...quoteDetails, volume: Number(e.target.value)})}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  fullWidth
-                  label="Entfernung km"
-                  type="number"
-                  value={quoteDetails.distance || ''}
-                  onChange={(e) => setQuoteDetails({...quoteDetails, distance: Number(e.target.value)})}
-                />
-              </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="E-Mail"
+                type="email"
+                value={customer.email}
+                onChange={(e) => setCustomer({...customer, email: e.target.value})}
+                disabled={!editMode}
+                sx={{ mb: 2 }}
+              />
             </Grid>
-            
-            <TextField
-              fullWidth
-              label="Basis-Preis Be- und Entladen"
-              type="number"
-              value={quoteDetails.manualBasePrice || ''}
-              onChange={(e) => setQuoteDetails({...quoteDetails, manualBasePrice: Number(e.target.value)})}
-              InputProps={{
-                startAdornment: <InputAdornment position="start">€</InputAdornment>
-              }}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Zusätzliche Hinweise"
-              multiline
-              rows={3}
-              value={quoteDetails.notes}
-              onChange={(e) => setQuoteDetails({...quoteDetails, notes: e.target.value})}
-            />
-          </Paper>
-        </Grid>
-
-        {/* Services */}
-        <Grid item xs={12} xl={8}>
-          <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 } }}>
-            <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
-              Zusatzleistungen
-            </Typography>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Verpackungsservice"
-                  type="number"
-                  value={servicePrices.packingPrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, packingPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Umzugskartons"
-                  type="number"
-                  value={servicePrices.boxPrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, boxPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Reinigungsservice"
-                  type="number"
-                  value={servicePrices.cleaningPrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, cleaningPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Entrümpelung"
-                  type="number"
-                  value={servicePrices.clearancePrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, clearancePrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Renovierungsarbeiten"
-                  type="number"
-                  value={servicePrices.renovationPrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, renovationPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Klaviertransport"
-                  type="number"
-                  value={servicePrices.pianoPrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, pianoPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Schwertransport"
-                  type="number"
-                  value={servicePrices.heavyItemsPrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, heavyItemsPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Verpackungsmaterial"
-                  type="number"
-                  value={servicePrices.packingMaterialsPrice || ''}
-                  onChange={(e) => setServicePrices({...servicePrices, packingMaterialsPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Halteverbotszone"
-                  type="number"
-                  value={quoteDetails.parkingZonePrice || ''}
-                  onChange={(e) => setQuoteDetails({...quoteDetails, parkingZonePrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Zwischenlagerung"
-                  type="number"
-                  value={quoteDetails.storagePrice || ''}
-                  onChange={(e) => setQuoteDetails({...quoteDetails, storagePrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Möbelmontage"
-                  type="number"
-                  value={quoteDetails.furnitureAssemblyPrice || ''}
-                  onChange={(e) => setQuoteDetails({...quoteDetails, furnitureAssemblyPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4} lg={6} xl={4}>
-                <TextField
-                  fullWidth
-                  label="Möbeldemontage"
-                  type="number"
-                  value={quoteDetails.furnitureDisassemblyPrice || ''}
-                  onChange={(e) => setQuoteDetails({...quoteDetails, furnitureDisassemblyPrice: Number(e.target.value)})}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Telefon"
+                value={customer.phone}
+                onChange={(e) => setCustomer({...customer, phone: e.target.value})}
+                disabled={!editMode}
+                sx={{ mb: 2 }}
+              />
             </Grid>
-          </Paper>
-        </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Umzugsdatum"
+                value={customer.movingDate || ''}
+                onChange={(e) => setCustomer({...customer, movingDate: e.target.value})}
+                disabled={!editMode}
+                sx={{ mb: 2 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Von Adresse"
+                value={customer.fromAddress}
+                onChange={(e) => setCustomer({...customer, fromAddress: e.target.value})}
+                disabled={!editMode}
+                sx={{ mb: 2 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Nach Adresse"
+                value={customer.toAddress}
+                onChange={(e) => setCustomer({...customer, toAddress: e.target.value})}
+                disabled={!editMode}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
-        {/* Kalkulation */}
-        <Grid item xs={12} xl={4}>
-          <Paper elevation={2} sx={{ 
-            p: { xs: 2, sm: 3 }, 
-            position: { lg: 'sticky' }, 
-            top: { lg: 20 },
-            height: 'fit-content'
-          }}>
-            <Typography variant="h6" gutterBottom>
-              <CalculateIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              Kalkulation
-            </Typography>
-            
-            {calculation && (
-              <Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">Basis-Preis:</Typography>
-                  <Typography variant="body2">€{calculation.priceBreakdown.base.toFixed(2)}</Typography>
-                </Box>
+      {/* Form */}
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={3}>
+          {/* Kalkulationsdetails */}
+          <Grid item xs={12} xl={4}>
+            <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+                Kalkulationsdetails
+              </Typography>
+              
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="Volumen m³"
+                    type="number"
+                    value={quoteDetails.volume || ''}
+                    onChange={(e) => setQuoteDetails({...quoteDetails, volume: Number(e.target.value)})}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="Entfernung km"
+                    type="number"
+                    value={quoteDetails.distance || ''}
+                    onChange={(e) => setQuoteDetails({...quoteDetails, distance: Number(e.target.value)})}
+                  />
+                </Grid>
+              </Grid>
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Typography variant="h6" gutterBottom color="primary">
+                💰 Preisgestaltung
+              </Typography>
+              
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={useManualPrice}
+                    onChange={(e) => setUseManualPrice(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Manuellen Gesamtpreis verwenden"
+                sx={{ mb: 2 }}
+              />
+              
+              {useManualPrice && (
+                <TextField
+                  fullWidth
+                  label="Gesamtpreis (inkl. MwSt.)"
+                  type="number"
+                  value={manualTotalPrice}
+                  onChange={(e) => setManualTotalPrice(Number(e.target.value))}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">€</InputAdornment>
+                  }}
+                  helperText="Geben Sie den finalen Gesamtpreis inkl. aller Leistungen und MwSt. ein"
+                  sx={{ mb: 2 }}
+                />
+              )}
+              
+              <TextField
+                fullWidth
+                label="Zusätzliche Hinweise"
+                multiline
+                rows={3}
+                value={quoteDetails.notes}
+                onChange={(e) => setQuoteDetails({...quoteDetails, notes: e.target.value})}
+              />
+            </Paper>
+          </Grid>
+
+          {/* Services */}
+          <Grid item xs={12} xl={8}>
+            <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+                Zusatzleistungen - Wählen Sie die gewünschten Services
+              </Typography>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.packing}
+                        onChange={(e) => setSelectedServices({...selectedServices, packing: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Verpackungsservice"
+                  />
+                </Grid>
                 
-                {calculation.priceBreakdown.floors > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Etagen-Zuschlag:</Typography>
-                    <Typography variant="body2">€{calculation.priceBreakdown.floors.toFixed(2)}</Typography>
-                  </Box>
-                )}
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.boxes}
+                        onChange={(e) => setSelectedServices({...selectedServices, boxes: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Umzugskartons"
+                  />
+                  {selectedServices.boxes && (
+                    <TextField
+                      fullWidth
+                      label="Anzahl Kartons"
+                      type="number"
+                      size="small"
+                      value={quoteDetails.boxCount}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, boxCount: Number(e.target.value)})}
+                      sx={{ mt: 1 }}
+                    />
+                  )}
+                </Grid>
                 
-                {calculation.priceBreakdown.distance > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Entfernungs-Zuschlag:</Typography>
-                    <Typography variant="body2">€{calculation.priceBreakdown.distance.toFixed(2)}</Typography>
-                  </Box>
-                )}
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.cleaning}
+                        onChange={(e) => setSelectedServices({...selectedServices, cleaning: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Reinigungsservice"
+                  />
+                  {selectedServices.cleaning && (
+                    <TextField
+                      fullWidth
+                      label="Stunden"
+                      type="number"
+                      size="small"
+                      value={quoteDetails.cleaningHours}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, cleaningHours: Number(e.target.value)})}
+                      sx={{ mt: 1 }}
+                    />
+                  )}
+                </Grid>
                 
-                {Object.entries(calculation.priceBreakdown).map(([key, value]) => {
-                  if (key === 'base' || key === 'floors' || key === 'distance' || value <= 0) return null;
-                  
-                  const labels: Record<string, string> = {
-                    packing: 'Verpackungsservice',
-                    boxes: 'Umzugskartons',
-                    cleaning: 'Reinigungsservice',
-                    clearance: 'Entrümpelung',
-                    renovation: 'Renovierung',
-                    piano: 'Klaviertransport',
-                    heavyItems: 'Schwertransport',
-                    packingMaterials: 'Verpackungsmaterial',
-                    parkingZone: 'Halteverbotszone',
-                    storage: 'Zwischenlagerung',
-                    furnitureAssembly: 'Möbelmontage',
-                    furnitureDisassembly: 'Möbeldemontage'
-                  };
-                  
-                  return (
-                    <Box key={key} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2">{labels[key] || key}:</Typography>
-                      <Typography variant="body2">€{value.toFixed(2)}</Typography>
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.clearance}
+                        onChange={(e) => setSelectedServices({...selectedServices, clearance: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Entrümpelung"
+                  />
+                  {selectedServices.clearance && (
+                    <TextField
+                      fullWidth
+                      label="Volumen m³"
+                      type="number"
+                      size="small"
+                      value={quoteDetails.clearanceVolume}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, clearanceVolume: Number(e.target.value)})}
+                      sx={{ mt: 1 }}
+                    />
+                  )}
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.renovation}
+                        onChange={(e) => setSelectedServices({...selectedServices, renovation: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Renovierungsarbeiten"
+                  />
+                  {selectedServices.renovation && (
+                    <TextField
+                      fullWidth
+                      label="Stunden"
+                      type="number"
+                      size="small"
+                      value={quoteDetails.renovationHours}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, renovationHours: Number(e.target.value)})}
+                      sx={{ mt: 1 }}
+                    />
+                  )}
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.piano}
+                        onChange={(e) => setSelectedServices({...selectedServices, piano: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Klaviertransport"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.heavyItems}
+                        onChange={(e) => setSelectedServices({...selectedServices, heavyItems: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Schwertransport"
+                  />
+                  {selectedServices.heavyItems && (
+                    <TextField
+                      fullWidth
+                      label="Anzahl Gegenstände"
+                      type="number"
+                      size="small"
+                      value={quoteDetails.heavyItemsCount}
+                      onChange={(e) => setQuoteDetails({...quoteDetails, heavyItemsCount: Number(e.target.value)})}
+                      sx={{ mt: 1 }}
+                    />
+                  )}
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.packingMaterials}
+                        onChange={(e) => setSelectedServices({...selectedServices, packingMaterials: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Verpackungsmaterial"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.parking}
+                        onChange={(e) => setSelectedServices({...selectedServices, parking: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Halteverbotszone"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.storage}
+                        onChange={(e) => setSelectedServices({...selectedServices, storage: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Zwischenlagerung"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.assembly}
+                        onChange={(e) => setSelectedServices({...selectedServices, assembly: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Möbelmontage"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedServices.disassembly}
+                        onChange={(e) => setSelectedServices({...selectedServices, disassembly: e.target.checked})}
+                        color="primary"
+                      />
+                    }
+                    label="Möbeldemontage"
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+
+          {/* Preisübersicht */}
+          <Grid item xs={12}>
+            <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+                <CalculateIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Preisübersicht
+              </Typography>
+              
+              {calculation && (
+                <Box>
+                  {useManualPrice && manualTotalPrice > 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 3 }}>
+                      <Typography variant="body1" gutterBottom>
+                        Alle ausgewählten Leistungen sind im Gesamtpreis enthalten
+                      </Typography>
+                      <Typography variant="h4" color="primary" sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
+                        €{calculation.finalPrice.toFixed(2)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        inkl. 19% MwSt.
+                      </Typography>
                     </Box>
-                  );
-                })}
-                
-                <Divider sx={{ my: 2 }} />
-                
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="h6">Gesamtpreis:</Typography>
-                  <Typography variant="h6" color="primary">
-                    €{calculation.finalPrice.toFixed(2)}
-                  </Typography>
+                  ) : (
+                    <>
+                      <Grid container spacing={2}>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body2" color="text.secondary">Basis:</Typography>
+                          <Typography variant="h6">€{calculation.basePrice.toFixed(2)}</Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body2" color="text.secondary">Zusatzleistungen:</Typography>
+                          <Typography variant="h6">
+                            €{(calculation.totalPrice - calculation.basePrice).toFixed(2)}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <Typography variant="body2" color="text.secondary">Gesamtpreis:</Typography>
+                          <Typography variant="h5" color="primary">
+                            €{calculation.finalPrice.toFixed(2)}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </>
+                  )}
                 </Box>
-                
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  inkl. 19% MwSt.
+              )}
+              
+              {error && (
+                <Typography color="error" sx={{ mt: 2 }}>
+                  {error}
                 </Typography>
+              )}
+              
+              {success && (
+                <Typography color="success.main" sx={{ mt: 2 }}>
+                  ✅ Angebot erfolgreich versendet!
+                </Typography>
+              )}
+              
+              <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={loading || !calculation || !customer.email}
+                  startIcon={<SendIcon />}
+                  sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+                >
+                  {loading ? 'Sende...' : 'Angebot per E-Mail senden'}
+                </Button>
                 
-                {error && (
-                  <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert severity="success" sx={{ mb: 2 }}>
-                    Angebot wurde erfolgreich versendet!
-                  </Alert>
-                )}
-                
-                <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={downloadPDF}
-                    disabled={loading || !calculation?.finalPrice}
-                    startIcon={loading ? <CircularProgress size={20} /> : <GetAppIcon />}
-                  >
-                    PDF herunterladen
-                  </Button>
-                  
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={handleSubmit}
-                    disabled={loading || success || !calculation?.finalPrice}
-                    startIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
-                  >
-                    Per E-Mail senden
-                  </Button>
-                </Box>
+                <Button
+                  variant="outlined"
+                  onClick={downloadPDF}
+                  disabled={loading || !calculation}
+                  startIcon={<GetAppIcon />}
+                  sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+                >
+                  PDF Download
+                </Button>
               </Box>
-            )}
-          </Paper>
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
+      </form>
     </Container>
   );
 };

@@ -94,17 +94,17 @@ class QuoteCalculationService {
   getAvailableServices() {
     return [
       { id: 'packing', name: 'Verpackungsservice', description: 'Professionelles Ein- und Auspacken', icon: '📦', basePrice: 0, priceType: 'calculated' },
-      { id: 'boxes', name: 'Umzugskartons', description: '2,50€ pro Karton', icon: '📋', basePrice: 2.5, priceType: 'per_item' },
-      { id: 'cleaning', name: 'Reinigungsservice', description: '35€ pro Stunde', icon: '🧽', basePrice: 35, priceType: 'per_hour' },
+      { id: 'boxes', name: 'Umzugskartons', description: 'Bereitstellung von Kartons', icon: '📋', basePrice: 2.5, priceType: 'per_item' },
+      { id: 'cleaning', name: 'Reinigungsservice', description: 'Endreinigung der alten Wohnung', icon: '🧽', basePrice: 35, priceType: 'per_hour' },
       { id: 'clearance', name: 'Entrümpelung', description: 'Entsorgung von Hausrat', icon: '🗑️', basePrice: 0, priceType: 'by_volume' },
-      { id: 'renovation', name: 'Renovierungsarbeiten', description: '45€ pro Stunde', icon: '🔨', basePrice: 45, priceType: 'per_hour' },
+      { id: 'renovation', name: 'Renovierungsarbeiten', description: 'Kleine Renovierungen', icon: '🔨', basePrice: 45, priceType: 'per_hour' },
       { id: 'piano', name: 'Klaviertransport', description: 'Spezialtransport für Klavier/Flügel', icon: '🎹', basePrice: 150, priceType: 'fixed' },
-      { id: 'heavy', name: 'Schwertransport', description: '25€ pro schweres Objekt', icon: '💪', basePrice: 25, priceType: 'per_item' },
+      { id: 'heavy', name: 'Schwertransport', description: 'Transport schwerer Gegenstände', icon: '💪', basePrice: 25, priceType: 'per_item' },
       { id: 'materials', name: 'Verpackungsmaterial', description: 'Luftpolsterfolie, Decken, etc.', icon: '📦', basePrice: 50, priceType: 'fixed' },
-      { id: 'parking', name: 'Halteverbotszone', description: 'Parkplatz-Reservierung', icon: '🚫', basePrice: 0, priceType: 'manual' },
-      { id: 'storage', name: 'Zwischenlagerung', description: 'Temporäre Lagerung', icon: '🏠', basePrice: 0, priceType: 'manual' },
-      { id: 'assembly', name: 'Möbelmontage', description: 'Aufbau von Möbeln', icon: '🔧', basePrice: 0, priceType: 'manual' },
-      { id: 'disassembly', name: 'Möbeldemontage', description: 'Abbau von Möbeln', icon: '🔨', basePrice: 0, priceType: 'manual' }
+      { id: 'parking', name: 'Halteverbotszone', description: 'Parkplatz-Reservierung', icon: '🚫', basePrice: 80, priceType: 'fixed' },
+      { id: 'storage', name: 'Zwischenlagerung', description: 'Temporäre Lagerung', icon: '🏠', basePrice: 100, priceType: 'fixed' },
+      { id: 'assembly', name: 'Möbelmontage', description: 'Aufbau von Möbeln', icon: '🔧', basePrice: 50, priceType: 'fixed' },
+      { id: 'disassembly', name: 'Möbeldemontage', description: 'Abbau von Möbeln', icon: '🔨', basePrice: 50, priceType: 'fixed' }
     ];
   }
 
@@ -203,10 +203,10 @@ class QuoteCalculationService {
       : this.calculateDistanceSurcharge(quoteDetails.distance);
     const packingService = this.calculatePackingService(volume, quoteDetails.packingRequested);
     const boxesPrice = this.calculateBoxesPrice(quoteDetails.boxCount || 0);
-    const parkingZonePrice = quoteDetails.parkingZonePrice || 0;
-    const storagePrice = quoteDetails.storagePrice || 0;
-    const furnitureAssemblyPrice = quoteDetails.furnitureAssemblyPrice || 0;
-    const furnitureDisassemblyPrice = quoteDetails.furnitureDisassemblyPrice || 0;
+    const parkingZonePrice = quoteDetails.parkingZonePrice > 0 ? 80 : 0;
+    const storagePrice = quoteDetails.storagePrice > 0 ? 100 : 0;
+    const furnitureAssemblyPrice = quoteDetails.furnitureAssemblyPrice > 0 ? 50 : 0;
+    const furnitureDisassemblyPrice = quoteDetails.furnitureDisassemblyPrice > 0 ? 50 : 0;
     
     // Gesamtpreis ist Summe aller Komponenten
     // Neue Services berechnen

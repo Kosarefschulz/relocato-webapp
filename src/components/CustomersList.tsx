@@ -1,3 +1,3 @@
-// Re-export the business version as the default
-export { default } from './CustomersList.business';
-export * from './CustomersList.business';
+// Re-export the simple version as the default
+export { default } from './CustomersList.simple';
+export * from './CustomersList.simple';

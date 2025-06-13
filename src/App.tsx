@@ -15,7 +15,7 @@ import CreateQuote from './components/CreateQuote';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
-import CustomerDetails from './components/CustomerDetails';
+import CustomerDetails from './components/CustomerDetails.simple';
 import InvoicesList from './components/InvoicesList';
 
 export const AuthContext = React.createContext<{
@@ -121,10 +121,13 @@ function App() {
       <AuthContext.Provider value={{ user, login, logout, resetPassword }}>
         <Router>
           <Routes>
+            {/* Auth Routes */}
             <Route 
               path="/login" 
               element={user ? <Navigate to="/dashboard" /> : <Login />} 
             />
+            
+            {/* Protected Routes */}
             <Route 
               path="/dashboard" 
               element={user ? <Dashboard /> : <Navigate to="/login" />} 
@@ -138,12 +141,12 @@ function App() {
               element={user ? <CreateQuote /> : <Navigate to="/login" />} 
             />
             <Route 
-              path="/new-customer" 
-              element={user ? <NewCustomer /> : <Navigate to="/login" />} 
+              path="/create-quote/:customerId" 
+              element={user ? <CreateQuote /> : <Navigate to="/login" />} 
             />
             <Route 
-              path="/edit-customer/:customerId" 
-              element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
+              path="/new-customer" 
+              element={user ? <NewCustomer /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/quotes" 
@@ -154,17 +157,21 @@ function App() {
               element={user ? <CustomersList /> : <Navigate to="/login" />} 
             />
             <Route 
-              path="/customer/:customerId" 
-              element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
-            />
-            <Route 
-              path="/customer-details/:customerId" 
-              element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
-            />
-            <Route 
               path="/invoices" 
               element={user ? <InvoicesList /> : <Navigate to="/login" />} 
             />
+            
+            {/* Customer Detail Routes */}
+            <Route 
+              path="/customer-details/:customerId" 
+              element={<CustomerDetails />} 
+            />
+            <Route 
+              path="/edit-customer/:customerId" 
+              element={<CustomerDetails />} 
+            />
+            
+            {/* Default Routes */}
             <Route 
               path="/" 
               element={<Navigate to={user ? "/dashboard" : "/login"} />} 

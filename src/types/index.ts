@@ -26,6 +26,8 @@ export interface Quote {
   createdAt: Date;
   createdBy: string;
   status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'invoiced';
+  volume?: number;
+  distance?: number;
 }
 
 export interface Invoice {

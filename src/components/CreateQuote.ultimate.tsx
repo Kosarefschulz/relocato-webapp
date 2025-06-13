@@ -113,6 +113,10 @@ const CreateQuote: React.FC = () => {
     manualBasePrice: undefined
   });
   
+  // Manueller Gesamtpreis
+  const [useManualPrice, setUseManualPrice] = useState(false);
+  const [manualTotalPrice, setManualTotalPrice] = useState(0);
+  
   // Services State
   const [selectedServices, setSelectedServices] = useState<ServiceOption[]>([]);
   const [expressService, setExpressService] = useState(false);
@@ -152,7 +156,7 @@ const CreateQuote: React.FC = () => {
     if (customer.id) {
       updateCalculation();
     }
-  }, [customer, quoteDetails, selectedServices, expressService, discount]);
+  }, [customer, quoteDetails, selectedServices, expressService, discount, useManualPrice, manualTotalPrice]);
 
   const updateCalculation = () => {
     // Services in QuoteDetails übertragen
@@ -177,15 +181,21 @@ const CreateQuote: React.FC = () => {
 
     const calc = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
     
-    // Express Service (+25%)
-    let finalPrice = calc.totalPrice;
-    if (expressService) {
-      finalPrice = finalPrice * 1.25;
-    }
-    
-    // Rabatt anwenden
-    if (discount > 0) {
-      finalPrice = finalPrice * (1 - discount / 100);
+    // Manueller Preis oder berechneter Preis
+    let finalPrice;
+    if (useManualPrice && manualTotalPrice > 0) {
+      finalPrice = manualTotalPrice;
+    } else {
+      // Express Service (+25%)
+      finalPrice = calc.totalPrice;
+      if (expressService) {
+        finalPrice = finalPrice * 1.25;
+      }
+      
+      // Rabatt anwenden
+      if (discount > 0) {
+        finalPrice = finalPrice * (1 - discount / 100);
+      }
     }
     
     setCalculation({ ...calc, finalPrice });
@@ -204,7 +214,7 @@ const CreateQuote: React.FC = () => {
         quantity: service.priceType === 'per_item' ? 1 : undefined,
         hours: service.priceType === 'per_hour' ? 1 : undefined,
         volume: service.priceType === 'by_volume' ? 5 : undefined,
-        price: service.priceType === 'manual' ? 0 : service.basePrice
+        price: service.basePrice
       };
       setSelectedServices([...selectedServices, newService]);
     }
@@ -288,7 +298,11 @@ const CreateQuote: React.FC = () => {
           comment: quoteDetails.notes,
           createdAt: new Date(),
           createdBy: 'current-user-id',
-          status: 'sent' as const
+          status: 'sent' as const,
+          volume: quoteDetails.volume,
+          distance: quoteDetails.distance,
+          calculation: calculation,
+          details: quoteDetails
         };
         
         const pdfBlob = await generatePDF(customer, quoteData, htmlContent);
@@ -400,17 +414,30 @@ const CreateQuote: React.FC = () => {
       setError('');
       
       console.log('📄 Erstelle PDF...');
+      console.log('Kundendaten:', customer);
+      console.log('Berechnung:', calculation);
+      
+      // Validiere Kundendaten
+      if (!customer || !customer.name) {
+        console.warn('⚠️ Kundenname fehlt, verwende Standardwert');
+      }
       
       // Verwende robuste jsPDF-Implementierung
       const quoteData = {
         customerId: customer.id || 'temp-id',
         customerName: customer.name || 'Unbekannt',
-        price: calculation.finalPrice,
+        price: calculation.finalPrice || 0,
         comment: quoteDetails.notes || '',
         createdAt: new Date(),
         createdBy: 'current-user-id',
-        status: 'draft' as const
+        status: 'draft' as const,
+        volume: quoteDetails.volume,
+        distance: quoteDetails.distance,
+        calculation: calculation,
+        details: quoteDetails
       };
+      
+      console.log('Quote Daten:', quoteData);
       
       const pdfBlob = await generatePDF(customer, quoteData);
       console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
@@ -440,7 +467,17 @@ const CreateQuote: React.FC = () => {
       
     } catch (err) {
       console.error('❌ PDF Download Error:', err);
-      setError('Fehler beim Erstellen der PDF. Bitte versuchen Sie es erneut.');
+      
+      // Detaillierte Fehlermeldung
+      let errorMessage = 'Fehler beim Erstellen der PDF. ';
+      if (err instanceof Error) {
+        errorMessage += err.message;
+        console.error('Fehlerdetails:', err.stack);
+      } else {
+        errorMessage += 'Bitte versuchen Sie es erneut.';
+      }
+      
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -761,18 +798,9 @@ const CreateQuote: React.FC = () => {
                               )}
                               
                               {service.priceType === 'manual' && (
-                                <TextField
-                                  fullWidth
-                                  label="Preis (€)"
-                                  type="number"
-                                  size="small"
-                                  value={selectedService.price || 0}
-                                  onClick={(e) => e.stopPropagation()}
-                                  onChange={(e) => updateServiceQuantity(service.id, 'price', Number(e.target.value))}
-                                  InputProps={{
-                                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                                  }}
-                                />
+                                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                                  ✓ Ausgewählt
+                                </Typography>
                               )}
                             </Box>
                           )}
@@ -903,7 +931,41 @@ const CreateQuote: React.FC = () => {
                   value={quoteDetails.notes}
                   onChange={(e) => setQuoteDetails({...quoteDetails, notes: e.target.value})}
                   placeholder="z.B. schwere Möbel, besondere Anforderungen..."
+                  sx={{ mb: 3 }}
                 />
+                
+                <Divider sx={{ my: 2 }} />
+                
+                {/* Manueller Gesamtpreis */}
+                <Typography variant="h6" gutterBottom color="primary">
+                  💰 Preisgestaltung
+                </Typography>
+                
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={useManualPrice}
+                      onChange={(e) => setUseManualPrice(e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Manuellen Gesamtpreis verwenden"
+                  sx={{ mb: 2 }}
+                />
+                
+                {useManualPrice && (
+                  <TextField
+                    fullWidth
+                    label="Gesamtpreis (inkl. MwSt.)"
+                    type="number"
+                    value={manualTotalPrice}
+                    onChange={(e) => setManualTotalPrice(Number(e.target.value))}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">€</InputAdornment>
+                    }}
+                    helperText="Geben Sie den finalen Gesamtpreis inkl. aller Leistungen und MwSt. ein"
+                  />
+                )}
               </Paper>
             </Grid>
 
@@ -915,9 +977,20 @@ const CreateQuote: React.FC = () => {
                 
                 {calculation && (
                   <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Preisaufstellung:
-                    </Typography>
+                    {useManualPrice && manualTotalPrice > 0 ? (
+                      <>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Manueller Preis:
+                        </Typography>
+                        <Typography variant="body1" sx={{ mb: 2 }}>
+                          Alle ausgewählten Leistungen sind im Gesamtpreis enthalten.
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Preisaufstellung:
+                        </Typography>
                     
                     {/* Basis */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -1000,6 +1073,8 @@ const CreateQuote: React.FC = () => {
                     )}
                     
                     <Divider sx={{ my: 2 }} />
+                      </>
+                    )}
                     
                     <Box sx={{ 
                       textAlign: 'center', 

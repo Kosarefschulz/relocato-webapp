@@ -49,6 +49,10 @@ function App() {
               element={<CreateQuote />} 
             />
             <Route 
+              path="/create-quote/:customerId" 
+              element={<CreateQuote />} 
+            />
+            <Route 
               path="/new-customer" 
               element={<NewCustomer />} 
             />
@@ -61,7 +65,7 @@ function App() {
               element={<CustomersList />} 
             />
             <Route 
-              path="/customer/:customerId" 
+              path="/customer-details/:customerId" 
               element={<CustomerDetails />} 
             />
             <Route 
