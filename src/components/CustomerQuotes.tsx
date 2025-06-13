@@ -219,6 +219,48 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   >
                     {loadingPdf === quote.id ? 'Erstelle...' : 'PDF'}
                   </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<EmailIcon />}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        const pdfBlob = await generatePDF(customer, quote);
+                        const emailData = {
+                          to: customer.email,
+                          subject: `Ihr Umzugsangebot von Relocato`,
+                          content: `
+                            <h2>Sehr geehrte/r ${customer.name},</h2>
+                            <p>vielen Dank für Ihre Anfrage. Anbei finden Sie Ihr persönliches Umzugsangebot.</p>
+                            <p><strong>Angebotsnummer:</strong> ${quote.id}</p>
+                            <p><strong>Gesamtpreis:</strong> €${quote.price.toFixed(2)}</p>
+                            <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
+                            <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
+                          `,
+                          attachments: [{
+                            filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
+                            content: pdfBlob
+                          }]
+                        };
+                        
+                        const sent = await sendEmail(emailData);
+                        if (sent) {
+                          // Update quote status to sent
+                          await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
+                          alert('Angebot erfolgreich versendet!');
+                          window.location.reload();
+                        } else {
+                          alert('Fehler beim E-Mail-Versand');
+                        }
+                      } catch (error) {
+                        console.error('Email Error:', error);
+                        alert('Fehler beim E-Mail-Versand');
+                      }
+                    }}
+                  >
+                    Email
+                  </Button>
                   
                   {/* Status ändern Buttons */}
                   {console.log(`Checking quote status "${quote.status}"`)}
@@ -227,23 +269,48 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                       size="small"
                       variant="contained"
                       color="primary"
-                      startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <SendIcon />}
+                      startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <EmailIcon />}
                       onClick={async (e) => {
                         e.stopPropagation();
                         setUpdatingStatus(quote.id);
                         try {
-                          await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'sent' });
-                          window.location.reload();
+                          const pdfBlob = await generatePDF(customer, quote);
+                          const emailData = {
+                            to: customer.email,
+                            subject: `Ihr Umzugsangebot von Relocato`,
+                            content: `
+                              <h2>Sehr geehrte/r ${customer.name},</h2>
+                              <p>vielen Dank für Ihre Anfrage. Anbei finden Sie Ihr persönliches Umzugsangebot.</p>
+                              <p><strong>Angebotsnummer:</strong> ${quote.id}</p>
+                              <p><strong>Gesamtpreis:</strong> €${quote.price.toFixed(2)}</p>
+                              <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
+                              <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
+                            `,
+                            attachments: [{
+                              filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
+                              content: pdfBlob
+                            }]
+                          };
+                          
+                          const sent = await sendEmail(emailData);
+                          if (sent) {
+                            // Update quote status to sent
+                            await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
+                            alert('Angebot erfolgreich versendet!');
+                            window.location.reload();
+                          } else {
+                            alert('Fehler beim E-Mail-Versand');
+                          }
                         } catch (error) {
-                          console.error('Error updating quote status:', error);
-                          alert('Fehler beim Aktualisieren des Status');
+                          console.error('Email Error:', error);
+                          alert('Fehler beim E-Mail-Versand');
                         } finally {
                           setUpdatingStatus(null);
                         }
                       }}
                       disabled={updatingStatus === quote.id}
                     >
-                      Als gesendet markieren
+                      Angebot versenden
                     </Button>
                   )}
                   {quote.status === 'sent' && (
