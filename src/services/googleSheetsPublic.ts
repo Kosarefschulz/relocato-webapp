@@ -335,6 +335,11 @@ class GoogleSheetsPublicService {
     }
   }
 
+  // Alias für Kompatibilität
+  async saveQuote(quote: Omit<Quote, 'id'>): Promise<boolean> {
+    return this.addQuote(quote);
+  }
+
   async getQuotes(): Promise<Quote[]> {
     // Lade lokale Angebote
     const localQuotes = this.getLocalQuotes();

@@ -142,7 +142,7 @@ const CreateQuote: React.FC = () => {
         details: quoteDetails
       };
       
-      await googleSheetsService.saveQuote(quote);
+      await googleSheetsService.addQuote(quote);
       console.log('💰 Angebot erfolgreich erstellt und lokal gespeichert:', quote);
       
       // Google Sheets Integration Info
