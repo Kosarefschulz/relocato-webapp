@@ -191,12 +191,12 @@ class GoogleSheetsPublicService {
     return isNaN(num) ? 0 : num;
   }
 
-  async addCustomer(customer: Omit<Customer, 'id'>): Promise<boolean> {
+  async addCustomer(customer: Omit<Customer, 'id'> | Customer): Promise<boolean> {
     try {
-      // Generiere eine eindeutige ID
+      // Generiere eine eindeutige ID nur wenn keine vorhanden ist
       const newCustomer: Customer = {
         ...customer,
-        id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        id: 'id' in customer && customer.id ? customer.id : `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       };
       
       // Lade existierende lokale Kunden
