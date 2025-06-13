@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { Customer } from '../types';
+import { Customer, Invoice } from '../types';
 
 interface QuoteData {
   customerId: string;
@@ -417,6 +417,250 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     } catch (fallbackError) {
       console.error('❌ Auch Fallback PDF fehlgeschlagen:', fallbackError);
       throw new Error('PDF-Erstellung fehlgeschlagen: ' + (error instanceof Error ? error.message : 'Unbekannter Fehler'));
+    }
+  }
+};
+
+export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): Promise<Blob> => {
+  try {
+    console.log('🔄 Starte Rechnungs-PDF-Generierung...', { customer, invoice });
+    
+    const doc = new jsPDF();
+    
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const rightMargin = pageWidth - margin;
+    let yPosition = 20;
+
+    // Header - wertvoll Logo
+    doc.setFontSize(26);
+    doc.setTextColor(74, 189, 189); // Türkis wie im Logo
+    doc.setFont('helvetica', 'bold');
+    doc.text('wertvoll', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 9;
+    
+    doc.setFontSize(16);
+    doc.setTextColor(0);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RECHNUNG', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+    
+    // Rechnungsinformationen
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    // Rechnungsnummer und Datum Box
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, yPosition, rightMargin - margin, 20, 'F');
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Rechnungsnummer:', margin + 5, yPosition + 6);
+    doc.text('Rechnungsdatum:', margin + 5, yPosition + 12);
+    doc.text('Leistungsdatum:', margin + 5, yPosition + 18);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.text(invoice.invoiceNumber, margin + 45, yPosition + 6);
+    doc.text(new Date(invoice.createdAt).toLocaleDateString('de-DE'), margin + 45, yPosition + 12);
+    doc.text(new Date(invoice.createdAt).toLocaleDateString('de-DE'), margin + 45, yPosition + 18);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Zahlungsziel:', rightMargin - 80, yPosition + 6);
+    doc.text('Kundennummer:', rightMargin - 80, yPosition + 12);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date(invoice.dueDate).toLocaleDateString('de-DE'), rightMargin - 35, yPosition + 6);
+    doc.text(customer.id, rightMargin - 35, yPosition + 12);
+    
+    yPosition += 25;
+    
+    // Absender
+    doc.setFontSize(8);
+    doc.setTextColor(128);
+    doc.text('wertvoll | Albrechtstraße 27, 33615 Bielefeld', margin, yPosition);
+    yPosition += 8;
+    
+    // Empfänger
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    doc.setFont('helvetica', 'normal');
+    doc.text(customer.name, margin, yPosition);
+    yPosition += 5;
+    
+    // Adresse des Kunden
+    if (customer.toAddress) {
+      const addressLines = doc.splitTextToSize(customer.toAddress, 80);
+      doc.text(addressLines, margin, yPosition);
+      yPosition += addressLines.length * 5 + 3;
+    }
+    
+    // E-Mail wenn vorhanden
+    if (customer.email) {
+      doc.text(customer.email, margin, yPosition);
+      yPosition += 10;
+    } else {
+      yPosition += 5;
+    }
+    
+    // Betreff
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text(`Rechnung für Umzugsdienstleistung`, margin, yPosition);
+    yPosition += 10;
+    
+    // Anrede
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Sehr geehrte/r ${customer.name},`, margin, yPosition);
+    yPosition += 6;
+    doc.text('vielen Dank für Ihren Auftrag. Wir berechnen Ihnen folgende Leistungen:', margin, yPosition);
+    yPosition += 10;
+    
+    // Leistungstabelle
+    // Tabellenkopf
+    doc.setFillColor(74, 189, 189);
+    doc.rect(margin, yPosition, rightMargin - margin, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Pos.', margin + 3, yPosition + 6);
+    doc.text('Beschreibung', margin + 20, yPosition + 6);
+    doc.text('Menge', rightMargin - 70, yPosition + 6);
+    doc.text('Einzelpreis', rightMargin - 45, yPosition + 6);
+    doc.text('Gesamt', rightMargin - 15, yPosition + 6, { align: 'right' });
+    yPosition += 10;
+    
+    // Tabelleninhalt
+    doc.setTextColor(0);
+    doc.setFont('helvetica', 'normal');
+    
+    let pos = 1;
+    invoice.items.forEach((item, index) => {
+      // Abwechselnde Zeilenfarben
+      if (index % 2 === 0) {
+        doc.setFillColor(248, 248, 248);
+        doc.rect(margin, yPosition - 2, rightMargin - margin, 8, 'F');
+      }
+      
+      doc.text(pos.toString(), margin + 3, yPosition + 3);
+      
+      // Beschreibung auf mehrere Zeilen aufteilen wenn nötig
+      const descLines = doc.splitTextToSize(item.description, 80);
+      doc.text(descLines[0], margin + 20, yPosition + 3);
+      
+      doc.text(item.quantity.toString(), rightMargin - 70, yPosition + 3);
+      doc.text(`€ ${item.unitPrice.toFixed(2)}`, rightMargin - 45, yPosition + 3);
+      doc.text(`€ ${item.totalPrice.toFixed(2)}`, rightMargin - 15, yPosition + 3, { align: 'right' });
+      
+      yPosition += 8;
+      pos++;
+    });
+    
+    yPosition += 5;
+    
+    // Zwischensumme
+    doc.setDrawColor(200);
+    doc.line(rightMargin - 80, yPosition, rightMargin, yPosition);
+    yPosition += 5;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.text('Zwischensumme:', rightMargin - 80, yPosition);
+    doc.text(`€ ${invoice.price.toFixed(2)}`, rightMargin - 15, yPosition, { align: 'right' });
+    yPosition += 5;
+    
+    // MwSt
+    doc.text('MwSt. 19%:', rightMargin - 80, yPosition);
+    doc.text(`€ ${invoice.taxAmount.toFixed(2)}`, rightMargin - 15, yPosition, { align: 'right' });
+    yPosition += 5;
+    
+    // Gesamtbetrag
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.line(rightMargin - 80, yPosition, rightMargin, yPosition);
+    yPosition += 5;
+    
+    doc.setFillColor(74, 189, 189, 20);
+    doc.rect(rightMargin - 80, yPosition - 3, 65, 10, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Gesamtbetrag:', rightMargin - 80, yPosition + 3);
+    doc.text(`€ ${invoice.totalPrice.toFixed(2)}`, rightMargin - 15, yPosition + 3, { align: 'right' });
+    yPosition += 15;
+    
+    // Zahlungsinformationen
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Zahlungsinformationen:', margin, yPosition);
+    yPosition += 6;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    const zahlungshinweis = `Bitte überweisen Sie den Gesamtbetrag von € ${invoice.totalPrice.toFixed(2)} bis zum ${new Date(invoice.dueDate).toLocaleDateString('de-DE')} auf folgendes Konto:`;
+    const zahlungsLines = doc.splitTextToSize(zahlungshinweis, rightMargin - margin);
+    doc.text(zahlungsLines, margin, yPosition);
+    yPosition += zahlungsLines.length * 4 + 5;
+    
+    // Bankverbindung
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, yPosition, rightMargin - margin, 30, 'F');
+    
+    doc.setFont('helvetica', 'bold');
+    let bankY = yPosition + 6;
+    doc.text('Kontoinhaber:', margin + 5, bankY);
+    doc.text('Bank:', margin + 5, bankY + 6);
+    doc.text('IBAN:', margin + 5, bankY + 12);
+    doc.text('BIC:', margin + 5, bankY + 18);
+    doc.text('Verwendungszweck:', margin + 5, bankY + 24);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.text('Wertvoll Dienstleistungen GmbH', margin + 50, bankY);
+    doc.text('Commerzbank', margin + 50, bankY + 6);
+    doc.text('DE89 3704 0044 0532 0130 00', margin + 50, bankY + 12);
+    doc.text('COBADEFFXXX', margin + 50, bankY + 18);
+    doc.text(invoice.invoiceNumber, margin + 50, bankY + 24);
+    
+    yPosition += 35;
+    
+    // Hinweise
+    doc.setFontSize(8);
+    doc.setTextColor(100);
+    doc.text('Vielen Dank für Ihr Vertrauen. Bei Fragen zu dieser Rechnung kontaktieren Sie uns gerne.', margin, yPosition);
+    yPosition += 4;
+    doc.text('Diese Rechnung wurde maschinell erstellt und ist ohne Unterschrift gültig.', margin, yPosition);
+    
+    // Footer
+    const footerY = pageHeight - 25;
+    doc.setDrawColor(128);
+    doc.line(margin, footerY - 8, rightMargin, footerY - 8);
+    
+    doc.setFontSize(8);
+    doc.setTextColor(128);
+    doc.setFont('helvetica', 'normal');
+    doc.text('wertvoll | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY - 3, { align: 'center' });
+    doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de | Wertvoll Dienstleistungen GmbH | HRB 43574', pageWidth / 2, footerY + 1, { align: 'center' });
+    doc.text('Geschäftsführer: Sergej Schulz | USt-IdNr.: DE815143866 | Amtsgericht Bielefeld', pageWidth / 2, footerY + 5, { align: 'center' });
+    
+    console.log('✅ Rechnungs-PDF erfolgreich generiert');
+    return doc.output('blob');
+    
+  } catch (error) {
+    console.error('❌ Fehler bei Rechnungs-PDF-Generierung:', error);
+    
+    // Fallback PDF
+    try {
+      const fallbackDoc = new jsPDF();
+      
+      fallbackDoc.setFontSize(20);
+      fallbackDoc.text('wertvoll Rechnung', 20, 30);
+      
+      fallbackDoc.setFontSize(12);
+      fallbackDoc.text(`Rechnungsnummer: ${invoice.invoiceNumber}`, 20, 50);
+      fallbackDoc.text(`Kunde: ${customer.name}`, 20, 60);
+      fallbackDoc.text(`Betrag: € ${invoice.totalPrice.toFixed(2)}`, 20, 70);
+      fallbackDoc.text(`Datum: ${new Date(invoice.createdAt).toLocaleDateString('de-DE')}`, 20, 80);
+      
+      return fallbackDoc.output('blob');
+    } catch (fallbackError) {
+      throw new Error('Rechnungs-PDF-Erstellung fehlgeschlagen');
     }
   }
 };

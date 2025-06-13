@@ -340,6 +340,52 @@ class GoogleSheetsPublicService {
     return this.addQuote(quote);
   }
 
+  async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<boolean> {
+    try {
+      const quotes = this.getLocalQuotes();
+      const index = quotes.findIndex(q => q.id === quoteId);
+      
+      if (index === -1) {
+        console.error('Angebot nicht gefunden:', quoteId);
+        return false;
+      }
+      
+      quotes[index] = { ...quotes[index], ...updates };
+      this.saveLocalQuotes(quotes);
+      
+      console.log('✅ Angebot aktualisiert:', quoteId, updates);
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Angebots:', error);
+      return false;
+    }
+  }
+
+  async addInvoice(invoice: Omit<Invoice, 'id'>): Promise<boolean> {
+    try {
+      const newInvoice: Invoice = {
+        ...invoice,
+        id: `local_invoice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      const invoices = this.getLocalInvoices();
+      invoices.push(newInvoice);
+      this.saveLocalInvoices(invoices);
+      
+      console.log('💰 Rechnung erfolgreich erstellt:', {
+        rechnungsnummer: invoice.invoiceNumber,
+        kunde: invoice.customerName,
+        betrag: `€ ${invoice.totalPrice.toFixed(2)}`,
+        status: invoice.status
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Speichern der Rechnung:', error);
+      return false;
+    }
+  }
+
   async getQuotes(): Promise<Quote[]> {
     // Lade lokale Angebote
     const localQuotes = this.getLocalQuotes();
