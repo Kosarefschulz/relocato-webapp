@@ -14,6 +14,7 @@ import {
   alpha,
   Card,
   useMediaQuery,
+  Grid,
 } from '@mui/material';
 import { 
   Search as SearchIcon,
@@ -21,9 +22,11 @@ import {
   People as PeopleIcon,
   Receipt as ReceiptIcon,
   CalendarMonth as CalendarIcon,
+  Sell as SellIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import DarkModeToggle from './DarkModeToggle';
+import SalesOverview from './SalesOverview';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +35,13 @@ const Dashboard: React.FC = () => {
   const [bottomNavValue, setBottomNavValue] = useState('dashboard');
 
   const navigationItems = [
+    {
+      label: 'Verkauf',
+      value: 'sales',
+      icon: <SellIcon />,
+      action: () => navigate('/sales'),
+      color: theme.palette.info.main,
+    },
     {
       label: 'Angebote',
       value: 'quotes',
@@ -172,11 +182,16 @@ const Dashboard: React.FC = () => {
             </Typography>
           </Box>
 
+          {/* Sales Overview for Desktop */}
+          <Box sx={{ display: { xs: 'none', md: 'block' }, mb: 4, maxWidth: 1200, width: '100%' }}>
+            <SalesOverview />
+          </Box>
+
           {/* Quick Action Cards for Desktop */}
           <Box 
             sx={{ 
               display: { xs: 'none', md: 'grid' },
-              gridTemplateColumns: 'repeat(4, 1fr)',
+              gridTemplateColumns: 'repeat(5, 1fr)',
               gap: 3,
               mb: 4,
             }}

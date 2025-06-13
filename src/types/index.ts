@@ -15,6 +15,9 @@ export interface Customer {
   services: string[];
   notes?: string;
   createdAt?: Date;
+  viewingScheduled?: boolean;
+  viewingDate?: string;
+  contacted?: boolean;
 }
 
 export interface Quote {

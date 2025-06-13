@@ -17,6 +17,7 @@ import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
 import CustomerDetails from './components/CustomerDetails.simple';
 import InvoicesList from './components/InvoicesList';
+import SalesPage from './pages/SalesPage';
 
 export const AuthContext = React.createContext<{
   user: User | null;
@@ -159,6 +160,10 @@ function App() {
             <Route 
               path="/invoices" 
               element={user ? <InvoicesList /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/sales" 
+              element={user ? <SalesPage /> : <Navigate to="/login" />} 
             />
             
             {/* Customer Detail Routes */}
