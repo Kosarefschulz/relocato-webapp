@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
       label: 'Kalender',
       value: 'calendar',
       icon: <CalendarIcon />,
-      action: () => console.log('Kalender noch nicht implementiert'),
+      action: () => navigate('/calendar'),
       color: theme.palette.success.main,
     },
     {

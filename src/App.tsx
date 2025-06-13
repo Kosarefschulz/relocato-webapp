@@ -18,6 +18,7 @@ import CustomersList from './components/CustomersList';
 import CustomerDetails from './components/CustomerDetails.simple';
 import InvoicesList from './components/InvoicesList';
 import SalesPage from './pages/SalesPage';
+import CalendarView from './components/CalendarView';
 
 export const AuthContext = React.createContext<{
   user: User | null;
@@ -164,6 +165,10 @@ function App() {
             <Route 
               path="/sales" 
               element={user ? <SalesPage /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/calendar" 
+              element={user ? <CalendarView /> : <Navigate to="/login" />} 
             />
             
             {/* Customer Detail Routes */}
