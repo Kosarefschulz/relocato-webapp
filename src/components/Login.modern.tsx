@@ -25,8 +25,7 @@ import {
 import { motion } from 'framer-motion';
 import { glassmorphism } from '../styles/modernTheme';
 import Logo from './Logo';
-// Import AuthContext - will be provided by parent app
-const AuthContext = React.createContext<any>(null);
+import { AuthContext } from '../App';
 
 const MotionBox = motion(Box);
 const MotionPaper = motion(Paper);
@@ -47,13 +46,16 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      if (auth.login.length === 0) {
-        // App.simple context
-        await auth.login();
-      } else {
-        // App context with Firebase
-        await auth.login(email, password);
+      if (!auth || !auth.login) {
+        throw new Error('Authentifizierungsdienst nicht verfügbar');
       }
+      
+      if (!email || !password) {
+        throw new Error('Email und Passwort dürfen nicht leer sein');
+      }
+      
+      // Call login with email and password
+      await auth.login(email, password);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Anmeldung fehlgeschlagen');
