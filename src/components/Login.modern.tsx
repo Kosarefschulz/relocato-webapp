@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { glassmorphism } from '../styles/modernTheme';
+import Logo from './Logo';
 // Import AuthContext - will be provided by parent app
 const AuthContext = React.createContext<any>(null);
 
@@ -138,27 +139,12 @@ const Login: React.FC = () => {
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
               >
-                <Box
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 4,
-                    background: `linear-gradient(135deg, ${theme.palette.secondary.light} 0%, ${theme.palette.secondary.main} 100%)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mx: 'auto',
-                    mb: 3,
-                    boxShadow: `0px 12px 32px ${alpha(theme.palette.secondary.main, 0.3)}`,
-                  }}
-                >
-                  <Typography variant="h3" sx={{ color: 'white', fontWeight: 800 }}>
-                    R
-                  </Typography>
+                <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+                  <Logo size="large" showText={false} imageOnly={true} />
                 </Box>
               </motion.div>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                Willkommen zurück
+                Willkommen bei Wertvoll
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 Melden Sie sich an, um fortzufahren

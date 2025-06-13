@@ -36,15 +36,15 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     const rightMargin = pageWidth - margin;
     let yPosition = 20;
 
-    // Header - RELOCATO Logo
+    // Header - wertvoll Logo
     doc.setFontSize(26);
-    doc.setTextColor(0);
+    doc.setTextColor(74, 189, 189); // Türkis wie im Logo
     doc.setFont('helvetica', 'bold');
-    doc.text('RELOCATO®', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('wertvoll', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 9;
     
     doc.setFontSize(14);
-    doc.setTextColor(124, 204, 66); // Grün #7ccc42
+    doc.setTextColor(0);
     doc.setFont('helvetica', 'normal');
     doc.text('Umzugsangebot', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 12;

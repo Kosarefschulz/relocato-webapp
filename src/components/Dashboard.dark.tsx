@@ -27,6 +27,7 @@ import {
 import { motion } from 'framer-motion';
 import DarkModeToggle from './DarkModeToggle';
 import SalesOverview from './SalesOverview';
+import Logo from './Logo';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -93,20 +94,9 @@ const Dashboard: React.FC = () => {
         }}
       >
         <Toolbar>
-          <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ 
-              flexGrow: 1, 
-              fontWeight: 700,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Relocato
-          </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <Logo size="medium" showText={true} />
+          </Box>
           
           {/* Dark Mode Toggle */}
           <DarkModeToggle />
