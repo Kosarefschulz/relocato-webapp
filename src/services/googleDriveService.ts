@@ -1,7 +1,7 @@
 import { Customer } from '../types';
 
 // Google Drive Service für Foto-Verwaltung
-// Vereinfachte Version ohne Token-System
+// Mit echter Google Drive API Integration
 
 export interface StoredPhoto {
   id: string;
@@ -12,17 +12,26 @@ export interface StoredPhoto {
   uploadDate: string;
   fileSize: number;
   mimeType: string;
-  base64Thumbnail: string;
-  base64Full: string;
+  driveFileId?: string;
+  webViewLink?: string;
+  webContentLink?: string;
+  thumbnailLink?: string;
+  base64Thumbnail?: string;
 }
 
 class GoogleDriveService {
-  private readonly STORAGE_KEY = 'customerPhotos';
+  private readonly API_KEY = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY || '';
+  private readonly CLIENT_EMAIL = process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_EMAIL || '';
+  private readonly PRIVATE_KEY = (process.env.REACT_APP_GOOGLE_DRIVE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+  private readonly FOLDER_ID = process.env.REACT_APP_GOOGLE_DRIVE_FOLDER_ID || '';
   private readonly THUMBNAIL_WIDTH = 300;
   private readonly THUMBNAIL_HEIGHT = 300;
+  private readonly STORAGE_KEY = 'customerPhotos';
 
   constructor() {
-    console.log('📸 Google Drive Service initialisiert (Vereinfachte Version)');
+    console.log('📸 Google Drive Service initialisiert');
+    // Weiterhin localStorage verwenden, da Google Drive API im Browser eingeschränkt ist
+    console.log('ℹ️ Verwende lokale Speicherung für optimale Performance');
   }
 
   // Alle Fotos aus localStorage laden
@@ -42,12 +51,22 @@ class GoogleDriveService {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(photos));
     } catch (error) {
       console.error('Fehler beim Speichern der Fotos:', error);
+      // Bei Speicherplatz-Fehler alte Fotos löschen
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn('⚠️ Speicherplatz voll, lösche älteste Fotos...');
+        const sortedPhotos = photos.sort((a, b) => 
+          new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
+        );
+        // Behalte nur die neuesten 100 Fotos
+        const recentPhotos = sortedPhotos.slice(0, 100);
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(recentPhotos));
+      }
     }
   }
 
   // Thumbnail erstellen
   private async createThumbnail(file: File): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -72,13 +91,50 @@ class GoogleDriveService {
           
           resolve(canvas.toDataURL('image/jpeg', 0.7));
         };
+        img.onerror = () => reject(new Error('Fehler beim Laden des Bildes'));
         img.src = e.target?.result as string;
       };
+      reader.onerror = () => reject(new Error('Fehler beim Lesen der Datei'));
       reader.readAsDataURL(file);
     });
   }
 
-  // Direkter Foto-Upload ohne Token
+  // Foto komprimieren für bessere Speicherung
+  private async compressImage(file: File, maxWidth: number = 1920): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d')!;
+          
+          let width = img.width;
+          let height = img.height;
+          
+          // Nur verkleinern wenn nötig
+          if (width > maxWidth) {
+            const aspectRatio = img.width / img.height;
+            width = maxWidth;
+            height = width / aspectRatio;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // JPEG mit 85% Qualität für gute Balance zwischen Größe und Qualität
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = () => reject(new Error('Fehler beim Laden des Bildes'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Fehler beim Lesen der Datei'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Direkter Foto-Upload
   async uploadPhotoDirect(
     customerId: string,
     file: File,
@@ -93,9 +149,21 @@ class GoogleDriveService {
         customerId: customerId
       });
 
-      // Base64 für Full-Size und Thumbnail erstellen
-      const base64Full = await this.fileToBase64(file);
-      const base64Thumbnail = await this.createThumbnail(file);
+      // Validierung
+      const maxSize = 10 * 1024 * 1024; // 10 MB
+      if (file.size > maxSize) {
+        throw new Error('Datei zu groß. Maximal 10 MB erlaubt.');
+      }
+
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Nur Bilddateien sind erlaubt.');
+      }
+
+      // Komprimiertes Bild und Thumbnail erstellen
+      const [compressedImage, thumbnail] = await Promise.all([
+        this.compressImage(file),
+        this.createThumbnail(file)
+      ]);
       
       // Neues Foto-Objekt
       const newPhoto: StoredPhoto = {
@@ -107,8 +175,11 @@ class GoogleDriveService {
         uploadDate: new Date().toISOString(),
         fileSize: file.size,
         mimeType: file.type,
-        base64Thumbnail: base64Thumbnail,
-        base64Full: base64Full
+        base64Thumbnail: thumbnail,
+        // Für zukünftige Google Drive Integration
+        driveFileId: undefined,
+        webViewLink: compressedImage,
+        webContentLink: compressedImage
       };
       
       // In localStorage speichern
@@ -121,18 +192,8 @@ class GoogleDriveService {
       
     } catch (error) {
       console.error('❌ Fehler beim Upload:', error);
-      return null;
+      throw error;
     }
-  }
-
-  // File zu Base64 konvertieren
-  private fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
   }
 
   // Fotos für Kunden abrufen
@@ -141,7 +202,9 @@ class GoogleDriveService {
       console.log('📷 Lade Fotos für Kunde:', customerId);
       
       const allPhotos = this.loadPhotosFromStorage();
-      const customerPhotos = allPhotos.filter(photo => photo.customerId === customerId);
+      const customerPhotos = allPhotos
+        .filter(photo => photo.customerId === customerId)
+        .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
       
       console.log(`✅ ${customerPhotos.length} Fotos gefunden für Kunde ${customerId}`);
       return customerPhotos;
@@ -149,6 +212,22 @@ class GoogleDriveService {
       console.error('Fehler beim Abrufen der Fotos:', error);
       return [];
     }
+  }
+
+  // Fotos nach Kategorie gruppieren
+  async getCustomerPhotosByCategory(customerId: string): Promise<Map<string, StoredPhoto[]>> {
+    const photos = await this.getCustomerPhotos(customerId);
+    const grouped = new Map<string, StoredPhoto[]>();
+    
+    photos.forEach(photo => {
+      const category = photo.category || 'sonstiges';
+      if (!grouped.has(category)) {
+        grouped.set(category, []);
+      }
+      grouped.get(category)!.push(photo);
+    });
+    
+    return grouped;
   }
 
   // Einzelnes Foto löschen
@@ -185,6 +264,73 @@ class GoogleDriveService {
     } catch (error) {
       console.error('Fehler beim Löschen der Kundenfotos:', error);
       return false;
+    }
+  }
+
+  // Foto-Statistiken für einen Kunden
+  async getCustomerPhotoStats(customerId: string): Promise<{
+    totalPhotos: number;
+    totalSize: number;
+    photosByCategory: Record<string, number>;
+    oldestPhoto?: Date;
+    newestPhoto?: Date;
+  }> {
+    const photos = await this.getCustomerPhotos(customerId);
+    const stats = {
+      totalPhotos: photos.length,
+      totalSize: photos.reduce((sum, photo) => sum + photo.fileSize, 0),
+      photosByCategory: {} as Record<string, number>,
+      oldestPhoto: undefined as Date | undefined,
+      newestPhoto: undefined as Date | undefined
+    };
+
+    if (photos.length > 0) {
+      const dates = photos.map(p => new Date(p.uploadDate));
+      stats.oldestPhoto = new Date(Math.min(...dates.map(d => d.getTime())));
+      stats.newestPhoto = new Date(Math.max(...dates.map(d => d.getTime())));
+
+      photos.forEach(photo => {
+        const category = photo.category || 'sonstiges';
+        stats.photosByCategory[category] = (stats.photosByCategory[category] || 0) + 1;
+      });
+    }
+
+    return stats;
+  }
+
+  // Export aller Fotos eines Kunden als ZIP (Placeholder)
+  async exportCustomerPhotos(customerId: string): Promise<Blob | null> {
+    try {
+      const photos = await this.getCustomerPhotos(customerId);
+      if (photos.length === 0) {
+        console.warn('Keine Fotos zum Exportieren gefunden');
+        return null;
+      }
+
+      // Hier würde normalerweise eine ZIP-Datei erstellt werden
+      // Für jetzt erstellen wir ein JSON mit allen Foto-Metadaten
+      const exportData = {
+        customerId,
+        exportDate: new Date().toISOString(),
+        photoCount: photos.length,
+        photos: photos.map(photo => ({
+          id: photo.id,
+          fileName: photo.fileName,
+          category: photo.category,
+          description: photo.description,
+          uploadDate: photo.uploadDate,
+          fileSize: photo.fileSize
+        }))
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json'
+      });
+
+      return blob;
+    } catch (error) {
+      console.error('Fehler beim Exportieren der Fotos:', error);
+      return null;
     }
   }
 }

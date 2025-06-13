@@ -241,10 +241,11 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                           size="small"
                           onClick={() => {
                             const link = document.createElement('a');
-                            link.href = photo.base64Full;
+                            link.href = photo.webContentLink || photo.base64Thumbnail;
                             link.download = photo.fileName;
                             link.click();
                           }}
+                          title="Herunterladen"
                         >
                           <DownloadIcon />
                         </IconButton>
@@ -252,6 +253,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                           size="small"
                           color="error"
                           onClick={() => handleDeletePhoto(photo.id)}
+                          title="Löschen"
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -276,7 +278,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
       {/* Upload Dialog */}
       <Dialog
         open={showUploadDialog}
-        onClose={() => setShowUploadDialog(false)}
+        onClose={() => !uploading && setShowUploadDialog(false)}
         maxWidth="sm"
         fullWidth
       >
@@ -284,7 +286,8 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           Fotos hochladen
           <IconButton
             sx={{ position: 'absolute', right: 8, top: 8 }}
-            onClick={() => setShowUploadDialog(false)}
+            onClick={() => !uploading && setShowUploadDialog(false)}
+            disabled={uploading}
           >
             <CloseIcon />
           </IconButton>
@@ -296,7 +299,16 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
               component="label"
               fullWidth
               startIcon={<UploadIcon />}
-              sx={{ height: 100, border: '2px dashed', borderColor: 'primary.main' }}
+              disabled={uploading}
+              sx={{ 
+                height: 100, 
+                border: '2px dashed', 
+                borderColor: uploadFiles.length > 0 ? 'success.main' : 'primary.main',
+                bgcolor: uploadFiles.length > 0 ? 'success.light' : 'transparent',
+                '&:hover': {
+                  bgcolor: uploadFiles.length > 0 ? 'success.light' : 'action.hover'
+                }
+              }}
             >
               {uploadFiles.length > 0 
                 ? `${uploadFiles.length} Datei${uploadFiles.length > 1 ? 'en' : ''} ausgewählt`
@@ -308,8 +320,29 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                 multiple
                 accept="image/*"
                 onChange={handleFileSelect}
+                disabled={uploading}
               />
             </Button>
+            
+            {/* Dateiliste anzeigen */}
+            {uploadFiles.length > 0 && (
+              <Box sx={{ mt: 2, maxHeight: 150, overflow: 'auto' }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Ausgewählte Dateien:
+                </Typography>
+                {uploadFiles.map((file, index) => (
+                  <Chip
+                    key={index}
+                    label={`${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`}
+                    size="small"
+                    sx={{ m: 0.5 }}
+                    onDelete={!uploading ? () => {
+                      setUploadFiles(uploadFiles.filter((_, i) => i !== index));
+                    } : undefined}
+                  />
+                ))}
+              </Box>
+            )}
             
             <TextField
               select
@@ -383,11 +416,46 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
             <CloseIcon />
           </IconButton>
           {selectedPhoto && (
-            <img
-              src={selectedPhoto.base64Full}
-              alt={selectedPhoto.fileName}
-              style={{ width: '100%', height: 'auto' }}
-            />
+            <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+              <img
+                src={selectedPhoto.webViewLink || selectedPhoto.base64Thumbnail}
+                alt={selectedPhoto.fileName}
+                style={{ 
+                  maxWidth: '100%', 
+                  maxHeight: '90vh', 
+                  height: 'auto',
+                  objectFit: 'contain'
+                }}
+              />
+              {/* Foto-Informationen */}
+              <Box sx={{ 
+                position: 'absolute', 
+                bottom: 0, 
+                left: 0, 
+                right: 0, 
+                bgcolor: 'rgba(0,0,0,0.7)', 
+                color: 'white', 
+                p: 2 
+              }}>
+                <Typography variant="h6">{selectedPhoto.fileName}</Typography>
+                <Typography variant="body2">
+                  {PHOTO_CATEGORIES.find(c => c.value === selectedPhoto.category)?.icon} {' '}
+                  {PHOTO_CATEGORIES.find(c => c.value === selectedPhoto.category)?.label}
+                </Typography>
+                {selectedPhoto.description && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>{selectedPhoto.description}</Typography>
+                )}
+                <Typography variant="caption">
+                  Hochgeladen am {new Date(selectedPhoto.uploadDate).toLocaleDateString('de-DE', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Typography>
+              </Box>
+            </Box>
           )}
         </DialogContent>
       </Dialog>

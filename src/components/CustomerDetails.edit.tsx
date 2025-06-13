@@ -30,7 +30,8 @@ import {
   Email as EmailIcon,
   Description as DescriptionIcon,
   Receipt as ReceiptIcon,
-  LocationOn as LocationIcon
+  LocationOn as LocationIcon,
+  AddAPhoto as AddAPhotoIcon
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Customer, Quote, Invoice } from '../types';
@@ -488,6 +489,14 @@ const CustomerDetails: React.FC = () => {
                     Route planen
                   </Button>
                 )}
+                <Button
+                  variant="outlined"
+                  startIcon={<AddAPhotoIcon />}
+                  onClick={() => setTabValue(1)} // Switch to photos tab
+                  sx={{ textTransform: 'none' }}
+                >
+                  Fotos hochladen
+                </Button>
               </Box>
             </Paper>
           </Box>
