@@ -1,3 +1,3 @@
-// Re-export the simple version as the default
-export { default } from './CustomersList.simple';
-export * from './CustomersList.simple';
+// Re-export the mobile-optimized version as the default
+export { default } from './CustomersList.mobile-optimized';
+export * from './CustomersList.mobile-optimized';

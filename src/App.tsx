@@ -15,7 +15,7 @@ import CreateQuote from './components/CreateQuote';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
-import CustomerDetails from './components/CustomerDetails.simple';
+import CustomerDetails from './components/CustomerDetails.mobile-optimized';
 import InvoicesList from './components/InvoicesList';
 import SalesPage from './pages/SalesPage';
 import CalendarView from './components/CalendarView';

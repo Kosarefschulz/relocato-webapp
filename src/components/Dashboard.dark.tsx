@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
                     border: `1px solid ${theme.palette.divider}`,
                     transition: 'all 0.3s ease',
                     '&:hover': {
-                      boxShadow: theme.shadows[8],
+                      boxShadow: theme.shadows?.[8] || '0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)',
                       borderColor: item.color,
                       '& .icon-wrapper': {
                         transform: 'scale(1.1) rotate(5deg)',
