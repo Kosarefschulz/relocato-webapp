@@ -7,18 +7,31 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import {
   Description as DescriptionIcon,
   Add as AddIcon,
   PictureAsPdf as PdfIcon,
-  Email as EmailIcon
+  Email as EmailIcon,
+  Visibility as VisibilityIcon,
+  Receipt as ReceiptIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Quote, Customer } from '../types';
-import { generatePDF } from '../services/pdfService';
+import { Quote, Customer, Invoice } from '../types';
+import { generatePDF, generateInvoicePDF } from '../services/pdfService';
+import { sendEmail } from '../services/emailService';
+import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 
 interface CustomerQuotesProps {
   quotes: Quote[];
@@ -29,6 +42,13 @@ interface CustomerQuotesProps {
 const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTabChange }) => {
   const navigate = useNavigate();
   const [loadingPdf, setLoadingPdf] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [convertDialogOpen, setConvertDialogOpen] = useState(false);
+  const [convertingQuote, setConvertingQuote] = useState<Quote | null>(null);
+  const [sendInvoice, setSendInvoice] = useState(true);
+  const [converting, setConverting] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   const downloadPDF = async (quote: Quote) => {
     try {
@@ -113,9 +133,15 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
   }
 
   return (
-    <Grid container spacing={2}>
-      {quotes.map((quote, index) => (
-        <Grid xs={12} md={6} key={quote.id}>
+    <>
+      <Grid container spacing={2}>
+      {quotes.map((quote, index) => {
+        // Debug: Log quote status
+        console.log(`Quote ${quote.id} status:`, quote.status, 'Type:', typeof quote.status);
+        console.log(`Quote ${quote.id} full data:`, quote);
+        
+        return (
+        <Grid item xs={12} md={6} key={quote.id}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -141,8 +167,8 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                     Angebot #{quote.id}
                   </Typography>
                   <Chip 
-                    label={quote.status}
-                    color={quote.status === 'accepted' ? 'success' : quote.status === 'pending' ? 'warning' : 'default'}
+                    label={quote.status === 'draft' ? 'Entwurf' : quote.status === 'sent' ? 'Gesendet' : quote.status === 'accepted' ? 'Angenommen' : quote.status === 'rejected' ? 'Abgelehnt' : 'In Rechnung gestellt'}
+                    color={quote.status === 'accepted' ? 'success' : quote.status === 'sent' ? 'warning' : quote.status === 'rejected' ? 'error' : 'default'}
                     size="small"
                   />
                 </Box>
@@ -167,7 +193,19 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   </Typography>
                 )}
                 
-                <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<VisibilityIcon />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedQuote(quote);
+                      setPreviewOpen(true);
+                    }}
+                  >
+                    Ansehen
+                  </Button>
                   <Button
                     size="small"
                     variant="outlined"
@@ -180,26 +218,107 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   >
                     {loadingPdf === quote.id ? 'Erstelle...' : 'PDF'}
                   </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<EmailIcon />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTabChange(4); // Zur E-Mail-Tab
-                    }}
-                  >
-                    Senden
-                  </Button>
+                  
+                  {/* Status ändern Buttons */}
+                  {console.log(`Checking quote status "${quote.status}"`)}
+                  {quote.status === 'draft' && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="primary"
+                      startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <EmailIcon />}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        setUpdatingStatus(quote.id);
+                        try {
+                          await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'sent' });
+                          window.location.reload(); // Reload to refresh data
+                        } catch (error) {
+                          console.error('Error updating quote status:', error);
+                          alert('Fehler beim Aktualisieren des Status');
+                        } finally {
+                          setUpdatingStatus(null);
+                        }
+                      }}
+                      disabled={updatingStatus === quote.id}
+                    >
+                      Als gesendet markieren
+                    </Button>
+                  )}
+                  {quote.status === 'sent' && (
+                    <>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="success"
+                        startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <CheckCircleIcon />}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setUpdatingStatus(quote.id);
+                          try {
+                            await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'accepted' });
+                            window.location.reload(); // Reload to refresh data
+                          } catch (error) {
+                            console.error('Error updating quote status:', error);
+                            alert('Fehler beim Aktualisieren des Status');
+                          } finally {
+                            setUpdatingStatus(null);
+                          }
+                        }}
+                        disabled={updatingStatus === quote.id}
+                      >
+                        Als angenommen markieren
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        startIcon={<CancelIcon />}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setUpdatingStatus(quote.id);
+                          try {
+                            await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'rejected' });
+                            window.location.reload(); // Reload to refresh data
+                          } catch (error) {
+                            console.error('Error updating quote status:', error);
+                            alert('Fehler beim Aktualisieren des Status');
+                          } finally {
+                            setUpdatingStatus(null);
+                          }
+                        }}
+                        disabled={updatingStatus === quote.id}
+                      >
+                        Als abgelehnt markieren
+                      </Button>
+                    </>
+                  )}
+                  
+                  {quote.status === 'accepted' && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      startIcon={<ReceiptIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConvertingQuote(quote);
+                        setConvertDialogOpen(true);
+                      }}
+                    >
+                      Rechnung
+                    </Button>
+                  )}
                 </Box>
               </CardContent>
             </Card>
           </motion.div>
         </Grid>
-      ))}
+        );
+      })}
       
       {/* Add New Quote Card */}
-      <Grid xs={12} md={6}>
+      <Grid item xs={12} md={6}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -233,6 +352,160 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
         </motion.div>
       </Grid>
     </Grid>
+
+      {/* Preview Dialog */}
+      <Dialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Angebot #{selectedQuote?.id}</Typography>
+            <IconButton onClick={() => setPreviewOpen(false)} size="small">
+              ×
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {selectedQuote && (
+            <Box>
+              <Typography variant="h4" color="primary" gutterBottom>
+                €{selectedQuote.price.toFixed(2)}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                <strong>Status:</strong> {selectedQuote.status}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                <strong>Erstellt am:</strong> {selectedQuote.createdAt.toLocaleDateString('de-DE')}
+              </Typography>
+              {selectedQuote.volume && (
+                <Typography variant="body1" gutterBottom>
+                  <strong>Volumen:</strong> {selectedQuote.volume} m³
+                </Typography>
+              )}
+              {selectedQuote.distance && (
+                <Typography variant="body1" gutterBottom>
+                  <strong>Entfernung:</strong> {selectedQuote.distance} km
+                </Typography>
+              )}
+              {selectedQuote.comment && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="h6" gutterBottom>Kommentar:</Typography>
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {selectedQuote.comment}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPreviewOpen(false)}>Schließen</Button>
+          {selectedQuote && (
+            <Button
+              variant="contained"
+              startIcon={<PdfIcon />}
+              onClick={() => {
+                downloadPDF(selectedQuote);
+                setPreviewOpen(false);
+              }}
+            >
+              PDF herunterladen
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Convert to Invoice Dialog */}
+      <Dialog
+        open={convertDialogOpen}
+        onClose={() => setConvertDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Angebot in Rechnung umwandeln</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            Möchten Sie das Angebot #{convertingQuote?.id} in eine Rechnung umwandeln?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Preis: €{convertingQuote?.price.toFixed(2)}
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={sendInvoice}
+                onChange={(e) => setSendInvoice(e.target.checked)}
+              />
+            }
+            label="Rechnung per E-Mail senden"
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConvertDialogOpen(false)} disabled={converting}>
+            Abbrechen
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={async () => {
+              if (!convertingQuote) return;
+              
+              setConverting(true);
+              try {
+                // Create invoice
+                const invoiceNumber = `R${Date.now().toString().slice(-6)}`;
+                const newInvoice: Invoice = {
+                  id: invoiceNumber,
+                  customerId: customer.id || '',
+                  customerName: customer.name,
+                  quoteId: convertingQuote.id,
+                  amount: convertingQuote.price,
+                  date: new Date(),
+                  dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
+                  status: 'pending',
+                  comment: convertingQuote.comment
+                };
+
+                // Save invoice
+                const savedInvoice = await googleSheetsService.createInvoice(newInvoice);
+
+                // Send invoice if requested
+                if (sendInvoice && customer.email) {
+                  const pdfBlob = await generateInvoicePDF(customer, savedInvoice);
+                  const emailData = {
+                    to: customer.email,
+                    subject: `Ihre Rechnung ${invoiceNumber} von Relocato`,
+                    content: `Sehr geehrte/r ${customer.name},\n\nanbei erhalten Sie Ihre Rechnung ${invoiceNumber} über €${convertingQuote.price.toFixed(2)}.\n\nZahlungsziel: 14 Tage\n\nVielen Dank für Ihr Vertrauen!\n\nMit freundlichen Grüßen\nIhr Relocato Team`,
+                    attachments: [{
+                      filename: `Rechnung_${invoiceNumber}_${customer.name.replace(/\s+/g, '_')}.pdf`,
+                      content: pdfBlob
+                    }]
+                  };
+                  await sendEmail(emailData);
+                }
+
+                alert(`Rechnung ${invoiceNumber} wurde erfolgreich erstellt${sendInvoice ? ' und versendet' : ''}!`);
+                setConvertDialogOpen(false);
+                onTabChange(3); // Switch to invoices tab
+              } catch (error) {
+                console.error('Error converting quote to invoice:', error);
+                alert('Fehler beim Erstellen der Rechnung');
+              } finally {
+                setConverting(false);
+              }
+            }}
+            disabled={converting}
+            startIcon={converting ? <CircularProgress size={16} /> : <ReceiptIcon />}
+          >
+            {converting ? 'Erstelle Rechnung...' : 'Rechnung erstellen'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

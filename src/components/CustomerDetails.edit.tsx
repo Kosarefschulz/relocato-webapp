@@ -41,6 +41,7 @@ import CustomerInfo from './CustomerInfo';
 import CustomerPhotos from './CustomerPhotos';
 import CustomerCommunication from './CustomerCommunication';
 import CustomerQuotes from './CustomerQuotes';
+import CustomerInvoices from './CustomerInvoices';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
@@ -582,12 +583,10 @@ const CustomerDetails: React.FC = () => {
 
           <TabPanel value={tabValue} index={3}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
-              <Box sx={{ textAlign: 'center', py: 8 }}>
-                <ReceiptIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                  Noch keine Rechnungen erstellt
-                </Typography>
-              </Box>
+              <CustomerInvoices 
+                invoices={invoices} 
+                customer={customer} 
+              />
             </Box>
           </TabPanel>
 

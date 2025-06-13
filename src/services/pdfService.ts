@@ -36,11 +36,11 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     const rightMargin = pageWidth - margin;
     let yPosition = 20;
 
-    // Header - wertvoll Logo
+    // Header - Relocato Logo
     doc.setFontSize(26);
     doc.setTextColor(74, 189, 189); // Türkis wie im Logo
     doc.setFont('helvetica', 'bold');
-    doc.text('wertvoll', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('Relocato', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 9;
     
     doc.setFontSize(14);
@@ -362,7 +362,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    const unterschriftText = 'Mit meiner Unterschrift beauftrage ich wertvoll mit der Durchführung des Umzugs zu den genannten Konditionen.';
+    const unterschriftText = 'Mit meiner Unterschrift beauftrage ich Relocato mit der Durchführung des Umzugs zu den genannten Konditionen.';
     doc.text(unterschriftText, margin + 3, yPosition + 5);
     
     // Unterschriftslinien
@@ -385,7 +385,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     doc.setTextColor(128);
     doc.setFont('helvetica', 'normal');
     // Korrigierte Adresse
-    doc.text('wertvoll | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY - 3, { align: 'center' });
+    doc.text('Relocato | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY - 3, { align: 'center' });
     doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de | Wertvoll Dienstleistungen GmbH | HRB 43574', pageWidth / 2, footerY + 1, { align: 'center' });
 
     console.log('✅ PDF erfolgreich generiert');
@@ -399,7 +399,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
       const fallbackDoc = new jsPDF();
       
       fallbackDoc.setFontSize(20);
-      fallbackDoc.text('wertvoll Umzugsangebot', 20, 30);
+      fallbackDoc.text('Relocato Umzugsangebot', 20, 30);
       
       fallbackDoc.setFontSize(12);
       fallbackDoc.text(`Kunde: ${customer.name || 'Unbekannt'}`, 20, 50);
@@ -433,11 +433,11 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     const rightMargin = pageWidth - margin;
     let yPosition = 20;
 
-    // Header - wertvoll Logo
+    // Header - Relocato Logo
     doc.setFontSize(26);
     doc.setTextColor(74, 189, 189); // Türkis wie im Logo
     doc.setFont('helvetica', 'bold');
-    doc.text('wertvoll', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('Relocato', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 9;
     
     doc.setFontSize(16);
@@ -477,7 +477,7 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     // Absender
     doc.setFontSize(8);
     doc.setTextColor(128);
-    doc.text('wertvoll | Albrechtstraße 27, 33615 Bielefeld', margin, yPosition);
+    doc.text('Relocato | Albrechtstraße 27, 33615 Bielefeld', margin, yPosition);
     yPosition += 8;
     
     // Empfänger
@@ -635,7 +635,7 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     doc.setFontSize(8);
     doc.setTextColor(128);
     doc.setFont('helvetica', 'normal');
-    doc.text('wertvoll | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY - 3, { align: 'center' });
+    doc.text('Relocato | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY - 3, { align: 'center' });
     doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de | Wertvoll Dienstleistungen GmbH | HRB 43574', pageWidth / 2, footerY + 1, { align: 'center' });
     doc.text('Geschäftsführer: Sergej Schulz | USt-IdNr.: DE815143866 | Amtsgericht Bielefeld', pageWidth / 2, footerY + 5, { align: 'center' });
     
@@ -650,7 +650,7 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
       const fallbackDoc = new jsPDF();
       
       fallbackDoc.setFontSize(20);
-      fallbackDoc.text('wertvoll Rechnung', 20, 30);
+      fallbackDoc.text('Relocato Rechnung', 20, 30);
       
       fallbackDoc.setFontSize(12);
       fallbackDoc.text(`Rechnungsnummer: ${invoice.invoiceNumber}`, 20, 50);

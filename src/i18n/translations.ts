@@ -5,7 +5,6 @@ export interface TranslationKeys {
   'nav.quotes': string;
   'nav.analytics': string;
   'nav.settings': string;
-  'nav.logout': string;
   'nav.profile': string;
   'nav.help': string;
 

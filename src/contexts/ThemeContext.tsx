@@ -193,12 +193,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     },
     typography: {
       fontFamily: [
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"SF Pro Text"',
-        '"SF Pro Display"',
         'Inter',
         'system-ui',
+        '-apple-system',
+        'BlinkMacSystemFont',
         '"Segoe UI"',
         'Roboto',
         '"Helvetica Neue"',
@@ -209,74 +207,58 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         fontWeight: 800,
         letterSpacing: '-0.025em',
         fontSize: `${currentFontScale.h1}rem`,
-        lineHeight: 1.2,
         '@media (max-width:600px)': {
-          fontSize: `clamp(1.75rem, 5vw, ${currentFontScale.h1 * 0.8}rem)`,
-          lineHeight: 1.25,
+          fontSize: `${currentFontScale.h1 * 0.8}rem`,
         },
       },
       h2: {
         fontWeight: 700,
-        letterSpacing: '-0.02em',
+        letterSpacing: '-0.025em',
         fontSize: `${currentFontScale.h2}rem`,
-        lineHeight: 1.3,
         '@media (max-width:600px)': {
-          fontSize: `clamp(1.5rem, 4vw, ${currentFontScale.h2 * 0.8}rem)`,
-          lineHeight: 1.35,
+          fontSize: `${currentFontScale.h2 * 0.8}rem`,
         },
       },
       h3: {
         fontWeight: 700,
-        letterSpacing: '-0.015em',
+        letterSpacing: '-0.025em',
         fontSize: `${currentFontScale.h3}rem`,
-        lineHeight: 1.35,
         '@media (max-width:600px)': {
-          fontSize: `clamp(1.25rem, 3.5vw, ${currentFontScale.h3 * 0.85}rem)`,
-          lineHeight: 1.4,
+          fontSize: `${currentFontScale.h3 * 0.85}rem`,
         },
       },
       h4: {
         fontWeight: 700,
-        letterSpacing: '-0.01em',
+        letterSpacing: '-0.025em',
         fontSize: `${currentFontScale.h4}rem`,
-        lineHeight: 1.4,
         '@media (max-width:600px)': {
-          fontSize: `clamp(1.125rem, 3vw, ${currentFontScale.h4 * 0.85}rem)`,
-          lineHeight: 1.45,
+          fontSize: `${currentFontScale.h4 * 0.85}rem`,
         },
       },
       h5: {
         fontWeight: 600,
         fontSize: `${currentFontScale.h5}rem`,
-        lineHeight: 1.45,
         '@media (max-width:600px)': {
-          fontSize: `clamp(1rem, 2.5vw, ${currentFontScale.h5 * 0.9}rem)`,
-          lineHeight: 1.5,
+          fontSize: `${currentFontScale.h5 * 0.9}rem`,
         },
       },
       h6: {
         fontWeight: 600,
         fontSize: `${currentFontScale.h6}rem`,
-        lineHeight: 1.5,
         '@media (max-width:600px)': {
-          fontSize: `clamp(0.875rem, 2vw, ${currentFontScale.h6 * 0.9}rem)`,
-          lineHeight: 1.55,
+          fontSize: `${currentFontScale.h6 * 0.9}rem`,
         },
       },
       body1: {
         fontSize: `${currentFontScale.body1}rem`,
-        lineHeight: 1.6,
         '@media (max-width:600px)': {
-          fontSize: '1rem',
-          lineHeight: 1.65,
+          fontSize: `${currentFontScale.body1 * 0.9}rem`,
         },
       },
       body2: {
         fontSize: `${currentFontScale.body2}rem`,
-        lineHeight: 1.55,
         '@media (max-width:600px)': {
-          fontSize: '0.875rem',
-          lineHeight: 1.6,
+          fontSize: `${currentFontScale.body2 * 0.9}rem`,
         },
       },
       button: {
@@ -366,33 +348,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         : '0px 11px 15px -7px rgba(0,0,0,0.2),0px 24px 38px 3px rgba(0,0,0,0.14),0px 9px 46px 8px rgba(0,0,0,0.12)',
     ] as any,
     components: {
-      MuiCssBaseline: {
-        styleOverrides: {
-          html: {
-            WebkitTextSizeAdjust: '100%',
-            textSizeAdjust: '100%',
-          },
-          body: {
-            overflowX: 'hidden',
-            maxWidth: '100vw',
-          },
-          '*': {
-            boxSizing: 'border-box',
-          },
-        },
-      },
-      MuiContainer: {
-        styleOverrides: {
-          root: {
-            maxWidth: '100vw !important',
-            overflowX: 'hidden',
-            '@media (max-width:600px)': {
-              paddingLeft: '16px',
-              paddingRight: '16px',
-            },
-          },
-        },
-      },
       MuiButton: {
         styleOverrides: {
           root: {
@@ -401,11 +356,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
             fontWeight: 600,
             padding: '10px 20px',
             transition: 'all 0.2s ease-in-out',
-            touchAction: 'manipulation',
             '@media (max-width:600px)': {
-              padding: '12px 20px',
-              minHeight: '48px',
-              fontSize: '1rem',
+              padding: '8px 16px',
+              minHeight: '44px',
             },
             '&:hover': {
               transform: 'translateY(-1px)',
@@ -495,34 +448,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
           colorPrimary: {
             backgroundColor: currentColorScheme.main,
             color: currentColorScheme.contrastText,
-          },
-        },
-      },
-      MuiTypography: {
-        styleOverrides: {
-          root: {
-            wordWrap: 'break-word',
-            overflowWrap: 'break-word',
-            wordBreak: 'break-word',
-            hyphens: 'auto',
-            maxWidth: '100%',
-          },
-        },
-      },
-      MuiGrid: {
-        styleOverrides: {
-          container: {
-            maxWidth: '100%',
-            '@media (max-width:600px)': {
-              margin: 0,
-              width: '100%',
-            },
-          },
-          item: {
-            '@media (max-width:600px)': {
-              paddingLeft: '8px',
-              paddingRight: '8px',
-            },
           },
         },
       },

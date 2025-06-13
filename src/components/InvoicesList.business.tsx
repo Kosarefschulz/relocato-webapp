@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -41,6 +41,8 @@ import {
   Euro as EuroIcon
 } from '@mui/icons-material';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { generateInvoicePDF } from '../services/pdfService';
+import { Customer } from '../types';
 
 interface Invoice {
   id?: string;
@@ -64,6 +66,8 @@ interface Invoice {
 
 const InvoicesList: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const highlightInvoice = location.state?.highlightInvoice;
   
   // State
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -73,11 +77,28 @@ const InvoicesList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date_desc');
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
   // Load invoices
   useEffect(() => {
     loadInvoices();
   }, []);
+  
+  // Scroll to highlighted invoice
+  useEffect(() => {
+    if (highlightInvoice && invoices.length > 0) {
+      setTimeout(() => {
+        const element = document.getElementById(`invoice-${highlightInvoice}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.style.backgroundColor = '#ffeb3b';
+          setTimeout(() => {
+            element.style.backgroundColor = '';
+          }, 2000);
+        }
+      }, 100);
+    }
+  }, [highlightInvoice, invoices]);
 
   // Filter and search
   useEffect(() => {
@@ -129,9 +150,13 @@ const InvoicesList: React.FC = () => {
       setLoading(true);
       setError('');
       
-      // Load invoices from Google Sheets
-      const invoices = await googleSheetsService.getInvoices();
-      setInvoices(invoices);
+      // Load invoices and customers from Google Sheets
+      const [invoicesData, customersData] = await Promise.all([
+        googleSheetsService.getInvoices(),
+        googleSheetsService.getCustomers()
+      ]);
+      setInvoices(invoicesData);
+      setCustomers(customersData);
       
     } catch (err) {
       setError('Fehler beim Laden der Rechnungen');
@@ -179,7 +204,7 @@ const InvoicesList: React.FC = () => {
     if (window.confirm(`Rechnung ${invoice.invoiceNumber} als bezahlt markieren?`)) {
       try {
         // Update invoice status
-        console.log('Mark as paid:', invoice.invoiceNumber);
+        await googleSheetsService.updateInvoice(invoice.id!, { ...invoice, status: 'paid' });
         // Refresh list
         await loadInvoices();
       } catch (err) {
@@ -389,7 +414,17 @@ const InvoicesList: React.FC = () => {
                 </TableRow>
               ) : (
                 filteredInvoices.map((invoice) => (
-                  <TableRow key={invoice.id} hover>
+                  <TableRow 
+              key={invoice.id} 
+              hover
+              id={`invoice-${invoice.id}`}
+              sx={{
+                transition: 'background-color 0.3s',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                }
+              }}
+            >
                     <TableCell>
                       <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
                         {invoice.invoiceNumber}
@@ -483,8 +518,25 @@ const InvoicesList: React.FC = () => {
                           size="small"
                           color="info"
                           title="PDF herunterladen"
-                          onClick={() => {
-                            console.log('Download PDF for invoice:', invoice.invoiceNumber);
+                          onClick={async () => {
+                            try {
+                              const customer = customers.find(c => c.id === invoice.customerId);
+                              if (!customer) {
+                                alert('Kunde nicht gefunden');
+                                return;
+                              }
+                              
+                              const pdfBlob = await generateInvoicePDF(customer, invoice);
+                              const url = URL.createObjectURL(pdfBlob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `Rechnung_${invoice.invoiceNumber}_${customer.name.replace(/\s+/g, '_')}.pdf`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            } catch (error) {
+                              console.error('PDF Download Error:', error);
+                              alert('Fehler beim PDF-Download');
+                            }
                           }}
                         >
                           <GetAppIcon fontSize="small" />

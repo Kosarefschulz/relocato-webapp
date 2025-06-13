@@ -58,6 +58,8 @@ const QuotesList: React.FC = () => {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [sendInvoice, setSendInvoice] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   // Load data
   useEffect(() => {
@@ -69,13 +71,15 @@ const QuotesList: React.FC = () => {
       setLoading(true);
       setError('');
       
-      const [quotesData, customersData] = await Promise.all([
+      const [quotesData, customersData, invoicesData] = await Promise.all([
         googleSheetsService.getQuotes(),
-        googleSheetsService.getCustomers()
+        googleSheetsService.getCustomers(),
+        googleSheetsService.getInvoices()
       ]);
       
       setQuotes(quotesData);
       setCustomers(customersData);
+      setInvoices(invoicesData);
       
     } catch (err) {
       setError('Fehler beim Laden der Angebote');
@@ -124,14 +128,14 @@ const QuotesList: React.FC = () => {
       
       const emailData = {
         to: customer.email,
-        subject: `Ihr Umzugsangebot von wertvoll`,
+        subject: `Ihr Umzugsangebot von Relocato`,
         content: `
           <h2>Sehr geehrte/r ${customer.name},</h2>
           <p>vielen Dank für Ihre Anfrage. Anbei finden Sie Ihr persönliches Umzugsangebot.</p>
           <p><strong>Angebotsnummer:</strong> ${quote.id}</p>
           <p><strong>Gesamtpreis:</strong> €${quote.price.toFixed(2)}</p>
           <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
-          <p>Mit freundlichen Grüßen<br>Ihr wertvoll Team</p>
+          <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
         `,
         attachments: [{
           filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
@@ -222,7 +226,7 @@ const QuotesList: React.FC = () => {
             // Send email with invoice
             const emailData = {
               to: customer.email,
-              subject: `Ihre Rechnung ${invoiceNumber} von wertvoll`,
+              subject: `Ihre Rechnung ${invoiceNumber} von Relocato`,
               content: `
                 <h2>Sehr geehrte/r ${customer.name},</h2>
                 <p>vielen Dank für Ihren Auftrag. Anbei erhalten Sie Ihre Rechnung.</p>
@@ -231,7 +235,7 @@ const QuotesList: React.FC = () => {
                 <p><strong>Zahlungsziel:</strong> ${new Date(savedInvoice.dueDate).toLocaleDateString('de-DE')}</p>
                 <p>Bitte überweisen Sie den Betrag bis zum angegebenen Zahlungsziel auf das in der Rechnung angegebene Konto.</p>
                 <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
-                <p>Mit freundlichen Grüßen<br>Ihr wertvoll Team</p>
+                <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
               `,
               attachments: [{
                 filename: `Rechnung_${invoiceNumber}_${customer.name.replace(/\s+/g, '_')}.pdf`,
@@ -452,7 +456,86 @@ const QuotesList: React.FC = () => {
                     )}
                   </Box>
 
-                  <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {/* Status ändern Buttons */}
+                    {quote.status === 'draft' && (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <SendIcon />}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setUpdatingStatus(quote.id);
+                          try {
+                            await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
+                            setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'sent' as const } : q));
+                            setSnackbar({ open: true, message: 'Status auf "Versendet" geändert', severity: 'success' });
+                          } catch (error) {
+                            console.error('Error updating quote status:', error);
+                            setSnackbar({ open: true, message: 'Fehler beim Aktualisieren des Status', severity: 'error' });
+                          } finally {
+                            setUpdatingStatus(null);
+                          }
+                        }}
+                        disabled={updatingStatus === quote.id}
+                      >
+                        Als gesendet markieren
+                      </Button>
+                    )}
+                    
+                    {quote.status === 'sent' && (
+                      <>
+                        <IconButton
+                          size="small"
+                          color="success"
+                          title="Als angenommen markieren"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setUpdatingStatus(quote.id);
+                            try {
+                              await googleSheetsService.updateQuote(quote.id, { status: 'accepted' });
+                              setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'accepted' as const } : q));
+                              setSnackbar({ open: true, message: 'Angebot wurde als angenommen markiert', severity: 'success' });
+                            } catch (error) {
+                              console.error('Error updating quote status:', error);
+                              setSnackbar({ open: true, message: 'Fehler beim Aktualisieren des Status', severity: 'error' });
+                            } finally {
+                              setUpdatingStatus(null);
+                            }
+                          }}
+                          disabled={updatingStatus === quote.id}
+                        >
+                          {updatingStatus === quote.id ? <CircularProgress size={20} /> : <CheckIcon />}
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          title="Als abgelehnt markieren"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setUpdatingStatus(quote.id);
+                            try {
+                              await googleSheetsService.updateQuote(quote.id, { status: 'rejected' });
+                              setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'rejected' as const } : q));
+                              setSnackbar({ open: true, message: 'Angebot wurde als abgelehnt markiert', severity: 'success' });
+                            } catch (error) {
+                              console.error('Error updating quote status:', error);
+                              setSnackbar({ open: true, message: 'Fehler beim Aktualisieren des Status', severity: 'error' });
+                            } finally {
+                              setUpdatingStatus(null);
+                            }
+                          }}
+                          disabled={updatingStatus === quote.id}
+                        >
+                          <CancelIcon />
+                        </IconButton>
+                      </>
+                    )}
+
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                    
+                    {/* Action Icons */}
                     <IconButton
                       size="small"
                       color="primary"
@@ -487,6 +570,25 @@ const QuotesList: React.FC = () => {
                         color="secondary"
                         title="In Rechnung umwandeln"
                         onClick={() => handleConvertToInvoice(quote)}
+                      >
+                        <ReceiptIcon />
+                      </IconButton>
+                    )}
+                    
+                    {quote.status === 'invoiced' && (
+                      <IconButton
+                        size="small"
+                        color="secondary"
+                        title="Rechnung anzeigen"
+                        onClick={() => {
+                          // Find invoice for this quote
+                          const invoice = invoices.find(inv => inv.quoteId === quote.id);
+                          if (invoice) {
+                            navigate('/invoices', { state: { highlightInvoice: invoice.id } });
+                          } else {
+                            setSnackbar({ open: true, message: 'Rechnung nicht gefunden', severity: 'error' });
+                          }
+                        }}
                       >
                         <ReceiptIcon />
                       </IconButton>

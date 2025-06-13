@@ -28,6 +28,7 @@ import { motion } from 'framer-motion';
 import DarkModeToggle from './DarkModeToggle';
 import SalesOverview from './SalesOverview';
 import Logo from './Logo';
+import SearchBar from './SearchBar';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -98,29 +99,13 @@ const Dashboard: React.FC = () => {
             <Logo size="medium" showText={true} />
           </Box>
           
-          {/* Dark Mode Toggle */}
-          <DarkModeToggle />
+          {/* Search Bar */}
+          <SearchBar />
           
-          {/* Search */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <IconButton
-              size="large"
-              onClick={() => navigate('/customers')}
-              sx={{ 
-                ml: 1,
-                color: theme.palette.text.primary,
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                }
-              }}
-            >
-              <SearchIcon />
-            </IconButton>
-          </motion.div>
+          {/* Dark Mode Toggle */}
+          <Box sx={{ ml: 1 }}>
+            <DarkModeToggle />
+          </Box>
         </Toolbar>
       </AppBar>
 
