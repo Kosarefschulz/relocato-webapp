@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import { CircularProgress, Box, Typography } from '@mui/material';
 import { User } from 'firebase/auth';
 import { authService } from './services/authService';
 import { authPersistencePromise } from './config/firebase';
-import { modernTheme } from './styles/modernTheme';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -98,8 +96,7 @@ function App() {
 
   if (loading) {
     return (
-      <ThemeProvider theme={modernTheme}>
-        <CssBaseline />
+      <ThemeProvider>
         <Box 
           display="flex" 
           flexDirection="column"
@@ -118,8 +115,7 @@ function App() {
   }
 
   return (
-    <ThemeProvider theme={modernTheme}>
-      <CssBaseline />
+    <ThemeProvider>
       <AuthContext.Provider value={{ user, login, logout, resetPassword }}>
         <Router>
           <Routes>
