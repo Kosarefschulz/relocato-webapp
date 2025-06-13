@@ -149,9 +149,13 @@ const QuotesList: React.FC = () => {
         // Update quote status to sent
         const updatedQuote = { ...quote, status: 'sent' as const };
         await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
-        setQuotes(quotes.map(q => q.id === quote.id ? updatedQuote : q));
         
-        setSnackbar({ open: true, message: 'Angebot erfolgreich versendet', severity: 'success' });
+        // Update local state immediately without reload
+        setQuotes(prevQuotes => prevQuotes.map(q => 
+          q.id === quote.id ? { ...q, status: 'sent' as const } : q
+        ));
+        
+        setSnackbar({ open: true, message: 'Angebot erfolgreich versendet. Sie können jetzt den Status aktualisieren.', severity: 'success' });
       } else {
         setSnackbar({ open: true, message: 'Fehler beim E-Mail-Versand', severity: 'error' });
       }

@@ -191,6 +191,14 @@ const CustomersList: React.FC = () => {
                 }}
               />
               <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/new-customer')}
+                >
+                  Neuer Kunde
+                </Button>
                 <Tooltip title="Filter">
                   <IconButton 
                     sx={{ 
@@ -203,12 +211,11 @@ const CustomersList: React.FC = () => {
                 </Tooltip>
                 {hasLocalCustomers && (
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     startIcon={<UploadIcon />}
                     onClick={handleExportClick}
-                    sx={{ minWidth: 200 }}
                   >
-                    Export für Google Sheets
+                    Export
                   </Button>
                 )}
               </Box>
