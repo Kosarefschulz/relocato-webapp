@@ -218,21 +218,6 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     yPosition += 12;
     
     // Service Box
-    doc.setFillColor(249, 249, 249);
-    doc.setDrawColor(221, 221, 221);
-    doc.setLineWidth(0.5);
-    const serviceBoxHeight = Math.min(45, 8 + includedServices.length * 4.5); // Dynamische Höhe basierend auf Anzahl der Leistungen
-    doc.rect(margin, yPosition, rightMargin - margin, serviceBoxHeight, 'FD');
-    
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0);
-    doc.text('Folgende Leistungen sind im Festpreis enthalten:', margin + 3, yPosition + 5);
-    yPosition += 8;
-    
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    
     const includedServices = [];
     
     // Basis Be- und Entladen
@@ -311,6 +296,21 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     includedServices.push('• Transport mit modernem Umzugs-LKW');
     includedServices.push('• Grundhaftung nach §451g HGB');
     
+    doc.setFillColor(249, 249, 249);
+    doc.setDrawColor(221, 221, 221);
+    doc.setLineWidth(0.5);
+    const serviceBoxHeight = Math.min(45, 8 + includedServices.length * 4.5); // Dynamische Höhe basierend auf Anzahl der Leistungen
+    doc.rect(margin, yPosition, rightMargin - margin, serviceBoxHeight, 'FD');
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text('Folgende Leistungen sind im Festpreis enthalten:', margin + 3, yPosition + 5);
+    yPosition += 8;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    
     // Leistungen ausgeben (kompakter mit Bullets)
     let serviceY = yPosition;
     const maxServicesPerColumn = 8;
@@ -385,7 +385,9 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
       doc.text('Anmerkungen:', margin, yPosition);
       doc.setFont('helvetica', 'normal');
       const splitComment = doc.splitTextToSize(quote.comment, rightMargin - margin - 30);
-      doc.text(splitComment.slice(0, 1)[0], margin + 30, yPosition);
+      if (splitComment.length > 0) {
+        doc.text(splitComment[0], margin + 30, yPosition);
+      }
       yPosition += 5;
     }
     
