@@ -76,11 +76,7 @@ const Logo: React.FC<LogoProps> = ({
             sx={{
               fontSize: currentSize.fontSize,
               fontWeight: 700,
-              color: variant === 'light' 
-                ? 'white' 
-                : variant === 'dark' 
-                ? theme.palette.grey[900]
-                : theme.palette.text.primary,
+              color: '#4ABDBD', // Wertvoll Türkis-Grün
               letterSpacing: '-0.02em',
             }}
           >

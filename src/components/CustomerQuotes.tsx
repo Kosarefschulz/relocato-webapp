@@ -24,7 +24,8 @@ import {
   Visibility as VisibilityIcon,
   Receipt as ReceiptIcon,
   CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
+  Send as SendIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -49,6 +50,9 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
   const [sendInvoice, setSendInvoice] = useState(true);
   const [converting, setConverting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [sendAndInvoiceDialogOpen, setSendAndInvoiceDialogOpen] = useState(false);
+  const [sendingQuote, setSendingQuote] = useState<Quote | null>(null);
+  const [createInvoiceWithQuote, setCreateInvoiceWithQuote] = useState(false);
 
   const downloadPDF = async (quote: Quote) => {
     try {
@@ -222,28 +226,42 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   {/* Status ändern Buttons */}
                   {console.log(`Checking quote status "${quote.status}"`)}
                   {quote.status === 'draft' && (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="primary"
-                      startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <EmailIcon />}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        setUpdatingStatus(quote.id);
-                        try {
-                          await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'sent' });
-                          window.location.reload(); // Reload to refresh data
-                        } catch (error) {
-                          console.error('Error updating quote status:', error);
-                          alert('Fehler beim Aktualisieren des Status');
-                        } finally {
-                          setUpdatingStatus(null);
-                        }
-                      }}
-                      disabled={updatingStatus === quote.id}
-                    >
-                      Als gesendet markieren
-                    </Button>
+                    <>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        startIcon={<EmailIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSendingQuote(quote);
+                          setSendAndInvoiceDialogOpen(true);
+                        }}
+                      >
+                        Versenden
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <CheckCircleIcon />}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setUpdatingStatus(quote.id);
+                          try {
+                            await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'sent' });
+                            window.location.reload();
+                          } catch (error) {
+                            console.error('Error updating quote status:', error);
+                            alert('Fehler beim Aktualisieren des Status');
+                          } finally {
+                            setUpdatingStatus(null);
+                          }
+                        }}
+                        disabled={updatingStatus === quote.id}
+                      >
+                        Als gesendet markieren
+                      </Button>
+                    </>
                   )}
                   {quote.status === 'sent' && (
                     <>
@@ -502,6 +520,128 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
             startIcon={converting ? <CircularProgress size={16} /> : <ReceiptIcon />}
           >
             {converting ? 'Erstelle Rechnung...' : 'Rechnung erstellen'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Send Quote with Invoice Option Dialog */}
+      <Dialog
+        open={sendAndInvoiceDialogOpen}
+        onClose={() => setSendAndInvoiceDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Angebot versenden</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            Möchten Sie das Angebot an {customer.name} versenden?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            E-Mail: {customer.email}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Preis: €{sendingQuote?.price.toFixed(2)}
+          </Typography>
+          
+          <FormControlLabel
+            control={
+              <Switch
+                checked={createInvoiceWithQuote}
+                onChange={(e) => setCreateInvoiceWithQuote(e.target.checked)}
+              />
+            }
+            label="Direkt eine Rechnung erstellen und versenden"
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setSendAndInvoiceDialogOpen(false);
+            setSendingQuote(null);
+            setCreateInvoiceWithQuote(false);
+          }}>
+            Abbrechen
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              if (!sendingQuote || !customer.email) return;
+              
+              try {
+                // Send quote PDF
+                const quotePdfBlob = await generatePDF(customer, sendingQuote);
+                const quoteEmailData = {
+                  to: customer.email,
+                  subject: `Ihr Umzugsangebot von Relocato`,
+                  content: `Sehr geehrte/r ${customer.name},\n\nanbei erhalten Sie Ihr persönliches Umzugsangebot.\n\nAngebotsnummer: ${sendingQuote.id}\nGesamtpreis: €${sendingQuote.price.toFixed(2)}\n\nBei Fragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen\nIhr Relocato Team`,
+                  attachments: [{
+                    filename: `Angebot_${sendingQuote.id}_${customer.name.replace(/\s+/g, '_')}.pdf`,
+                    content: quotePdfBlob
+                  }]
+                };
+                
+                await sendEmail(quoteEmailData);
+                await googleSheetsService.updateQuote(sendingQuote.id, { ...sendingQuote, status: 'sent' });
+                
+                // Create and send invoice if requested
+                if (createInvoiceWithQuote) {
+                  const invoiceNumber = `R${Date.now().toString().slice(-6)}`;
+                  const newInvoice: Invoice = {
+                    id: invoiceNumber,
+                    customerId: customer.id || '',
+                    customerName: customer.name,
+                    quoteId: sendingQuote.id,
+                    amount: sendingQuote.price,
+                    date: new Date(),
+                    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+                    status: 'sent',
+                    comment: sendingQuote.comment,
+                    invoiceNumber: invoiceNumber,
+                    price: sendingQuote.price,
+                    taxAmount: sendingQuote.price * 0.19,
+                    totalPrice: sendingQuote.price * 1.19,
+                    items: [{
+                      description: 'Umzugsdienstleistung gemäß Angebot ' + sendingQuote.id,
+                      quantity: 1,
+                      unitPrice: sendingQuote.price,
+                      totalPrice: sendingQuote.price
+                    }],
+                    createdAt: new Date()
+                  };
+                  
+                  const savedInvoice = await googleSheetsService.createInvoice(newInvoice);
+                  
+                  // Send invoice PDF
+                  const invoicePdfBlob = await generateInvoicePDF(customer, savedInvoice);
+                  const invoiceEmailData = {
+                    to: customer.email,
+                    subject: `Ihre Rechnung ${invoiceNumber} von Relocato`,
+                    content: `Sehr geehrte/r ${customer.name},\n\nanbei erhalten Sie Ihre Rechnung.\n\nRechnungsnummer: ${invoiceNumber}\nGesamtbetrag: €${savedInvoice.totalPrice.toFixed(2)}\nZahlungsziel: ${new Date(savedInvoice.dueDate).toLocaleDateString('de-DE')}\n\nBitte überweisen Sie den Betrag bis zum angegebenen Zahlungsziel.\n\nMit freundlichen Grüßen\nIhr Relocato Team`,
+                    attachments: [{
+                      filename: `Rechnung_${invoiceNumber}_${customer.name.replace(/\s+/g, '_')}.pdf`,
+                      content: invoicePdfBlob
+                    }]
+                  };
+                  
+                  await sendEmail(invoiceEmailData);
+                  alert(`Angebot und Rechnung wurden erfolgreich versendet!`);
+                } else {
+                  alert('Angebot wurde erfolgreich versendet!');
+                }
+                
+                setSendAndInvoiceDialogOpen(false);
+                setSendingQuote(null);
+                setCreateInvoiceWithQuote(false);
+                window.location.reload();
+              } catch (error) {
+                console.error('Error:', error);
+                alert('Fehler beim Versenden');
+              }
+            }}
+            startIcon={<SendIcon />}
+          >
+            Versenden
           </Button>
         </DialogActions>
       </Dialog>
