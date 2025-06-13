@@ -127,6 +127,7 @@ const Dashboard: React.FC = () => {
       {/* Main Content */}
       <Container 
         component="main" 
+        maxWidth="lg"
         sx={{ 
           flex: 1,
           display: 'flex',
@@ -135,6 +136,9 @@ const Dashboard: React.FC = () => {
           alignItems: 'center',
           pt: 8,
           pb: 10,
+          px: { xs: 2, sm: 3 },
+          maxWidth: '100vw',
+          overflowX: 'hidden',
         }}
       >
         <motion.div
@@ -235,9 +239,10 @@ const Dashboard: React.FC = () => {
             sx={{ 
               display: { xs: 'grid', md: 'none' },
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: 2,
+              gap: 1.5,
               width: '100%',
-              px: 2,
+              maxWidth: '100%',
+              px: 0,
             }}
           >
             {navigationItems.map((item, index) => (
