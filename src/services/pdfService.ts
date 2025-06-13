@@ -362,7 +362,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    const unterschriftText = 'Mit meiner Unterschrift beauftrage ich RELOCATO® Bielefeld mit der Durchführung des Umzugs zu den genannten Konditionen.';
+    const unterschriftText = 'Mit meiner Unterschrift beauftrage ich wertvoll mit der Durchführung des Umzugs zu den genannten Konditionen.';
     doc.text(unterschriftText, margin + 3, yPosition + 5);
     
     // Unterschriftslinien
@@ -385,7 +385,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     doc.setTextColor(128);
     doc.setFont('helvetica', 'normal');
     // Korrigierte Adresse
-    doc.text('RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY - 3, { align: 'center' });
+    doc.text('wertvoll | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY - 3, { align: 'center' });
     doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de | Wertvoll Dienstleistungen GmbH | HRB 43574', pageWidth / 2, footerY + 1, { align: 'center' });
 
     console.log('✅ PDF erfolgreich generiert');
@@ -399,7 +399,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
       const fallbackDoc = new jsPDF();
       
       fallbackDoc.setFontSize(20);
-      fallbackDoc.text('RELOCATO® Umzugsangebot', 20, 30);
+      fallbackDoc.text('wertvoll Umzugsangebot', 20, 30);
       
       fallbackDoc.setFontSize(12);
       fallbackDoc.text(`Kunde: ${customer.name || 'Unbekannt'}`, 20, 50);

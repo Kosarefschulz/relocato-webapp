@@ -241,7 +241,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
 </head>
 <body>
     <div class="logo-header">
-        <img src="https://images.provenexpert.com/cf/91/1fa1149f570df63b5b99e815df3d/relocato-ulm_full_1701284945.jpg" alt="RELOCATO® Logo" class="logo-img">
+        <div style="font-size: 32px; font-weight: bold; color: #4abdbd;">wertvoll</div>
     </div>
     
     <h1>Umzugsangebot</h1>
@@ -249,7 +249,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
     <div class="header">
         <h2>Angebot Nr. ${angebotNr}</h2>
         <p>Gültig bis: ${gueltigBis.toLocaleDateString('de-DE')}</p>
-        <p>RELOCATO® Bielefeld - Ihr regionaler Umzugsservice!</p>
+        <p>wertvoll - Ihr professioneller Umzugsservice!</p>
     </div>
     
     <div class="info-section">
@@ -488,7 +488,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
     
     <div class="signature-section">
         <p><strong>Hinweis:</strong> Dieses Angebot ist unverbindlich und freibleibend. Alle Preise verstehen sich inkl. 19% MwSt.</p>
-        <p>Mit meiner Unterschrift beauftrage ich RELOCATO® Bielefeld mit der Durchführung des Umzugs zu den genannten Konditionen.</p>
+        <p>Mit meiner Unterschrift beauftrage ich wertvoll mit der Durchführung des Umzugs zu den genannten Konditionen.</p>
         
         <table style="width: 100%; margin-top: 40px;">
             <tr>
@@ -506,7 +506,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
     </div>
     
     <p class="footer-text">
-        RELOCATO® Bielefeld | Detmolder Str. 234a, 33605 Bielefeld<br>
+        wertvoll | Albrechtstraße 27, 33615 Bielefeld<br>
         Tel: (0521) 1200551-0 | E-Mail: bielefeld@relocato.de | Web: www.relocato.de<br>
         Wertvoll Dienstleistungen GmbH | Geschäftsführer: M. Michailowski & M. Knaub<br>
         Amtsgericht Bielefeld HRB 43574 | USt-IdNr.: DE328644143

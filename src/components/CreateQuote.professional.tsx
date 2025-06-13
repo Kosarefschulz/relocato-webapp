@@ -24,7 +24,7 @@ import {
   GetApp as GetAppIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { sendQuoteEmailWithPDFShift } from '../services/emailServiceWithPDFShift';
+import { sendEmail } from '../services/emailService';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
@@ -179,8 +179,21 @@ const CreateQuote: React.FC = () => {
       // Angebot speichern
       const quote = await saveQuote();
       
+      // PDF generieren
+      const pdfBlob = await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));
+      
       // E-Mail senden
-      const sent = await sendQuoteEmailWithPDFShift(customer, calculation, quoteDetails);
+      const emailData = {
+        to: customer.email,
+        subject: `Ihr Umzugsangebot von wertvoll`,
+        content: generateEmailHTML(customer, calculation, quoteDetails),
+        attachments: [{
+          filename: `Umzugsangebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
+          content: pdfBlob
+        }]
+      };
+      
+      const sent = await sendEmail(emailData);
       
       if (sent) {
         setSuccess(true);
