@@ -82,7 +82,7 @@ const CustomersList: React.FC = () => {
   );
 
   const handleSelectCustomer = (customer: Customer) => {
-    navigate(`/customer/${customer.id}`, { state: { from: '/customers' } });
+    navigate(`/customer-details/${customer.id}`, { state: { from: '/customers' } });
   };
 
   const isUpcomingMove = (movingDate: string) => {

@@ -266,7 +266,7 @@ const CreateQuote: React.FC = () => {
       setSnackbar({ open: true, message: 'Angebot erfolgreich erstellt!', severity: 'success' });
       
       setTimeout(() => {
-        navigate(`/customer/${selectedCustomer.id}`, { state: { tabIndex: 2 } });
+        navigate(`/customer-details/${selectedCustomer.id}`, { state: { tabIndex: 2 } });
       }, 1500);
     } catch (error) {
       console.error('Fehler beim Speichern:', error);

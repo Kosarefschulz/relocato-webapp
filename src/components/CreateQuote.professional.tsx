@@ -188,7 +188,7 @@ const CreateQuote: React.FC = () => {
         
         // Nach 3 Sekunden zurück zur Kundendetails
         setTimeout(() => {
-          navigate(`/customer/${customer.id}`);
+          navigate(`/customer-details/${customer.id}`);
         }, 3000);
       } else {
         setError('E-Mail konnte nicht gesendet werden');
@@ -273,7 +273,7 @@ const CreateQuote: React.FC = () => {
     <Container maxWidth="xl" sx={{ mt: { xs: 1, sm: 2 }, mb: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <IconButton onClick={() => navigate(`/customer/${customer.id}`)} sx={{ mb: 2 }}>
+        <IconButton onClick={() => navigate(`/customer-details/${customer.id}`)} sx={{ mb: 2 }}>
           <ArrowBackIcon />
         </IconButton>
         
