@@ -42,6 +42,7 @@ import CustomerPhotos from './CustomerPhotos';
 import CustomerCommunication from './CustomerCommunication';
 import CustomerQuotes from './CustomerQuotes';
 import DarkModeToggle from './DarkModeToggle';
+import RoutePlanner from './RoutePlanner';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 
 const HeroSection = motion(Box);
@@ -87,6 +88,7 @@ const CustomerDetails: React.FC = () => {
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [routePlannerOpen, setRoutePlannerOpen] = useState(false);
 
   // E-Mail-Statistiken für Tab-Counter
   const emailStats = React.useMemo(() => {
@@ -480,10 +482,7 @@ const CustomerDetails: React.FC = () => {
                   <Button
                     variant="outlined"
                     startIcon={<LocationIcon />}
-                    onClick={() => {
-                      const routeUrl = `https://maps.google.com/maps/dir/${encodeURIComponent(customer.fromAddress)}/${encodeURIComponent(customer.toAddress)}`;
-                      window.open(routeUrl, '_blank');
-                    }}
+                    onClick={() => setRoutePlannerOpen(true)}
                     sx={{ textTransform: 'none' }}
                   >
                     Route planen
@@ -611,6 +610,15 @@ const CustomerDetails: React.FC = () => {
           Änderungen gespeichert
         </Alert>
       </Snackbar>
+
+      {/* Route Planner Dialog */}
+      {customer && (
+        <RoutePlanner
+          open={routePlannerOpen}
+          onClose={() => setRoutePlannerOpen(false)}
+          customer={customer}
+        />
+      )}
     </>
   );
 };

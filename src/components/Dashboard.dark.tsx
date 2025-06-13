@@ -182,11 +182,6 @@ const Dashboard: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* Sales Overview for Desktop */}
-          <Box sx={{ display: { xs: 'none', md: 'block' }, mb: 4, maxWidth: 1200, width: '100%' }}>
-            <SalesOverview />
-          </Box>
-
           {/* Quick Action Cards for Desktop */}
           <Box 
             sx={{ 
