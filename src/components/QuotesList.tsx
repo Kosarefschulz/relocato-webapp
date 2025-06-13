@@ -423,10 +423,11 @@ const QuotesList: React.FC = () => {
               whileHover={{ scale: 1.01 }}
             >
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                      <Typography variant="h6">
+                <Grid container spacing={2}>
+                  {/* Left side - Customer info */}
+                  <Grid item xs={12} md={8}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                         {quote.customerName}
                       </Typography>
                       <Chip
@@ -437,52 +438,77 @@ const QuotesList: React.FC = () => {
                       />
                     </Box>
                     
-                    <Box sx={{ display: 'flex', gap: 3, mb: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 3, mb: 1, flexWrap: 'wrap' }}>
                       <Typography variant="body2" color="text.secondary">
                         <strong>ID:</strong> {quote.id}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         <strong>Datum:</strong> {new Date(quote.createdAt).toLocaleDateString('de-DE')}
                       </Typography>
-                      <Typography variant="h6" color="success.main">
-                        €{quote.price.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
-                      </Typography>
                     </Box>
                     
                     {quote.comment && (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{ 
+                          mt: 1,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}
+                      >
                         {quote.comment}
                       </Typography>
                     )}
-                  </Box>
+                  </Grid>
+                  
+                  {/* Right side - Price */}
+                  <Grid item xs={12} md={4}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: { xs: 'flex-start', md: 'flex-end' },
+                      height: '100%'
+                    }}>
+                      <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold', mb: 2 }}>
+                        €{quote.price.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                      </Typography>
+                    </Box>
+                  </Grid>
 
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                    {/* Status ändern Buttons */}
-                    {quote.status === 'draft' && (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="primary"
-                        startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <SendIcon />}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          setUpdatingStatus(quote.id);
-                          try {
-                            await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
-                            setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'sent' as const } : q));
-                            setSnackbar({ open: true, message: 'Status auf "Versendet" geändert', severity: 'success' });
-                          } catch (error) {
-                            console.error('Error updating quote status:', error);
-                            setSnackbar({ open: true, message: 'Fehler beim Aktualisieren des Status', severity: 'error' });
-                          } finally {
-                            setUpdatingStatus(null);
-                          }
-                        }}
-                        disabled={updatingStatus === quote.id}
-                      >
-                        Als gesendet markieren
-                      </Button>
-                    )}
+                  {/* Actions */}
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 2 }} />
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        {/* Status ändern Buttons */}
+                        {quote.status === 'draft' && (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <SendIcon />}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setUpdatingStatus(quote.id);
+                              try {
+                                await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
+                                setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'sent' as const } : q));
+                                setSnackbar({ open: true, message: 'Status auf "Versendet" geändert', severity: 'success' });
+                              } catch (error) {
+                                console.error('Error updating quote status:', error);
+                                setSnackbar({ open: true, message: 'Fehler beim Aktualisieren des Status', severity: 'error' });
+                              } finally {
+                                setUpdatingStatus(null);
+                              }
+                            }}
+                            disabled={updatingStatus === quote.id}
+                          >
+                            Als gesendet markieren
+                          </Button>
+                        )}
                     
                     {quote.status === 'sent' && (
                       <>
@@ -532,10 +558,10 @@ const QuotesList: React.FC = () => {
                         </IconButton>
                       </>
                     )}
-
-                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                    
-                    {/* Action Icons */}
+                      </Box>
+                      
+                      {/* Action Icons */}
+                      <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton
                       size="small"
                       color="primary"
@@ -593,8 +619,10 @@ const QuotesList: React.FC = () => {
                         <ReceiptIcon />
                       </IconButton>
                     )}
-                  </Box>
-                </Box>
+                      </Box>
+                    </Box>
+                  </Grid>
+                </Grid>
               </CardContent>
             </MotionCard>
           </Grid>

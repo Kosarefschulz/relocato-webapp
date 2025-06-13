@@ -207,7 +207,18 @@ const SearchBar: React.FC = () => {
                       />
                     )}
                     renderOption={(props, option) => (
-                      <Box component="li" {...props} sx={{ py: 1, px: 2 }}>
+                      <Box 
+                        component="li" 
+                        {...props} 
+                        sx={{ 
+                          py: 1.5, 
+                          px: 2,
+                          cursor: 'pointer',
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                          }
+                        }}
+                      >
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                           <Avatar
                             sx={{
