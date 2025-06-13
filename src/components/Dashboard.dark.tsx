@@ -92,9 +92,13 @@ const Dashboard: React.FC = () => {
           borderBottom: `1px solid ${theme.palette.divider}`,
           color: theme.palette.text.primary,
           transition: 'all 0.3s ease',
+          pt: { xs: 'env(safe-area-inset-top)', sm: 0 },
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ 
+          minHeight: { xs: 56, sm: 64 },
+          px: { xs: 2, sm: 3 }
+        }}>
           <Box sx={{ flexGrow: 1 }}>
             <Logo size="medium" showText={true} />
           </Box>
@@ -119,8 +123,8 @@ const Dashboard: React.FC = () => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          pt: 8,
-          pb: 10,
+          pt: { xs: 10, sm: 8 },
+          pb: { xs: 12, sm: 10 },
           px: { xs: 2, sm: 3 },
           maxWidth: '100vw',
           overflowX: 'hidden',
@@ -281,6 +285,7 @@ const Dashboard: React.FC = () => {
           borderTop: `1px solid ${theme.palette.divider}`,
           backgroundColor: alpha(theme.palette.background.paper, 0.95),
           backdropFilter: 'blur(10px)',
+          pb: 'env(safe-area-inset-bottom)',
         }} 
         elevation={0}
       >
