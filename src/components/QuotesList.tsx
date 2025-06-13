@@ -489,24 +489,13 @@ const QuotesList: React.FC = () => {
                             size="small"
                             variant="contained"
                             color="primary"
-                            startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <SendIcon />}
-                            onClick={async (e) => {
+                            startIcon={<EmailIcon />}
+                            onClick={(e) => {
                               e.stopPropagation();
-                              setUpdatingStatus(quote.id);
-                              try {
-                                await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
-                                setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'sent' as const } : q));
-                                setSnackbar({ open: true, message: 'Status auf "Versendet" geändert', severity: 'success' });
-                              } catch (error) {
-                                console.error('Error updating quote status:', error);
-                                setSnackbar({ open: true, message: 'Fehler beim Aktualisieren des Status', severity: 'error' });
-                              } finally {
-                                setUpdatingStatus(null);
-                              }
+                              handleSendEmail(quote);
                             }}
-                            disabled={updatingStatus === quote.id}
                           >
-                            Als gesendet markieren
+                            Angebot versenden
                           </Button>
                         )}
                     
