@@ -29,7 +29,21 @@ import {
   AddAPhoto as AddAPhotoIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { googleDriveService, PHOTO_CATEGORIES, StoredPhoto } from '../services/googleDriveService';
+import googleDriveService, { StoredPhoto } from '../services/googleDriveService';
+
+const PHOTO_CATEGORIES = [
+  'Eingang',
+  'Wohnzimmer',
+  'Schlafzimmer',
+  'Küche',
+  'Bad',
+  'Flur',
+  'Keller',
+  'Dachboden',
+  'Garage',
+  'Außenbereich',
+  'Sonstiges'
+];
 
 interface CustomerPhotosProps {
   customer: Customer;
