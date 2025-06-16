@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "umzugs-webapp-demo"
+    "default": "umzugsapp"
   },
   "targets": {},
   "etags": {}

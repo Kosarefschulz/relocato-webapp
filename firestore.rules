@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Alle Benutzer müssen authentifiziert sein
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Kunden-Sammlung
+    match /customers/{customerId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Angebote-Sammlung
+    match /quotes/{quoteId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Rechnungen-Sammlung
+    match /invoices/{invoiceId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Email-Vorlagen
+    match /emailTemplates/{templateId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Follow-up Regeln
+    match /followUpRules/{ruleId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Geplante Follow-ups
+    match /scheduledFollowUps/{followUpId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Angebots-Templates
+    match /quoteTemplates/{templateId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Analytics
+    match /analytics/{documentId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Email History
+    match /emailHistory/{emailId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Sync Logs
+    match /syncLogs/{logId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

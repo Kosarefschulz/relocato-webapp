@@ -25,14 +25,21 @@ import {
   Receipt as ReceiptIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
-  Send as SendIcon
+  Send as SendIcon,
+  History as HistoryIcon,
+  Draw as DrawIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Quote, Customer, Invoice } from '../types';
-import { generatePDF, generateInvoicePDF } from '../services/pdfService';
+import { generatePDF, generateInvoicePDF, generatePDFWithSignature } from '../services/pdfService';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { useAnalytics } from '../hooks/useAnalytics';
+import QuoteVersionManager from './QuoteVersionManager';
+import SignatureModal from './SignatureModal';
+import { SignatureData } from '../services/pdfSignatureService';
+import EmailComposer from './EmailComposer';
 
 interface CustomerQuotesProps {
   quotes: Quote[];
@@ -42,6 +49,7 @@ interface CustomerQuotesProps {
 
 const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTabChange }) => {
   const navigate = useNavigate();
+  const analytics = useAnalytics();
   const [loadingPdf, setLoadingPdf] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
@@ -50,8 +58,15 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
   const [sendInvoice, setSendInvoice] = useState(true);
   const [converting, setConverting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [versionManagerOpen, setVersionManagerOpen] = useState(false);
+  const [selectedQuoteForVersions, setSelectedQuoteForVersions] = useState<Quote | null>(null);
+  const [signatureModalOpen, setSignatureModalOpen] = useState(false);
+  const [quoteForSignature, setQuoteForSignature] = useState<Quote | null>(null);
+  const [signatureAction, setSignatureAction] = useState<'download' | 'email' | null>(null);
+  const [emailComposerOpen, setEmailComposerOpen] = useState(false);
+  const [quoteForEmail, setQuoteForEmail] = useState<Quote | null>(null);
 
-  const downloadPDF = async (quote: Quote) => {
+  const downloadPDF = async (quote: Quote, signatureData?: SignatureData) => {
     try {
       setLoadingPdf(quote.id);
       console.log('📄 Erstelle PDF für Angebot:', quote.id);
@@ -69,13 +84,19 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
         distance: quote.distance || 25
       };
       
-      // Generiere PDF
-      const pdfBlob = await generatePDF(customer, quoteData);
+      // Generiere PDF mit oder ohne digitale Unterschrift
+      const pdfBlob = signatureData 
+        ? await generatePDFWithSignature(customer, quoteData, signatureData)
+        : await generatePDF(customer, quoteData);
+        
       console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
+      
+      // Analytics: PDF Export
+      analytics.trackPDFExport('quote', quote.id);
       
       // Download/Öffnen
       const url = URL.createObjectURL(pdfBlob);
-      const fileName = `Umzugsangebot_${(customer.name || 'Kunde').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `Umzugsangebot_${(customer.name || 'Kunde').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}${signatureData ? '_signiert' : ''}.pdf`;
       
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         // iOS: Öffne in neuem Tab
@@ -100,6 +121,28 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
     } finally {
       setLoadingPdf(null);
     }
+  };
+
+  const handleSignatureRequest = (quote: Quote, action: 'download' | 'email') => {
+    setQuoteForSignature(quote);
+    setSignatureAction(action);
+    setSignatureModalOpen(true);
+  };
+
+  const handleSignatureComplete = async (signatureData: SignatureData) => {
+    if (!quoteForSignature) return;
+    
+    setSignatureModalOpen(false);
+    
+    if (signatureAction === 'download') {
+      await downloadPDF(quoteForSignature, signatureData);
+    } else if (signatureAction === 'email') {
+      // Email mit digitaler Unterschrift wird später implementiert
+      console.log('Email mit digitaler Unterschrift noch nicht implementiert');
+    }
+    
+    setQuoteForSignature(null);
+    setSignatureAction(null);
   };
 
   if (quotes.length === 0) {
@@ -222,47 +265,38 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   <Button
                     size="small"
                     variant="outlined"
-                    startIcon={<EmailIcon />}
-                    onClick={async (e) => {
+                    startIcon={<DrawIcon />}
+                    onClick={(e) => {
                       e.stopPropagation();
-                      try {
-                        const pdfBlob = await generatePDF(customer, quote);
-                        const emailData = {
-                          to: customer.email,
-                          subject: `Ihr Umzugsangebot von Relocato`,
-                          content: `
-                            <h2>Sehr geehrte/r ${customer.name},</h2>
-                            <p>vielen Dank für Ihre Anfrage. Anbei finden Sie Ihr persönliches Umzugsangebot.</p>
-                            <p><strong>Angebotsnummer:</strong> ${quote.id}</p>
-                            <p><strong>Gesamtpreis:</strong> €${quote.price.toFixed(2)}</p>
-                            <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
-                            <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
-                          `,
-                          attachments: [{
-                            filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
-                            content: pdfBlob
-                          }],
-                          customerId: customer.id,
-                          customerName: customer.name,
-                          templateType: 'quote_email'
-                        };
-                        
-                        const sent = await sendEmailViaSMTP(emailData);
-                        if (sent) {
-                          // Update quote status to sent
-                          await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
-                          alert('Angebot erfolgreich versendet!');
-                          window.location.reload();
-                        } else {
-                          alert('Fehler beim E-Mail-Versand');
-                        }
-                      } catch (error) {
-                        console.error('Email Error:', error);
-                        alert('Fehler beim E-Mail-Versand');
-                      }
+                      handleSignatureRequest(quote, 'download');
+                    }}
+                    disabled={loadingPdf === quote.id}
+                  >
+                    Signieren
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<EmailIcon />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setQuoteForEmail(quote);
+                      setEmailComposerOpen(true);
                     }}
                   >
                     Email
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<HistoryIcon />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedQuoteForVersions(quote);
+                      setVersionManagerOpen(true);
+                    }}
+                  >
+                    Versionen
                   </Button>
                   
                   {/* Status ändern Buttons */}
@@ -582,6 +616,60 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Quote Version Manager */}
+      {selectedQuoteForVersions && (
+        <QuoteVersionManager
+          open={versionManagerOpen}
+          onClose={() => {
+            setVersionManagerOpen(false);
+            setSelectedQuoteForVersions(null);
+          }}
+          quote={selectedQuoteForVersions}
+          onVersionChange={(newVersion) => {
+            // Reload to show the new version
+            window.location.reload();
+          }}
+        />
+      )}
+
+      {/* Digital Signature Modal */}
+      {quoteForSignature && (
+        <SignatureModal
+          open={signatureModalOpen}
+          onClose={() => {
+            setSignatureModalOpen(false);
+            setQuoteForSignature(null);
+            setSignatureAction(null);
+          }}
+          onSign={handleSignatureComplete}
+          documentName={`Angebot ${quoteForSignature.id}`}
+          signerType="customer"
+        />
+      )}
+
+      {/* Email Composer */}
+      {quoteForEmail && (
+        <EmailComposer
+          open={emailComposerOpen}
+          onClose={() => {
+            setEmailComposerOpen(false);
+            setQuoteForEmail(null);
+          }}
+          customer={customer}
+          quote={quoteForEmail}
+          onEmailSent={async () => {
+            // Update quote status to sent
+            await googleSheetsService.updateQuote(quoteForEmail.id, { status: 'sent' });
+            
+            // Analytics: Quote sent
+            analytics.trackQuoteSent(quoteForEmail.id, quoteForEmail.price);
+            analytics.trackEmailSent('quote', customer.id);
+            
+            window.location.reload();
+          }}
+        />
+      )}
 
     </>
   );

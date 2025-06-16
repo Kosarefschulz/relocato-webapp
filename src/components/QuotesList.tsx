@@ -37,12 +37,14 @@ import {
   Euro as EuroIcon,
   TrendingUp as TrendingUpIcon,
   Assessment as AssessmentIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
 import { Quote, Customer, Invoice } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 import { generatePDF, generateInvoicePDF } from '../services/pdfService';
 import { sendEmail } from '../services/emailService';
 import { motion } from 'framer-motion';
+import QuoteVersionManager from './QuoteVersionManager';
 
 const MotionCard = motion(Card);
 
@@ -60,6 +62,8 @@ const QuotesList: React.FC = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [versionManagerOpen, setVersionManagerOpen] = useState(false);
+  const [selectedQuoteForVersions, setSelectedQuoteForVersions] = useState<Quote | null>(null);
 
   // Load data
   useEffect(() => {

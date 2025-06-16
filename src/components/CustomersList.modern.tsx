@@ -38,6 +38,8 @@ import {
   Clear as ClearIcon,
   FilterList as FilterIcon,
   Add as AddIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
@@ -293,9 +295,17 @@ const CustomersList: React.FC = () => {
                         {/* Header */}
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                           <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              {customer.name}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                {customer.name}
+                              </Typography>
+                              {customer.priority === 'high' && (
+                                <StarIcon fontSize="small" color="error" />
+                              )}
+                              {customer.priority === 'medium' && (
+                                <StarBorderIcon fontSize="small" color="warning" />
+                              )}
+                            </Box>
                             <Typography variant="caption" color="text.secondary">
                               ID: {customer.id}
                             </Typography>
@@ -330,6 +340,38 @@ const CustomersList: React.FC = () => {
                             </Typography>
                           </Box>
                         </Box>
+
+                        {/* Tags */}
+                        {customer.tags && customer.tags.length > 0 && (
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', my: 1 }}>
+                            {customer.tags.slice(0, 3).map((tag, index) => (
+                              <Chip
+                                key={index}
+                                label={tag}
+                                size="small"
+                                variant="outlined"
+                                sx={{ 
+                                  fontSize: '0.7rem',
+                                  height: 20,
+                                  '& .MuiChip-label': { px: 1 }
+                                }}
+                              />
+                            ))}
+                            {customer.tags.length > 3 && (
+                              <Chip
+                                label={`+${customer.tags.length - 3}`}
+                                size="small"
+                                variant="filled"
+                                color="default"
+                                sx={{ 
+                                  fontSize: '0.7rem',
+                                  height: 20,
+                                  '& .MuiChip-label': { px: 1 }
+                                }}
+                              />
+                            )}
+                          </Box>
+                        )}
 
                         {/* Addresses */}
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1 }}>

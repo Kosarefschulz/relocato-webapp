@@ -18,6 +18,21 @@ export interface Customer {
   viewingScheduled?: boolean;
   viewingDate?: string;
   contacted?: boolean;
+  // Erweiterte Felder für bessere Kundenverwaltung
+  tags?: string[];
+  extendedNotes?: CustomerNote[];
+  priority?: 'low' | 'medium' | 'high';
+  source?: string; // Woher kam der Kunde (Website, Empfehlung, etc.)
+  customerNumber?: string;
+}
+
+export interface CustomerNote {
+  id: string;
+  content: string;
+  createdAt: Date;
+  createdBy: string;
+  category?: 'general' | 'wichtig' | 'besichtigung' | 'preisverhandlung' | 'sonstiges';
+  isInternal?: boolean; // Interne Notizen, die nicht für Kunden sichtbar sind
 }
 
 export interface Quote {
@@ -31,6 +46,24 @@ export interface Quote {
   status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'invoiced';
   volume?: number;
   distance?: number;
+  // Versionierung
+  version?: number;
+  parentQuoteId?: string; // Verweis auf ursprüngliches Angebot
+  isLatestVersion?: boolean;
+  versionHistory?: QuoteVersion[];
+  // Template-Referenz
+  templateId?: string;
+  templateName?: string;
+}
+
+export interface QuoteVersion {
+  id: string;
+  version: number;
+  price: number;
+  createdAt: Date;
+  createdBy: string;
+  changes?: string; // Beschreibung der Änderungen
+  status: Quote['status'];
 }
 
 export interface Invoice {
@@ -73,4 +106,39 @@ export interface EmailHistory {
   type: 'quote' | 'invoice' | 'reminder' | 'general';
   attachments?: string[];
   status: 'sent' | 'delivered' | 'opened' | 'failed';
+}
+
+export interface QuoteTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  isDefault?: boolean;
+  services: {
+    name: string;
+    basePrice: number;
+    pricePerUnit?: number;
+    unit?: 'Stunde' | 'Pauschale' | 'qm' | 'km';
+    included: boolean;
+    category?: 'transport' | 'verpackung' | 'montage' | 'sonstiges';
+  }[];
+  discounts?: {
+    name: string;
+    type: 'percentage' | 'fixed';
+    value: number;
+    condition?: string;
+  }[];
+  additionalText?: {
+    introduction?: string;
+    conclusion?: string;
+    terms?: string[];
+  };
+  priceFactors?: {
+    floorMultiplier?: number; // Zuschlag pro Etage
+    noElevatorMultiplier?: number; // Zuschlag ohne Aufzug
+    distanceBaseKm?: number; // Inkludierte km
+    pricePerExtraKm?: number; // Preis pro zusätzlichem km
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
 }

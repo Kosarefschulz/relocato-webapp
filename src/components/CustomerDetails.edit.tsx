@@ -36,12 +36,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Customer, Quote, Invoice } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
-import { emailHistoryService } from '../services/emailHistoryService';
+import emailHistoryService from '../services/emailHistoryService';
 import CustomerInfo from './CustomerInfo';
 import CustomerPhotos from './CustomerPhotos';
 import CustomerCommunication from './CustomerCommunication';
 import CustomerQuotes from './CustomerQuotes';
 import CustomerInvoices from './CustomerInvoices';
+import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
@@ -231,6 +232,27 @@ const CustomerDetails: React.FC = () => {
       setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCustomerUpdate = async (updates: Partial<Customer>) => {
+    if (!customer) return;
+    
+    const updatedCustomer = { ...customer, ...updates };
+    
+    try {
+      const success = await googleSheetsService.updateCustomer(customer.id, updatedCustomer);
+      
+      if (success) {
+        setCustomer(updatedCustomer);
+        setEditedCustomer(updatedCustomer);
+        setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
+      } else {
+        setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });
+      }
+    } catch (error) {
+      console.error('Fehler beim Speichern:', error);
+      setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });
     }
   };
 
@@ -545,6 +567,7 @@ const CustomerDetails: React.FC = () => {
               }}
             >
               <Tab label="Info" />
+              <Tab label="Tags & Notizen" />
               <Tab label="Fotos" disabled={editMode} />
               <Tab label={`Angebote (${tabCount.quotes})`} disabled={editMode} />
               <Tab label={`Rechnung (${tabCount.invoices})`} disabled={editMode} />
@@ -567,11 +590,21 @@ const CustomerDetails: React.FC = () => {
 
           <TabPanel value={tabValue} index={1}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
-              <CustomerPhotos customer={customer} />
+              <CustomerTagsAndNotes
+                customer={customer}
+                onUpdate={handleCustomerUpdate}
+                readOnly={false}
+              />
             </Box>
           </TabPanel>
 
           <TabPanel value={tabValue} index={2}>
+            <Box sx={{ p: { xs: 2, md: 3 } }}>
+              <CustomerPhotos customer={customer} />
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
               <CustomerQuotes 
                 quotes={quotes} 
@@ -581,7 +614,7 @@ const CustomerDetails: React.FC = () => {
             </Box>
           </TabPanel>
 
-          <TabPanel value={tabValue} index={3}>
+          <TabPanel value={tabValue} index={4}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
               <CustomerInvoices 
                 invoices={invoices} 
@@ -590,7 +623,7 @@ const CustomerDetails: React.FC = () => {
             </Box>
           </TabPanel>
 
-          <TabPanel value={tabValue} index={4}>
+          <TabPanel value={tabValue} index={5}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
               <CustomerCommunication customer={customer} />
             </Box>

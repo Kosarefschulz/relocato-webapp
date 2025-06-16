@@ -1,5 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { Customer, Invoice } from '../types';
+import pdfSignatureService, { SignatureData } from './pdfSignatureService';
+import { generateArbeitsschein } from './arbeitsscheinService';
 
 interface QuoteData {
   customerId: string;
@@ -761,5 +763,88 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     } catch (fallbackError) {
       throw new Error('Rechnungs-PDF-Erstellung fehlgeschlagen');
     }
+  }
+};
+
+/**
+ * Generiert ein PDF mit digitaler Unterschrift
+ */
+export const generatePDFWithSignature = async (
+  customer: Customer, 
+  quote: QuoteData & { volume?: number; distance?: number; calculation?: any; details?: any },
+  signatureData?: SignatureData,
+  htmlContent?: string
+): Promise<Blob> => {
+  try {
+    // Generiere das Basis-PDF
+    const pdfBlob = await generatePDF(customer, quote, htmlContent);
+    
+    // Wenn keine Unterschrift vorhanden ist, gib das normale PDF zurück
+    if (!signatureData) {
+      return pdfBlob;
+    }
+    
+    // Konvertiere Blob zu ArrayBuffer
+    const arrayBuffer = await pdfBlob.arrayBuffer();
+    
+    // Füge digitale Unterschrift hinzu
+    const signedPdfBuffer = await pdfSignatureService.embedSignature(
+      arrayBuffer,
+      signatureData,
+      0 // Index für Auftraggeber-Unterschrift
+    );
+    
+    // Konvertiere zurück zu Blob
+    return new Blob([signedPdfBuffer], { type: 'application/pdf' });
+  } catch (error) {
+    console.error('Fehler beim Hinzufügen der digitalen Unterschrift:', error);
+    // Fallback auf normales PDF
+    return generatePDF(customer, quote, htmlContent);
+  }
+};
+
+/**
+ * Generiert ein Arbeitsschein-PDF mit digitalen Unterschriften
+ */
+export const generateArbeitsscheinWithSignatures = async (
+  disposition: any,
+  customerSignature?: SignatureData,
+  employeeSignature?: SignatureData
+): Promise<Blob> => {
+  try {
+    // Generiere das Basis-Arbeitsschein PDF
+    const pdfBlob = await generateArbeitsschein(disposition);
+    
+    // Wenn keine Unterschriften vorhanden sind, gib das normale PDF zurück
+    if (!customerSignature && !employeeSignature) {
+      return pdfBlob;
+    }
+    
+    // Konvertiere Blob zu ArrayBuffer
+    let arrayBuffer = await pdfBlob.arrayBuffer();
+    
+    // Füge Unterschriften hinzu
+    const signatures: { data: SignatureData; fieldIndex: number }[] = [];
+    
+    if (customerSignature) {
+      signatures.push({ data: customerSignature, fieldIndex: 0 });
+    }
+    
+    if (employeeSignature) {
+      signatures.push({ data: employeeSignature, fieldIndex: 1 });
+    }
+    
+    // Füge alle Unterschriften hinzu
+    const signedPdfBuffer = await pdfSignatureService.embedMultipleSignatures(
+      arrayBuffer,
+      signatures
+    );
+    
+    // Konvertiere zurück zu Blob
+    return new Blob([signedPdfBuffer], { type: 'application/pdf' });
+  } catch (error) {
+    console.error('Fehler beim Hinzufügen der digitalen Unterschriften:', error);
+    // Fallback auf normales PDF
+    return generateArbeitsschein(disposition);
   }
 };

@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import googleDriveService, { StoredPhoto } from '../services/googleDriveService';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 const PHOTO_CATEGORIES = [
   'Eingang',
@@ -50,6 +51,7 @@ interface CustomerPhotosProps {
 }
 
 const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
+  const analytics = useAnalytics();
   const [photos, setPhotos] = useState<StoredPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('alle');
@@ -113,6 +115,11 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
       // Fotos neu laden
       await loadPhotos();
       
+      // Analytics: Track uploaded photos
+      if (uploadedCount > 0) {
+        analytics.trackPhotoUploaded(customer.id, uploadedCount);
+      }
+      
       // Feedback anzeigen
       if (errorCount > 0) {
         setError(`${uploadedCount} Fotos erfolgreich hochgeladen, ${errorCount} Fehler aufgetreten.`);
@@ -141,6 +148,8 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
         if (success) {
           await loadPhotos();
           console.log('✅ Foto erfolgreich gelöscht');
+          // Analytics: Track photo deletion
+          analytics.trackPhotoDeleted(customer.id);
         } else {
           console.error('❌ Fehler beim Löschen des Fotos');
         }

@@ -1,0 +1,138 @@
+// Wrapper für Firebase Service mit Fallback
+import { Customer, Quote, Invoice, EmailHistory } from '../types';
+import { db } from '../config/firebase';
+
+class FirebaseServiceWrapper {
+  private isFirebaseAvailable(): boolean {
+    return !!db;
+  }
+
+  async getCustomers(): Promise<Customer[]> {
+    if (!this.isFirebaseAvailable()) {
+      console.log('⚠️ Firebase nicht verfügbar - nutze lokale Daten');
+      return [];
+    }
+    
+    // Dynamischer Import nur wenn Firebase verfügbar
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getCustomers();
+  }
+
+  async getCustomerById(customerId: string): Promise<Customer | null> {
+    if (!this.isFirebaseAvailable()) return null;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getCustomerById(customerId);
+  }
+
+  async addCustomer(customer: Omit<Customer, 'id'>): Promise<string> {
+    if (!this.isFirebaseAvailable()) {
+      console.warn('Firebase nicht verfügbar - Kunde kann nicht gespeichert werden');
+      return '';
+    }
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.addCustomer(customer);
+  }
+
+  async updateCustomer(customerId: string, updates: Partial<Customer>): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.updateCustomer(customerId, updates);
+  }
+
+  async deleteCustomer(customerId: string): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.deleteCustomer(customerId);
+  }
+
+  async getQuotes(): Promise<Quote[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getQuotes();
+  }
+
+  async getQuotesByCustomerId(customerId: string): Promise<Quote[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getQuotesByCustomerId(customerId);
+  }
+
+  async addQuote(quote: Omit<Quote, 'id'>): Promise<string> {
+    if (!this.isFirebaseAvailable()) return '';
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.addQuote(quote);
+  }
+
+  async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.updateQuote(quoteId, updates);
+  }
+
+  async getInvoices(): Promise<Invoice[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getInvoices();
+  }
+
+  async addInvoice(invoice: Omit<Invoice, 'id'>): Promise<string> {
+    if (!this.isFirebaseAvailable()) return '';
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.addInvoice(invoice);
+  }
+
+  async getEmailHistory(customerId?: string): Promise<EmailHistory[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getEmailHistory(customerId);
+  }
+
+  async addEmailHistory(email: Omit<EmailHistory, 'id'>): Promise<string> {
+    if (!this.isFirebaseAvailable()) return '';
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.addEmailHistory(email);
+  }
+
+  subscribeToCustomers(callback: (customers: Customer[]) => void): () => void {
+    if (!this.isFirebaseAvailable()) {
+      return () => {}; // Leere unsubscribe Funktion
+    }
+    
+    // Async import und subscribe
+    import('./firebaseService').then(({ firebaseService }) => {
+      firebaseService.subscribeToCustomers(callback);
+    });
+    
+    return () => {};
+  }
+
+  subscribeToQuotes(callback: (quotes: Quote[]) => void): () => void {
+    if (!this.isFirebaseAvailable()) {
+      return () => {};
+    }
+    
+    import('./firebaseService').then(({ firebaseService }) => {
+      firebaseService.subscribeToQuotes(callback);
+    });
+    
+    return () => {};
+  }
+
+  async migrateCustomerFromGoogleSheets(customer: Customer): Promise<void> {
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Firebase nicht verfügbar für Migration');
+    }
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.migrateCustomerFromGoogleSheets(customer);
+  }
+
+  async migrateQuoteFromGoogleSheets(quote: Quote): Promise<void> {
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Firebase nicht verfügbar für Migration');
+    }
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.migrateQuoteFromGoogleSheets(quote);
+  }
+}
+
+export const firebaseService = new FirebaseServiceWrapper();

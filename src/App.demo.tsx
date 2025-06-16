@@ -10,6 +10,8 @@ import CreateQuote from './components/CreateQuote';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
+import CustomerDetails from './components/CustomerDetails';
+import InvoicesList from './components/InvoicesList';
 
 const theme = createTheme({
   palette: {
@@ -66,7 +68,7 @@ export const AuthContext = React.createContext<{
 });
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Immer eingeloggt
 
   const login = () => setIsAuthenticated(true);
   const logout = () => setIsAuthenticated(false);
@@ -79,35 +81,43 @@ function App() {
           <Routes>
             <Route 
               path="/login" 
-              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
+              element={<Navigate to="/dashboard" />} 
             />
             <Route 
               path="/dashboard" 
-              element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
+              element={<Dashboard />} 
             />
             <Route 
               path="/search-customer" 
-              element={isAuthenticated ? <CustomerSearch /> : <Navigate to="/login" />} 
+              element={<CustomerSearch />} 
             />
             <Route 
               path="/create-quote" 
-              element={isAuthenticated ? <CreateQuote /> : <Navigate to="/login" />} 
+              element={<CreateQuote />} 
             />
             <Route 
               path="/new-customer" 
-              element={isAuthenticated ? <NewCustomer /> : <Navigate to="/login" />} 
+              element={<NewCustomer />} 
             />
             <Route 
               path="/quotes" 
-              element={isAuthenticated ? <QuotesList /> : <Navigate to="/login" />} 
+              element={<QuotesList />} 
             />
             <Route 
               path="/customers" 
-              element={isAuthenticated ? <CustomersList /> : <Navigate to="/login" />} 
+              element={<CustomersList />} 
+            />
+            <Route 
+              path="/customer/:customerId" 
+              element={<CustomerDetails />} 
+            />
+            <Route 
+              path="/invoices" 
+              element={<InvoicesList />} 
             />
             <Route 
               path="/" 
-              element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} 
+              element={<Navigate to="/dashboard" />} 
             />
           </Routes>
         </Router>

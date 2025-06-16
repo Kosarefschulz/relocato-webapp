@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -30,6 +30,8 @@ import {
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { findPotentialDuplicates, DuplicateScore } from '../utils/duplicateDetection';
+import DuplicateWarningDialog from './DuplicateWarningDialog';
 
 const NewCustomer: React.FC = () => {
   const navigate = useNavigate();
@@ -58,6 +60,32 @@ const NewCustomer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  
+  // Duplikat-Erkennung
+  const [duplicates, setDuplicates] = useState<DuplicateScore[]>([]);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
+  const [existingCustomers, setExistingCustomers] = useState<Customer[]>([]);
+
+  // Lade existierende Kunden für Duplikat-Erkennung
+  useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        const customers = await googleSheetsService.getCustomers();
+        setExistingCustomers(customers);
+      } catch (error) {
+        console.error('Fehler beim Laden der Kunden:', error);
+      }
+    };
+    loadCustomers();
+  }, []);
+
+  // Prüfe auf Duplikate bei wichtigen Feldänderungen
+  useEffect(() => {
+    if (customer.name || customer.email || customer.phone) {
+      const potentialDuplicates = findPotentialDuplicates(customer, existingCustomers);
+      setDuplicates(potentialDuplicates);
+    }
+  }, [customer.name, customer.email, customer.phone, existingCustomers]);
 
   // Validation functions
   const validateStep = (step: number): boolean => {
@@ -112,6 +140,17 @@ const NewCustomer: React.FC = () => {
       return;
     }
     
+    // Prüfe auf Duplikate mit hoher Übereinstimmung
+    const highSeverityDuplicates = duplicates.filter(d => d.score >= 75);
+    if (highSeverityDuplicates.length > 0 && !showDuplicateDialog) {
+      setShowDuplicateDialog(true);
+      return;
+    }
+    
+    await saveCustomer();
+  };
+
+  const saveCustomer = async () => {
     setLoading(true);
     setError('');
     
@@ -152,6 +191,7 @@ const NewCustomer: React.FC = () => {
       console.error(err);
     } finally {
       setLoading(false);
+      setShowDuplicateDialog(false);
     }
   };
 
@@ -489,6 +529,21 @@ const NewCustomer: React.FC = () => {
             )}
           </Box>
         </Box>
+        
+        {/* Duplikat-Warnung */}
+        {duplicates.length > 0 && activeStep === steps.length - 1 && (
+          <Alert 
+            severity={duplicates.some(d => d.score >= 75) ? "warning" : "info"} 
+            sx={{ mt: 3 }}
+          >
+            <Typography variant="body2">
+              {duplicates.some(d => d.score >= 75) 
+                ? `⚠️ Achtung: ${duplicates.filter(d => d.score >= 75).length} sehr ähnliche Kunden gefunden!`
+                : `ℹ️ ${duplicates.length} ähnliche Kunden in der Datenbank gefunden.`
+              }
+            </Typography>
+          </Alert>
+        )}
       </Paper>
 
       {/* Progress Summary */}
@@ -498,6 +553,15 @@ const NewCustomer: React.FC = () => {
           {isStepComplete(activeStep) ? ' Dieser Schritt ist vollständig' : ' Bitte füllen Sie alle Pflichtfelder aus'}
         </Typography>
       </Paper>
+
+      {/* Duplicate Warning Dialog */}
+      <DuplicateWarningDialog
+        open={showDuplicateDialog}
+        onClose={() => setShowDuplicateDialog(false)}
+        onContinue={saveCustomer}
+        duplicates={duplicates}
+        newCustomerData={customer}
+      />
     </Container>
   );
 };

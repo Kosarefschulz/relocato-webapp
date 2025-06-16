@@ -1,4 +1,7 @@
 import emailHistoryService from './emailHistoryService';
+import followUpService from './followUpService';
+import { db } from '../config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface EmailData {
   to: string;
@@ -12,6 +15,7 @@ interface EmailData {
   customerId?: string;
   customerName?: string;
   templateType?: string;
+  quoteId?: string; // For follow-up scheduling
 }
 
 interface SMTPConfig {
@@ -114,6 +118,9 @@ class SMTPEmailService {
             sentAt: new Date().toISOString(),
             status: 'sent'
           });
+
+          // Schedule follow-ups based on email type
+          this.scheduleFollowUps(emailData);
         }
         
         return true;
@@ -140,6 +147,34 @@ class SMTPEmailService {
     } catch (error) {
       console.error('❌ SMTP E-Mail-Versand Fehler:', error);
       return false;
+    }
+  }
+
+  private async scheduleFollowUps(emailData: EmailData): Promise<void> {
+    try {
+      // Only schedule follow-ups for quote emails
+      if (emailData.templateType === 'quote' && emailData.customerId && emailData.quoteId) {
+        // Get customer data
+        if (!db) return;
+        
+        const customerDoc = await getDoc(doc(db, 'customers', emailData.customerId));
+        if (!customerDoc.exists()) return;
+        
+        const customer = { id: customerDoc.id, ...customerDoc.data() } as any;
+        
+        // Get quote data
+        const quoteDoc = await getDoc(doc(db, 'quotes', emailData.quoteId));
+        if (!quoteDoc.exists()) return;
+        
+        const quote = { id: quoteDoc.id, ...quoteDoc.data() } as any;
+        
+        // Schedule follow-ups
+        await followUpService.scheduleFollowUp('quote_sent', customer, quote);
+        console.log('Follow-ups geplant für Kunde:', customer.name);
+      }
+    } catch (error) {
+      console.error('Fehler beim Planen der Follow-ups:', error);
+      // Don't throw - we don't want to fail the email send
     }
   }
 }

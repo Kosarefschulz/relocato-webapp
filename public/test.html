@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Service Worker Test</title>
+</head>
+<body>
+    <h1>Service Worker Test</h1>
+    <p>This is a test page to verify the server is running correctly.</p>
+    <script>
+        // Unregister all service workers
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                    console.log('Service Worker unregistered:', registration);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

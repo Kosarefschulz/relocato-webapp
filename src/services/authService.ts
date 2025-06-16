@@ -4,7 +4,9 @@ import {
   signOut,
   onAuthStateChanged,
   User,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
@@ -64,6 +66,16 @@ class AuthService {
     }
   }
 
+  async signInWithGoogle(): Promise<User> {
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      return userCredential.user;
+    } catch (error: any) {
+      throw this.handleAuthError(error);
+    }
+  }
+
   onAuthStateChange(callback: (user: User | null) => void): () => void {
     return onAuthStateChanged(auth, callback);
   }
@@ -99,6 +111,18 @@ class AuthService {
         break;
       case 'auth/network-request-failed':
         message = 'Netzwerkfehler. Bitte prüfen Sie Ihre Internetverbindung';
+        break;
+      case 'auth/popup-closed-by-user':
+        message = 'Anmeldung abgebrochen';
+        break;
+      case 'auth/cancelled-popup-request':
+        message = 'Anmeldung abgebrochen';
+        break;
+      case 'auth/popup-blocked':
+        message = 'Popup wurde blockiert. Bitte erlauben Sie Popups für diese Seite';
+        break;
+      case 'auth/account-exists-with-different-credential':
+        message = 'Ein Konto mit dieser E-Mail-Adresse existiert bereits mit anderen Anmeldedaten';
         break;
       default:
         message = error.message || 'Authentifizierungsfehler';

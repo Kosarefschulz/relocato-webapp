@@ -30,6 +30,7 @@ import DarkModeToggle from './DarkModeToggle';
 import SalesOverview from './SalesOverview';
 import Logo from './Logo';
 import SearchBar from './SearchBar';
+import SyncStatus from './SyncStatus';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -113,6 +114,9 @@ const Dashboard: React.FC = () => {
           
           {/* Search Bar */}
           <SearchBar />
+          
+          {/* Sync Status */}
+          <SyncStatus />
           
           {/* Dark Mode Toggle */}
           <Box sx={{ ml: 1 }}>
