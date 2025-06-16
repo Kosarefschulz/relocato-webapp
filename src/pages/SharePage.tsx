@@ -27,11 +27,15 @@ import {
   Close as CloseIcon,
   Download as DownloadIcon,
   PhotoCamera as PhotoIcon,
+  Assignment as AssignmentIcon,
+  PictureAsPdf as PdfIcon,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { motion } from 'framer-motion';
+import { generateArbeitsschein, ArbeitsscheinData } from '../services/arbeitsscheinService';
+import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 
 interface CustomerData {
   id: string;
@@ -45,6 +49,7 @@ interface CustomerData {
   toAddress: string;
   assignedVehicles?: any[];
   photos?: string[];
+  quoteData?: any;
 }
 
 const SharePage: React.FC = () => {
@@ -57,11 +62,65 @@ const SharePage: React.FC = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
 
+  const handleGenerateArbeitsschein = () => {
+    if (!customerData || !customerData.quoteData) {
+      alert('Angebotsdaten nicht verfügbar');
+      return;
+    }
+
+    // Parse addresses
+    const parseAddress = (address: string) => {
+      const parts = address.split(',').map(p => p.trim());
+      return {
+        strasse: parts[0] || '',
+        ort: parts.slice(1).join(', ') || '',
+        etage: customerData.quoteData.fromFloor || 'Erdgeschoss' // You might need to add floor info to quote
+      };
+    };
+
+    const vonAddress = parseAddress(customerData.fromAddress);
+    const nachAddress = parseAddress(customerData.toAddress);
+
+    // Generate Auftragsnummer (Order number)
+    const date = new Date(customerData.moveDate);
+    const auftragsnummer = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}${customerData.customerNumber}`;
+
+    const arbeitsscheinData: ArbeitsscheinData = {
+      auftragsnummer,
+      kunde: {
+        name: `${customerData.firstName} ${customerData.lastName}`,
+        telefon: customerData.phone
+      },
+      datum: new Date(customerData.moveDate),
+      volumen: customerData.quoteData.volume || 0,
+      strecke: customerData.quoteData.distance || 0,
+      vonAdresse: vonAddress,
+      nachAdresse: nachAddress,
+      leistungen: [
+        `Transport inkl. Be- und Entladen (${customerData.quoteData.volume || 0} m³)`,
+        'Möbeldemontage',
+        'Möbelremontage',
+        'Verpackungsmaterial bereitgestellt'
+      ],
+      preis: customerData.quoteData.price || 0
+    };
+
+    const pdfBlob = generateArbeitsschein(arbeitsscheinData);
+    
+    // Create download link
+    const url = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Arbeitsschein_${auftragsnummer}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     loadShareData();
   }, [token]);
 
-  const loadShareData = () => {
+  const loadShareData = async () => {
     try {
       // Get share links from localStorage
       const shareLinks = JSON.parse(localStorage.getItem('shareLinks') || '[]');
@@ -81,27 +140,33 @@ const SharePage: React.FC = () => {
         return;
       }
 
-      // Get customer data
-      const customers = JSON.parse(localStorage.getItem('customers') || '[]');
-      const customer = customers.find((c: any) => c.id === shareLink.customerId);
+      // Load data from Google Sheets
+      const [customers, quotes] = await Promise.all([
+        googleSheetsService.getCustomers(),
+        googleSheetsService.getQuotes()
+      ]);
 
+      const customer = customers.find((c: any) => c.id === shareLink.customerId);
       if (!customer) {
         setError('Kundendaten nicht gefunden');
         setLoading(false);
         return;
       }
 
-      // Get quote data for move details
-      const quotes = JSON.parse(localStorage.getItem('quotes') || '[]');
+      // Find the specific quote
       const acceptedQuote = quotes.find((q: any) => 
-        q.customerId === customer.id && q.status === 'accepted'
+        q.id === shareLink.quoteId && q.status === 'accepted'
       );
 
       if (!acceptedQuote) {
-        setError('Keine angenommenen Angebote gefunden');
+        setError('Angebot nicht gefunden');
         setLoading(false);
         return;
       }
+
+      // Load disposition data
+      const savedDispositions = JSON.parse(localStorage.getItem('dispositions') || '{}');
+      const dispositionData = savedDispositions[shareLink.quoteId] || {};
 
       // Mock photos for demonstration
       const mockPhotos = [
@@ -121,11 +186,13 @@ const SharePage: React.FC = () => {
         moveDate: acceptedQuote.moveDate || new Date().toISOString(),
         fromAddress: acceptedQuote.fromAddress || customer.address,
         toAddress: acceptedQuote.toAddress || '',
-        assignedVehicles: [],
+        assignedVehicles: dispositionData.assignedVehicles || [],
+        quoteData: acceptedQuote,
       });
       setPhotos(mockPhotos);
       setLoading(false);
     } catch (err) {
+      console.error('Fehler beim Laden der Daten:', err);
       setError('Fehler beim Laden der Daten');
       setLoading(false);
     }
@@ -264,6 +331,26 @@ const SharePage: React.FC = () => {
               </Paper>
             </Grid>
           </Grid>
+
+          {/* Arbeitsschein Button */}
+          <Paper sx={{ p: 3, mt: 3, textAlign: 'center' }}>
+            <AssignmentIcon sx={{ fontSize: 48, color: theme.palette.primary.main, mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Arbeitsschein generieren
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Erstellen Sie einen Arbeitsschein für diesen Umzugsauftrag zur Vorlage beim Kunden
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<PdfIcon />}
+              onClick={handleGenerateArbeitsschein}
+              sx={{ mt: 1 }}
+            >
+              Arbeitsschein als PDF generieren
+            </Button>
+          </Paper>
 
           {/* Photos Section */}
           <Paper sx={{ p: 3, mt: 3 }}>

@@ -40,6 +40,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 
 interface Vehicle {
   id: string;
@@ -70,6 +71,7 @@ interface ShareLink {
   token: string;
   expiresAt: string;
   createdAt: string;
+  quoteId: string;
 }
 
 const DispositionPage: React.FC = () => {
@@ -95,14 +97,13 @@ const DispositionPage: React.FC = () => {
     loadDispositionCustomers();
   }, []);
 
-  const loadDispositionCustomers = () => {
-    // Load quotes from localStorage
-    const quotesData = localStorage.getItem('quotes');
-    const customersData = localStorage.getItem('customers');
-    
-    if (quotesData && customersData) {
-      const quotes = JSON.parse(quotesData);
-      const allCustomers = JSON.parse(customersData);
+  const loadDispositionCustomers = async () => {
+    try {
+      // Load quotes and customers from Google Sheets
+      const [quotes, allCustomers] = await Promise.all([
+        googleSheetsService.getQuotes(),
+        googleSheetsService.getCustomers()
+      ]);
       
       // Filter accepted quotes and map to disposition customers
       const acceptedQuotes = quotes.filter((quote: any) => quote.status === 'accepted');
@@ -110,6 +111,10 @@ const DispositionPage: React.FC = () => {
       const dispositionCustomers = acceptedQuotes.map((quote: any) => {
         const customer = allCustomers.find((c: any) => c.id === quote.customerId);
         if (!customer) return null;
+        
+        // Load saved disposition data from localStorage
+        const savedDispositions = JSON.parse(localStorage.getItem('dispositions') || '{}');
+        const savedData = savedDispositions[quote.id] || {};
         
         return {
           id: customer.id,
@@ -121,14 +126,16 @@ const DispositionPage: React.FC = () => {
           moveDate: quote.moveDate || new Date().toISOString(),
           fromAddress: quote.fromAddress || customer.address,
           toAddress: quote.toAddress || '',
-          status: 'accepted' as const,
+          status: savedData.status || 'accepted' as const,
           quoteId: quote.id,
           createdAt: quote.createdAt,
-          assignedVehicles: [],
+          assignedVehicles: savedData.assignedVehicles || [],
         };
       }).filter(Boolean);
       
       setCustomers(dispositionCustomers);
+    } catch (error) {
+      console.error('Fehler beim Laden der Dispositionsdaten:', error);
     }
   };
 
@@ -181,6 +188,15 @@ const DispositionPage: React.FC = () => {
       status: assignedVehicles.length > 0 ? 'assigned' as const : 'in_planning' as const,
     };
 
+    // Save to localStorage
+    const savedDispositions = JSON.parse(localStorage.getItem('dispositions') || '{}');
+    savedDispositions[selectedCustomer.quoteId] = {
+      status: updatedCustomer.status,
+      assignedVehicles: updatedCustomer.assignedVehicles,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem('dispositions', JSON.stringify(savedDispositions));
+
     setCustomers(customers.map(c => 
       c.id === selectedCustomer.id ? updatedCustomer : c
     ));
@@ -207,6 +223,7 @@ const DispositionPage: React.FC = () => {
       token,
       expiresAt: expiresAt.toISOString(),
       createdAt: new Date().toISOString(),
+      quoteId: customer.quoteId,
     };
     
     // Save to localStorage
