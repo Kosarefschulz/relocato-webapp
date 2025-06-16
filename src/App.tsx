@@ -12,6 +12,8 @@ import CustomerDetails from './components/CustomerDetails';
 import InvoicesList from './components/InvoicesList';
 import SalesPage from './pages/SalesPage';
 import CalendarView from './components/CalendarView';
+import DispositionPage from './pages/DispositionPage';
+import SharePage from './pages/SharePage';
 
 
 function App() {
@@ -61,6 +63,10 @@ function App() {
             path="/calendar" 
             element={<CalendarView />} 
           />
+          <Route 
+            path="/disposition" 
+            element={<DispositionPage />} 
+          />
           
           {/* Customer Detail Routes */}
           <Route 
@@ -70,6 +76,16 @@ function App() {
           <Route 
             path="/edit-customer/:customerId" 
             element={<CustomerDetails />} 
+          />
+          <Route 
+            path="/customers/:customerId" 
+            element={<CustomerDetails />} 
+          />
+          
+          {/* Share Link Route */}
+          <Route 
+            path="/share/:token" 
+            element={<SharePage />} 
           />
           
           {/* Default Route */}

@@ -23,6 +23,7 @@ import {
   Receipt as ReceiptIcon,
   CalendarMonth as CalendarIcon,
   Sell as SellIcon,
+  Assignment as AssignmentIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import DarkModeToggle from './DarkModeToggle';
@@ -37,6 +38,13 @@ const Dashboard: React.FC = () => {
   const [bottomNavValue, setBottomNavValue] = useState('dashboard');
 
   const navigationItems = [
+    {
+      label: 'Disposition',
+      value: 'disposition',
+      icon: <AssignmentIcon />,
+      action: () => navigate('/disposition'),
+      color: theme.palette.primary.main,
+    },
     {
       label: 'Verkauf',
       value: 'sales',
