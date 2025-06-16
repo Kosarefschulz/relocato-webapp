@@ -31,7 +31,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Quote, Customer, Invoice } from '../types';
 import { generatePDF, generateInvoicePDF } from '../services/pdfService';
-import { sendEmail } from '../services/emailService';
+import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
 
 interface CustomerQuotesProps {
@@ -241,10 +241,13 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                           attachments: [{
                             filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
                             content: pdfBlob
-                          }]
+                          }],
+                          customerId: customer.id,
+                          customerName: customer.name,
+                          templateType: 'quote_email'
                         };
                         
-                        const sent = await sendEmail(emailData);
+                        const sent = await sendEmailViaSMTP(emailData);
                         if (sent) {
                           // Update quote status to sent
                           await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
@@ -289,10 +292,13 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                             attachments: [{
                               filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
                               content: pdfBlob
-                            }]
+                            }],
+                            customerId: customer.id,
+                            customerName: customer.name,
+                            templateType: 'quote_sent'
                           };
                           
-                          const sent = await sendEmail(emailData);
+                          const sent = await sendEmailViaSMTP(emailData);
                           if (sent) {
                             // Update quote status to sent
                             await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
@@ -551,9 +557,12 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                     attachments: [{
                       filename: `Rechnung_${invoiceNumber}_${customer.name.replace(/\s+/g, '_')}.pdf`,
                       content: pdfBlob
-                    }]
+                    }],
+                    customerId: customer.id,
+                    customerName: customer.name,
+                    templateType: 'invoice'
                   };
-                  await sendEmail(emailData);
+                  await sendEmailViaSMTP(emailData);
                 }
 
                 alert(`Rechnung ${invoiceNumber} wurde erfolgreich erstellt${sendInvoice ? ' und versendet' : ''}!`);

@@ -1,3 +1,5 @@
+import emailHistoryService from './emailHistoryService';
+
 interface EmailData {
   to: string;
   subject: string;
@@ -7,6 +9,9 @@ interface EmailData {
     content: Blob;
   }[];
   bcc?: string; // Blindkopie für Gesendet-Ordner
+  customerId?: string;
+  customerName?: string;
+  templateType?: string;
 }
 
 interface SMTPConfig {
@@ -97,9 +102,38 @@ class SMTPEmailService {
       if (result.success) {
         console.log('✅ E-Mail erfolgreich gesendet via IONOS SMTP');
         console.log('Message ID:', result.messageId);
+        
+        // E-Mail in Historie speichern
+        if (emailData.customerId) {
+          emailHistoryService.saveEmailRecord({
+            customerId: emailData.customerId,
+            customerName: emailData.customerName || '',
+            to: emailData.to,
+            subject: emailData.subject,
+            templateType: emailData.templateType || 'custom',
+            sentAt: new Date().toISOString(),
+            status: 'sent'
+          });
+        }
+        
         return true;
       } else {
         console.error('❌ E-Mail-Versand fehlgeschlagen:', result.error);
+        
+        // Fehlgeschlagene E-Mail in Historie speichern
+        if (emailData.customerId) {
+          emailHistoryService.saveEmailRecord({
+            customerId: emailData.customerId,
+            customerName: emailData.customerName || '',
+            to: emailData.to,
+            subject: emailData.subject,
+            templateType: emailData.templateType || 'custom',
+            sentAt: new Date().toISOString(),
+            status: 'failed',
+            errorMessage: result.error
+          });
+        }
+        
         return false;
       }
 
