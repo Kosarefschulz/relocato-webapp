@@ -1,7 +1,7 @@
 import { Customer } from '../types';
 
 // Google Drive Service für Foto-Verwaltung
-// Mit echter Google Drive API Integration
+// Kommuniziert mit dem Backend für echte Google Drive Integration
 
 export interface StoredPhoto {
   id: string;
@@ -20,21 +20,35 @@ export interface StoredPhoto {
 }
 
 class GoogleDriveService {
-  private readonly API_KEY = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY || '';
-  private readonly CLIENT_EMAIL = process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_EMAIL || '';
-  private readonly PRIVATE_KEY = (process.env.REACT_APP_GOOGLE_DRIVE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
-  private readonly FOLDER_ID = process.env.REACT_APP_GOOGLE_DRIVE_FOLDER_ID || '';
+  private readonly BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
   private readonly THUMBNAIL_WIDTH = 300;
   private readonly THUMBNAIL_HEIGHT = 300;
   private readonly STORAGE_KEY = 'customerPhotos';
+  private useBackend = false;
 
   constructor() {
     console.log('📸 Google Drive Service initialisiert');
-    // Weiterhin localStorage verwenden, da Google Drive API im Browser eingeschränkt ist
-    console.log('ℹ️ Verwende lokale Speicherung für optimale Performance');
+    this.checkBackendAvailability();
   }
 
-  // Alle Fotos aus localStorage laden
+  // Prüfe ob Backend verfügbar ist
+  private async checkBackendAvailability() {
+    try {
+      const response = await fetch(`${this.BACKEND_URL}/api/health`);
+      const data = await response.json();
+      
+      if (data.googleDrive === 'ready') {
+        console.log('✅ Google Drive Backend verfügbar');
+        this.useBackend = true;
+      } else {
+        console.log('⚠️ Google Drive im Backend nicht konfiguriert - verwende localStorage');
+      }
+    } catch (error) {
+      console.log('ℹ️ Backend nicht erreichbar - verwende localStorage Fallback');
+    }
+  }
+
+  // Alle Fotos aus localStorage laden (Fallback)
   private loadPhotosFromStorage(): StoredPhoto[] {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
@@ -45,21 +59,20 @@ class GoogleDriveService {
     }
   }
 
-  // Fotos in localStorage speichern
+  // Fotos in localStorage speichern (Fallback)
   private savePhotosToStorage(photos: StoredPhoto[]) {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(photos));
     } catch (error) {
       console.error('Fehler beim Speichern der Fotos:', error);
-      // Bei Speicherplatz-Fehler alte Fotos löschen
       if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        console.warn('⚠️ Speicherplatz voll, lösche älteste Fotos...');
+        // Lösche älteste Fotos wenn Speicher voll
         const sortedPhotos = photos.sort((a, b) => 
           new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
         );
-        // Behalte nur die neuesten 100 Fotos
-        const recentPhotos = sortedPhotos.slice(0, 100);
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(recentPhotos));
+        const reducedPhotos = sortedPhotos.slice(0, 100); // Behalte nur die neuesten 100
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(reducedPhotos));
+        console.log(`⚠️ Speicher voll - behalte nur die neuesten ${reducedPhotos.length} Fotos`);
       }
     }
   }
@@ -72,283 +85,281 @@ class GoogleDriveService {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d')!;
-          
-          // Aspect Ratio beibehalten
-          const aspectRatio = img.width / img.height;
-          let width = this.THUMBNAIL_WIDTH;
-          let height = this.THUMBNAIL_HEIGHT;
-          
-          if (aspectRatio > 1) {
-            height = width / aspectRatio;
-          } else {
-            width = height * aspectRatio;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Canvas context nicht verfügbar'));
+            return;
           }
+
+          // Berechne Skalierung für Thumbnail
+          const scale = Math.min(
+            this.THUMBNAIL_WIDTH / img.width,
+            this.THUMBNAIL_HEIGHT / img.height
+          );
           
-          canvas.width = width;
-          canvas.height = height;
-          ctx.drawImage(img, 0, 0, width, height);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           
           resolve(canvas.toDataURL('image/jpeg', 0.7));
         };
-        img.onerror = () => reject(new Error('Fehler beim Laden des Bildes'));
+        img.onerror = reject;
         img.src = e.target?.result as string;
       };
-      reader.onerror = () => reject(new Error('Fehler beim Lesen der Datei'));
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   }
 
-  // Foto komprimieren für bessere Speicherung
-  private async compressImage(file: File, maxWidth: number = 1920): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d')!;
+  // Foto zu Google Drive hochladen (über Backend)
+  async uploadPhoto(
+    customerId: string,
+    customerName: string,
+    file: File,
+    category: string = 'Allgemein',
+    description?: string
+  ): Promise<StoredPhoto> {
+    try {
+      // Versuche zuerst über Backend hochzuladen
+      if (this.useBackend) {
+        const formData = new FormData();
+        formData.append('photo', file);
+        formData.append('customerId', customerId);
+        formData.append('customerName', customerName);
+
+        const response = await fetch(`${this.BACKEND_URL}/api/upload-photo`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
           
-          let width = img.width;
-          let height = img.height;
+          // Erstelle Thumbnail für lokale Anzeige
+          const thumbnail = await this.createThumbnail(file);
           
-          // Nur verkleinern wenn nötig
-          if (width > maxWidth) {
-            const aspectRatio = img.width / img.height;
-            width = maxWidth;
-            height = width / aspectRatio;
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          // JPEG mit 85% Qualität für gute Balance zwischen Größe und Qualität
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
-        };
-        img.onerror = () => reject(new Error('Fehler beim Laden des Bildes'));
-        img.src = e.target?.result as string;
-      };
-      reader.onerror = () => reject(new Error('Fehler beim Lesen der Datei'));
-      reader.readAsDataURL(file);
-    });
+          const photo: StoredPhoto = {
+            id: data.fileId,
+            customerId,
+            fileName: data.fileName,
+            category,
+            description,
+            uploadDate: new Date().toISOString(),
+            fileSize: file.size,
+            mimeType: file.type,
+            driveFileId: data.fileId,
+            webViewLink: data.webViewLink,
+            webContentLink: data.webContentLink,
+            base64Thumbnail: thumbnail
+          };
+
+          // Speichere auch lokal für schnellen Zugriff
+          const photos = this.loadPhotosFromStorage();
+          photos.push(photo);
+          this.savePhotosToStorage(photos);
+
+          console.log('✅ Foto erfolgreich zu Google Drive hochgeladen');
+          return photo;
+        }
+      }
+
+      // Fallback zu localStorage
+      console.log('ℹ️ Verwende localStorage für Foto-Upload');
+      return await this.uploadPhotoToLocalStorage(customerId, file, category, description);
+      
+    } catch (error) {
+      console.error('Upload-Fehler, verwende Fallback:', error);
+      return await this.uploadPhotoToLocalStorage(customerId, file, category, description);
+    }
   }
 
-  // Direkter Foto-Upload
-  async uploadPhotoDirect(
+  // Fallback: Foto in localStorage speichern
+  private async uploadPhotoToLocalStorage(
     customerId: string,
     file: File,
     category: string,
     description?: string
-  ): Promise<StoredPhoto | null> {
-    try {
-      console.log('📤 Lade Foto hoch:', {
-        datei: file.name,
-        größe: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-        kategorie: category,
-        customerId: customerId
-      });
-
-      // Validierung
-      const maxSize = 10 * 1024 * 1024; // 10 MB
-      if (file.size > maxSize) {
-        throw new Error('Datei zu groß. Maximal 10 MB erlaubt.');
-      }
-
-      if (!file.type.startsWith('image/')) {
-        throw new Error('Nur Bilddateien sind erlaubt.');
-      }
-
-      // Komprimiertes Bild und Thumbnail erstellen
-      const [compressedImage, thumbnail] = await Promise.all([
-        this.compressImage(file),
-        this.createThumbnail(file)
-      ]);
-      
-      // Neues Foto-Objekt
-      const newPhoto: StoredPhoto = {
-        id: `photo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        customerId: customerId,
-        fileName: file.name,
-        category: category,
-        description: description,
-        uploadDate: new Date().toISOString(),
-        fileSize: file.size,
-        mimeType: file.type,
-        base64Thumbnail: thumbnail,
-        // Für zukünftige Google Drive Integration
-        driveFileId: undefined,
-        webViewLink: compressedImage,
-        webContentLink: compressedImage
+  ): Promise<StoredPhoto> {
+    const fileReader = new FileReader();
+    
+    return new Promise((resolve, reject) => {
+      fileReader.onload = async (event) => {
+        try {
+          const base64 = event.target?.result as string;
+          
+          // Komprimiere das Bild
+          const compressedBase64 = await this.compressImage(base64);
+          
+          // Erstelle Thumbnail
+          const thumbnail = await this.createThumbnail(file);
+          
+          const photo: StoredPhoto = {
+            id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            customerId,
+            fileName: file.name,
+            category,
+            description,
+            uploadDate: new Date().toISOString(),
+            fileSize: file.size,
+            mimeType: file.type,
+            base64Thumbnail: thumbnail,
+            webContentLink: compressedBase64
+          };
+          
+          const photos = this.loadPhotosFromStorage();
+          photos.push(photo);
+          this.savePhotosToStorage(photos);
+          
+          resolve(photo);
+        } catch (error) {
+          reject(error);
+        }
       };
       
-      // In localStorage speichern
-      const photos = this.loadPhotosFromStorage();
-      photos.push(newPhoto);
-      this.savePhotosToStorage(photos);
-      
-      console.log('✅ Foto erfolgreich gespeichert:', newPhoto.id);
-      return newPhoto;
-      
-    } catch (error) {
-      console.error('❌ Fehler beim Upload:', error);
-      throw error;
-    }
+      fileReader.onerror = reject;
+      fileReader.readAsDataURL(file);
+    });
   }
 
-  // Fotos für Kunden abrufen
+  // Bild komprimieren
+  private async compressImage(base64: string, quality: number = 0.85): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context nicht verfügbar'));
+          return;
+        }
+
+        // Maximal 2000x2000 Pixel
+        const maxSize = 2000;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxSize || height > maxSize) {
+          const scale = Math.min(maxSize / width, maxSize / height);
+          width *= scale;
+          height *= scale;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = base64;
+    });
+  }
+
+  // Alle Fotos eines Kunden abrufen
   async getCustomerPhotos(customerId: string): Promise<StoredPhoto[]> {
     try {
-      console.log('📷 Lade Fotos für Kunde:', customerId);
-      
+      // Versuche zuerst vom Backend
+      if (this.useBackend) {
+        const response = await fetch(`${this.BACKEND_URL}/api/customer-photos/${customerId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.success && data.photos) {
+            // Konvertiere Backend-Format zu StoredPhoto
+            const photos = data.photos.map((photo: any) => ({
+              id: photo.id,
+              customerId,
+              fileName: photo.name,
+              category: 'Allgemein',
+              uploadDate: photo.createdTime,
+              fileSize: photo.size || 0,
+              mimeType: 'image/jpeg',
+              driveFileId: photo.id,
+              webViewLink: photo.webViewLink,
+              webContentLink: photo.webContentLink
+            }));
+
+            console.log(`✅ ${photos.length} Fotos von Google Drive geladen`);
+            return photos;
+          }
+        }
+      }
+
+      // Fallback zu localStorage
       const allPhotos = this.loadPhotosFromStorage();
-      const customerPhotos = allPhotos
-        .filter(photo => photo.customerId === customerId)
-        .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
+      return allPhotos.filter(photo => photo.customerId === customerId);
       
-      console.log(`✅ ${customerPhotos.length} Fotos gefunden für Kunde ${customerId}`);
-      return customerPhotos;
     } catch (error) {
       console.error('Fehler beim Abrufen der Fotos:', error);
-      return [];
+      // Fallback zu localStorage
+      const allPhotos = this.loadPhotosFromStorage();
+      return allPhotos.filter(photo => photo.customerId === customerId);
     }
   }
 
-  // Fotos nach Kategorie gruppieren
-  async getCustomerPhotosByCategory(customerId: string): Promise<Map<string, StoredPhoto[]>> {
-    const photos = await this.getCustomerPhotos(customerId);
-    const grouped = new Map<string, StoredPhoto[]>();
-    
-    photos.forEach(photo => {
-      const category = photo.category || 'sonstiges';
-      if (!grouped.has(category)) {
-        grouped.set(category, []);
-      }
-      grouped.get(category)!.push(photo);
-    });
-    
-    return grouped;
-  }
-
-  // Einzelnes Foto löschen
+  // Foto löschen
   async deletePhoto(photoId: string): Promise<boolean> {
     try {
-      const photos = this.loadPhotosFromStorage();
-      const filteredPhotos = photos.filter(photo => photo.id !== photoId);
-      
-      if (photos.length === filteredPhotos.length) {
-        console.error('❌ Foto nicht gefunden:', photoId);
-        return false;
+      // Versuche zuerst über Backend
+      if (this.useBackend && !photoId.startsWith('local_')) {
+        const response = await fetch(`${this.BACKEND_URL}/api/delete-photo/${photoId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          console.log('✅ Foto von Google Drive gelöscht');
+          
+          // Lösche auch aus localStorage
+          const photos = this.loadPhotosFromStorage();
+          const filtered = photos.filter(p => p.id !== photoId);
+          this.savePhotosToStorage(filtered);
+          
+          return true;
+        }
       }
+
+      // Fallback: Nur aus localStorage löschen
+      const photos = this.loadPhotosFromStorage();
+      const filtered = photos.filter(p => p.id !== photoId);
+      this.savePhotosToStorage(filtered);
       
-      this.savePhotosToStorage(filteredPhotos);
-      console.log('✅ Foto gelöscht:', photoId);
       return true;
     } catch (error) {
-      console.error('Fehler beim Löschen des Fotos:', error);
-      return false;
+      console.error('Fehler beim Löschen:', error);
+      // Versuche trotzdem aus localStorage zu löschen
+      const photos = this.loadPhotosFromStorage();
+      const filtered = photos.filter(p => p.id !== photoId);
+      this.savePhotosToStorage(filtered);
+      return true;
     }
   }
 
   // Alle Fotos eines Kunden löschen
-  async deleteCustomerPhotos(customerId: string): Promise<boolean> {
+  async deleteAllCustomerPhotos(customerId: string): Promise<boolean> {
     try {
-      const photos = this.loadPhotosFromStorage();
-      const filteredPhotos = photos.filter(photo => photo.customerId !== customerId);
+      const customerPhotos = await this.getCustomerPhotos(customerId);
       
-      const deletedCount = photos.length - filteredPhotos.length;
-      this.savePhotosToStorage(filteredPhotos);
+      // Lösche jedes Foto einzeln
+      for (const photo of customerPhotos) {
+        await this.deletePhoto(photo.id);
+      }
       
-      console.log(`✅ ${deletedCount} Fotos für Kunde ${customerId} gelöscht`);
       return true;
     } catch (error) {
-      console.error('Fehler beim Löschen der Kundenfotos:', error);
+      console.error('Fehler beim Löschen aller Fotos:', error);
       return false;
     }
   }
 
-  // Foto-Statistiken für einen Kunden
-  async getCustomerPhotoStats(customerId: string): Promise<{
-    totalPhotos: number;
-    totalSize: number;
-    photosByCategory: Record<string, number>;
-    oldestPhoto?: Date;
-    newestPhoto?: Date;
-  }> {
-    const photos = await this.getCustomerPhotos(customerId);
-    const stats = {
-      totalPhotos: photos.length,
-      totalSize: photos.reduce((sum, photo) => sum + photo.fileSize, 0),
-      photosByCategory: {} as Record<string, number>,
-      oldestPhoto: undefined as Date | undefined,
-      newestPhoto: undefined as Date | undefined
-    };
-
-    if (photos.length > 0) {
-      const dates = photos.map(p => new Date(p.uploadDate));
-      stats.oldestPhoto = new Date(Math.min(...dates.map(d => d.getTime())));
-      stats.newestPhoto = new Date(Math.max(...dates.map(d => d.getTime())));
-
-      photos.forEach(photo => {
-        const category = photo.category || 'sonstiges';
-        stats.photosByCategory[category] = (stats.photosByCategory[category] || 0) + 1;
-      });
-    }
-
-    return stats;
-  }
-
-  // Export aller Fotos eines Kunden als ZIP (Placeholder)
-  async exportCustomerPhotos(customerId: string): Promise<Blob | null> {
-    try {
-      const photos = await this.getCustomerPhotos(customerId);
-      if (photos.length === 0) {
-        console.warn('Keine Fotos zum Exportieren gefunden');
-        return null;
-      }
-
-      // Hier würde normalerweise eine ZIP-Datei erstellt werden
-      // Für jetzt erstellen wir ein JSON mit allen Foto-Metadaten
-      const exportData = {
-        customerId,
-        exportDate: new Date().toISOString(),
-        photoCount: photos.length,
-        photos: photos.map(photo => ({
-          id: photo.id,
-          fileName: photo.fileName,
-          category: photo.category,
-          description: photo.description,
-          uploadDate: photo.uploadDate,
-          fileSize: photo.fileSize
-        }))
-      };
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: 'application/json'
-      });
-
-      return blob;
-    } catch (error) {
-      console.error('Fehler beim Exportieren der Fotos:', error);
-      return null;
-    }
+  // Prüfe ob Backend verfügbar ist
+  isBackendAvailable(): boolean {
+    return this.useBackend;
   }
 }
 
-export const googleDriveService = new GoogleDriveService();
-
-// Kategorien für Foto-Upload
-export const PHOTO_CATEGORIES = [
-  { value: 'wohnzimmer', label: 'Wohnzimmer', icon: '🛋️' },
-  { value: 'schlafzimmer', label: 'Schlafzimmer', icon: '🛏️' },
-  { value: 'kueche', label: 'Küche', icon: '🍳' },
-  { value: 'bad', label: 'Bad', icon: '🚿' },
-  { value: 'flur', label: 'Flur', icon: '🚪' },
-  { value: 'keller', label: 'Keller', icon: '🏚️' },
-  { value: 'dachboden', label: 'Dachboden', icon: '🏠' },
-  { value: 'garage', label: 'Garage', icon: '🚗' },
-  { value: 'garten', label: 'Garten', icon: '🌳' },
-  { value: 'schaeden', label: 'Schäden', icon: '⚠️' },
-  { value: 'besonderheiten', label: 'Besonderheiten', icon: '⭐' },
-  { value: 'sonstiges', label: 'Sonstiges', icon: '📦' }
-];
+// Singleton Instance
+const googleDriveService = new GoogleDriveService();
+export default googleDriveService;
