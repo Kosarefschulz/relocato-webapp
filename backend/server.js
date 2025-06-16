@@ -40,9 +40,11 @@ const upload = multer({
   }
 });
 
-// Google Drive Konfiguration
+// Google Services Konfiguration
 let driveService = null;
+let sheetsService = null;
 const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
+const GOOGLE_SHEETS_ID = process.env.GOOGLE_SHEETS_ID || '1F5qtOkOiMMLqzwqe1HoLvNxJLtPZlqt9S0w6D7-aXGg';
 
 // Google Drive Service initialisieren
 async function initGoogleDrive() {
@@ -57,16 +59,21 @@ async function initGoogleDrive() {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
         private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       },
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
+      scopes: [
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/spreadsheets'
+      ],
     });
 
     const authClient = await auth.getClient();
     driveService = google.drive({ version: 'v3', auth: authClient });
+    sheetsService = google.sheets({ version: 'v4', auth: authClient });
     
-    console.log('✅ Google Drive Service initialisiert');
-    console.log('📁 Zielordner ID:', GOOGLE_DRIVE_FOLDER_ID);
+    console.log('✅ Google Services initialisiert');
+    console.log('📁 Drive Ordner ID:', GOOGLE_DRIVE_FOLDER_ID);
+    console.log('📊 Sheets ID:', GOOGLE_SHEETS_ID);
     
-    return driveService;
+    return { driveService, sheetsService };
   } catch (error) {
     console.error('❌ Google Drive Initialisierung fehlgeschlagen:', error);
     return null;
@@ -298,6 +305,156 @@ app.delete('/api/delete-photo/:fileId', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Fehler beim Löschen:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Google Sheets Create Quote Endpoint
+app.post('/api/quotes', async (req, res) => {
+  try {
+    if (!sheetsService) {
+      return res.status(503).json({ 
+        success: false, 
+        error: 'Google Sheets Service nicht verfügbar' 
+      });
+    }
+
+    const quote = req.body;
+
+    // Lese aktuelle Quotes um die nächste Zeile zu bestimmen
+    const response = await sheetsService.spreadsheets.values.get({
+      spreadsheetId: GOOGLE_SHEETS_ID,
+      range: 'Quotes!A:N',
+    });
+
+    const rows = response.data.values || [];
+    const nextRow = rows.length + 1;
+
+    // Erstelle neue Zeile
+    const newRow = [
+      quote.id || `Q${Date.now()}`,
+      quote.customerId || '',
+      quote.customerName || '',
+      new Date(quote.createdAt).toISOString(),
+      (quote.price || 0).toString(),
+      quote.status || 'draft',
+      quote.comment || '',
+      quote.moveDate || '',
+      (quote.volume || 0).toString(),
+      (quote.distance || 0).toString(),
+      quote.fromAddress || '',
+      quote.toAddress || '',
+      JSON.stringify(quote.items || []),
+      JSON.stringify(quote.services || [])
+    ];
+
+    // Füge neue Zeile hinzu
+    await sheetsService.spreadsheets.values.append({
+      spreadsheetId: GOOGLE_SHEETS_ID,
+      range: 'Quotes!A:N',
+      valueInputOption: 'RAW',
+      resource: {
+        values: [newRow]
+      }
+    });
+
+    console.log(`✅ Neue Quote ${quote.id} erstellt`);
+
+    res.json({ 
+      success: true, 
+      message: 'Quote erfolgreich erstellt',
+      quoteId: quote.id
+    });
+
+  } catch (error) {
+    console.error('❌ Fehler beim Erstellen der Quote:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Google Sheets Update Quote Endpoint
+app.put('/api/quotes/:quoteId', async (req, res) => {
+  try {
+    if (!sheetsService) {
+      return res.status(503).json({ 
+        success: false, 
+        error: 'Google Sheets Service nicht verfügbar' 
+      });
+    }
+
+    const { quoteId } = req.params;
+    const updates = req.body;
+
+    // Lese aktuelle Quotes
+    const response = await sheetsService.spreadsheets.values.get({
+      spreadsheetId: GOOGLE_SHEETS_ID,
+      range: 'Quotes!A:N',
+    });
+
+    const rows = response.data.values || [];
+    if (rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Keine Quotes gefunden' 
+      });
+    }
+
+    // Finde die Zeile mit der Quote ID
+    let rowIndex = -1;
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][0] === quoteId) {
+        rowIndex = i;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Quote nicht gefunden' 
+      });
+    }
+
+    // Update die Zeile
+    const currentRow = rows[rowIndex];
+    
+    // Map updates to columns
+    if (updates.status !== undefined) currentRow[5] = updates.status;
+    if (updates.price !== undefined) currentRow[4] = updates.price.toString();
+    if (updates.comment !== undefined) currentRow[6] = updates.comment || '';
+    if (updates.moveDate !== undefined) currentRow[7] = updates.moveDate || '';
+    if (updates.volume !== undefined) currentRow[8] = (updates.volume || 0).toString();
+    if (updates.distance !== undefined) currentRow[9] = (updates.distance || 0).toString();
+    if (updates.fromAddress !== undefined) currentRow[10] = updates.fromAddress || '';
+    if (updates.toAddress !== undefined) currentRow[11] = updates.toAddress || '';
+    if (updates.items !== undefined) currentRow[12] = JSON.stringify(updates.items || []);
+    if (updates.services !== undefined) currentRow[13] = JSON.stringify(updates.services || []);
+
+    // Schreibe zurück zu Google Sheets
+    await sheetsService.spreadsheets.values.update({
+      spreadsheetId: GOOGLE_SHEETS_ID,
+      range: `Quotes!A${rowIndex + 1}:N${rowIndex + 1}`,
+      valueInputOption: 'RAW',
+      resource: {
+        values: [currentRow]
+      }
+    });
+
+    console.log(`✅ Quote ${quoteId} aktualisiert - Status: ${updates.status}`);
+
+    res.json({ 
+      success: true, 
+      message: 'Quote erfolgreich aktualisiert' 
+    });
+
+  } catch (error) {
+    console.error('❌ Fehler beim Aktualisieren der Quote:', error);
     res.status(500).json({ 
       success: false, 
       error: error.message 

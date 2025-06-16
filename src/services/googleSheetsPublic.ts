@@ -305,28 +305,41 @@ class GoogleSheetsPublicService {
       // Generiere eine eindeutige ID
       const newQuote: Quote = {
         ...quote,
-        id: `local_quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        id: `Q${Date.now()}_${Math.random().toString(36).substr(2, 5).toUpperCase()}`
       };
       
-      // Lade existierende lokale Angebote
+      // Save to backend (Google Sheets)
+      try {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+        const response = await fetch(`${backendUrl}/api/quotes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newQuote),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Backend save failed: ${response.statusText}`);
+        }
+
+        console.log('💰 Angebot erfolgreich in Google Sheets gespeichert:', {
+          kunde: quote.customerName,
+          preis: `€ ${quote.price.toFixed(2)}`,
+          datum: quote.createdAt.toLocaleDateString('de-DE'),
+          status: quote.status,
+          kommentar: quote.comment || 'Kein Kommentar'
+        });
+      } catch (backendError) {
+        console.error('⚠️ Backend-Speicherung fehlgeschlagen:', backendError);
+        console.log('📊 Für Google Sheets Integration:');
+        console.log('🔗 Fügen Sie das Angebot manuell hinzu: https://docs.google.com/spreadsheets/d/' + this.spreadsheetId);
+      }
+      
+      // Also save locally for immediate UI feedback
       const localQuotes = this.getLocalQuotes();
-      
-      // Füge neues Angebot hinzu
       localQuotes.push(newQuote);
-      
-      // Speichere aktualisierte Liste
       this.saveLocalQuotes(localQuotes);
-      
-      console.log('💰 Angebot erfolgreich erstellt und lokal gespeichert:', {
-        kunde: quote.customerName,
-        preis: `€ ${quote.price.toFixed(2)}`,
-        datum: quote.createdAt.toLocaleDateString('de-DE'),
-        status: quote.status,
-        kommentar: quote.comment || 'Kein Kommentar'
-      });
-      
-      console.log('📊 Für Google Sheets Integration:');
-      console.log('🔗 Fügen Sie das Angebot manuell hinzu: https://docs.google.com/spreadsheets/d/' + this.spreadsheetId);
       
       return true;
     } catch (error) {
@@ -342,6 +355,37 @@ class GoogleSheetsPublicService {
 
   async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<boolean> {
     try {
+      // Update in backend (Google Sheets)
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/quotes/${quoteId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Backend update failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Angebot in Google Sheets aktualisiert:', quoteId, updates);
+
+      // Also update locally for immediate UI feedback
+      const quotes = this.getLocalQuotes();
+      const index = quotes.findIndex(q => q.id === quoteId);
+      
+      if (index !== -1) {
+        quotes[index] = { ...quotes[index], ...updates };
+        this.saveLocalQuotes(quotes);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Angebots:', error);
+      
+      // Fallback to local update only
       const quotes = this.getLocalQuotes();
       const index = quotes.findIndex(q => q.id === quoteId);
       
@@ -353,11 +397,8 @@ class GoogleSheetsPublicService {
       quotes[index] = { ...quotes[index], ...updates };
       this.saveLocalQuotes(quotes);
       
-      console.log('✅ Angebot aktualisiert:', quoteId, updates);
+      console.log('⚠️ Angebot nur lokal aktualisiert (Backend nicht erreichbar):', quoteId, updates);
       return true;
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Angebots:', error);
-      return false;
     }
   }
 
