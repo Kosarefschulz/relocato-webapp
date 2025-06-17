@@ -5,7 +5,7 @@
 
 // Import both services
 import { googleSheetsPublicService } from '../services/googleSheetsPublic';
-import { unifiedDatabaseService } from '../services/unifiedDatabaseService';
+import { unifiedDatabaseService } from '../services/unifiedDatabaseService.optimized';
 
 /**
  * Set to true to use Firebase as primary database
