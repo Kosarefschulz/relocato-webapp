@@ -15,6 +15,7 @@ const { handleWebhook } = require('./webhookHandlerSimple');
 const { getEmailsWithStatus } = require('./getEmailsWithStatus');
 const { previewEmailData } = require('./previewEmailData');
 const { importSingleEmail } = require('./importSingleEmail');
+const { syncEmailsForClient, getEmailFolders, sendEmailFromClient } = require('./emailClientSync');
 
 // Firebase Admin initialisieren - nur wenn noch nicht initialisiert
 if (!admin.apps.length) {
@@ -37,6 +38,9 @@ exports.handleWebhook = handleWebhook;
 exports.getEmailsWithStatus = getEmailsWithStatus;
 exports.previewEmailData = previewEmailData;
 exports.importSingleEmail = importSingleEmail;
+exports.syncEmailsForClient = syncEmailsForClient;
+exports.getEmailFolders = getEmailFolders;
+exports.sendEmailFromClient = sendEmailFromClient;
 
 /**
  * Test-Version: Verarbeitet die letzten 50 E-Mails aus einem Ordner

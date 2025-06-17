@@ -75,15 +75,17 @@ import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, o
 import { db } from '../config/firebase';
 import { Customer } from '../types';
 import { emailParser } from '../utils/emailParser';
-import { emailDemoService } from '../services/emailDemoService';
+import { emailClientService, Email as ServiceEmail } from '../services/emailClientService';
 
 interface EmailMessage {
   id: string;
+  uid?: string;
   from: string;
   fromName?: string;
   to: string;
   subject: string;
   body: string;
+  html?: string;
   date: Date;
   folder: string;
   isRead: boolean;
@@ -93,6 +95,7 @@ interface EmailMessage {
   attachments?: {
     filename: string;
     size: number;
+    contentType?: string;
     url?: string;
   }[];
   labels?: string[];
@@ -168,16 +171,29 @@ const EmailClient: React.FC = () => {
     loadEmails();
     
     // Set up real-time listener
-    const q = query(collection(db, 'emails'), orderBy('date', 'desc'));
+    const q = query(collection(db, 'emailClient'), orderBy('date', 'desc'));
     const unsub = onSnapshot(q, (snapshot) => {
       const emailList: EmailMessage[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
         emailList.push({
           id: doc.id,
-          ...data,
+          uid: data.uid,
+          from: data.from || '',
+          fromName: extractNameFromEmail(data.from || ''),
+          to: data.to || '',
+          subject: data.subject || '(Kein Betreff)',
+          body: data.text || data.html || '',
+          html: data.html,
           date: data.date?.toDate() || new Date(),
-        } as EmailMessage);
+          folder: data.folder?.toLowerCase() || 'inbox',
+          isRead: data.flags?.includes('\\Seen') || false,
+          isStarred: data.flags?.includes('\\Flagged') || false,
+          isImported: data.isImported || false,
+          importedCustomerId: data.importedCustomerId,
+          attachments: data.attachments || [],
+          messageId: data.messageId,
+        });
       });
       setEmails(emailList);
       updateFolderCounts(emailList);
@@ -198,17 +214,34 @@ const EmailClient: React.FC = () => {
   const loadEmails = async () => {
     setLoading(true);
     try {
-      const emailsCollection = collection(db, 'emails');
-      const emailsSnapshot = await getDocs(emailsCollection);
+      // First sync emails from IONOS
+      await syncEmailsFromIONOS();
+      
+      // Then load from Firestore
+      const emailsCollection = collection(db, 'emailClient');
+      const emailsSnapshot = await getDocs(query(emailsCollection, orderBy('date', 'desc')));
       const emailList: EmailMessage[] = [];
       
       emailsSnapshot.forEach((doc) => {
         const data = doc.data();
         emailList.push({
           id: doc.id,
-          ...data,
+          uid: data.uid,
+          from: data.from || '',
+          fromName: extractNameFromEmail(data.from || ''),
+          to: data.to || '',
+          subject: data.subject || '(Kein Betreff)',
+          body: data.text || data.html || '',
+          html: data.html,
           date: data.date?.toDate() || new Date(),
-        } as EmailMessage);
+          folder: data.folder?.toLowerCase() || 'inbox',
+          isRead: data.flags?.includes('\\Seen') || false,
+          isStarred: data.flags?.includes('\\Flagged') || false,
+          isImported: data.isImported || false,
+          importedCustomerId: data.importedCustomerId,
+          attachments: data.attachments || [],
+          messageId: data.messageId,
+        });
       });
 
       setEmails(emailList);
@@ -219,6 +252,23 @@ const EmailClient: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const syncEmailsFromIONOS = async () => {
+    try {
+      // Sync INBOX
+      await emailClientService.syncEmails('INBOX', 50);
+      // Sync Sent folder
+      await emailClientService.syncEmails('Sent', 20);
+    } catch (error) {
+      console.error('Error syncing from IONOS:', error);
+      // Don't throw - continue with loading from Firestore
+    }
+  };
+
+  const extractNameFromEmail = (email: string): string => {
+    const match = email.match(/^"?([^"<]+)"?\s*</);
+    return match ? match[1].trim() : email.split('@')[0];
   };
 
   const updateFolderCounts = (emailList: EmailMessage[]) => {
@@ -282,7 +332,10 @@ const EmailClient: React.FC = () => {
     // Mark as read
     if (!email.isRead) {
       try {
-        await updateDoc(doc(db, 'emails', email.id), { isRead: true });
+        await updateDoc(doc(db, 'emailClient', email.id), { 
+          isRead: true,
+          flags: [...(email.flags || []), '\\Seen']
+        });
         const updatedEmails = emails.map(e => 
           e.id === email.id ? { ...e, isRead: true } : e
         );
@@ -300,7 +353,14 @@ const EmailClient: React.FC = () => {
     if (!email) return;
 
     try {
-      await updateDoc(doc(db, 'emails', emailId), { isStarred: !email.isStarred });
+      const newFlags = email.isStarred 
+        ? (email.flags || []).filter(f => f !== '\\Flagged')
+        : [...(email.flags || []), '\\Flagged'];
+      
+      await updateDoc(doc(db, 'emailClient', emailId), { 
+        isStarred: !email.isStarred,
+        flags: newFlags
+      });
       const updatedEmails = emails.map(e => 
         e.id === emailId ? { ...e, isStarred: !e.isStarred } : e
       );
@@ -314,15 +374,11 @@ const EmailClient: React.FC = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      // Trigger email sync from backend
-      const response = await fetch('/api/sync-emails', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      // Sync emails from IONOS
+      const result = await emailClientService.syncEmails('INBOX', 50, true);
       
-      if (response.ok) {
-        const result = await response.json();
-        showSnackbar(`${result.newEmails || 0} neue E-Mails synchronisiert`, 'success');
+      if (result && result.success) {
+        showSnackbar(`${result.count || 0} E-Mails synchronisiert`, 'success');
       } else {
         throw new Error('Sync failed');
       }
@@ -331,7 +387,7 @@ const EmailClient: React.FC = () => {
       showSnackbar('Fehler beim Synchronisieren der E-Mails', 'error');
     } finally {
       setRefreshing(false);
-      await loadEmails();
+      // Reload will happen automatically via real-time listener
     }
   };
 
@@ -407,10 +463,10 @@ const EmailClient: React.FC = () => {
 
         if (email.folder === 'trash') {
           // Permanently delete
-          await deleteDoc(doc(db, 'emails', emailId));
+          await deleteDoc(doc(db, 'emailClient', emailId));
         } else {
           // Move to trash
-          await updateDoc(doc(db, 'emails', emailId), { folder: 'trash' });
+          await updateDoc(doc(db, 'emailClient', emailId), { folder: 'trash' });
         }
       }
 
@@ -431,7 +487,7 @@ const EmailClient: React.FC = () => {
 
     try {
       for (const emailId of emailsToArchive) {
-        await updateDoc(doc(db, 'emails', emailId), { folder: 'archive' });
+        await updateDoc(doc(db, 'emailClient', emailId), { folder: 'archive' });
       }
 
       showSnackbar(`${emailsToArchive.length} E-Mail(s) archiviert`, 'success');
@@ -544,22 +600,6 @@ const EmailClient: React.FC = () => {
             >
               <FilterListIcon />
             </IconButton>
-            {emails.length === 0 && (
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={async () => {
-                  try {
-                    await emailDemoService.generateDemoEmails();
-                    showSnackbar('Demo-E-Mails generiert', 'success');
-                  } catch (error) {
-                    showSnackbar('Fehler beim Generieren der Demo-E-Mails', 'error');
-                  }
-                }}
-              >
-                Demo-Daten
-              </Button>
-            )}
             {selectedEmails.length > 0 && (
               <>
                 <Typography variant="caption" sx={{ ml: 1 }}>
