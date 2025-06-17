@@ -228,10 +228,18 @@ async function processEmails(imap, emailIds, stats, lastImport, db) {
             // Parse customer data
             const customer = parseEmail(emailData);
             
-            // Validate customer data
+            // Validate customer data - enhanced logging
             if (!customer.name || customer.name === 'Unbekannt') {
-              console.warn('⚠️ No name found, skipping');
-              await logFailedImport(db, emailData, 'No customer name');
+              console.warn('⚠️ No name found in email');
+              await logFailedImport(db, emailData, 'No customer name', customer);
+              stats.skipped++;
+              return;
+            }
+            
+            // Check for minimum contact info
+            if (!customer.email && !customer.phone) {
+              console.warn('⚠️ No email or phone found');
+              await logFailedImport(db, emailData, 'No contact information (email or phone)', customer);
               stats.skipped++;
               return;
             }
@@ -282,7 +290,7 @@ async function processEmails(imap, emailIds, stats, lastImport, db) {
             
           } catch (error) {
             console.error('❌ Processing error:', error);
-            await logFailedImport(db, emailData, error.message);
+            await logFailedImport(db, emailData, error.message, null);
             stats.errors++;
           }
           
@@ -518,13 +526,23 @@ async function sendErrorNotification(db, error) {
   }
 }
 
-async function logFailedImport(db, emailData, reason) {
+async function logFailedImport(db, emailData, reason, parsedData) {
   try {
     await db.collection('failed_imports').add({
       emailData: emailData,
       reason: reason,
+      parsedData: parsedData || null,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
       resolved: false
+    });
+    
+    // Also send notification for failed imports
+    await db.collection('notifications').add({
+      type: 'import_failed',
+      title: 'E-Mail Import fehlgeschlagen',
+      message: `E-Mail von ${emailData.from} konnte nicht importiert werden: ${reason}`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      read: false
     });
   } catch (error) {
     console.error('Error logging failed import:', error);

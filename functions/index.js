@@ -10,6 +10,7 @@ const { importAllEmails } = require('./importAllEmails');
 const { importAllCustomers } = require('./importAllCustomers');
 const { processFollowUps, triggerFollowUpProcessor } = require('./followUpProcessor');
 const { scheduledCustomerImport, triggerCustomerImport } = require('./automaticEmailImporter');
+const { retryFailedImports } = require('./retryFailedImports');
 
 // Firebase Admin initialisieren
 admin.initializeApp();
@@ -25,6 +26,7 @@ exports.processFollowUps = processFollowUps;
 exports.triggerFollowUpProcessor = triggerFollowUpProcessor;
 exports.scheduledCustomerImport = scheduledCustomerImport;
 exports.triggerCustomerImport = triggerCustomerImport;
+exports.retryFailedImports = retryFailedImports;
 
 /**
  * Test-Version: Verarbeitet die letzten 50 E-Mails aus einem Ordner

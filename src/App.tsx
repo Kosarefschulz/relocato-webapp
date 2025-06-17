@@ -29,6 +29,7 @@ import EmailTemplateManager from './components/EmailTemplateManager';
 import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
 import EmailImportSettings from './components/EmailImportSettings';
+import FailedEmailRecovery from './components/FailedEmailRecovery';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 
@@ -199,6 +200,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/import-settings" 
         element={user ? <EmailImportSettings /> : <Navigate to="/login" />} 
+      />
+      
+      {/* Failed Email Recovery */}
+      <Route 
+        path="/failed-email-recovery" 
+        element={user ? <FailedEmailRecovery /> : <Navigate to="/login" />} 
       />
       
       {/* Default Route */}

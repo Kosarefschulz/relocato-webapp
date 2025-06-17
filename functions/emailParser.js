@@ -412,8 +412,15 @@ function parseEmail(emailData) {
   }
   
   // Wenn nichts erkannt wird, versuche generisches Parsing
-  console.warn('  ⚠️ Unbekannte E-Mail-Quelle');
-  return {
+  console.warn('  ⚠️ Unbekannte E-Mail-Quelle, versuche generisches Parsing');
+  return parseGenericEmail(content, emailData);
+}
+
+/**
+ * Generischer Parser für unbekannte E-Mail-Formate
+ */
+function parseGenericEmail(content, emailData) {
+  const data = {
     source: 'Unbekannt',
     name: 'Unbekannt',
     firstName: '',
@@ -425,11 +432,94 @@ function parseEmail(emailData) {
     toAddress: '',
     apartment: {},
     services: ['Umzug'],
-    notes: 'E-Mail konnte nicht automatisch geparst werden',
+    notes: '',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     status: 'new',
     leadSource: 'unknown-email'
   };
+
+  // Versuche Namen zu finden
+  const namePatterns = [
+    /Name:\s*(.+?)(?:\n|$)/i,
+    /Kunde:\s*(.+?)(?:\n|$)/i,
+    /Absender:\s*(.+?)(?:\n|$)/i,
+    /Von:\s*(.+?)(?:\n|$)/i,
+    /Herr\s+([A-ZÄÖÜ][a-zäöüß]+\s+[A-ZÄÖÜ][a-zäöüß]+)/,
+    /Frau\s+([A-ZÄÖÜ][a-zäöüß]+\s+[A-ZÄÖÜ][a-zäöüß]+)/
+  ];
+  
+  for (const pattern of namePatterns) {
+    const match = content.match(pattern);
+    if (match && match[1].trim() !== '') {
+      data.name = match[1].trim();
+      const nameParts = data.name.split(' ');
+      data.firstName = nameParts[0] || '';
+      data.lastName = nameParts.slice(1).join(' ') || '';
+      break;
+    }
+  }
+
+  // Versuche E-Mail zu finden
+  const emailMatch = content.match(/[\w\.\-]+@[\w\.\-]+\.\w+/);
+  if (emailMatch) {
+    data.email = emailMatch[0];
+  } else if (emailData.from) {
+    // Extrahiere E-Mail aus From-Header
+    const fromEmailMatch = emailData.from.match(/<?([\w\.\-]+@[\w\.\-]+\.\w+)>?/);
+    if (fromEmailMatch) {
+      data.email = fromEmailMatch[1];
+    }
+  }
+
+  // Versuche Telefon zu finden
+  const phonePatterns = [
+    /Telefon:\s*([\d\s\+\-\(\)\/]+)(?:\n|$)/i,
+    /Tel\.?:\s*([\d\s\+\-\(\)\/]+)(?:\n|$)/i,
+    /Handy:\s*([\d\s\+\-\(\)\/]+)(?:\n|$)/i,
+    /Mobile:\s*([\d\s\+\-\(\)\/]+)(?:\n|$)/i,
+    /\+49[\d\s\-\(\)\/]{10,}/,
+    /0[\d\s\-\(\)\/]{9,}/
+  ];
+  
+  for (const pattern of phonePatterns) {
+    const match = content.match(pattern);
+    if (match) {
+      data.phone = normalizePhone(match[1] || match[0]);
+      break;
+    }
+  }
+
+  // Versuche Adressen zu finden
+  const addressPattern = /([A-ZÄÖÜ][a-zäöüß]+(?:straße|str\.|weg|platz|allee|gasse))\s+(\d+\w?),?\s*(\d{5})\s+([A-ZÄÖÜ][a-zäöüß]+)/g;
+  const addresses = [...content.matchAll(addressPattern)];
+  
+  if (addresses.length > 0) {
+    data.fromAddress = `${addresses[0][1]} ${addresses[0][2]}, ${addresses[0][3]} ${addresses[0][4]}`;
+    if (addresses.length > 1) {
+      data.toAddress = `${addresses[1][1]} ${addresses[1][2]}, ${addresses[1][3]} ${addresses[1][4]}`;
+    }
+  }
+
+  // Versuche Datum zu finden
+  const datePatterns = [
+    /Umzug.*?(\d{1,2}\.\d{1,2}\.\d{4})/i,
+    /Termin.*?(\d{1,2}\.\d{1,2}\.\d{4})/i,
+    /Datum.*?(\d{1,2}\.\d{1,2}\.\d{4})/i,
+    /(\d{1,2}\.\d{1,2}\.\d{4})/
+  ];
+  
+  for (const pattern of datePatterns) {
+    const match = content.match(pattern);
+    if (match) {
+      data.moveDate = parseGermanDate(match[1]);
+      break;
+    }
+  }
+
+  // Füge Original-Text als Notiz hinzu
+  data.notes = `E-Mail konnte nicht automatisch geparst werden.\n\nOriginal-Betreff: ${emailData.subject || ''}\n\nInhalt:\n${content.substring(0, 500)}...`;
+
+  return data;
 }
 
 module.exports = {

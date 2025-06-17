@@ -25,11 +25,13 @@ import {
   People as PeopleIcon,
   PlayArrow as PlayIcon,
   Refresh as RefreshIcon,
-  TrendingUp as TrendingUpIcon
+  TrendingUp as TrendingUpIcon,
+  Warning as WarningIcon
 } from '@mui/icons-material';
 import { format, formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { databaseService } from '../config/database.config';
+import { useNavigate } from 'react-router-dom';
 
 interface ImportStats {
   totalEmails: number;
@@ -51,6 +53,7 @@ interface ImportHistory {
 }
 
 const EmailImportMonitor: React.FC = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
   const [lastImport, setLastImport] = useState<Date | null>(null);
@@ -58,6 +61,7 @@ const EmailImportMonitor: React.FC = () => {
   const [currentStats, setCurrentStats] = useState<ImportStats | null>(null);
   const [history, setHistory] = useState<ImportHistory[]>([]);
   const [error, setError] = useState('');
+  const [failedCount, setFailedCount] = useState(0);
 
   useEffect(() => {
     loadImportData();
@@ -85,6 +89,11 @@ const EmailImportMonitor: React.FC = () => {
         ...h,
         timestamp: h.timestamp.toDate()
       })) as ImportHistory[]);
+
+      // Count failed imports
+      const failedImports = await databaseService.getCollection('failed_imports');
+      const unresolvedCount = failedImports.filter(f => !f.resolved).length;
+      setFailedCount(unresolvedCount);
 
     } catch (error) {
       console.error('Error loading import data:', error);
@@ -163,6 +172,29 @@ const EmailImportMonitor: React.FC = () => {
 
       {/* Status Cards */}
       <Grid container spacing={3}>
+        {failedCount > 0 && (
+          <Grid item xs={12}>
+            <Card sx={{ bgcolor: 'warning.light', cursor: 'pointer' }} onClick={() => navigate('/failed-email-recovery')}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <WarningIcon />
+                      Fehlgeschlagene Imports
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      {failedCount} E-Mails konnten nicht automatisch verarbeitet werden und benötigen manuelle Überprüfung.
+                    </Typography>
+                  </Box>
+                  <Button variant="contained" color="warning">
+                    Jetzt beheben →
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
+        
         <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
@@ -291,6 +323,26 @@ const EmailImportMonitor: React.FC = () => {
               </Box>
             </Grid>
           </Grid>
+          
+          {failedCount > 0 && (
+            <Alert 
+              severity="warning" 
+              sx={{ mt: 3 }}
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small"
+                  onClick={() => navigate('/failed-email-recovery')}
+                >
+                  Beheben
+                </Button>
+              }
+            >
+              <Typography variant="body2">
+                {failedCount} E-Mails konnten nicht automatisch importiert werden und warten auf manuelle Überprüfung.
+              </Typography>
+            </Alert>
+          )}
 
           {currentStats.emailsBySource && Object.keys(currentStats.emailsBySource).length > 0 && (
             <Box sx={{ mt: 3 }}>

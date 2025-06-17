@@ -25,7 +25,8 @@ import {
   Analytics as AnalyticsIcon,
   Article as TemplateIcon,
   Email as EmailIcon,
-  Schedule as ScheduleIcon
+  Schedule as ScheduleIcon,
+  Error as ErrorIcon
 } from '@mui/icons-material';
 
 interface MenuItem {
@@ -120,6 +121,12 @@ const NavigationMenu: React.FC = () => {
       title: 'Import Einstellungen',
       path: '/import-settings',
       icon: <EmailIcon />
+    },
+    {
+      title: 'Failed Email Recovery',
+      path: '/failed-email-recovery',
+      icon: <ErrorIcon />,
+      badge: 'WICHTIG'
     }
   ];
 
