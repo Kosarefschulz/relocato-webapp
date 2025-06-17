@@ -16,9 +16,22 @@ exports.importAllEmails = functions
   .https.onRequest(async (req, res) => {
     console.log('🚀 Starte Massen-Import aller E-Mails...');
     
+    // CORS Headers setzen
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    
+    // Preflight request handling
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+    
     const skipExisting = req.query.skipExisting !== 'false'; // Standard: true
     const batchSize = parseInt(req.query.batchSize) || 100; // Verarbeite in Batches
     const startFrom = parseInt(req.query.startFrom) || 0; // Start-Index
+    
+    const db = admin.firestore();
     
     try {
       const result = await importAllEmailsFromFolder(
@@ -77,7 +90,8 @@ async function importAllEmailsFromFolder(folderName, skipExisting, batchSize, st
         console.log(`📬 ${box.messages.total} E-Mails im Ordner "${folderName}"`);
         stats.total = box.messages.total;
         
-        if (box.messages.total === 0) {
+        if (box.messages.total === 0 || startFrom >= box.messages.total) {
+          console.log(`ℹ️ Keine E-Mails zu verarbeiten (startFrom: ${startFrom}, total: ${box.messages.total})`);
           imap.end();
           resolve(stats);
           return;

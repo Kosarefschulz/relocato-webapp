@@ -46,14 +46,15 @@ const AdminImport: React.FC = () => {
     setProgress(0);
 
     try {
-      addLog('🚀 Starte E-Mail-Import...');
+      addLog('🚀 Starte Single-Batch E-Mail-Import...');
+      addLog(`📦 Importiere E-Mails ${startFrom} bis ${startFrom + batchSize}...`);
       
       // Analytics: Import started
       analytics.trackImportStarted(batchSize);
       
-      // Rufe die Import-Funktion auf
+      // Verwende importAllEmails für korrektes Batch-Handling
       const response = await fetch(
-        `https://europe-west1-umzugsapp.cloudfunctions.net/checkEmails?folder=erfolgreich%20verarbeitete%20Anfragen&limit=${batchSize}&test=true&all=true`,
+        `https://europe-west1-umzugsapp.cloudfunctions.net/importAllEmails?batchSize=${batchSize}&startFrom=${startFrom}&skipExisting=true`,
         {
           method: 'GET',
           headers: {
@@ -65,15 +66,19 @@ const AdminImport: React.FC = () => {
       const result = await response.json();
       
       if (result.success) {
-        addLog(`✅ ${result.processed} E-Mails verarbeitet`);
+        addLog(`✅ Import abgeschlossen:`);
+        addLog(`   - ${result.imported || 0} neue Kunden importiert`);
+        addLog(`   - ${result.skipped || 0} existierende übersprungen`);
+        addLog(`   - ${result.failed || 0} fehlgeschlagen`);
+        
         setStats({
-          total: result.processed,
-          imported: result.processed,
-          failed: 0
+          total: result.total || 0,
+          imported: result.imported || 0,
+          failed: result.failed || 0
         });
         
         // Analytics: Import completed
-        analytics.trackImportCompleted(result.processed);
+        analytics.trackImportCompleted(result.imported || 0);
       } else {
         addLog(`❌ Fehler: ${result.error || 'Unbekannter Fehler'}`);
       }
@@ -89,9 +94,9 @@ const AdminImport: React.FC = () => {
     setImporting(true);
     
     try {
-      addLog(`📧 Importiere Batch: ${startFrom} - ${startFrom + batchSize}`);
+      addLog(`📧 Importiere alle E-Mails mit der importAllEmails Funktion...`);
       
-      // Mehrere Batches nacheinander
+      // Mehrere Batches nacheinander mit der richtigen Import-Funktion
       let totalImported = 0;
       const totalBatches = Math.ceil(1200 / batchSize);
       
@@ -101,8 +106,9 @@ const AdminImport: React.FC = () => {
         
         addLog(`📦 Batch ${i + 1}/${totalBatches}: Verarbeite E-Mails ${currentStart} - ${currentStart + batchSize}`);
         
+        // Verwende importAllEmails statt checkEmails für korrektes Batch-Handling
         const response = await fetch(
-          `https://europe-west1-umzugsapp.cloudfunctions.net/checkEmails?folder=erfolgreich%20verarbeitete%20Anfragen&limit=${batchSize}&test=true&all=true`,
+          `https://europe-west1-umzugsapp.cloudfunctions.net/importAllEmails?batchSize=${batchSize}&startFrom=${currentStart}&skipExisting=true`,
           {
             method: 'GET',
             headers: {
@@ -114,10 +120,16 @@ const AdminImport: React.FC = () => {
         const result = await response.json();
         
         if (result.success) {
-          totalImported += result.processed;
-          addLog(`✅ Batch ${i + 1}: ${result.processed} E-Mails importiert`);
+          totalImported += result.imported || 0;
+          addLog(`✅ Batch ${i + 1}: ${result.imported} neue Kunden importiert, ${result.skipped} übersprungen`);
+          
+          // Wenn keine neuen E-Mails mehr gefunden werden, beende den Import
+          if (result.imported === 0 && result.skipped === 0) {
+            addLog(`ℹ️ Keine weiteren E-Mails gefunden. Import beendet.`);
+            break;
+          }
         } else {
-          addLog(`⚠️ Batch ${i + 1} fehlgeschlagen`);
+          addLog(`⚠️ Batch ${i + 1} fehlgeschlagen: ${result.error}`);
         }
         
         // Kurze Pause zwischen Batches
@@ -125,12 +137,12 @@ const AdminImport: React.FC = () => {
       }
       
       setStats({
-        total: 1200,
+        total: totalImported,
         imported: totalImported,
-        failed: 1200 - totalImported
+        failed: 0
       });
       
-      addLog(`🎉 Import abgeschlossen: ${totalImported} von 1200 E-Mails importiert`);
+      addLog(`🎉 Import abgeschlossen: ${totalImported} Kunden importiert`);
       
       // Analytics: Track completion
       analytics.trackImportCompleted(totalImported);
