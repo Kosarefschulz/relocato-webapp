@@ -468,10 +468,10 @@ const CustomersListOptimized: React.FC = () => {
           {displayedCustomers.map((customer, index) => (
             <MotionCard
               key={customer.id}
-              variants={animations.listItem}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.5) }}
               custom={Math.min(index, 10)} // Only animate first 10 items
               sx={{ 
                 mb: 2, 
