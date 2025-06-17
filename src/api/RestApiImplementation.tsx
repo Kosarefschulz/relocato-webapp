@@ -74,7 +74,7 @@ import {
   Upload as UploadIcon,
   NetworkCheck as NetworkIcon,
   Memory as MemoryIcon,
-  CachedIcon,
+  Cached as CachedIcon,
 } from '@mui/icons-material';
 import { format, addDays, addHours, differenceInMilliseconds } from 'date-fns';
 import { de } from 'date-fns/locale';
