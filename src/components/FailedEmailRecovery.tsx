@@ -50,7 +50,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { collection, query, orderBy, limit, getDocs, deleteDoc, doc, setDoc, addDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { parseEmail } from '../../functions/emailParser';
+import { parseEmail } from '../utils/emailParser';
 
 interface FailedImport {
   id: string;

@@ -29,7 +29,8 @@ import {
   CalendarMonth as CalendarIcon,
   Assignment as DispositionIcon,
   PhotoLibrary as PhotoIcon,
-  TrendingUp as SalesIcon
+  TrendingUp as SalesIcon,
+  AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
 import NavigationMenu from './NavigationMenu';
 import SyncStatus from './SyncStatus';
@@ -107,6 +108,14 @@ const Dashboard: React.FC = () => {
       path: '/sales',
       color: 'secondary.main',
       stats: { label: 'Diesen Monat', value: '€ 48.320' }
+    },
+    {
+      title: 'Admin Tools',
+      description: 'Duplikate & E-Mail Import',
+      icon: <AdminIcon sx={{ fontSize: 32 }} />,
+      path: '/admin-tools',
+      color: 'warning.main',
+      stats: { label: 'Verwaltung', value: '3 Tools' }
     }
   ];
 

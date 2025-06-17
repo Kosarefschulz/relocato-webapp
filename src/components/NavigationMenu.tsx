@@ -92,6 +92,12 @@ const NavigationMenu: React.FC = () => {
 
   const adminItems: MenuItem[] = [
     {
+      title: 'Admin Tools',
+      path: '/admin-tools',
+      icon: <AdminIcon />,
+      badge: 'NEU'
+    },
+    {
       title: 'Angebots-Templates',
       path: '/templates',
       icon: <TemplateIcon />
@@ -114,19 +120,12 @@ const NavigationMenu: React.FC = () => {
     {
       title: 'Import Monitor',
       path: '/import-monitor',
-      icon: <AnalyticsIcon />,
-      badge: 'NEU'
+      icon: <AnalyticsIcon />
     },
     {
       title: 'Import Einstellungen',
       path: '/import-settings',
       icon: <EmailIcon />
-    },
-    {
-      title: 'Failed Email Recovery',
-      path: '/failed-email-recovery',
-      icon: <ErrorIcon />,
-      badge: 'WICHTIG'
     }
   ];
 

@@ -24,6 +24,11 @@ import {
   Fade,
   Tooltip,
   Checkbox,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import { 
   ArrowBack as ArrowBackIcon,
@@ -46,6 +51,13 @@ import {
   CheckBox as CheckBoxIcon,
   CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
   IndeterminateCheckBox as IndeterminateCheckBoxIcon,
+  Sort as SortIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+  SortByAlpha as SortByAlphaIcon,
+  DateRange as DateRangeIcon,
+  LocationCity as LocationCityIcon,
+  AttachMoney as AttachMoneyIcon,
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { databaseService as googleSheetsService } from '../config/database.config';
@@ -70,6 +82,9 @@ const CustomersList: React.FC = () => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState(false);
+  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'movingDate' | 'created'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const loadCustomers = async () => {
@@ -91,10 +106,45 @@ const CustomersList: React.FC = () => {
     loadCustomers();
   }, []);
 
-  const filteredCustomers = customers.filter(customer => 
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.id.includes(searchTerm) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const sortCustomers = (customers: Customer[]) => {
+    const sorted = [...customers];
+    
+    sorted.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case 'date':
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          comparison = dateA - dateB;
+          break;
+        case 'movingDate':
+          const movingA = a.movingDate ? new Date(a.movingDate).getTime() : 0;
+          const movingB = b.movingDate ? new Date(b.movingDate).getTime() : 0;
+          comparison = movingA - movingB;
+          break;
+        case 'created':
+          const createdA = a.id.startsWith('K') ? parseInt(a.id.substring(1)) : 0;
+          const createdB = b.id.startsWith('K') ? parseInt(b.id.substring(1)) : 0;
+          comparison = createdA - createdB;
+          break;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    return sorted;
+  };
+
+  const filteredCustomers = sortCustomers(
+    customers.filter(customer => 
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.id.includes(searchTerm) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const handleSelectCustomer = (customer: Customer) => {
@@ -230,6 +280,24 @@ const CustomersList: React.FC = () => {
 
   const hasLocalCustomers = customers.some(customer => customer.id.startsWith('local_'));
 
+  const handleSortMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setSortAnchorEl(event.currentTarget);
+  };
+
+  const handleSortMenuClose = () => {
+    setSortAnchorEl(null);
+  };
+
+  const handleSortChange = (newSortBy: typeof sortBy) => {
+    if (sortBy === newSortBy) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(newSortBy);
+      setSortOrder('asc');
+    }
+    handleSortMenuClose();
+  };
+
   // Get customer initials for avatar
   const getInitials = (name: string) => {
     return name
@@ -324,6 +392,17 @@ const CustomersList: React.FC = () => {
                     >
                       Auswählen
                     </Button>
+                    <Tooltip title="Sortieren">
+                      <IconButton 
+                        onClick={handleSortMenuOpen}
+                        sx={{ 
+                          border: `1px solid ${theme.palette.divider}`,
+                          borderRadius: 2,
+                        }}
+                      >
+                        <SortIcon />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Filter">
                       <IconButton 
                         sx={{ 
@@ -703,6 +782,58 @@ const CustomersList: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Sort Menu */}
+      <Menu
+        anchorEl={sortAnchorEl}
+        open={Boolean(sortAnchorEl)}
+        onClose={handleSortMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={() => handleSortChange('name')}>
+          <ListItemIcon>
+            <SortByAlphaIcon fontSize="small" />
+            {sortBy === 'name' && (
+              sortOrder === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
+            )}
+          </ListItemIcon>
+          <ListItemText>Name</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleSortChange('movingDate')}>
+          <ListItemIcon>
+            <CalendarIcon fontSize="small" />
+            {sortBy === 'movingDate' && (
+              sortOrder === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
+            )}
+          </ListItemIcon>
+          <ListItemText>Umzugsdatum</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleSortChange('date')}>
+          <ListItemIcon>
+            <DateRangeIcon fontSize="small" />
+            {sortBy === 'date' && (
+              sortOrder === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
+            )}
+          </ListItemIcon>
+          <ListItemText>Erstellungsdatum</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleSortChange('created')}>
+          <ListItemIcon>
+            <AttachMoneyIcon fontSize="small" />
+            {sortBy === 'created' && (
+              sortOrder === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
+            )}
+          </ListItemIcon>
+          <ListItemText>Kundennummer</ListItemText>
+        </MenuItem>
+      </Menu>
 
       {/* Snackbar */}
       <Snackbar
