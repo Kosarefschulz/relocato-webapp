@@ -1,33 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Button,
-  TextField,
-  InputAdornment,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Chip,
-  Grid,
-  Card,
-  CardContent,
-  Alert,
-  CircularProgress,
-  Checkbox,
-  Snackbar
-} from '@mui/material';
+import { Container, Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Button, TextField, InputAdornment, Select, MenuItem, FormControl, InputLabel, Chip, Card, CardContent, Alert, CircularProgress, Checkbox, Snackbar } from '@mui/material';
+import Grid from './GridCompat';
 import {
   ArrowBack as ArrowBackIcon,
   Search as SearchIcon,

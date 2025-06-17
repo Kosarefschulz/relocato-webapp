@@ -1,38 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  TextField,
-  Button,
-  IconButton,
-  Card,
-  CardContent,
-  InputAdornment,
-  FormControlLabel,
-  Switch,
-  Divider,
-  Tab,
-  Tabs,
-  Grid,
-  Chip,
-  Alert,
-  CircularProgress,
-  Slider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stepper,
-  Step,
-  StepLabel,
-  Badge,
-  Tooltip,
-  Fade,
-  Zoom
-} from '@mui/material';
+import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, InputAdornment, FormControlLabel, Switch, Divider, Tab, Tabs, Chip, Alert, CircularProgress, Slider, Dialog, DialogTitle, DialogContent, DialogActions, Stepper, Step, StepLabel, Badge, Tooltip, Fade, Zoom } from '@mui/material';
+import Grid from './GridCompat';
 import { 
   ArrowBack as ArrowBackIcon,
   Calculate as CalculateIcon,
@@ -241,6 +210,7 @@ const CreateQuote: React.FC = () => {
 
     try {
       const quoteData = {
+        id: `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         customerId: customer.id,
         customerName: customer.name,
         price: calculation.finalPrice,

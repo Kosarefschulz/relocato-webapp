@@ -1,23 +1,6 @@
 import React from 'react';
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  Chip,
-  TextField,
-  Switch,
-  FormControlLabel,
-  IconButton,
-  alpha,
-  useTheme
-} from '@mui/material';
+import { Card, CardContent, Typography, Box, List, ListItem, ListItemAvatar, ListItemText, Avatar, Chip, TextField, Switch, FormControlLabel, IconButton, alpha, useTheme } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Phone as PhoneIcon,
   Email as EmailIcon,

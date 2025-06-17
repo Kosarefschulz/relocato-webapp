@@ -1,39 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-  LinearProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, Chip, List, ListItem, ListItemText, ListItemIcon, Divider, useTheme, alpha, Tooltip, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   TrendingUp as TrendingUpIcon,
   Person as PersonIcon,
@@ -99,6 +66,17 @@ interface CustomerLifetimeValueProps {
   onCustomerSelect?: (customer: Customer) => void;
   timeRange?: 'last_6_months' | 'last_year' | 'last_2_years' | 'all_time';
 }
+
+const rotateKeyframes = `
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
 
 const CustomerLifetimeValue: React.FC<CustomerLifetimeValueProps> = ({
   customers: propCustomers = [],
@@ -352,6 +330,7 @@ const CustomerLifetimeValue: React.FC<CustomerLifetimeValueProps> = ({
 
   return (
     <Box>
+      <GlobalStyles styles={rotateKeyframes} />
       {/* Header */}
       <SlideInContainer>
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -376,7 +355,7 @@ const CustomerLifetimeValue: React.FC<CustomerLifetimeValueProps> = ({
               
               <Button
                 variant="contained"
-                startIcon={isCalculating ? <RefreshIcon className="rotating" /> : <AnalyticsIcon />}
+                startIcon={isCalculating ? <RefreshIcon sx={{ animation: 'rotate 1s linear infinite' }} /> : <AnalyticsIcon />}
                 onClick={calculateCLV}
                 disabled={isCalculating}
               >
@@ -833,20 +812,6 @@ const CustomerLifetimeValue: React.FC<CustomerLifetimeValueProps> = ({
         </DialogActions>
       </Dialog>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
     </Box>
   );
 };

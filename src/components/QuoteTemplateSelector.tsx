@@ -1,28 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  CardActionArea,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Grid,
-  Alert,
-  Skeleton,
-  useTheme,
-  alpha
-} from '@mui/material';
+import { Box, Paper, Typography, Button, Card, CardContent, CardActionArea, Chip, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemIcon, ListItemText, Divider, Alert, Skeleton, useTheme, alpha } from '@mui/material';
+import Grid from './GridCompat';
 import {
   CheckCircle as CheckIcon,
   RadioButtonUnchecked as UncheckedIcon,

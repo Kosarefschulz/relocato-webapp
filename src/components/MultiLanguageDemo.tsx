@@ -1,29 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Divider,
-  Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, TextField, FormControl, InputLabel, Select, MenuItem, Chip, Divider, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useTheme, alpha } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Language as LanguageIcon,
   Check as CheckIcon,

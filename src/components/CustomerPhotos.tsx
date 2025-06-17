@@ -46,6 +46,23 @@ const PHOTO_CATEGORIES = [
   'Sonstiges'
 ];
 
+const getCategoryIcon = (category: string): string => {
+  const icons: Record<string, string> = {
+    'Eingang': '🚪',
+    'Wohnzimmer': '🛋️',
+    'Schlafzimmer': '🛏️',
+    'Küche': '🍳',
+    'Bad': '🚿',
+    'Flur': '🚶',
+    'Keller': '📦',
+    'Dachboden': '🏠',
+    'Garage': '🚗',
+    'Außenbereich': '🌳',
+    'Sonstiges': '📷'
+  };
+  return icons[category] || '📷';
+};
+
 interface CustomerPhotosProps {
   customer: Customer;
 }
@@ -166,10 +183,11 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     : photos.filter(photo => photo.category === selectedCategory);
 
   const photosByCategory = PHOTO_CATEGORIES.reduce((acc, category) => {
-    const categoryPhotos = photos.filter(p => p.category === category.value);
+    const categoryPhotos = photos.filter(p => p.category === category);
     if (categoryPhotos.length > 0) {
-      acc[category.value] = {
-        ...category,
+      acc[category] = {
+        value: category,
+        label: category,
         photos: categoryPhotos
       };
     }
@@ -256,15 +274,15 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Chip
                         size="small"
-                        label={PHOTO_CATEGORIES.find(c => c.value === photo.category)?.label || photo.category}
-                        icon={<span>{PHOTO_CATEGORIES.find(c => c.value === photo.category)?.icon}</span>}
+                        label={photo.category}
+                        icon={<span>{getCategoryIcon(photo.category)}</span>}
                       />
                       <Box>
                         <IconButton
                           size="small"
                           onClick={() => {
                             const link = document.createElement('a');
-                            link.href = photo.webContentLink || photo.base64Thumbnail;
+                            link.href = photo.webContentLink || photo.base64Thumbnail || '';
                             link.download = photo.fileName;
                             link.click();
                           }}
@@ -377,10 +395,10 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
               required
             >
               {PHOTO_CATEGORIES.map((category) => (
-                <MenuItem key={category.value} value={category.value}>
+                <MenuItem key={category} value={category}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{category.icon}</span>
-                    <span>{category.label}</span>
+                    <span>{getCategoryIcon(category)}</span>
+                    <span>{category}</span>
                   </Box>
                 </MenuItem>
               ))}
@@ -462,8 +480,8 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
               }}>
                 <Typography variant="h6">{selectedPhoto.fileName}</Typography>
                 <Typography variant="body2">
-                  {PHOTO_CATEGORIES.find(c => c.value === selectedPhoto.category)?.icon} {' '}
-                  {PHOTO_CATEGORIES.find(c => c.value === selectedPhoto.category)?.label}
+                  {getCategoryIcon(selectedPhoto.category)} {' '}
+                  {selectedPhoto.category}
                 </Typography>
                 {selectedPhoto.description && (
                   <Typography variant="body2" sx={{ mt: 1 }}>{selectedPhoto.description}</Typography>

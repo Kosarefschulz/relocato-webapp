@@ -1,13 +1,6 @@
 import React from 'react';
-import { 
-  Box, 
-  Skeleton, 
-  Paper, 
-  Card, 
-  CardContent, 
-  Grid,
-  useTheme 
-} from '@mui/material';
+import { Box, Skeleton, Paper, Card, CardContent, useTheme } from '@mui/material';
+import Grid from './GridCompat';
 
 interface LoadingSkeletonProps {
   variant?: 'table' | 'card' | 'list' | 'dashboard' | 'form' | 'stats';

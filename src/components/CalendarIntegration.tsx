@@ -1,32 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  IconButton,
-  Switch,
-  FormControlLabel,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, IconButton, Switch, FormControlLabel, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Divider, useTheme, alpha, Tooltip, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   CalendarToday as CalendarIcon,
   Google as GoogleIcon,
@@ -72,6 +46,17 @@ interface SyncSettings {
 interface CalendarIntegrationProps {
   onEventSync?: (events: any[]) => void;
 }
+
+const rotateKeyframes = `
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
 
 const CalendarIntegration: React.FC<CalendarIntegrationProps> = ({ onEventSync }) => {
   const theme = useTheme();
@@ -282,7 +267,7 @@ END:VCALENDAR`;
   const getStatusIcon = () => {
     switch (syncStatus) {
       case 'syncing':
-        return <SyncIcon className="rotating" />;
+        return <SyncIcon sx={{ animation: 'rotate 1s linear infinite' }} />;
       case 'success':
         return <CheckIcon color="success" />;
       case 'error':
@@ -307,6 +292,7 @@ END:VCALENDAR`;
 
   return (
     <Box>
+      <GlobalStyles styles={rotateKeyframes} />
       {/* Header */}
       <SlideInContainer>
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -722,20 +708,6 @@ END:VCALENDAR`;
         </DialogActions>
       </Dialog>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
     </Box>
   );
 };

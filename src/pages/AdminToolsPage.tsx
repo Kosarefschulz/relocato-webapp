@@ -1,20 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Tabs,
-  Tab,
-  IconButton,
-  Badge,
-  Tooltip,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Alert,
-} from '@mui/material';
+import { Box, Container, Typography, Paper, Tabs, Tab, IconButton, Badge, Tooltip, Button, Card, CardContent, Alert } from '@mui/material';
+import Grid from '../components/GridCompat';
 import {
   ArrowBack as ArrowBackIcon,
   MergeType as MergeIcon,

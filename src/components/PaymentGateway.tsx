@@ -1,47 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-  FormControlLabel,
-  Checkbox,
-  Radio,
-  RadioGroup,
-  FormLabel,
-  LinearProgress,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Divider, useTheme, alpha, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Stepper, Step, StepLabel, StepContent, FormControlLabel, Checkbox, Radio, RadioGroup, FormLabel, LinearProgress, Accordion, AccordionSummary, AccordionDetails, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Payment as PaymentIcon,
   CreditCard as CreditCardIcon,
@@ -880,20 +839,21 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         </DialogActions>
       </Dialog>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
+      <GlobalStyles
+        styles={{
+          '@keyframes rotate': {
+            from: {
+              transform: 'rotate(0deg)',
+            },
+            to: {
+              transform: 'rotate(360deg)',
+            },
+          },
+          '.rotating': {
+            animation: 'rotate 1s linear infinite',
+          },
+        }}
+      />
     </Box>
   );
 };

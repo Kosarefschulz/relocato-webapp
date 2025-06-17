@@ -1,22 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  LinearProgress,
-  Chip,
-  Alert,
-  List,
-  ListItem,
-  ListItemText,
-  CircularProgress,
-  IconButton,
-  Tooltip
-} from '@mui/material';
+import { Box, Paper, Typography, Card, CardContent, Button, LinearProgress, Chip, Alert, List, ListItem, ListItemText, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Email as EmailIcon,
   CheckCircle as CheckIcon,

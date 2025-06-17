@@ -1,57 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Switch,
-  FormControlLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  Tab,
-  Tabs,
-  Avatar,
-  AvatarGroup,
-  Badge,
-  Fab,
-  Menu,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Divider, useTheme, alpha, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Switch, FormControlLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Tab, Tabs, Avatar, AvatarGroup, Badge, Fab, Menu, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, StepContent, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Schedule as ScheduleIcon,
   CalendarToday as CalendarIcon,
@@ -201,6 +150,17 @@ interface AdvancedSchedulingSystemProps {
   initialDate?: Date;
   view?: 'day' | 'week' | 'month';
 }
+
+const rotateKeyframes = `
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
 
 const AdvancedSchedulingSystem: React.FC<AdvancedSchedulingSystemProps> = ({
   onJobScheduled,
@@ -967,6 +927,7 @@ const AdvancedSchedulingSystem: React.FC<AdvancedSchedulingSystemProps> = ({
 
   return (
     <Box>
+      <GlobalStyles styles={rotateKeyframes} />
       {/* Header */}
       <SlideInContainer>
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -990,7 +951,7 @@ const AdvancedSchedulingSystem: React.FC<AdvancedSchedulingSystemProps> = ({
               
               <Button
                 variant="contained"
-                startIcon={isOptimizing ? <RefreshIcon className="rotating" /> : <AutoFixIcon />}
+                startIcon={isOptimizing ? <RefreshIcon sx={{ animation: 'rotate 1s linear infinite' }} /> : <AutoFixIcon />}
                 onClick={optimizeSchedule}
                 disabled={isOptimizing}
               >
@@ -1158,20 +1119,6 @@ const AdvancedSchedulingSystem: React.FC<AdvancedSchedulingSystemProps> = ({
         {selectedTab === 3 && renderConflictsView()}
       </SlideInContainer>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
     </Box>
   );
 };

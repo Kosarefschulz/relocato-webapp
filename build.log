@@ -1,0 +1,17 @@
+
+> relocato-webapp@1.0.0 build
+> GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/craco build
+
+Creating an optimized production build...
+Failed to compile.
+
+TS2339: Property 'listItem' does not exist on type '{ fadeIn: { initial: { opacity: number; y: number; }; animate: { opacity: number; y: number; }; exit: { opacity: number; y: number; }; transition: { duration: number; }; }; slideIn: { initial: { x: number; opacity: number; }; animate: { ...; }; exit: { ...; }; transition: { ...; }; }; scaleIn: { ...; }; stagger: { ....'.
+    468 |             <MotionCard
+    469 |               key={customer.id}
+  > 470 |               variants={animations.listItem}
+        |                                    ^^^^^^^^
+    471 |               initial="hidden"
+    472 |               animate="visible"
+    473 |               exit="exit"
+
+

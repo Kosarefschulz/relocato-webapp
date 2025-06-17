@@ -1,50 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Switch,
-  FormControlLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tab,
-  Tabs,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  RadioGroup,
-  Radio,
-  FormLabel,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Divider, useTheme, alpha, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Switch, FormControlLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tab, Tabs, Accordion, AccordionSummary, AccordionDetails, RadioGroup, Radio, FormLabel, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Calculate as CalculateIcon,
   Receipt as ReceiptIcon,
@@ -152,6 +108,17 @@ interface TaxCalculationEngineProps {
   defaultCustomerCountry?: string;
   defaultServiceType?: string;
 }
+
+const rotateKeyframes = `
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
 
 const TaxCalculationEngine: React.FC<TaxCalculationEngineProps> = ({
   onTaxCalculated,
@@ -637,7 +604,7 @@ const TaxCalculationEngine: React.FC<TaxCalculationEngineProps> = ({
                   fullWidth
                   variant="contained"
                   size="large"
-                  startIcon={isCalculating ? <RefreshIcon className="rotating" /> : <CalculateIcon />}
+                  startIcon={isCalculating ? <RefreshIcon sx={{ animation: 'rotate 1s linear infinite' }} /> : <CalculateIcon />}
                   onClick={calculateTax}
                   disabled={isCalculating || calculationInput.netAmount <= 0}
                 >
@@ -973,6 +940,7 @@ const TaxCalculationEngine: React.FC<TaxCalculationEngineProps> = ({
 
   return (
     <Box>
+      <GlobalStyles styles={rotateKeyframes} />
       {/* Header */}
       <SlideInContainer>
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -1029,20 +997,6 @@ const TaxCalculationEngine: React.FC<TaxCalculationEngineProps> = ({
         {selectedTab === 2 && renderReportsTab()}
       </SlideInContainer>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
     </Box>
   );
 };

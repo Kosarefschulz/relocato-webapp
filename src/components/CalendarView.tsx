@@ -1,34 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  IconButton,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Alert,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  useTheme,
-  alpha,
-  Grid,
-  Tooltip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
+import { Container, Paper, Typography, Box, IconButton, Button, Card, CardContent, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, useTheme, alpha, Tooltip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import Grid from './GridCompat';
 import {
   ArrowBack as ArrowBackIcon,
   CalendarMonth as CalendarIcon,
@@ -148,7 +120,7 @@ const CalendarView: React.FC = () => {
         time: newEvent.time || '10:00',
         type: newEvent.type || 'other',
         description: newEvent.description,
-        customer: newEvent.customerId ? customers.find(c => c.id === newEvent.customerId) : undefined,
+        customer: newEvent.customer,
       };
       
       setEvents([...events, event]);
@@ -456,8 +428,14 @@ const CalendarView: React.FC = () => {
             <FormControl fullWidth>
               <InputLabel>Kunde (optional)</InputLabel>
               <Select
-                value={newEvent.customerId || ''}
-                onChange={(e) => setNewEvent({ ...newEvent, customerId: e.target.value })}
+                value={newEvent.customer?.id || ''}
+                onChange={(e) => {
+                  const customerId = e.target.value;
+                  setNewEvent({ 
+                    ...newEvent, 
+                    customer: customerId ? customers.find(c => c.id === customerId) : undefined 
+                  });
+                }}
                 label="Kunde (optional)"
               >
                 <MenuItem value="">Kein Kunde</MenuItem>

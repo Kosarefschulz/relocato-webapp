@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Box,
-  IconButton,
-  Button,
-  Chip,
-  Grid,
-  Card,
-  CardContent,
-  Alert,
-  CircularProgress
-} from '@mui/material';
+import { Container, Typography, Box, IconButton, Button, Chip, Card, CardContent, Alert, CircularProgress } from '@mui/material';
+import Grid from './GridCompat';
 import {
   ArrowBack as ArrowBackIcon,
   Search as SearchIcon,

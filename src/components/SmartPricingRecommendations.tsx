@@ -1,49 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Slider,
-  FormControlLabel,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  Tab,
-  Tabs,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Divider, useTheme, alpha, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Slider, FormControlLabel, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Tab, Tabs, Accordion, AccordionSummary, AccordionDetails, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   TrendingUp as TrendingUpIcon,
   Psychology as PsychologyIcon,
@@ -152,6 +109,17 @@ interface SmartPricingRecommendationsProps {
   customerSegment?: string;
   location?: string;
 }
+
+const rotateKeyframes = `
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
 
 const SmartPricingRecommendations: React.FC<SmartPricingRecommendationsProps> = ({
   onPriceUpdate,
@@ -579,7 +547,7 @@ const SmartPricingRecommendations: React.FC<SmartPricingRecommendationsProps> = 
           
           <Button
             variant="contained"
-            startIcon={isOptimizing ? <RefreshIcon className="rotating" /> : <PsychologyIcon />}
+            startIcon={isOptimizing ? <RefreshIcon sx={{ animation: 'rotate 1s linear infinite' }} /> : <PsychologyIcon />}
             onClick={runOptimization}
             disabled={isOptimizing}
           >
@@ -925,6 +893,7 @@ const SmartPricingRecommendations: React.FC<SmartPricingRecommendationsProps> = 
 
   return (
     <Box>
+      <GlobalStyles styles={rotateKeyframes} />
       {/* Header */}
       <SlideInContainer>
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -1059,20 +1028,6 @@ const SmartPricingRecommendations: React.FC<SmartPricingRecommendationsProps> = 
         {selectedTab === 3 && renderMarketTab()}
       </SlideInContainer>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
     </Box>
   );
 };

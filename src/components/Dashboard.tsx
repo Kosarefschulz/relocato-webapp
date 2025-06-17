@@ -1,23 +1,8 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App';
-import {
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  Box,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Avatar,
-  Menu,
-  MenuItem,
-  Card,
-  CardContent,
-  useTheme
-} from '@mui/material';
+import { Container, Paper, Typography, Button, Box, AppBar, Toolbar, IconButton, Avatar, Menu, MenuItem, Card, CardContent, useTheme } from '@mui/material';
+import Grid from './GridCompat';
 import { 
   Search as SearchIcon, 
   Add as AddIcon,

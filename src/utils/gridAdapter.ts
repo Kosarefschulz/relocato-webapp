@@ -3,7 +3,8 @@
  * This file helps with the transition between MUI Grid versions
  */
 
-import { Grid as MUIGrid, GridProps } from '@mui/material';
+import { as MUIGrid, GridProps } from '@mui/material';
+import Grid from '../components/GridCompat';
 import React from 'react';
 
 // Type to handle both old and new Grid props

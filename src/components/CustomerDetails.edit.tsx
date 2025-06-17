@@ -96,7 +96,7 @@ const CustomerDetails: React.FC = () => {
   const emailStats = React.useMemo(() => {
     if (!customer?.id) return { totalMessages: 0, sentMessages: 0, receivedMessages: 0, activeThreads: 0 };
     try {
-      return emailHistoryService.getEmailStats(customer.id);
+      return emailHistoryService.getEmailStats();
     } catch {
       return { totalMessages: 0, sentMessages: 0, receivedMessages: 0, activeThreads: 0 };
     }
@@ -138,10 +138,13 @@ const CustomerDetails: React.FC = () => {
         
         // Lade zusätzliche Daten parallel (mit Fallback)
         try {
-          const [quotesData, invoicesData] = await Promise.all([
-            googleSheetsService.getQuotesByCustomerId(customerId).catch(() => []),
-            googleSheetsService.getInvoicesByCustomerId(customerId).catch(() => [])
+          const [allQuotes, allInvoices] = await Promise.all([
+            googleSheetsService.getQuotes().catch(() => []),
+            googleSheetsService.getInvoices().catch(() => [])
           ]);
+          
+          const quotesData = allQuotes.filter(q => q.customerId === customerId);
+          const invoicesData = allInvoices.filter(i => i.customerId === customerId);
           
           setQuotes(quotesData);
           setInvoices(invoicesData);
@@ -166,6 +169,7 @@ const CustomerDetails: React.FC = () => {
             floor: 2,
             hasElevator: true
           },
+          services: [],
           notes: 'Demo-Kunde für Testzwecke'
         };
         
@@ -301,7 +305,7 @@ const CustomerDetails: React.FC = () => {
   const tabCount = {
     quotes: quotes.length,
     invoices: invoices.length,
-    emails: emailStats.totalMessages
+    emails: 'total' in emailStats ? emailStats.total : emailStats.totalMessages
   };
 
   return (

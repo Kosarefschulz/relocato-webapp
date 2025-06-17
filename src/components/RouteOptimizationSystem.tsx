@@ -1,58 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Switch,
-  FormControlLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  Tab,
-  Tabs,
-  Avatar,
-  Slider,
-  RadioGroup,
-  Radio,
-  FormLabel,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Badge,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Divider, useTheme, alpha, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Switch, FormControlLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Tab, Tabs, Avatar, Slider, RadioGroup, Radio, FormLabel, Stepper, Step, StepLabel, StepContent, Accordion, AccordionSummary, AccordionDetails, Badge, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Route as RouteIcon,
   Navigation as NavigationIcon,
@@ -1247,20 +1195,21 @@ const RouteOptimizationSystem: React.FC<RouteOptimizationSystemProps> = ({
         {selectedTab === 3 && renderTrafficMonitoring()}
       </SlideInContainer>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
+      <GlobalStyles
+        styles={{
+          '@keyframes rotate': {
+            from: {
+              transform: 'rotate(0deg)',
+            },
+            to: {
+              transform: 'rotate(360deg)',
+            },
+          },
+          '.rotating': {
+            animation: 'rotate 1s linear infinite',
+          },
+        }}
+      />
     </Box>
   );
 };

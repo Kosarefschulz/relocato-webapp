@@ -1,29 +1,6 @@
 import React, { useState, useRef } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Alert,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Grid,
-  IconButton,
-  Card,
-  CardContent,
-  Divider,
-  LinearProgress,
-  Tooltip,
-} from '@mui/material';
+import { Box, Paper, Typography, Button, Alert, CircularProgress, List, ListItem, ListItemIcon, ListItemText, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Card, CardContent, Divider, LinearProgress, Tooltip } from '@mui/material';
+import Grid from './GridCompat';
 import {
   CloudUpload as CloudUploadIcon,
   Email as EmailIcon,

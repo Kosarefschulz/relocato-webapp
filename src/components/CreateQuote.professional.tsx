@@ -1,21 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  TextField,
-  Button,
-  IconButton,
-  Card,
-  CardContent,
-  InputAdornment,
-  FormControlLabel,
-  Switch,
-  Divider,
-  Grid
-} from '@mui/material';
+import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, InputAdornment, FormControlLabel, Switch, Divider } from '@mui/material';
+import Grid from './GridCompat';
 import { 
   ArrowBack as ArrowBackIcon,
   Calculate as CalculateIcon,
@@ -178,6 +164,12 @@ const CreateQuote: React.FC = () => {
     try {
       // Angebot speichern
       const quote = await saveQuote();
+      
+      if (!quote) {
+        setError('Angebot konnte nicht gespeichert werden');
+        setLoading(false);
+        return;
+      }
       
       // PDF generieren
       const pdfBlob = await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));

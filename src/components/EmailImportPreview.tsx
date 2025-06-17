@@ -1,33 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Checkbox,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Chip,
-  CircularProgress,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Card,
-  CardContent,
-  Grid,
-  IconButton,
-  Collapse,
-  Tooltip,
-  FormControlLabel,
-  LinearProgress
-} from '@mui/material';
+import { Box, Paper, Typography, Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Chip, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent, IconButton, Collapse, Tooltip, FormControlLabel, LinearProgress } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Email as EmailIcon,
   ExpandMore as ExpandMoreIcon,

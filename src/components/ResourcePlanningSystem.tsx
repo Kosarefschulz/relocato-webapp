@@ -1,60 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  useTheme,
-  alpha,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Switch,
-  FormControlLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  Tab,
-  Tabs,
-  Avatar,
-  AvatarGroup,
-  Badge,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  CircularProgress,
-  Slider,
-  RadioGroup,
-  Radio,
-  FormLabel,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, Button, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Divider, useTheme, alpha, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Switch, FormControlLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Tab, Tabs, Avatar, AvatarGroup, Badge, Accordion, AccordionSummary, AccordionDetails, CircularProgress, Slider, RadioGroup, Radio, FormLabel, Stepper, Step, StepLabel, StepContent, GlobalStyles } from '@mui/material';
+import Grid from './GridCompat';
 import {
   People as PeopleIcon,
   LocalShipping as TruckIcon,
@@ -1438,20 +1384,21 @@ const ResourcePlanningSystem: React.FC<ResourcePlanningSystemProps> = ({
         )}
       </SlideInContainer>
 
-      <style jsx global>{`
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        .rotating {
-          animation: rotate 1s linear infinite;
-        }
-      `}</style>
+      <GlobalStyles
+        styles={{
+          '@keyframes rotate': {
+            from: {
+              transform: 'rotate(0deg)',
+            },
+            to: {
+              transform: 'rotate(360deg)',
+            },
+          },
+          '.rotating': {
+            animation: 'rotate 1s linear infinite',
+          },
+        }}
+      />
     </Box>
   );
 };

@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  TextField,
-  Button,
-  IconButton,
-  Grid,
-  Card,
-  CardContent,
-  FormControlLabel,
-  Switch,
-  Stepper,
-  Step,
-  StepLabel,
-  Alert,
-  CircularProgress,
-  Divider
-} from '@mui/material';
+import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, FormControlLabel, Switch, Stepper, Step, StepLabel, Alert, CircularProgress, Divider } from '@mui/material';
+import Grid from './GridCompat';
 import {
   ArrowBack as ArrowBackIcon,
   Person as PersonIcon,

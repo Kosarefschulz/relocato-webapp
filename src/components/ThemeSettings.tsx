@@ -1,22 +1,6 @@
 import React from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  FormControlLabel,
-  Switch,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Slider,
-  Grid,
-  Card,
-  CardContent,
-  Divider,
-  Button,
-  IconButton,
-} from '@mui/material';
+import { Box, Paper, Typography, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem, Slider, Card, CardContent, Divider, Button, IconButton } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Palette as PaletteIcon,
   TextFields as TextFieldsIcon,

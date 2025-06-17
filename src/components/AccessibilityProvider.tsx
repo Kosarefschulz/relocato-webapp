@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
+import { GlobalStyles } from '@mui/material';
 
 interface AccessibilitySettings {
   highContrast: boolean;
@@ -245,124 +246,102 @@ export const AccessibilityProvider: React.FC<AccessibilityProviderProps> = ({ ch
         Zum Hauptinhalt springen
       </a>
       
-      <style jsx global>{`
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-        
-        .skip-to-content {
-          position: absolute;
-          top: -40px;
-          left: 6px;
-          background: ${theme.palette.primary.main};
-          color: white;
-          padding: 8px 16px;
-          text-decoration: none;
-          border-radius: 4px;
-          z-index: 10000;
-          transition: top 0.3s;
-        }
-        
-        .skip-to-content:focus {
-          top: 6px;
-        }
-        
+      <GlobalStyles styles={{
+        '.sr-only': {
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        },
+        '.skip-to-content': {
+          position: 'absolute',
+          top: '-40px',
+          left: '6px',
+          background: theme.palette.primary.main,
+          color: 'white',
+          padding: '8px 16px',
+          textDecoration: 'none',
+          borderRadius: '4px',
+          zIndex: 10000,
+          transition: 'top 0.3s',
+        },
+        '.skip-to-content:focus': {
+          top: '6px',
+        },
         /* High contrast mode */
-        .high-contrast {
-          filter: contrast(150%);
-        }
-        
-        .high-contrast * {
-          text-shadow: none !important;
-          box-shadow: none !important;
-        }
-        
-        .high-contrast button,
-        .high-contrast .MuiButton-root {
-          border: 2px solid currentColor !important;
-        }
-        
+        '.high-contrast': {
+          filter: 'contrast(150%)',
+        },
+        '.high-contrast *': {
+          textShadow: 'none !important',
+          boxShadow: 'none !important',
+        },
+        '.high-contrast button, .high-contrast .MuiButton-root': {
+          border: '2px solid currentColor !important',
+        },
         /* Large text mode */
-        .large-text {
-          font-size: 120% !important;
-        }
-        
-        .large-text * {
-          line-height: 1.6 !important;
-        }
-        
+        '.large-text': {
+          fontSize: '120% !important',
+        },
+        '.large-text *': {
+          lineHeight: '1.6 !important',
+        },
         /* Reduced motion */
-        .reduced-motion *,
-        .reduced-motion *::before,
-        .reduced-motion *::after {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-          scroll-behavior: auto !important;
-        }
-        
+        '.reduced-motion *, .reduced-motion *::before, .reduced-motion *::after': {
+          animationDuration: '0.01ms !important',
+          animationIterationCount: '1 !important',
+          transitionDuration: '0.01ms !important',
+          scrollBehavior: 'auto !important',
+        },
         /* Font size variations */
-        [data-font-size="small"] {
-          font-size: 90%;
-        }
-        
-        [data-font-size="large"] {
-          font-size: 120%;
-        }
-        
-        [data-font-size="extra-large"] {
-          font-size: 140%;
-        }
-        
+        '[data-font-size="small"]': {
+          fontSize: '90%',
+        },
+        '[data-font-size="large"]': {
+          fontSize: '120%',
+        },
+        '[data-font-size="extra-large"]': {
+          fontSize: '140%',
+        },
         /* Color blindness filters */
-        [data-colorblind-filter="protanopia"] {
-          filter: url(#protanopia-filter);
-        }
-        
-        [data-colorblind-filter="deuteranopia"] {
-          filter: url(#deuteranopia-filter);
-        }
-        
-        [data-colorblind-filter="tritanopia"] {
-          filter: url(#tritanopia-filter);
-        }
-        
+        '[data-colorblind-filter="protanopia"]': {
+          filter: 'url(#protanopia-filter)',
+        },
+        '[data-colorblind-filter="deuteranopia"]': {
+          filter: 'url(#deuteranopia-filter)',
+        },
+        '[data-colorblind-filter="tritanopia"]': {
+          filter: 'url(#tritanopia-filter)',
+        },
         /* Focus indicators */
-        .no-focus-indicators *:focus {
-          outline: none !important;
-          box-shadow: none !important;
-        }
-        
+        '.no-focus-indicators *:focus': {
+          outline: 'none !important',
+          boxShadow: 'none !important',
+        },
         /* Enhanced focus indicators */
-        *:focus-visible {
-          outline: 3px solid ${theme.palette.primary.main} !important;
-          outline-offset: 2px !important;
-        }
-        
+        '*:focus-visible': {
+          outline: `3px solid ${theme.palette.primary.main} !important`,
+          outlineOffset: '2px !important',
+        },
         /* Screen reader optimizations */
-        .screen-reader-optimized .MuiIconButton-root {
-          min-width: 44px;
-          min-height: 44px;
-        }
-        
-        .screen-reader-optimized button:not([aria-label]):not([aria-labelledby]) {
-          position: relative;
-        }
-        
-        .screen-reader-optimized button:not([aria-label]):not([aria-labelledby])::after {
-          content: attr(title);
-          position: absolute;
-          left: -9999px;
-        }
-      `}</style>
+        '.screen-reader-optimized .MuiIconButton-root': {
+          minWidth: '44px',
+          minHeight: '44px',
+        },
+        '.screen-reader-optimized button:not([aria-label]):not([aria-labelledby])': {
+          position: 'relative',
+        },
+        '.screen-reader-optimized button:not([aria-label]):not([aria-labelledby])::after': {
+          content: 'attr(title)',
+          position: 'absolute',
+          left: '-9999px',
+        },
+      }} />
       
       {/* SVG filters for color blindness simulation */}
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>

@@ -1,24 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Stack,
-  Alert,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  Grid,
-  Chip,
-  Divider,
-  IconButton,
-  Dialog,
-  DialogContent,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Container, Typography, Paper, Stack, Alert, Button, Card, CardContent, CardMedia, Chip, Divider, IconButton, Dialog, DialogContent, useTheme, alpha } from '@mui/material';
+import Grid from '../components/GridCompat';
 import {
   LocationOn as LocationIcon,
   CalendarToday as CalendarIcon,

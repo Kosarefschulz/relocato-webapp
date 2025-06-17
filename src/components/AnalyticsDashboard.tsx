@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  LinearProgress,
-  IconButton,
-  Tooltip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Alert
-} from '@mui/material';
+import { Box, Paper, Typography, Card, CardContent, Chip, LinearProgress, IconButton, Tooltip, Select, MenuItem, FormControl, InputLabel, Alert } from '@mui/material';
+import Grid from './GridCompat';
 import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,

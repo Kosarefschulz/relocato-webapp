@@ -1,24 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  LinearProgress,
-  Alert,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  CircularProgress,
-  Tabs,
-  Tab
-} from '@mui/material';
+import { Box, Paper, Typography, Button, TextField, LinearProgress, Alert, Card, CardContent, Chip, List, ListItem, ListItemText, Divider, CircularProgress, Tabs, Tab } from '@mui/material';
+import Grid from './GridCompat';
 import { useAnalytics } from '../hooks/useAnalytics';
 import {
   CloudUpload as UploadIcon,

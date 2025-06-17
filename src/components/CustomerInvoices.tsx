@@ -1,19 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from '@mui/material';
+import { Card, CardContent, Typography, Box, Button, Chip, IconButton, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Receipt as ReceiptIcon,
   GetApp as GetAppIcon,

@@ -1,35 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  IconButton,
-  Tabs,
-  Tab,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
-  Badge,
-  Alert,
-  Skeleton,
-  useTheme,
-  useMediaQuery,
-  alpha
-} from '@mui/material';
+import { Container, Paper, Typography, Box, IconButton, Tabs, Tab, Button, Card, CardContent, Chip, Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, SpeedDial, SpeedDialAction, SpeedDialIcon, Badge, Alert, Skeleton, useTheme, useMediaQuery, alpha } from '@mui/material';
+import Grid from './GridCompat';
 import {
   ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
@@ -143,9 +115,9 @@ const CustomerDetails: React.FC = () => {
       // Lade alle Daten parallel
       const [customersData, quotesData, invoicesData, emailsData] = await Promise.all([
         googleSheetsService.getCustomers(),
-        googleSheetsService.getQuotesByCustomerId(customerId),
-        googleSheetsService.getInvoicesByCustomerId(customerId),
-        googleSheetsService.getEmailHistoryByCustomerId(customerId)
+        googleSheetsService.getQuotes().then(quotes => quotes.filter(q => q.customerId === customerId)),
+        googleSheetsService.getInvoices().then(invoices => invoices.filter(i => i.customerId === customerId)),
+        'getEmailHistory' in googleSheetsService ? (googleSheetsService as any).getEmailHistory(customerId) : Promise.resolve([])
       ]);
 
       const foundCustomer = customersData.find(c => c.id === customerId);

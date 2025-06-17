@@ -1,23 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-  Chip,
-  Card,
-  CardContent,
-  IconButton,
-  TextField,
-  Alert,
-  Tooltip,
-  Divider,
-  Stack,
-  Grid
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Chip, Card, CardContent, IconButton, TextField, Alert, Tooltip, Divider, Stack } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Timeline,
   TimelineItem,

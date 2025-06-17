@@ -1,31 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Box,
-  IconButton,
-  Button,
-  Chip,
-  Card,
-  CardContent,
-  Alert,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Grid,
-  Divider,
-  Snackbar,
-  FormControlLabel,
-  Switch,
-  Checkbox,
-  Tooltip,
-  alpha,
-  useTheme,
-} from '@mui/material';
+import { Container, Typography, Box, IconButton, Button, Chip, Card, CardContent, Alert, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Divider, Snackbar, FormControlLabel, Switch, Checkbox, Tooltip, alpha, useTheme } from '@mui/material';
+import Grid from './GridCompat';
 import {
   ArrowBack as ArrowBackIcon,
   Edit as EditIcon,

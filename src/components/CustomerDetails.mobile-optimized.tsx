@@ -80,6 +80,7 @@ const CustomerDetails: React.FC = () => {
             floor: 2,
             hasElevator: true
           },
+          services: [],
           notes: `Demo-Kunde für ${customerId}`
         };
         
@@ -102,6 +103,7 @@ const CustomerDetails: React.FC = () => {
           floor: 2,
           hasElevator: true
         },
+        services: [],
         notes: `Demo-Kunde für ${customerId}`
       };
       
@@ -339,13 +341,13 @@ const CustomerDetails: React.FC = () => {
         color="primary"
         aria-label="create quote"
         onClick={handleCreateQuote}
+        {...getButtonProps()}
         sx={{
           position: 'fixed',
           bottom: 16,
           right: 16,
           zIndex: 1000,
         }}
-        {...getButtonProps()}
       >
         <DescriptionIcon />
       </Fab>

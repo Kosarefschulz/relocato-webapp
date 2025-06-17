@@ -1,26 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  TextField,
-  Button,
-  IconButton,
-  Card,
-  CardContent,
-  InputAdornment,
-  FormControlLabel,
-  Switch,
-  Divider,
-  Grid,
-  useTheme,
-  useMediaQuery,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
+import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, InputAdornment, FormControlLabel, Switch, Divider, useTheme, useMediaQuery, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import Grid from './GridCompat';
 import { 
   ArrowBack as ArrowBackIcon,
   Calculate as CalculateIcon,
@@ -191,6 +172,12 @@ const CreateQuote: React.FC = () => {
     try {
       // Angebot speichern
       const quote = await saveQuote();
+      
+      if (!quote) {
+        setError('Angebot konnte nicht gespeichert werden');
+        setLoading(false);
+        return;
+      }
       
       // PDF generieren
       const pdfBlob = await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));
@@ -420,10 +407,10 @@ const CreateQuote: React.FC = () => {
                   fullWidth
                   label="Volumen m³"
                   type="number"
-                  inputProps={{ step: "0.1" }}
                   value={quoteDetails.volume || ''}
                   onChange={(e) => setQuoteDetails({...quoteDetails, volume: Number(e.target.value)})}
                   {...getTextFieldProps()}
+                  inputProps={{ step: "0.1" }}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -532,8 +519,8 @@ const CreateQuote: React.FC = () => {
                     size="small"
                     value={quoteDetails.boxCount}
                     onChange={(e) => setQuoteDetails({...quoteDetails, boxCount: Number(e.target.value)})}
-                    sx={{ mt: 1, ml: 4 }}
                     {...getTextFieldProps()}
+                    sx={{ mt: 1, ml: 4 }}
                   />
                 )}
               </Grid>
@@ -557,8 +544,8 @@ const CreateQuote: React.FC = () => {
                     size="small"
                     value={quoteDetails.cleaningHours}
                     onChange={(e) => setQuoteDetails({...quoteDetails, cleaningHours: Number(e.target.value)})}
-                    sx={{ mt: 1, ml: 4 }}
                     {...getTextFieldProps()}
+                    sx={{ mt: 1, ml: 4 }}
                   />
                 )}
               </Grid>
@@ -582,8 +569,8 @@ const CreateQuote: React.FC = () => {
                     size="small"
                     value={quoteDetails.clearanceVolume}
                     onChange={(e) => setQuoteDetails({...quoteDetails, clearanceVolume: Number(e.target.value)})}
-                    sx={{ mt: 1, ml: 4 }}
                     {...getTextFieldProps()}
+                    sx={{ mt: 1, ml: 4 }}
                   />
                 )}
               </Grid>
@@ -607,8 +594,8 @@ const CreateQuote: React.FC = () => {
                     size="small"
                     value={quoteDetails.renovationHours}
                     onChange={(e) => setQuoteDetails({...quoteDetails, renovationHours: Number(e.target.value)})}
-                    sx={{ mt: 1, ml: 4 }}
                     {...getTextFieldProps()}
+                    sx={{ mt: 1, ml: 4 }}
                   />
                 )}
               </Grid>
@@ -645,8 +632,8 @@ const CreateQuote: React.FC = () => {
                     size="small"
                     value={quoteDetails.heavyItemsCount}
                     onChange={(e) => setQuoteDetails({...quoteDetails, heavyItemsCount: Number(e.target.value)})}
-                    sx={{ mt: 1, ml: 4 }}
                     {...getTextFieldProps()}
+                    sx={{ mt: 1, ml: 4 }}
                   />
                 )}
               </Grid>
@@ -803,8 +790,8 @@ const CreateQuote: React.FC = () => {
             variant="outlined"
             onClick={downloadPDF}
             disabled={loading || !calculation}
-            sx={{ minWidth: 'auto', px: 2 }}
             {...getButtonProps()}
+            sx={{ minWidth: 'auto', px: 2 }}
           >
             <GetAppIcon />
           </Button>

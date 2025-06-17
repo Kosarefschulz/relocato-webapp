@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, useTheme, alpha } from '@mui/material';
+import Grid from './GridCompat';
 import { CustomIcons } from './CustomIcons';
 import { AnimatedCard, SlideInContainer } from './MicroAnimations';
 import Logo, { BrandHeader, LogoWithBackground, ResponsiveLogo } from './LogoIntegration';

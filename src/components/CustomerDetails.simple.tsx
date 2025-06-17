@@ -67,6 +67,7 @@ const CustomerDetails: React.FC = () => {
             floor: 2,
             hasElevator: true
           },
+          services: [],
           notes: `Demo-Kunde für ${customerId}`
         };
         
@@ -89,6 +90,7 @@ const CustomerDetails: React.FC = () => {
           floor: 2,
           hasElevator: true
         },
+        services: [],
         notes: `Demo-Kunde für ${customerId}`
       };
       

@@ -47,7 +47,6 @@ import {
   Star as StarIcon,
   StarBorder as StarBorderIcon,
   Delete as DeleteIcon,
-  Checkbox as CheckboxIcon,
   CheckBox as CheckBoxIcon,
   CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
   IndeterminateCheckBox as IndeterminateCheckBoxIcon,
@@ -251,7 +250,9 @@ const CustomersList: React.FC = () => {
   };
 
   const handleExportClick = () => {
-    const csvData = googleSheetsService.exportLocalCustomersForSheets();
+    const csvData = 'exportLocalCustomersForSheets' in googleSheetsService 
+      ? (googleSheetsService as any).exportLocalCustomersForSheets()
+      : 'Export nicht verfügbar';
     setExportData(csvData);
     setExportDialogOpen(true);
   };
@@ -270,7 +271,9 @@ const CustomersList: React.FC = () => {
   };
 
   const handleClearLocalCustomers = async () => {
-    googleSheetsService.clearLocalCustomers();
+    if ('clearLocalCustomers' in googleSheetsService) {
+      (googleSheetsService as any).clearLocalCustomers();
+    }
     setExportDialogOpen(false);
     setSnackbarMessage('Lokale Kunden wurden gelöscht');
     setSnackbarOpen(true);

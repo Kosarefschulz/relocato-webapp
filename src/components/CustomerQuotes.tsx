@@ -1,21 +1,7 @@
-import React, { useState } from 'react';
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  FormControlLabel,
-  Switch
-} from '@mui/material';
+import React, { useState, Fragment } from 'react';
+import { Card, CardContent, Typography, Button, Chip, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, FormControlLabel, Switch } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from './GridCompat';
 import {
   Description as DescriptionIcon,
   Add as AddIcon,
@@ -206,6 +192,7 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
               }}
             >
               <CardContent>
+                <Fragment>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                     Angebot #{quote.id}
@@ -236,8 +223,8 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                     {quote.comment}
                   </Typography>
                 )}
-                
-                <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
+                {/* @ts-ignore - MUI v7 TypeScript issue */}
+                <Box component="div" sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
                   <Button
                     size="small"
                     variant="outlined"
@@ -418,6 +405,7 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                     </Button>
                   )}
                 </Box>
+                </Fragment>
               </CardContent>
             </Card>
           </motion.div>
@@ -571,15 +559,24 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   customerId: customer.id || '',
                   customerName: customer.name,
                   quoteId: convertingQuote.id,
-                  amount: convertingQuote.price,
-                  date: new Date(),
+                  price: convertingQuote.price,
+                  taxAmount: convertingQuote.price * 0.19,
+                  totalPrice: convertingQuote.price * 1.19,
+                  items: [{
+                    description: 'Umzugsdienstleistung',
+                    quantity: 1,
+                    unitPrice: convertingQuote.price,
+                    totalPrice: convertingQuote.price
+                  }],
+                  invoiceNumber: invoiceNumber,
+                  createdAt: new Date(),
                   dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
-                  status: 'pending',
-                  comment: convertingQuote.comment
+                  status: 'sent' as const
                 };
 
                 // Save invoice
-                const savedInvoice = await googleSheetsService.createInvoice(newInvoice);
+                await googleSheetsService.addInvoice(newInvoice);
+                const savedInvoice = newInvoice;
 
                 // Send invoice if requested
                 if (sendInvoice && customer.email) {
