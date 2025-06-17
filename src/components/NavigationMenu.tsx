@@ -47,6 +47,12 @@ const NavigationMenu: React.FC = () => {
       icon: <DashboardIcon />
     },
     {
+      title: 'E-Mail Client',
+      path: '/email-client',
+      icon: <EmailIcon />,
+      badge: 'NEU'
+    },
+    {
       title: 'Kunden',
       path: '/customers',
       icon: <PeopleIcon />

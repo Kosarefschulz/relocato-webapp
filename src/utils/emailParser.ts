@@ -18,7 +18,19 @@ export interface ParsedCustomer {
   source: string;
 }
 
-export function parseEmail(emailData: {
+export const emailParser = {
+  async parseEmail(body: string, from: string): Promise<ParsedCustomer> {
+    const emailData = {
+      from,
+      text: body.replace(/<[^>]*>/g, ''), // Strip HTML tags
+      html: body
+    };
+    
+    return parseEmailContent(emailData);
+  }
+};
+
+function parseEmailContent(emailData: {
   from?: string;
   subject?: string;
   text?: string;

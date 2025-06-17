@@ -1,59 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Alle Benutzer müssen authentifiziert sein
-    function isAuthenticated() {
-      return request.auth != null;
+    // Allow read/write access on all documents to authenticated users
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
     
-    // Kunden-Sammlung
-    match /customers/{customerId} {
-      allow read, write: if isAuthenticated();
+    // Public share links
+    match /shareLinks/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
     }
     
-    // Angebote-Sammlung
-    match /quotes/{quoteId} {
-      allow read, write: if isAuthenticated();
+    // Email collections
+    match /emails/{document=**} {
+      allow read, write: if request.auth != null;
     }
     
-    // Rechnungen-Sammlung
-    match /invoices/{invoiceId} {
-      allow read, write: if isAuthenticated();
+    match /emailFolders/{document=**} {
+      allow read, write: if request.auth != null;
     }
     
-    // Email-Vorlagen
-    match /emailTemplates/{templateId} {
-      allow read, write: if isAuthenticated();
+    match /emailImportStatus/{document=**} {
+      allow read, write: if request.auth != null;
     }
     
-    // Follow-up Regeln
-    match /followUpRules/{ruleId} {
-      allow read, write: if isAuthenticated();
+    // Failed imports collection
+    match /failed_imports/{document=**} {
+      allow read, write: if request.auth != null;
     }
     
-    // Geplante Follow-ups
-    match /scheduledFollowUps/{followUpId} {
-      allow read, write: if isAuthenticated();
+    // Import history
+    match /import_history/{document=**} {
+      allow read, write: if request.auth != null;
     }
     
-    // Angebots-Templates
-    match /quoteTemplates/{templateId} {
-      allow read, write: if isAuthenticated();
-    }
-    
-    // Analytics
-    match /analytics/{documentId} {
-      allow read, write: if isAuthenticated();
-    }
-    
-    // Email History
-    match /emailHistory/{emailId} {
-      allow read, write: if isAuthenticated();
-    }
-    
-    // Sync Logs
-    match /syncLogs/{logId} {
-      allow read, write: if isAuthenticated();
+    // System collections
+    match /system/{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }

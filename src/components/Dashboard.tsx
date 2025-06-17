@@ -30,7 +30,8 @@ import {
   Assignment as DispositionIcon,
   PhotoLibrary as PhotoIcon,
   TrendingUp as SalesIcon,
-  AdminPanelSettings as AdminIcon
+  AdminPanelSettings as AdminIcon,
+  Email as EmailIcon
 } from '@mui/icons-material';
 import NavigationMenu from './NavigationMenu';
 import SyncStatus from './SyncStatus';
@@ -116,6 +117,14 @@ const Dashboard: React.FC = () => {
       path: '/admin-tools',
       color: 'warning.main',
       stats: { label: 'Verwaltung', value: '3 Tools' }
+    },
+    {
+      title: 'E-Mail Client',
+      description: 'E-Mails verwalten und importieren',
+      icon: <EmailIcon sx={{ fontSize: 32 }} />,
+      path: '/email-client',
+      color: 'info.main',
+      stats: { label: 'Ungelesen', value: '0' }
     }
   ];
 
