@@ -30,6 +30,16 @@ export const emailParser = {
   }
 };
 
+// Export standalone function for backward compatibility
+export function parseEmail(emailData: {
+  from?: string;
+  subject?: string;
+  text?: string;
+  html?: string;
+}): ParsedCustomer {
+  return parseEmailContent(emailData);
+}
+
 function parseEmailContent(emailData: {
   from?: string;
   subject?: string;
