@@ -255,7 +255,7 @@ const FailedEmailRecovery: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Möchten Sie diesen Eintrag wirklich löschen?')) return;
+    if (!window.confirm('Möchten Sie diesen Eintrag wirklich löschen?')) return;
     
     try {
       await deleteDoc(doc(db, 'failed_imports', id));
@@ -296,7 +296,7 @@ const FailedEmailRecovery: React.FC = () => {
       return;
     }
 
-    if (!confirm(`Möchten Sie ${currentImports.length} E-Mails erneut verarbeiten?`)) {
+    if (!window.confirm(`Möchten Sie ${currentImports.length} E-Mails erneut verarbeiten?`)) {
       return;
     }
 
