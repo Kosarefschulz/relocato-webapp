@@ -12,6 +12,9 @@ const { processFollowUps, triggerFollowUpProcessor } = require('./followUpProces
 const { scheduledCustomerImport, triggerCustomerImport } = require('./automaticEmailImporter');
 const { retryFailedImports } = require('./retryFailedImports');
 const { handleWebhook } = require('./webhookHandlerSimple');
+const { getEmailsWithStatus } = require('./getEmailsWithStatus');
+const { previewEmailData } = require('./previewEmailData');
+const { importSingleEmail } = require('./importSingleEmail');
 
 // Firebase Admin initialisieren - nur wenn noch nicht initialisiert
 if (!admin.apps.length) {
@@ -31,6 +34,9 @@ exports.scheduledCustomerImport = scheduledCustomerImport;
 exports.triggerCustomerImport = triggerCustomerImport;
 exports.retryFailedImports = retryFailedImports;
 exports.handleWebhook = handleWebhook;
+exports.getEmailsWithStatus = getEmailsWithStatus;
+exports.previewEmailData = previewEmailData;
+exports.importSingleEmail = importSingleEmail;
 
 /**
  * Test-Version: Verarbeitet die letzten 50 E-Mails aus einem Ordner

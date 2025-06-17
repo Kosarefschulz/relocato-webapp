@@ -15,7 +15,9 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  CircularProgress
+  CircularProgress,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { useAnalytics } from '../hooks/useAnalytics';
 import {
@@ -23,8 +25,12 @@ import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
   Email as EmailIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  Preview as PreviewIcon,
+  ImportExport as ImportIcon
 } from '@mui/icons-material';
+import EmailImportPreview from './EmailImportPreview';
+import TabPanel from './TabPanel';
 
 const AdminImport: React.FC = () => {
   const analytics = useAnalytics();
@@ -34,6 +40,11 @@ const AdminImport: React.FC = () => {
   const [batchSize, setBatchSize] = useState(50);
   const [startFrom, setStartFrom] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   const addLog = (message: string) => {
     setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
@@ -217,11 +228,33 @@ const AdminImport: React.FC = () => {
           E-Mail Import Admin
         </Typography>
         <Typography variant="body1" color="text.secondary" gutterBottom>
-          Importiere alle E-Mails aus dem "erfolgreich verarbeitete Anfragen" Ordner
+          Importiere und verwalte E-Mails aus dem IONOS E-Mail-Konto
         </Typography>
+        
+        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mt: 3 }}>
+          <Tab 
+            label="E-Mail Vorschau" 
+            icon={<PreviewIcon />} 
+            iconPosition="start"
+          />
+          <Tab 
+            label="Batch Import" 
+            icon={<ImportIcon />} 
+            iconPosition="start"
+          />
+        </Tabs>
       </Paper>
 
-      <Grid container spacing={3}>
+      <TabPanel value={tabValue} index={0}>
+        <EmailImportPreview 
+          onImportComplete={(imported) => {
+            addLog(`✅ ${imported} E-Mails über Vorschau importiert`);
+          }}
+        />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={1}>
+        <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
@@ -397,13 +430,14 @@ const AdminImport: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Alert severity="info" sx={{ mt: 3 }}>
-        <Typography variant="body2">
-          <strong>Hinweis:</strong> Der Import kann mehrere Minuten dauern. 
-          Die E-Mails werden in Batches verarbeitet, um Timeouts zu vermeiden.
-          Bereits existierende Kunden werden übersprungen.
-        </Typography>
-      </Alert>
+        <Alert severity="info" sx={{ mt: 3 }}>
+          <Typography variant="body2">
+            <strong>Hinweis:</strong> Der Import kann mehrere Minuten dauern. 
+            Die E-Mails werden in Batches verarbeitet, um Timeouts zu vermeiden.
+            Bereits existierende Kunden werden übersprungen.
+          </Typography>
+        </Alert>
+      </TabPanel>
     </Box>
   );
 };

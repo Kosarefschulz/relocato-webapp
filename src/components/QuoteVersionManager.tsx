@@ -64,12 +64,14 @@ const QuoteVersionManager: React.FC<QuoteVersionManagerProps> = ({
   const [comparisonResult, setComparisonResult] = useState<any>(null);
 
   useEffect(() => {
-    if (open) {
+    if (open && quote?.id) {
       loadVersions();
     }
-  }, [open, quote.id]);
+  }, [open, quote?.id]);
 
   const loadVersions = async () => {
+    if (!quote?.id) return;
+    
     try {
       setLoading(true);
       const versionList = await quoteHistoryService.getQuoteVersions(quote.id);
@@ -184,6 +186,11 @@ const QuoteVersionManager: React.FC<QuoteVersionManagerProps> = ({
     };
     return labels[status];
   };
+
+  // Return early if quote is null
+  if (!quote) {
+    return null;
+  }
 
   return (
     <>

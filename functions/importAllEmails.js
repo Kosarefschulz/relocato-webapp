@@ -297,3 +297,7 @@ async function createAutomaticQuote(customer, db) {
   
   return quote;
 }
+
+// Export helper functions for use in other modules
+module.exports.generateCustomerNumber = generateCustomerNumber;
+module.exports.createAutomaticQuote = createAutomaticQuote;

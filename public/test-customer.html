@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Customer Creation - RELOCATO®</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #e74c3c;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .info-box p {
+            margin: 5px 0;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.loading {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #e74c3c;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-details {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        .result-details h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result-details pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RELOCATO® Test Customer Creation</h1>
+        
+        <div class="info-box">
+            <h3>Test Customer Details</h3>
+            <p><strong>Name:</strong> Sergej Schulz</p>
+            <p><strong>Email:</strong> sergej.schulz92@gmail.com</p>
+            <p><strong>Phone:</strong> +49 1234 567890</p>
+            <p><strong>From:</strong> Detmolder Str. 234a, 33605 Bielefeld</p>
+            <p><strong>To:</strong> Musterstraße 123, 33602 Bielefeld</p>
+            <p><strong>Area:</strong> 65 m²</p>
+            <p><strong>Rooms:</strong> 3</p>
+            <p><strong>Floor:</strong> 1.OG (no elevator)</p>
+            <p><strong>Moving Date:</strong> In 2 weeks</p>
+            <p><strong>Services:</strong> Packing service + Furniture assembly</p>
+        </div>
+
+        <button id="createCustomerBtn" onclick="createTestCustomer()">
+            Create Test Customer & Send Quote
+        </button>
+
+        <div id="status" class="status"></div>
+        <div id="resultDetails" class="result-details"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCeOBZw96klWFkolRQMnhr5DG4Ol2eMjY",
+            authDomain: "umzugsapp.firebaseapp.com",
+            projectId: "umzugsapp",
+            storageBucket: "umzugsapp.firebasestorage.app",
+            messagingSenderId: "130199132038",
+            appId: "1:130199132038:web:3be72ffeb2b1f55be93e07",
+            measurementId: "G-MQWV0M47PN"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            if (type === 'loading') {
+                statusDiv.innerHTML = `<div class="loader"></div>${message}`;
+            } else {
+                statusDiv.innerHTML = message;
+            }
+        }
+
+        function showResult(data) {
+            const resultDiv = document.getElementById('resultDetails');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <h3>Creation Summary</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function generateCustomerNumber() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            
+            const counterRef = db.collection('counters').doc(`customers_${year}_${month}`);
+            
+            const newNumber = await db.runTransaction(async (transaction) => {
+                const doc = await transaction.get(counterRef);
+                
+                let counter = 1;
+                if (doc.exists) {
+                    counter = (doc.data().value || 0) + 1;
+                }
+                
+                transaction.set(counterRef, { value: counter });
+                
+                return `K${year}${month}${String(counter).padStart(3, '0')}`;
+            });
+            
+            return newNumber;
+        }
+
+        async function generateQuoteNumber() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            
+            const counterRef = db.collection('counters').doc(`quotes_${year}_${month}`);
+            
+            const newNumber = await db.runTransaction(async (transaction) => {
+                const doc = await transaction.get(counterRef);
+                
+                let counter = 1;
+                if (doc.exists) {
+                    counter = (doc.data().value || 0) + 1;
+                }
+                
+                transaction.set(counterRef, { value: counter });
+                
+                return `Q${year}${month}${String(counter).padStart(3, '0')}`;
+            });
+            
+            return newNumber;
+        }
+
+        async function createTestCustomer() {
+            const button = document.getElementById('createCustomerBtn');
+            button.disabled = true;
+            
+            try {
+                showStatus('Creating test customer...', 'loading');
+                
+                // Calculate moving date (2 weeks from now)
+                const movingDate = new Date();
+                movingDate.setDate(movingDate.getDate() + 14);
+                const movingDateStr = movingDate.toLocaleDateString('de-DE');
+                
+                // Generate customer number
+                const customerNumber = await generateCustomerNumber();
+                
+                // Test customer data
+                const customerData = {
+                    id: customerNumber,
+                    customerNumber: customerNumber,
+                    name: 'Sergej Schulz',
+                    email: 'sergej.schulz92@gmail.com',
+                    phone: '+49 1234 567890',
+                    fromAddress: 'Detmolder Str. 234a, 33605 Bielefeld',
+                    toAddress: 'Musterstraße 123, 33602 Bielefeld',
+                    moveDate: movingDateStr,
+                    movingDate: movingDateStr,
+                    apartment: {
+                        area: 65,
+                        rooms: 3,
+                        floor: 1,
+                        hasElevator: false
+                    },
+                    source: 'manual_test',
+                    customerType: 'private',
+                    distance: 15,
+                    packingService: true,
+                    furnitureAssembly: true,
+                    notes: 'TEST CUSTOMER - Created for automatic quote system testing',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Save customer
+                showStatus('Saving customer to database...', 'loading');
+                await db.collection('customers').doc(customerNumber).set(customerData);
+                
+                // Create automatic quote and send email
+                showStatus('Creating quote and sending email...', 'loading');
+                
+                // Calculate price using the same logic as the backend
+                const basePrice = customerData.apartment.area <= 25 ? 399 :
+                                customerData.apartment.area <= 40 ? 549 :
+                                customerData.apartment.area <= 60 ? 749 :
+                                customerData.apartment.area <= 80 ? 949 :
+                                customerData.apartment.area <= 100 ? 1149 : 1349;
+                
+                const floorSurcharge = customerData.apartment.floor > 0 && !customerData.apartment.hasElevator ? 
+                                     customerData.apartment.floor * 60 : 0;
+                
+                const packingPrice = customerData.packingService ? customerData.apartment.area * 8 : 0;
+                const furniturePrice = customerData.furnitureAssembly ? customerData.apartment.rooms * 75 : 0;
+                
+                let subtotal = basePrice + floorSurcharge + packingPrice + furniturePrice;
+                // Private customer discount
+                subtotal = Math.round(subtotal * 0.95);
+                const vat = Math.round(subtotal * 0.19);
+                const total = subtotal + vat;
+                
+                // Generate quote number
+                const quoteNumber = await generateQuoteNumber();
+                
+                // Create quote document
+                const quoteData = {
+                    id: quoteNumber,
+                    customerId: customerNumber,
+                    customerName: customerData.name,
+                    customerEmail: customerData.email,
+                    customerPhone: customerData.phone,
+                    fromAddress: customerData.fromAddress,
+                    toAddress: customerData.toAddress,
+                    moveDate: customerData.moveDate,
+                    movingDate: customerData.movingDate,
+                    apartment: customerData.apartment,
+                    distance: customerData.distance,
+                    services: {
+                        packing: customerData.packingService,
+                        furnitureAssembly: customerData.furnitureAssembly
+                    },
+                    pricing: {
+                        basePrice,
+                        floorSurcharge,
+                        packingPrice,
+                        furniturePrice,
+                        subtotal,
+                        vat,
+                        total
+                    },
+                    price: total,
+                    status: 'sent',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: 'test_interface',
+                    notes: 'Automatically generated test quote'
+                };
+                
+                await db.collection('quotes').doc(quoteNumber).set(quoteData);
+                
+                // Send email via backend API
+                const emailContent = `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                        <h2 style="color: #e74c3c;">Ihr Umzugsangebot von RELOCATO®</h2>
+                        <p>Sehr geehrte/r ${customerData.name},</p>
+                        <p>vielen Dank für Ihre Umzugsanfrage! Hier ist Ihr persönliches Angebot:</p>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h3>Angebotsnummer: ${quoteNumber}</h3>
+                            <p><strong>Von:</strong> ${customerData.fromAddress}</p>
+                            <p><strong>Nach:</strong> ${customerData.toAddress}</p>
+                            <p><strong>Umzugsdatum:</strong> ${customerData.moveDate}</p>
+                            <p><strong>Wohnfläche:</strong> ${customerData.apartment.area} m²</p>
+                            <p><strong>Zimmer:</strong> ${customerData.apartment.rooms}</p>
+                        </div>
+                        
+                        <div style="background: #e74c3c; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                            <h2>Gesamtpreis: €${total.toFixed(2)}</h2>
+                            <p>(inkl. 19% MwSt.)</p>
+                        </div>
+                        
+                        <p>Das detaillierte Angebot mit PDF folgt in einer separaten E-Mail.</p>
+                        
+                        <p>Mit freundlichen Grüßen<br>
+                        Ihr RELOCATO® Team</p>
+                        
+                        <hr style="margin: 30px 0;">
+                        <p style="font-size: 12px; color: #666;">
+                            RELOCATO® Bielefeld<br>
+                            Detmolder Str. 234a, 33605 Bielefeld<br>
+                            Tel: 0521 / 329 777 30<br>
+                            E-Mail: bielefeld@relocato.de
+                        </p>
+                    </div>
+                `;
+                
+                const emailResponse = await fetch('https://europe-west1-umzugsapp.cloudfunctions.net/backendApi/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: customerData.email,
+                        subject: `Ihr Umzugsangebot #${quoteNumber} - RELOCATO®`,
+                        content: emailContent
+                    })
+                });
+                
+                if (!emailResponse.ok) {
+                    throw new Error(`Email send error: ${emailResponse.status}`);
+                }
+                
+                const result = { quoteId: quoteNumber };
+                
+                // Save email history
+                await db.collection('emailHistory').add({
+                    to: customerData.email,
+                    subject: `Ihr Umzugsangebot #${quoteNumber} - RELOCATO®`,
+                    content: emailContent,
+                    customerId: customerNumber,
+                    customerName: customerData.name,
+                    quoteId: quoteNumber,
+                    templateType: 'quote_test',
+                    sentAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'sent',
+                    source: 'test_interface'
+                });
+                
+                showStatus(`
+                    <strong>✅ Success!</strong><br>
+                    Customer: ${customerData.name} (${customerNumber})<br>
+                    Quote: ${result.quoteId || 'Generated'}<br>
+                    Email: Sent to ${customerData.email}<br>
+                    Check your email for the quote PDF!
+                `, 'success');
+                
+                showResult({
+                    customer: {
+                        id: customerNumber,
+                        name: customerData.name,
+                        email: customerData.email
+                    },
+                    quote: result.quoteId,
+                    email: 'sent',
+                    movingDate: movingDateStr
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`
+                    <strong>❌ Error:</strong><br>
+                    ${error.message}<br>
+                    Check the console for details.
+                `, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
