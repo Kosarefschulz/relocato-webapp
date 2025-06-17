@@ -565,7 +565,7 @@ const EmailClient: React.FC = () => {
             }}
           >
             Neue E-Mail
-          </Typography>
+          </Button>
         </Toolbar>
         <Divider />
         <List>

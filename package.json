@@ -45,7 +45,7 @@
   },
   "scripts": {
     "start": "PORT=3001 node --max_old_space_size=12288 node_modules/.bin/react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=4096 node_modules/.bin/react-scripts build",
+    "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "demo": "node switch-to-demo.js && npm start",
