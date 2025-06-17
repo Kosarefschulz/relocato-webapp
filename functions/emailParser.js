@@ -286,6 +286,10 @@ function parseUmzug365Email(content) {
     data.region = regionMatch ? regionMatch[1].trim() : '';
   }
   
+  // --- Entfernung ---
+  const entfernungMatch = content.match(/Entfernung.*?:\s*(.+?)\s*km/i);
+  data.distance = entfernungMatch ? parseFloat(entfernungMatch[1].trim()) : 0;
+  
   // Formatiere finale Daten
   const nameParts = data.name.split(' ');
   
@@ -302,6 +306,7 @@ function parseUmzug365Email(content) {
     toAddress: data.toAddress || '',
     apartment: data.apartment || {},
     services: ['Umzug'], // Umzug365 hat keine Service-Details in den Beispielen
+    distance: data.distance || 0,
     notes: data.kategorie ? `Kategorie: ${data.kategorie}\nRegion: ${data.region || ''}` : '',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     status: 'new',
@@ -432,6 +437,7 @@ function parseGenericEmail(content, emailData) {
     toAddress: '',
     apartment: {},
     services: ['Umzug'],
+    distance: 0,
     notes: '',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     status: 'new',
@@ -516,6 +522,22 @@ function parseGenericEmail(content, emailData) {
     }
   }
 
+  // Versuche Entfernung zu finden
+  const distancePatterns = [
+    /Entfernung.*?:\s*(.+?)\s*km/i,
+    /Distanz.*?:\s*(.+?)\s*km/i,
+    /Strecke.*?:\s*(.+?)\s*km/i,
+    /(\d+)\s*km/i
+  ];
+  
+  for (const pattern of distancePatterns) {
+    const match = content.match(pattern);
+    if (match) {
+      data.distance = parseFloat(match[1]) || 0;
+      break;
+    }
+  }
+  
   // Füge Original-Text als Notiz hinzu
   data.notes = `E-Mail konnte nicht automatisch geparst werden.\n\nOriginal-Betreff: ${emailData.subject || ''}\n\nInhalt:\n${content.substring(0, 500)}...`;
 

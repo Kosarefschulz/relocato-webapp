@@ -3,8 +3,13 @@ const admin = require('firebase-admin');
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
 const { parseEmail } = require('./emailParser');
+const nodemailer = require('nodemailer');
+const fetch = require('node-fetch');
 
 // Don't initialize admin here - it's already initialized in index.js
+
+// Import pricing calculator and template functions from quotePriceCalculator
+const { QuoteCalculator, generateQuoteHTML, generatePDFFromHTML, generateEmailText } = require('./quotePriceCalculator');
 
 /**
  * Scheduled function that runs periodically to import new customers from emails
@@ -228,6 +233,11 @@ async function processEmails(imap, emailIds, stats, lastImport, db) {
             // Parse customer data
             const customer = parseEmail(emailData);
             
+            // Ensure distance is properly set
+            if (!customer.distance && customer.distance !== 0) {
+              customer.distance = 25; // Default distance
+            }
+            
             // Validate customer data - enhanced logging
             if (!customer.name || customer.name === 'Unbekannt') {
               console.warn('⚠️ No name found in email');
@@ -253,7 +263,14 @@ async function processEmails(imap, emailIds, stats, lastImport, db) {
               // Still create a new quote for existing customer
               const existingCustomer = await findExistingCustomer(db, customer);
               if (existingCustomer) {
-                await createAutomaticQuote(db, existingCustomer, emailData);
+                // Merge new data with existing customer data
+                const mergedCustomer = {
+                  ...existingCustomer,
+                  ...customer,
+                  id: existingCustomer.id,
+                  customerNumber: existingCustomer.customerNumber
+                };
+                await createAutomaticQuote(db, mergedCustomer, emailData);
               }
               return;
             }
@@ -277,14 +294,9 @@ async function processEmails(imap, emailIds, stats, lastImport, db) {
             console.log(`✅ New customer: ${customer.customerNumber} - ${customer.name}`);
             stats.newCustomers++;
             
-            // Create automatic quote
+            // Create automatic quote (includes PDF generation and email sending)
             const quote = await createAutomaticQuote(db, customer, emailData);
-            console.log(`✅ Quote created: ${quote.id}`);
-            
-            // Send welcome email
-            if (customer.email) {
-              await sendWelcomeEmail(customer, quote);
-            }
+            console.log(`✅ Quote created and email sent: ${quote.id}`);
             
             stats.processedEmails++;
             
@@ -429,29 +441,31 @@ async function generateCustomerNumber(db) {
 }
 
 async function createAutomaticQuote(db, customer, emailData) {
-  // Base pricing
-  const basePrice = 450;
-  const pricePerRoom = 150;
-  const pricePerSqm = 8;
-  const pricePerFloor = 50;
+  // Use the Zapier pricing logic
+  const calculator = new QuoteCalculator();
   
-  let price = basePrice;
+  // Prepare data for calculation
+  const calculationData = {
+    area: customer.apartment?.area || 60,
+    rooms: customer.apartment?.rooms || 3,
+    fromFloor: customer.apartment?.floor || 0,
+    toFloor: customer.apartment?.toFloor || 0,
+    hasElevatorFrom: customer.apartment?.hasElevator || false,
+    hasElevatorTo: customer.apartment?.hasElevatorTo || false,
+    distance: customer.distance || 25,
+    packingService: customer.packingService || customer.services?.includes('Einpackservice') || false,
+    furnitureAssembly: customer.furnitureAssembly || customer.services?.includes('Möbelmontage') || false,
+    customerType: customer.customerType || 'private'
+  };
   
-  if (customer.apartment?.rooms) {
-    price += customer.apartment.rooms * pricePerRoom;
-  }
+  // Calculate price
+  const calculation = calculator.calculateQuote(calculationData);
   
-  if (customer.apartment?.area) {
-    price += customer.apartment.area * pricePerSqm;
-  }
-  
-  if (customer.apartment?.floor > 0 && !customer.apartment?.hasElevator) {
-    price += customer.apartment.floor * pricePerFloor;
-  }
-  
-  const volume = (customer.apartment?.rooms || 3) * 12;
+  // Generate quote number
+  const quoteNumber = `Q${Date.now()}_${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
   
   const quoteData = {
+    id: quoteNumber,
     customerId: customer.id,
     customerName: customer.name,
     customerEmail: customer.email,
@@ -459,22 +473,23 @@ async function createAutomaticQuote(db, customer, emailData) {
     fromAddress: customer.fromAddress || '',
     toAddress: customer.toAddress || '',
     date: customer.movingDate || null,
-    rooms: customer.apartment?.rooms || 0,
-    area: customer.apartment?.area || 0,
+    rooms: customer.apartment?.rooms || 3,
+    area: customer.apartment?.area || 60,
     floor: customer.apartment?.floor || 0,
     hasElevator: customer.apartment?.hasElevator || false,
     items: [],
     services: [
       {
         name: 'Umzugsservice',
-        description: `Komplettumzug für ${customer.apartment?.rooms || 3} Zimmer`,
-        price: price
+        description: `Komplettumzug für ${customer.apartment?.area || 60} m²`,
+        price: calculation.total
       }
     ],
-    volume: volume,
-    distance: 10,
-    price: price,
-    status: 'draft',
+    volume: Math.round((customer.apartment?.area || 60) * 0.3),
+    distance: customer.distance || 25,
+    price: calculation.total,
+    calculation: calculation,
+    status: 'sent',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     createdBy: 'automatic_import',
@@ -485,15 +500,83 @@ async function createAutomaticQuote(db, customer, emailData) {
     }
   };
   
-  const quoteRef = db.collection('quotes').doc();
-  await quoteRef.set(quoteData);
+  await db.collection('quotes').doc(quoteNumber).set(quoteData);
   
-  return { id: quoteRef.id, ...quoteData };
+  // Generate PDF and send email
+  if (customer.email) {
+    try {
+      console.log('📄 Generating PDF for automatic quote...');
+      const html = generateQuoteHTML(customer, calculation, quoteNumber);
+      const pdfBuffer = await generatePDFFromHTML(html);
+      
+      console.log('📧 Sending quote email to:', customer.email);
+      await sendQuoteEmail(db, customer, calculation, quoteNumber, pdfBuffer);
+    } catch (error) {
+      console.error('❌ Error generating PDF or sending email:', error);
+      // Don't throw - quote is already created, just log the error
+    }
+  }
+  
+  return { id: quoteNumber, ...quoteData };
+}
+
+// SMTP Transporter creation
+function createTransporter() {
+  return nodemailer.createTransporter({
+    host: functions.config().smtp?.host || 'smtp.ionos.de',
+    port: parseInt(functions.config().smtp?.port || '587'),
+    secure: false,
+    auth: {
+      user: functions.config().smtp?.user || 'bielefeld@relocato.de',
+      pass: functions.config().smtp?.pass || 'Bicm1308'
+    },
+    tls: {
+      ciphers: 'SSLv3',
+      rejectUnauthorized: false
+    }
+  });
+}
+
+// Send quote email with PDF attachment
+async function sendQuoteEmail(db, customer, calculation, quoteNumber, pdfBuffer) {
+  const transporter = createTransporter();
+  const emailText = generateEmailText(customer, calculation, quoteNumber);
+  
+  const mailOptions = {
+    from: 'RELOCATO® Bielefeld <bielefeld@relocato.de>',
+    to: customer.email,
+    bcc: 'bielefeld@relocato.de', // Copy for archive
+    subject: `Ihr Umzugsangebot #${quoteNumber} - RELOCATO®`,
+    text: emailText,
+    html: emailText.replace(/\n/g, '<br>'),
+    attachments: [{
+      filename: `Umzugsangebot_${quoteNumber}_RELOCATO.pdf`,
+      content: pdfBuffer,
+      contentType: 'application/pdf'
+    }]
+  };
+  
+  await transporter.sendMail(mailOptions);
+  console.log('✅ Quote email sent successfully');
+  
+  // Save email history
+  await db.collection('emailHistory').add({
+    to: customer.email,
+    subject: mailOptions.subject,
+    content: emailText,
+    customerId: customer.id,
+    customerName: customer.name,
+    quoteId: quoteNumber,
+    templateType: 'quote_automatic_import',
+    sentAt: admin.firestore.FieldValue.serverTimestamp(),
+    status: 'sent',
+    source: 'automatic_import'
+  });
 }
 
 async function sendWelcomeEmail(customer, quote) {
-  // TODO: Implement welcome email using sendEmailViaSMTP
-  console.log(`📧 Would send welcome email to ${customer.email}`);
+  // This is now handled in createAutomaticQuote
+  console.log(`✅ Quote email sent as part of automatic import for ${customer.email}`);
 }
 
 async function sendSuccessNotification(db, stats) {
