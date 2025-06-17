@@ -9,6 +9,7 @@ const { backendApi } = require('./backendApi');
 const { importAllEmails } = require('./importAllEmails');
 const { importAllCustomers } = require('./importAllCustomers');
 const { processFollowUps, triggerFollowUpProcessor } = require('./followUpProcessor');
+const { scheduledCustomerImport, triggerCustomerImport } = require('./automaticEmailImporter');
 
 // Firebase Admin initialisieren
 admin.initializeApp();
@@ -22,6 +23,8 @@ exports.importAllEmails = importAllEmails;
 exports.importAllCustomers = importAllCustomers;
 exports.processFollowUps = processFollowUps;
 exports.triggerFollowUpProcessor = triggerFollowUpProcessor;
+exports.scheduledCustomerImport = scheduledCustomerImport;
+exports.triggerCustomerImport = triggerCustomerImport;
 
 /**
  * Test-Version: Verarbeitet die letzten 50 E-Mails aus einem Ordner
@@ -528,3 +531,6 @@ www.relocato.de
   
   console.log(`📧 Willkommens-E-Mail vorbereitet für: ${customer.email}`);
 }
+
+// Import automatic email importer functions (they export themselves)
+require('./automaticEmailImporter');

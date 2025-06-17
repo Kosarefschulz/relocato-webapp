@@ -27,6 +27,8 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import QuoteTemplateManager from './components/QuoteTemplateManager';
 import EmailTemplateManager from './components/EmailTemplateManager';
 import FollowUpManager from './components/FollowUpManager';
+import EmailImportMonitor from './components/EmailImportMonitor';
+import EmailImportSettings from './components/EmailImportSettings';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 
@@ -185,6 +187,18 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/follow-ups" 
         element={user ? <FollowUpManager /> : <Navigate to="/login" />} 
+      />
+      
+      {/* Email Import Monitor */}
+      <Route 
+        path="/import-monitor" 
+        element={user ? <EmailImportMonitor /> : <Navigate to="/login" />} 
+      />
+      
+      {/* Email Import Settings */}
+      <Route 
+        path="/import-settings" 
+        element={user ? <EmailImportSettings /> : <Navigate to="/login" />} 
       />
       
       {/* Default Route */}

@@ -109,6 +109,17 @@ const NavigationMenu: React.FC = () => {
       title: 'Import Tool',
       path: '/admin-import',
       icon: <AdminIcon />
+    },
+    {
+      title: 'Import Monitor',
+      path: '/import-monitor',
+      icon: <AnalyticsIcon />,
+      badge: 'NEU'
+    },
+    {
+      title: 'Import Einstellungen',
+      path: '/import-settings',
+      icon: <EmailIcon />
     }
   ];
 
