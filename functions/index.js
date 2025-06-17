@@ -7,6 +7,7 @@ const { showEmails } = require('./showEmails');
 const { scheduledEmailCheck } = require('./scheduledEmailCheck');
 const { backendApi } = require('./backendApi');
 const { importAllEmails } = require('./importAllEmails');
+const { importAllCustomers } = require('./importAllCustomers');
 const { processFollowUps, triggerFollowUpProcessor } = require('./followUpProcessor');
 
 // Firebase Admin initialisieren
@@ -18,6 +19,7 @@ exports.showEmails = showEmails;
 exports.scheduledEmailCheck = scheduledEmailCheck;
 exports.backendApi = backendApi;
 exports.importAllEmails = importAllEmails;
+exports.importAllCustomers = importAllCustomers;
 exports.processFollowUps = processFollowUps;
 exports.triggerFollowUpProcessor = triggerFollowUpProcessor;
 

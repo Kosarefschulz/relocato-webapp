@@ -74,7 +74,8 @@ const AdminImport: React.FC = () => {
         setStats({
           total: result.total || 0,
           imported: result.imported || 0,
-          failed: result.failed || 0
+          failed: result.failed || 0,
+          skipped: result.skipped || 0
         });
         
         // Analytics: Import completed
@@ -154,6 +155,61 @@ const AdminImport: React.FC = () => {
     }
   };
 
+  const importAllIncludingDuplicates = async () => {
+    setImporting(true);
+    setStats(null);
+    setLogs([]);
+    setProgress(0);
+    
+    addLog('🚀 Starte Import ALLER E-Mails inklusive Duplikate...');
+    addLog('⚠️  Duplikate erhalten eindeutige Kundennummern');
+    
+    try {
+      const response = await fetch(
+        'https://europe-west1-umzugsapp.cloudfunctions.net/importAllCustomers',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        addLog(`✅ Import abgeschlossen!`);
+        addLog(`📊 Statistik:`);
+        addLog(`   - ${result.stats.totalEmails} E-Mails verarbeitet`);
+        addLog(`   - ${result.stats.imported} neue Kunden importiert`);
+        addLog(`   - ${result.stats.duplicatesImported} Duplikate als neue Kunden importiert`);
+        addLog(`   - ${result.stats.failed} fehlgeschlagen`);
+        
+        if (result.stats.duplicatesImported > 0) {
+          addLog(`\n⚠️  ${result.stats.duplicatesImported} Duplikate wurden mit eindeutigen Kundennummern importiert.`);
+          addLog(`Diese können Sie manuell überprüfen und ggf. löschen.`);
+        }
+        
+        setStats({
+          total: result.stats.totalEmails,
+          imported: result.stats.imported + result.stats.duplicatesImported,
+          failed: result.stats.failed,
+          skipped: 0
+        });
+        
+        // Analytics: Import completed
+        analytics.trackImportCompleted(result.stats.imported + result.stats.duplicatesImported);
+      } else {
+        addLog(`❌ Fehler: ${result.error || 'Unbekannter Fehler'}`);
+      }
+    } catch (error: any) {
+      addLog(`❌ Fehler beim Import: ${error.message}`);
+    } finally {
+      setImporting(false);
+      setProgress(100);
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Paper sx={{ p: 3, mb: 3 }}>
@@ -216,8 +272,21 @@ const AdminImport: React.FC = () => {
                   startIcon={importing ? <CircularProgress size={20} /> : <PeopleIcon />}
                   onClick={importBatch}
                   disabled={importing}
+                  sx={{ mb: 2 }}
                 >
                   {importing ? 'Importiere alle 1200 Kunden...' : 'Alle 1200 Kunden importieren'}
+                </Button>
+                
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  fullWidth
+                  startIcon={importing ? <CircularProgress size={20} /> : <PeopleIcon />}
+                  onClick={importAllIncludingDuplicates}
+                  disabled={importing}
+                >
+                  {importing ? 'Importiere ALLE...' : 'ALLE Kunden + Duplikate importieren'}
                 </Button>
               </Box>
               
@@ -242,37 +311,56 @@ const AdminImport: React.FC = () => {
                 </Typography>
                 
                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                  <Grid item xs={4}>
+                  <Grid item xs={3}>
                     <Box textAlign="center">
                       <Typography variant="h3" color="primary">
                         {stats.total}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Gesamt
+                        E-Mails
                       </Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item xs={3}>
                     <Box textAlign="center">
                       <Typography variant="h3" color="success.main">
                         {stats.imported}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Importiert
+                        Neue Kunden
                       </Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item xs={3}>
+                    <Box textAlign="center">
+                      <Typography variant="h3" color="warning.main">
+                        {stats.skipped || 0}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Duplikate
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={3}>
                     <Box textAlign="center">
                       <Typography variant="h3" color="error.main">
                         {stats.failed}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Fehlgeschlagen
+                        Fehler
                       </Typography>
                     </Box>
                   </Grid>
                 </Grid>
+                
+                {stats.skipped > 0 && (
+                  <Box sx={{ mt: 2, p: 2, bgcolor: 'warning.50', borderRadius: 1 }}>
+                    <Typography variant="body2" color="warning.dark">
+                      <strong>{stats.skipped} E-Mails</strong> wurden übersprungen, da die Kunden bereits existieren.
+                      Dies verhindert doppelte Kundeneinträge bei mehrfachen Anfragen.
+                    </Typography>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           )}

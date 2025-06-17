@@ -74,7 +74,8 @@ async function importAllEmailsFromFolder(folderName, skipExisting, batchSize, st
     imported: 0,
     skipped: 0,
     failed: 0,
-    errors: []
+    errors: [],
+    duplicateEmails: []
   };
   
   return new Promise((resolve, reject) => {
@@ -147,14 +148,20 @@ async function importAllEmailsFromFolder(folderName, skipExisting, batchSize, st
                     const existing = await checkExistingCustomer(customer.email, db);
                     if (existing) {
                       stats.skipped++;
+                      if (!stats.duplicateEmails) stats.duplicateEmails = [];
+                      stats.duplicateEmails.push({
+                        email: customer.email,
+                        existingCustomer: existing.customerNumber,
+                        date: emailData.date
+                      });
                       console.log(`⏭️  Kunde existiert bereits: ${existing.customerNumber}`);
                       resolveEmail();
                       return;
                     }
                   }
                   
-                  // Generiere Kundennummer
-                  customer.customerNumber = await generateCustomerNumber(db);
+                  // Generiere Kundennummer mit Email-Datum
+                  customer.customerNumber = await generateCustomerNumber(db, emailData.date);
                   customer.id = customer.customerNumber;
                   
                   // Speichere in Firestore
@@ -225,8 +232,8 @@ async function checkExistingCustomer(email, db) {
   return !snapshot.empty ? snapshot.docs[0].data() : null;
 }
 
-async function generateCustomerNumber(db) {
-  const date = new Date();
+async function generateCustomerNumber(db, emailDate = null) {
+  const date = emailDate ? new Date(emailDate) : new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   
