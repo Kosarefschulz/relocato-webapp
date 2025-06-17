@@ -718,6 +718,63 @@ class GoogleSheetsPublicService {
     }
   }
 
+  async updateInvoice(invoiceId: string, updates: Partial<Invoice>): Promise<boolean> {
+    try {
+      // Lade existierende lokale Rechnungen
+      const localInvoices = this.getLocalInvoices();
+      
+      // Finde die Rechnung
+      const invoiceIndex = localInvoices.findIndex(inv => inv.id === invoiceId);
+      
+      if (invoiceIndex === -1) {
+        console.error('Rechnung nicht gefunden:', invoiceId);
+        return false;
+      }
+      
+      // Aktualisiere die Rechnung
+      localInvoices[invoiceIndex] = {
+        ...localInvoices[invoiceIndex],
+        ...updates,
+        id: invoiceId // Stelle sicher, dass die ID nicht überschrieben wird
+      };
+      
+      // Speichere aktualisierte Liste
+      this.saveLocalInvoices(localInvoices);
+      
+      console.log('💸 Rechnung erfolgreich aktualisiert:', invoiceId);
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren der Rechnung:', error);
+      return false;
+    }
+  }
+
+  async deleteInvoice(invoiceId: string): Promise<boolean> {
+    try {
+      // Lade existierende lokale Rechnungen
+      const localInvoices = this.getLocalInvoices();
+      
+      // Filtere die zu löschende Rechnung heraus
+      const updatedInvoices = localInvoices.filter(inv => inv.id !== invoiceId);
+      
+      if (updatedInvoices.length === localInvoices.length) {
+        console.error('Rechnung nicht gefunden:', invoiceId);
+        return false;
+      }
+      
+      // Speichere aktualisierte Liste
+      this.saveLocalInvoices(updatedInvoices);
+      
+      console.log('💸 Rechnung erfolgreich gelöscht:', invoiceId);
+      
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Löschen der Rechnung:', error);
+      return false;
+    }
+  }
+
   private getDemoInvoices(): Invoice[] {
     const today = new Date();
     const dueDate = new Date(today);

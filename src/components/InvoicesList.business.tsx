@@ -24,7 +24,9 @@ import {
   Card,
   CardContent,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Checkbox,
+  Snackbar
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -38,7 +40,10 @@ import {
   Payment as PaymentIcon,
   AccountBalance as AccountBalanceIcon,
   Receipt as ReceiptIcon,
-  Euro as EuroIcon
+  Euro as EuroIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
+  IndeterminateCheckBox as IndeterminateCheckBoxIcon
 } from '@mui/icons-material';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { generateInvoicePDF } from '../services/pdfService';
@@ -78,6 +83,9 @@ const InvoicesList: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date_desc');
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
+  const [selectMode, setSelectMode] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   // Load invoices
   useEffect(() => {
@@ -166,6 +174,95 @@ const InvoicesList: React.FC = () => {
     }
   };
 
+  // Selection functions
+  const toggleInvoiceSelection = (invoiceId: string) => {
+    setSelectedInvoices(prev => {
+      if (prev.includes(invoiceId)) {
+        return prev.filter(id => id !== invoiceId);
+      } else {
+        return [...prev, invoiceId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedInvoices.length === filteredInvoices.length && filteredInvoices.length > 0) {
+      setSelectedInvoices([]);
+    } else {
+      setSelectedInvoices(filteredInvoices.map(i => i.id!).filter(id => id !== undefined));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedInvoices.length === 0) return;
+    
+    const confirmMessage = selectedInvoices.length === 1 
+      ? 'Möchten Sie die ausgewählte Rechnung wirklich löschen?'
+      : `Möchten Sie die ${selectedInvoices.length} ausgewählten Rechnungen wirklich löschen?`;
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        let successCount = 0;
+        let errorCount = 0;
+        
+        for (const invoiceId of selectedInvoices) {
+          try {
+            const success = await googleSheetsService.deleteInvoice(invoiceId);
+            if (success) {
+              successCount++;
+            } else {
+              errorCount++;
+            }
+          } catch (error) {
+            errorCount++;
+          }
+        }
+        
+        // Update local state
+        setInvoices(invoices.filter(i => !selectedInvoices.includes(i.id!)));
+        setSelectedInvoices([]);
+        
+        if (errorCount === 0) {
+          setSnackbar({ 
+            open: true, 
+            message: `${successCount} Rechnung${successCount > 1 ? 'en' : ''} erfolgreich gelöscht`, 
+            severity: 'success' 
+          });
+        } else {
+          setSnackbar({ 
+            open: true, 
+            message: `${successCount} gelöscht, ${errorCount} Fehler`, 
+            severity: 'error' 
+          });
+        }
+        
+        if (successCount > 0) {
+          setSelectMode(false);
+        }
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+        setSnackbar({ open: true, message: 'Fehler beim Löschen der Rechnungen', severity: 'error' });
+      }
+    }
+  };
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    if (window.confirm('Rechnung wirklich löschen?')) {
+      try {
+        const success = await googleSheetsService.deleteInvoice(invoiceId);
+        if (success) {
+          setInvoices(invoices.filter(i => i.id !== invoiceId));
+          setSnackbar({ open: true, message: 'Rechnung erfolgreich gelöscht', severity: 'success' });
+        } else {
+          setSnackbar({ open: true, message: 'Fehler beim Löschen der Rechnung', severity: 'error' });
+        }
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+        setSnackbar({ open: true, message: 'Fehler beim Löschen der Rechnung', severity: 'error' });
+      }
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft': return 'default';
@@ -217,15 +314,71 @@ const InvoicesList: React.FC = () => {
     <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <IconButton onClick={() => navigate('/dashboard')} sx={{ mb: 2 }}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h4" gutterBottom>
-          Finance Center
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Rechnungsverwaltung und Finanzübersicht
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box>
+            <IconButton onClick={() => navigate('/dashboard')} sx={{ mb: 2 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h4" gutterBottom>
+              Finance Center
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Rechnungsverwaltung und Finanzübersicht
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            {!selectMode ? (
+              <Button
+                variant="outlined"
+                startIcon={<CheckBoxIcon />}
+                onClick={() => {
+                  setSelectMode(true);
+                  setSelectedInvoices([]);
+                }}
+              >
+                Auswählen
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setSelectMode(false);
+                    setSelectedInvoices([]);
+                  }}
+                >
+                  Abbrechen
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={
+                    selectedInvoices.length === filteredInvoices.length && filteredInvoices.length > 0
+                      ? <CheckBoxIcon />
+                      : selectedInvoices.length > 0
+                      ? <IndeterminateCheckBoxIcon />
+                      : <CheckBoxOutlineBlankIcon />
+                  }
+                  onClick={handleSelectAll}
+                >
+                  {selectedInvoices.length === filteredInvoices.length && filteredInvoices.length > 0
+                    ? 'Alle abwählen'
+                    : 'Alle auswählen'}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDeleteSelected}
+                  disabled={selectedInvoices.length === 0}
+                >
+                  {selectedInvoices.length > 0 
+                    ? `${selectedInvoices.length} löschen`
+                    : 'Löschen'}
+                </Button>
+              </>
+            )}
+          </Box>
+        </Box>
       </Box>
 
       {/* Statistics Cards */}
@@ -386,6 +539,15 @@ const InvoicesList: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                {selectMode && (
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      indeterminate={selectedInvoices.length > 0 && selectedInvoices.length < filteredInvoices.length}
+                      checked={filteredInvoices.length > 0 && selectedInvoices.length === filteredInvoices.length}
+                      onChange={handleSelectAll}
+                    />
+                  </TableCell>
+                )}
                 <TableCell sx={{ fontWeight: 'bold' }}>Rechnungsnummer</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Kunde</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Netto</TableCell>
@@ -400,13 +562,13 @@ const InvoicesList: React.FC = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
+                  <TableCell colSpan={selectMode ? 10 : 9} sx={{ textAlign: 'center', py: 4 }}>
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : filteredInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
+                  <TableCell colSpan={selectMode ? 10 : 9} sx={{ textAlign: 'center', py: 4 }}>
                     <Typography variant="body1" color="text.secondary">
                       Keine Rechnungen gefunden
                     </Typography>
@@ -418,13 +580,34 @@ const InvoicesList: React.FC = () => {
               key={invoice.id} 
               hover
               id={`invoice-${invoice.id}`}
+              onClick={() => {
+                if (selectMode && invoice.id) {
+                  toggleInvoiceSelection(invoice.id);
+                }
+              }}
+              selected={selectMode && selectedInvoices.includes(invoice.id!)}
               sx={{
                 transition: 'background-color 0.3s',
+                cursor: selectMode ? 'pointer' : 'default',
                 '&:hover': {
                   backgroundColor: 'action.hover',
                 }
               }}
             >
+                    {selectMode && (
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedInvoices.includes(invoice.id!)}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            if (invoice.id) {
+                              toggleInvoiceSelection(invoice.id);
+                            }
+                          }}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
                         {invoice.invoiceNumber}
@@ -553,18 +736,21 @@ const InvoicesList: React.FC = () => {
                           </IconButton>
                         )}
                         
-                        <IconButton
-                          size="small"
-                          color="error"
-                          title="Löschen"
-                          onClick={() => {
-                            if (window.confirm('Rechnung wirklich löschen?')) {
-                              console.log('Delete invoice:', invoice.invoiceNumber);
-                            }
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                        {!selectMode && (
+                          <IconButton
+                            size="small"
+                            color="error"
+                            title="Löschen"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (invoice.id) {
+                                handleDeleteInvoice(invoice.id);
+                              }
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -584,6 +770,14 @@ const InvoicesList: React.FC = () => {
           )}
         </Typography>
       </Box>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+      />
     </Container>
   );
 };

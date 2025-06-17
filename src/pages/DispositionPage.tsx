@@ -28,6 +28,7 @@ import {
   Snackbar,
   useTheme,
   alpha,
+  Checkbox,
 } from '@mui/material';
 import {
   DirectionsCar as CarIcon,
@@ -35,6 +36,10 @@ import {
   Edit as EditIcon,
   Visibility as ViewIcon,
   ArrowBack as BackIcon,
+  Delete as DeleteIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
+  IndeterminateCheckBox as IndeterminateCheckBoxIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -91,6 +96,8 @@ const DispositionPage: React.FC = () => {
     { id: '4', name: 'Transporter 2', type: 'Transporter', licensePlate: 'B-RL 3456' },
   ]);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+  const [selectMode, setSelectMode] = useState(false);
 
   // Load customers with accepted quotes
   useEffect(() => {
@@ -244,6 +251,88 @@ const DispositionPage: React.FC = () => {
     setSnackbarOpen(true);
   };
 
+  // Selection functions
+  const toggleCustomerSelection = (customerId: string) => {
+    setSelectedCustomers(prev => {
+      if (prev.includes(customerId)) {
+        return prev.filter(id => id !== customerId);
+      } else {
+        return [...prev, customerId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCustomers.length === customers.length) {
+      setSelectedCustomers([]);
+    } else {
+      setSelectedCustomers(customers.map(c => c.id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedCustomers.length === 0) return;
+    
+    const confirmMessage = selectedCustomers.length === 1 
+      ? 'Möchten Sie die ausgewählte Disposition wirklich löschen?'
+      : `Möchten Sie die ${selectedCustomers.length} ausgewählten Dispositionen wirklich löschen?`;
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        // Remove from localStorage
+        const savedDispositions = JSON.parse(localStorage.getItem('dispositions') || '{}');
+        selectedCustomers.forEach(customerId => {
+          const customer = customers.find(c => c.id === customerId);
+          if (customer) {
+            delete savedDispositions[customer.quoteId];
+          }
+        });
+        localStorage.setItem('dispositions', JSON.stringify(savedDispositions));
+        
+        // Update local state
+        setCustomers(customers.filter(c => !selectedCustomers.includes(c.id)));
+        setSelectedCustomers([]);
+        setSelectMode(false);
+        
+        setSnackbarMessage(
+          selectedCustomers.length === 1 
+            ? 'Disposition erfolgreich gelöscht' 
+            : `${selectedCustomers.length} Dispositionen erfolgreich gelöscht`
+        );
+        setSnackbarOpen(true);
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+        setSnackbarMessage('Fehler beim Löschen der Dispositionen');
+        setSnackbarOpen(true);
+      }
+    }
+  };
+
+  const handleDeleteCustomer = async (customerId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (window.confirm('Möchten Sie diese Disposition wirklich löschen?')) {
+      try {
+        // Remove from localStorage
+        const customer = customers.find(c => c.id === customerId);
+        if (customer) {
+          const savedDispositions = JSON.parse(localStorage.getItem('dispositions') || '{}');
+          delete savedDispositions[customer.quoteId];
+          localStorage.setItem('dispositions', JSON.stringify(savedDispositions));
+        }
+        
+        // Update local state
+        setCustomers(customers.filter(c => c.id !== customerId));
+        setSnackbarMessage('Disposition erfolgreich gelöscht');
+        setSnackbarOpen(true);
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+        setSnackbarMessage('Fehler beim Löschen der Disposition');
+        setSnackbarOpen(true);
+      }
+    }
+  };
+
   return (
     <Box sx={{ 
       minHeight: '100vh',
@@ -258,13 +347,67 @@ const DispositionPage: React.FC = () => {
         >
           {/* Header */}
           <Box sx={{ mb: 4 }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-              <IconButton onClick={() => navigate('/')} sx={{ mr: 1 }}>
-                <BackIcon />
-              </IconButton>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                Disposition
-              </Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <IconButton onClick={() => navigate('/')} sx={{ mr: 1 }}>
+                  <BackIcon />
+                </IconButton>
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  Disposition
+                </Typography>
+              </Stack>
+              <Stack direction="row" spacing={2}>
+                {!selectMode ? (
+                  <Button
+                    variant="outlined"
+                    startIcon={<CheckBoxIcon />}
+                    onClick={() => {
+                      setSelectMode(true);
+                      setSelectedCustomers([]);
+                    }}
+                  >
+                    Auswählen
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setSelectMode(false);
+                        setSelectedCustomers([]);
+                      }}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={
+                        selectedCustomers.length === customers.length && customers.length > 0
+                          ? <CheckBoxIcon />
+                          : selectedCustomers.length > 0
+                          ? <IndeterminateCheckBoxIcon />
+                          : <CheckBoxOutlineBlankIcon />
+                      }
+                      onClick={handleSelectAll}
+                    >
+                      {selectedCustomers.length === customers.length && customers.length > 0
+                        ? 'Alle abwählen'
+                        : 'Alle auswählen'}
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleDeleteSelected}
+                      disabled={selectedCustomers.length === 0}
+                    >
+                      {selectedCustomers.length > 0 
+                        ? `${selectedCustomers.length} löschen`
+                        : 'Löschen'}
+                    </Button>
+                  </>
+                )}
+              </Stack>
             </Stack>
             <Typography variant="body1" color="text.secondary">
               Verwaltung von angenommenen Angeboten und Fahrzeugzuweisungen
@@ -321,6 +464,16 @@ const DispositionPage: React.FC = () => {
               <Table>
                 <TableHead>
                   <TableRow>
+                    {selectMode && (
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          indeterminate={selectedCustomers.length > 0 && selectedCustomers.length < customers.length}
+                          checked={customers.length > 0 && selectedCustomers.length === customers.length}
+                          onChange={handleSelectAll}
+                          color="primary"
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>Kundennr.</TableCell>
                     <TableCell>Name</TableCell>
                     <TableCell>Umzugsdatum</TableCell>
@@ -333,7 +486,34 @@ const DispositionPage: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {customers.map((customer) => (
-                    <TableRow key={customer.id}>
+                    <TableRow 
+                      key={customer.id}
+                      hover
+                      onClick={() => {
+                        if (selectMode) {
+                          toggleCustomerSelection(customer.id);
+                        }
+                      }}
+                      sx={{
+                        cursor: selectMode ? 'pointer' : 'default',
+                        backgroundColor: selectMode && selectedCustomers.includes(customer.id) 
+                          ? alpha(theme.palette.primary.main, 0.08)
+                          : 'inherit',
+                      }}
+                    >
+                      {selectMode && (
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={selectedCustomers.includes(customer.id)}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              toggleCustomerSelection(customer.id);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            color="primary"
+                          />
+                        </TableCell>
+                      )}
                       <TableCell>{customer.customerNumber}</TableCell>
                       <TableCell>
                         <Box>
@@ -388,7 +568,10 @@ const DispositionPage: React.FC = () => {
                           <Tooltip title="Details anzeigen">
                             <IconButton 
                               size="small"
-                              onClick={() => navigate(`/customers/${customer.id}`)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/customers/${customer.id}`);
+                              }}
                             >
                               <ViewIcon />
                             </IconButton>
@@ -397,7 +580,10 @@ const DispositionPage: React.FC = () => {
                             <IconButton 
                               size="small"
                               color="primary"
-                              onClick={() => handleOpenVehicleDialog(customer)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenVehicleDialog(customer);
+                              }}
                             >
                               <CarIcon />
                             </IconButton>
@@ -406,11 +592,25 @@ const DispositionPage: React.FC = () => {
                             <IconButton 
                               size="small"
                               color="secondary"
-                              onClick={() => handleGenerateLink(customer)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleGenerateLink(customer);
+                              }}
                             >
                               <LinkIcon />
                             </IconButton>
                           </Tooltip>
+                          {!selectMode && (
+                            <Tooltip title="Disposition löschen">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={(e) => handleDeleteCustomer(customer.id, e)}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </Stack>
                       </TableCell>
                     </TableRow>
