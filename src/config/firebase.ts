@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -27,6 +28,7 @@ let app: any = null;
 let auth: any = null;
 let db: any = null;
 let storage: any = null;
+let functions: any = null;
 
 if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
   try {
@@ -34,6 +36,7 @@ if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
+    functions = getFunctions(app, 'europe-west1');
 
     // Auth-Persistenz sofort nach Initialisierung setzen
     setPersistence(auth, browserLocalPersistence)
@@ -54,5 +57,5 @@ if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
 // Auth-Persistenz Promise für App.tsx
 export const authPersistencePromise = Promise.resolve();
 
-export { app, auth, db, storage };
+export { app, auth, db, storage, functions };
 export default app;

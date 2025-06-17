@@ -44,9 +44,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "PORT=3001 node --max_old_space_size=12288 node_modules/.bin/react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/react-scripts build",
-    "test": "react-scripts test",
+    "start": "PORT=3001 node --max_old_space_size=12288 node_modules/.bin/craco start",
+    "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/craco build",
+    "test": "craco test",
     "eject": "react-scripts eject",
     "demo": "node switch-to-demo.js && npm start",
     "firebase": "node switch-to-firebase.js && npm start",
@@ -77,6 +77,7 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@types/react-router-dom": "^5.3.3"
   }
 }
