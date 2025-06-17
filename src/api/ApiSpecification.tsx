@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardContent,
   Typography,
@@ -79,6 +78,7 @@ import { de } from 'date-fns/locale';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { AnimatedCard, SlideInContainer } from '../components/MicroAnimations';
+import { Grid } from '../utils/gridAdapter';
 
 interface ApiEndpoint {
   id: string;
