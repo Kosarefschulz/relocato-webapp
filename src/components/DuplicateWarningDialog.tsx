@@ -287,7 +287,15 @@ const DuplicateCard: React.FC<{
 
         <Divider sx={{ my: 2 }} />
 
-        <Alert severity={recommendation.severity} variant="outlined" sx={{ mt: 2 }}>
+        <Alert 
+          severity={
+            recommendation.severity === 'high' ? 'error' : 
+            recommendation.severity === 'medium' ? 'warning' : 
+            'info'
+          } 
+          variant="outlined" 
+          sx={{ mt: 2 }}
+        >
           <Typography variant="body2">
             {recommendation.message}
           </Typography>
