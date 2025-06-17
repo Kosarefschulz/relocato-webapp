@@ -76,6 +76,7 @@ import { db } from '../config/firebase';
 import { Customer } from '../types';
 import { emailParser } from '../utils/emailParser';
 import { emailClientService, Email as ServiceEmail } from '../services/emailClientService';
+import EmailCompose from './EmailCompose';
 
 interface EmailMessage {
   id: string;
@@ -165,6 +166,13 @@ const EmailClient: React.FC = () => {
     parsedData: null
   });
   const [unsubscribe, setUnsubscribe] = useState<(() => void) | null>(null);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeData, setComposeData] = useState<{
+    replyTo?: any;
+    forwardEmail?: any;
+    recipientEmail?: string;
+    recipientName?: string;
+  }>({});
 
   // Load emails from Firestore
   useEffect(() => {
@@ -545,8 +553,18 @@ const EmailClient: React.FC = () => {
         }}
       >
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             E-Mail Client
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<EmailIcon />}
+            onClick={() => {
+              setComposeData({});
+              setComposeOpen(true);
+            }}
+          >
+            Neue E-Mail
           </Typography>
         </Toolbar>
         <Divider />
@@ -815,8 +833,39 @@ const EmailClient: React.FC = () => {
             {/* Email Actions */}
             <Paper sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button startIcon={<ReplyIcon />}>Antworten</Button>
-                <Button startIcon={<ForwardIcon />}>Weiterleiten</Button>
+                <Button 
+                  startIcon={<ReplyIcon />}
+                  onClick={() => {
+                    setComposeData({
+                      replyTo: {
+                        from: selectedEmail.from,
+                        subject: selectedEmail.subject,
+                        body: selectedEmail.body,
+                        messageId: selectedEmail.messageId
+                      }
+                    });
+                    setComposeOpen(true);
+                  }}
+                >
+                  Antworten
+                </Button>
+                <Button 
+                  startIcon={<ForwardIcon />}
+                  onClick={() => {
+                    setComposeData({
+                      forwardEmail: {
+                        from: selectedEmail.from,
+                        to: selectedEmail.to,
+                        subject: selectedEmail.subject,
+                        body: selectedEmail.body,
+                        date: selectedEmail.date
+                      }
+                    });
+                    setComposeOpen(true);
+                  }}
+                >
+                  Weiterleiten
+                </Button>
                 <Button startIcon={<ArchiveIcon />} onClick={handleArchiveEmails}>
                   Archivieren
                 </Button>
@@ -1002,6 +1051,17 @@ const EmailClient: React.FC = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Email Compose Dialog */}
+      <EmailCompose
+        open={composeOpen}
+        onClose={() => setComposeOpen(false)}
+        onSent={() => {
+          showSnackbar('E-Mail erfolgreich gesendet', 'success');
+          handleRefresh();
+        }}
+        {...composeData}
+      />
     </Box>
   );
 };
