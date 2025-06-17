@@ -29,7 +29,7 @@ import { motion } from 'framer-motion';
 import { Invoice, Customer } from '../types';
 import { generateInvoicePDF } from '../services/pdfService';
 import { sendEmail } from '../services/emailService';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 
 interface CustomerInvoicesProps {
   invoices: Invoice[];

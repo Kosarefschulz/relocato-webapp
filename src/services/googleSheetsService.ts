@@ -1,4 +1,5 @@
 import { Customer, Quote } from '../types';
+import { cleanPhoneNumber } from '../utils/phoneUtils';
 
 interface GoogleSheetsConfig {
   apiKey: string;
@@ -82,7 +83,7 @@ class GoogleSheetsService {
       id: row[0] || `${index + 1}`,
       name: row[1] || '',
       email: row[2] || '',
-      phone: row[3] || '',
+      phone: cleanPhoneNumber(row[3]) || '',
       movingDate: row[4] || '',
       fromAddress: row[5] || '',
       toAddress: row[6] || '',

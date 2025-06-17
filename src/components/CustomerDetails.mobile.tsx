@@ -57,7 +57,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Customer, Quote, Invoice, EmailHistory } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import CustomerPhotos from './CustomerPhotos';
 
 // Styled Components

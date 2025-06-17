@@ -25,10 +25,12 @@ import {
   Home as HomeIcon,
   LocationOn as LocationIcon,
   CheckCircle as CheckIcon,
-  Cancel as CrossIcon
+  Cancel as CrossIcon,
+  Edit as EditIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { Customer } from '../types';
+import { formatDate } from '../utils/dateUtils';
 
 const AnimatedCard = motion(Card);
 
@@ -38,6 +40,7 @@ interface CustomerInfoProps {
   editMode: boolean;
   onFieldChange: (field: string, value: any) => void;
   isMobile: boolean;
+  onEditNotes?: () => void;
 }
 
 const CustomerInfo: React.FC<CustomerInfoProps> = ({
@@ -45,7 +48,8 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
   editedCustomer,
   editMode,
   onFieldChange,
-  isMobile
+  isMobile,
+  onEditNotes
 }) => {
   const theme = useTheme();
 
@@ -153,12 +157,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                       />
                     ) : (
                       <Typography component="span" sx={{ fontWeight: 600 }}>
-                        {new Date(customer.movingDate).toLocaleDateString('de-DE', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
+                        {formatDate(customer.movingDate, { includeWeekday: true, fallback: 'Datum nicht festgelegt' })}
                       </Typography>
                     )
                   }
@@ -392,9 +391,25 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
           transition={{ duration: 0.3 }}
         >
           <CardContent>
-            <Typography variant="h6" gutterBottom color="primary">
-              Notizen
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6" color="primary">
+                Notizen
+              </Typography>
+              {!editMode && onEditNotes && (
+                <IconButton 
+                  onClick={onEditNotes}
+                  color="primary"
+                  sx={{ 
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                    }
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+              )}
+            </Box>
             {editMode ? (
               <TextField
                 value={editedCustomer.notes || ''}
@@ -404,6 +419,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                 multiline
                 rows={4}
                 placeholder="Notizen zum Kunden hinzufügen..."
+                autoFocus
               />
             ) : (
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>

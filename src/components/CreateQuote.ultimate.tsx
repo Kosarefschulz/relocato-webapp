@@ -61,7 +61,7 @@ import { generatePDF } from '../services/pdfService';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { sendQuoteEmailWithPDFShift } from '../services/emailServiceWithPDFShift';
 import { sendEmail } from '../services/emailService';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import html2canvas from 'html2canvas';

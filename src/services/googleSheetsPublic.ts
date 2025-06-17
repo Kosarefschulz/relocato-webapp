@@ -1,4 +1,6 @@
 import { Customer, Quote, Invoice, EmailHistory } from '../types';
+import { cleanPhoneNumber } from '../utils/phoneUtils';
+import { toISODateString } from '../utils/dateUtils';
 
 class GoogleSheetsPublicService {
   private spreadsheetId = '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
@@ -139,9 +141,9 @@ class GoogleSheetsPublicService {
       return {
         id: `csv_${index + 1}`,
         name: columns[0] || `Kunde ${index + 1}`,
-        phone: columns[1] || '',
+        phone: cleanPhoneNumber(columns[1]) || '',
         email: columns[2] || '',
-        movingDate: columns[9] || '',
+        movingDate: toISODateString(columns[9]) || '',
         fromAddress: columns[4] ? `${columns[4]}${columns[5] ? ` - Etage ${columns[5]}` : ''}` : '',
         toAddress: columns[7] ? `${columns[7]}${columns[8] ? ` - Etage ${columns[8]}` : ''}` : '',
         apartment: {
@@ -154,7 +156,7 @@ class GoogleSheetsPublicService {
         notes: [
           columns[11] ? `Quelle: ${columns[11]}` : '',
           columns[10] ? `Eingang: ${columns[10]}` : '',
-          columns[3] ? `WhatsApp: ${columns[3]}` : '',
+          columns[3] ? `WhatsApp: ${cleanPhoneNumber(columns[3])}` : '',
           columns[12] ? `Datum: ${columns[12]}` : '',
           columns[13] ? `Nachricht: ${columns[13]}` : ''
         ].filter(Boolean).join(', ')

@@ -35,7 +35,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { generateArbeitsschein, ArbeitsscheinData } from '../services/arbeitsscheinService';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 
 interface CustomerData {
   id: string;

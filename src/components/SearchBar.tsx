@@ -23,7 +23,7 @@ import {
   LocationOn as LocationIcon,
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SearchBar: React.FC = () => {

@@ -23,7 +23,7 @@ import {
   Clear as ClearIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 
 const CustomerSearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

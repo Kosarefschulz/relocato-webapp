@@ -28,7 +28,7 @@ import {
 } from '@mui/icons-material';
 import { CustomIcons } from './CustomIcons';
 import Logo from './LogoIntegration';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import DataTable from './DataTable';
 
 interface Quote {

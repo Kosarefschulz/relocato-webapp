@@ -32,6 +32,7 @@ import {
   TrendingUp as SalesIcon
 } from '@mui/icons-material';
 import NavigationMenu from './NavigationMenu';
+import SyncStatus from './SyncStatus';
 import { motion } from 'framer-motion';
 
 const Dashboard: React.FC = () => {
@@ -124,6 +125,7 @@ const Dashboard: React.FC = () => {
             </Typography>
             
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <SyncStatus />
               <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
                 {user?.email}
               </Typography>

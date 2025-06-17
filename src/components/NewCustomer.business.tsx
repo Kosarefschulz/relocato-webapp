@@ -29,7 +29,7 @@ import {
   ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { findPotentialDuplicates, DuplicateScore } from '../utils/duplicateDetection';
 import DuplicateWarningDialog from './DuplicateWarningDialog';
 

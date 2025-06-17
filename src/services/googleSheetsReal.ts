@@ -1,4 +1,5 @@
 import { Customer, Quote } from '../types';
+import { cleanPhoneNumber } from '../utils/phoneUtils';
 
 class GoogleSheetsRealService {
   private spreadsheetId = '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
@@ -55,7 +56,7 @@ class GoogleSheetsRealService {
         const customer: Customer = {
           id: `real_${index + 1}`,
           name: row[0] || `Kunde ${index + 1}`,
-          phone: row[1] || '',
+          phone: cleanPhoneNumber(row[1]) || '',
           email: row[2] || '',
           movingDate: row[9] || '', // J: Umzugstag
           fromAddress: row[4] ? `${row[4]}${row[5] ? ` - Etage ${row[5]}` : ''}` : '', // E + F
@@ -136,7 +137,7 @@ class GoogleSheetsRealService {
     
     if (data.quelle) notes.push(`Quelle: ${data.quelle}`);
     if (data.eingang) notes.push(`Eingang: ${data.eingang}`);
-    if (data.whatsapp) notes.push(`WhatsApp: ${data.whatsapp}`);
+    if (data.whatsapp) notes.push(`WhatsApp: ${cleanPhoneNumber(data.whatsapp)}`);
     if (data.datetime) notes.push(`Datum: ${data.datetime}`);
     if (data.nachricht) notes.push(`Nachricht: ${data.nachricht}`);
     

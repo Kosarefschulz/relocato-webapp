@@ -26,7 +26,7 @@ import {
   Home as HomeIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 
 const CustomerDetails: React.FC = () => {
   const { customerId } = useParams<{ customerId: string }>();

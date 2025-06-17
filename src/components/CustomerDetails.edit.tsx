@@ -35,7 +35,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Customer, Quote, Invoice } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import emailHistoryService from '../services/emailHistoryService';
 import CustomerInfo from './CustomerInfo';
 import CustomerPhotos from './CustomerPhotos';
@@ -584,6 +584,7 @@ const CustomerDetails: React.FC = () => {
                 editMode={editMode}
                 onFieldChange={handleFieldChange}
                 isMobile={isMobile}
+                onEditNotes={() => setEditMode(true)}
               />
             </Box>
           </TabPanel>

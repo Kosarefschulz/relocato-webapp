@@ -40,7 +40,7 @@ import {
   History as HistoryIcon,
 } from '@mui/icons-material';
 import { Quote, Customer, Invoice } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { generatePDF, generateInvoicePDF } from '../services/pdfService';
 import { sendEmail } from '../services/emailService';
 import { motion } from 'framer-motion';

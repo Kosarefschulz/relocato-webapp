@@ -40,7 +40,7 @@ import {
   Receipt as ReceiptIcon,
   Euro as EuroIcon
 } from '@mui/icons-material';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { generateInvoicePDF } from '../services/pdfService';
 import { Customer } from '../types';
 

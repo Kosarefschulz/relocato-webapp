@@ -23,6 +23,7 @@ import {
   Skeleton,
   Fade,
   Tooltip,
+  Checkbox,
 } from '@mui/material';
 import { 
   ArrowBack as ArrowBackIcon,
@@ -40,11 +41,17 @@ import {
   Add as AddIcon,
   Star as StarIcon,
   StarBorder as StarBorderIcon,
+  Delete as DeleteIcon,
+  Checkbox as CheckboxIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
+  IndeterminateCheckBox as IndeterminateCheckBoxIcon,
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { animations } from '../styles/modernTheme';
+import { formatDate, parseDate } from '../utils/dateUtils';
 
 // Motion components
 const MotionCard = motion(Card);
@@ -60,17 +67,24 @@ const CustomersList: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+  const [selectMode, setSelectMode] = useState(false);
 
   useEffect(() => {
     const loadCustomers = async () => {
       try {
-        setLoading(true);
+        // Only show loading skeleton on first load
+        if (!initialLoad) {
+          setLoading(true);
+        }
         const customers = await googleSheetsService.getCustomers();
         setCustomers(customers);
       } catch (error) {
         console.error('Fehler beim Laden der Kunden:', error);
       } finally {
         setLoading(false);
+        setInitialLoad(false);
       }
     };
     
@@ -84,11 +98,104 @@ const CustomersList: React.FC = () => {
   );
 
   const handleSelectCustomer = (customer: Customer) => {
-    navigate(`/customer-details/${customer.id}`, { state: { from: '/customers' } });
+    if (selectMode) {
+      toggleCustomerSelection(customer.id);
+    } else {
+      navigate(`/customer-details/${customer.id}`, { state: { from: '/customers' } });
+    }
+  };
+
+  const toggleCustomerSelection = (customerId: string) => {
+    setSelectedCustomers(prev => {
+      if (prev.includes(customerId)) {
+        return prev.filter(id => id !== customerId);
+      } else {
+        return [...prev, customerId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCustomers.length === filteredCustomers.length) {
+      setSelectedCustomers([]);
+    } else {
+      setSelectedCustomers(filteredCustomers.map(c => c.id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedCustomers.length === 0) return;
+    
+    const confirmMessage = selectedCustomers.length === 1 
+      ? 'Möchten Sie den ausgewählten Kunden wirklich löschen?'
+      : `Möchten Sie die ${selectedCustomers.length} ausgewählten Kunden wirklich löschen?`;
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        let successCount = 0;
+        let errorCount = 0;
+        
+        for (const customerId of selectedCustomers) {
+          try {
+            const success = await googleSheetsService.deleteCustomer(customerId);
+            if (success) {
+              successCount++;
+            } else {
+              errorCount++;
+            }
+          } catch (error) {
+            errorCount++;
+          }
+        }
+        
+        // Update local state
+        setCustomers(customers.filter(c => !selectedCustomers.includes(c.id)));
+        setSelectedCustomers([]);
+        
+        if (errorCount === 0) {
+          setSnackbarMessage(`${successCount} Kunden erfolgreich gelöscht`);
+        } else {
+          setSnackbarMessage(`${successCount} gelöscht, ${errorCount} Fehler`);
+        }
+        setSnackbarOpen(true);
+        
+        if (successCount > 0) {
+          setSelectMode(false);
+        }
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+        setSnackbarMessage('Fehler beim Löschen der Kunden');
+        setSnackbarOpen(true);
+      }
+    }
+  };
+
+  const handleDeleteCustomer = async (customerId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Verhindere Navigation zur Detail-Seite
+    
+    if (window.confirm('Möchten Sie diesen Kunden wirklich löschen?')) {
+      try {
+        const success = await googleSheetsService.deleteCustomer(customerId);
+        if (success) {
+          // Kunde aus der lokalen Liste entfernen
+          setCustomers(customers.filter(c => c.id !== customerId));
+          setSnackbarMessage('Kunde erfolgreich gelöscht');
+          setSnackbarOpen(true);
+        } else {
+          setSnackbarMessage('Fehler beim Löschen des Kunden');
+          setSnackbarOpen(true);
+        }
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+        setSnackbarMessage('Fehler beim Löschen des Kunden');
+        setSnackbarOpen(true);
+      }
+    }
   };
 
   const isUpcomingMove = (movingDate: string) => {
-    const moveDate = new Date(movingDate);
+    const moveDate = parseDate(movingDate);
+    if (!moveDate) return false;
     const today = new Date();
     return moveDate > today;
   };
@@ -149,8 +256,12 @@ const CustomersList: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <MotionBox {...animations.fadeIn}>
+    <Fade in={true} timeout={300}>
+      <Container maxWidth="lg" sx={{ mt: 4, minHeight: '100vh' }}>
+        <MotionBox 
+          initial={initialLoad ? { opacity: 0 } : false}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -193,32 +304,84 @@ const CustomersList: React.FC = () => {
                 }}
               />
               <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<AddIcon />}
-                  onClick={() => navigate('/new-customer')}
-                >
-                  Neuer Kunde
-                </Button>
-                <Tooltip title="Filter">
-                  <IconButton 
-                    sx={{ 
-                      border: `1px solid ${theme.palette.divider}`,
-                      borderRadius: 2,
-                    }}
-                  >
-                    <FilterIcon />
-                  </IconButton>
-                </Tooltip>
-                {hasLocalCustomers && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<UploadIcon />}
-                    onClick={handleExportClick}
-                  >
-                    Export
-                  </Button>
+                {!selectMode ? (
+                  <>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<AddIcon />}
+                      onClick={() => navigate('/new-customer')}
+                    >
+                      Neuer Kunde
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CheckBoxIcon />}
+                      onClick={() => {
+                        setSelectMode(true);
+                        setSelectedCustomers([]);
+                      }}
+                    >
+                      Auswählen
+                    </Button>
+                    <Tooltip title="Filter">
+                      <IconButton 
+                        sx={{ 
+                          border: `1px solid ${theme.palette.divider}`,
+                          borderRadius: 2,
+                        }}
+                      >
+                        <FilterIcon />
+                      </IconButton>
+                    </Tooltip>
+                    {hasLocalCustomers && (
+                      <Button
+                        variant="outlined"
+                        startIcon={<UploadIcon />}
+                        onClick={handleExportClick}
+                      >
+                        Export
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setSelectMode(false);
+                        setSelectedCustomers([]);
+                      }}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={
+                        selectedCustomers.length === filteredCustomers.length && filteredCustomers.length > 0
+                          ? <CheckBoxIcon />
+                          : selectedCustomers.length > 0
+                          ? <IndeterminateCheckBoxIcon />
+                          : <CheckBoxOutlineBlankIcon />
+                      }
+                      onClick={handleSelectAll}
+                    >
+                      {selectedCustomers.length === filteredCustomers.length && filteredCustomers.length > 0
+                        ? 'Alle abwählen'
+                        : 'Alle auswählen'}
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleDeleteSelected}
+                      disabled={selectedCustomers.length === 0}
+                    >
+                      {selectedCustomers.length > 0 
+                        ? `${selectedCustomers.length} löschen`
+                        : 'Löschen'}
+                    </Button>
+                  </>
                 )}
               </Box>
             </Box>
@@ -249,16 +412,23 @@ const CustomersList: React.FC = () => {
               {filteredCustomers.map((customer, index) => (
                 <MotionCard
                   key={customer.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={initialLoad ? { opacity: 0, y: 10 } : false}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -4 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ 
+                    duration: 0.2,
+                    delay: initialLoad ? Math.min(index * 0.03, 0.3) : 0,
+                    ease: "easeOut"
+                  }}
+                  whileHover={{ y: -2, transition: { duration: 0.2 } }}
                   onClick={() => handleSelectCustomer(customer)}
                   sx={{
                     cursor: 'pointer',
                     position: 'relative',
                     overflow: 'hidden',
+                    border: selectMode && selectedCustomers.includes(customer.id) 
+                      ? `2px solid ${theme.palette.primary.main}` 
+                      : '1px solid transparent',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
@@ -277,6 +447,19 @@ const CustomersList: React.FC = () => {
                 >
                   <CardContent>
                     <Box sx={{ display: 'flex', gap: 2 }}>
+                      {selectMode && (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Checkbox
+                            checked={selectedCustomers.includes(customer.id)}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              toggleCustomerSelection(customer.id);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            color="primary"
+                          />
+                        </Box>
+                      )}
                       {/* Avatar */}
                       <Avatar
                         sx={{
@@ -393,27 +576,46 @@ const CustomersList: React.FC = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <CalendarIcon sx={{ fontSize: 16, color: 'primary.main' }} />
                             <Typography variant="body2" color="primary" fontWeight={500}>
-                              {new Date(customer.movingDate).toLocaleDateString('de-DE')}
+                              {formatDate(customer.movingDate, { includeWeekday: false, fallback: 'Kein Datum' })}
                             </Typography>
                           </Box>
-                          <Tooltip title="Angebot erstellen">
-                            <IconButton
-                              size="small"
-                              color="primary"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate('/create-quote', { state: { customer } });
-                              }}
-                              sx={{
-                                backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                                '&:hover': {
-                                  backgroundColor: alpha(theme.palette.primary.main, 0.16),
-                                },
-                              }}
-                            >
-                              <DescriptionIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Tooltip title="Angebot erstellen">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/create-quote', { state: { customer } });
+                                }}
+                                sx={{
+                                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                                  '&:hover': {
+                                    backgroundColor: alpha(theme.palette.primary.main, 0.16),
+                                  },
+                                }}
+                              >
+                                <DescriptionIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            {!selectMode && (
+                              <Tooltip title="Kunde löschen">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={(e) => handleDeleteCustomer(customer.id, e)}
+                                  sx={{
+                                    backgroundColor: alpha(theme.palette.error.main, 0.08),
+                                    '&:hover': {
+                                      backgroundColor: alpha(theme.palette.error.main, 0.16),
+                                    },
+                                  }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </Box>
                         </Box>
                       </Box>
                     </Box>
@@ -509,7 +711,8 @@ const CustomersList: React.FC = () => {
         onClose={() => setSnackbarOpen(false)}
         message={snackbarMessage}
       />
-    </Container>
+      </Container>
+    </Fade>
   );
 };
 

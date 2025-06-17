@@ -64,7 +64,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Customer } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { quoteCalculationService } from '../services/quoteCalculation';
 import DarkModeToggle from './DarkModeToggle';
 

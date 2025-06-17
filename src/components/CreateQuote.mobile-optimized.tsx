@@ -34,7 +34,7 @@ import {
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { sendEmail } from '../services/emailService';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import { generatePDF } from '../services/pdfService';

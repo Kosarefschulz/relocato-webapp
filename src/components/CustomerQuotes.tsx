@@ -34,7 +34,7 @@ import { useNavigate } from 'react-router-dom';
 import { Quote, Customer, Invoice } from '../types';
 import { generatePDF, generateInvoicePDF, generatePDFWithSignature } from '../services/pdfService';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { useAnalytics } from '../hooks/useAnalytics';
 import QuoteVersionManager from './QuoteVersionManager';
 import SignatureModal from './SignatureModal';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { googleSheetsPublicService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsPublicService } from '../config/database.config';
 import {
   Container,
   Paper,

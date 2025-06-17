@@ -28,7 +28,7 @@ import {
   LocationOn as LocationIcon,
 } from '@mui/icons-material';
 import { Customer, Quote } from '../types';
-import { googleSheetsPublicService as googleSheetsService } from '../services/googleSheetsPublic';
+import { databaseService as googleSheetsService } from '../config/database.config';
 import { format, isAfter, subDays } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { motion } from 'framer-motion';
