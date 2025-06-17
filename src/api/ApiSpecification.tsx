@@ -324,6 +324,7 @@ const ApiSpecification: React.FC<ApiSpecificationProps> = ({
           estimatedVolume: { type: 'number', description: 'Estimated volume in cubic meters' },
           pricing: {
             type: 'object',
+            description: 'Pricing details for the quote',
             properties: {
               basePrice: { type: 'number', description: 'Base price' },
               additionalServices: { type: 'number', description: 'Additional services cost' },
@@ -426,10 +427,12 @@ const ApiSpecification: React.FC<ApiSpecificationProps> = ({
             contentType: 'application/json',
             schema: {
               type: 'object',
+              description: 'Customer list response',
               properties: {
                 data: { type: 'array', items: { $ref: '#/components/schemas/Customer' } },
                 pagination: {
                   type: 'object',
+                  description: 'Pagination details',
                   properties: {
                     page: { type: 'integer' },
                     limit: { type: 'integer' },
@@ -574,6 +577,7 @@ const ApiSpecification: React.FC<ApiSpecificationProps> = ({
             contentType: 'application/json',
             schema: {
               type: 'object',
+              description: 'Quote list response',
               properties: {
                 data: { type: 'array', items: { $ref: '#/components/schemas/Quote' } },
               },
@@ -644,6 +648,7 @@ const ApiSpecification: React.FC<ApiSpecificationProps> = ({
           contentType: 'application/json',
           schema: {
             type: 'object',
+            description: 'Login request body',
             properties: {
               email: { type: 'string', format: 'email' },
               password: { type: 'string', format: 'password' },
@@ -664,10 +669,12 @@ const ApiSpecification: React.FC<ApiSpecificationProps> = ({
             contentType: 'application/json',
             schema: {
               type: 'object',
+              description: 'Authentication response',
               properties: {
                 token: { type: 'string' },
                 user: {
                   type: 'object',
+                  description: 'User details',
                   properties: {
                     id: { type: 'string' },
                     email: { type: 'string' },
@@ -733,6 +740,7 @@ const ApiSpecification: React.FC<ApiSpecificationProps> = ({
             contentType: 'application/json',
             schema: {
               type: 'object',
+              description: 'Analytics data response',
               properties: {
                 revenue: { type: 'number' },
                 bookings: { type: 'integer' },
@@ -740,6 +748,7 @@ const ApiSpecification: React.FC<ApiSpecificationProps> = ({
                 conversionRate: { type: 'number' },
                 trends: {
                   type: 'object',
+                  description: 'Trend data',
                   properties: {
                     revenue: { type: 'array', items: { type: 'object' } },
                     bookings: { type: 'array', items: { type: 'object' } },
