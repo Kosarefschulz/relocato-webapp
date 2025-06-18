@@ -21,8 +21,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { folder = 'INBOX', limit = '50', forceSync = 'false' } = req.query;
-    const limitNum = parseInt(limit);
+    const { folder = 'INBOX', limit = '10', forceSync = 'false' } = req.query;
+    const limitNum = Math.min(parseInt(limit), 50); // Max 50 emails to prevent timeout
     
     console.log(`📧 API: Syncing emails from folder: ${folder}, limit: ${limitNum}`);
     
@@ -39,8 +39,13 @@ export default async function handler(req, res) {
       });
     }
     
-    // Fetch emails from IONOS
-    const emails = await fetchEmailsFromIONOS(folder, limitNum, emailUser, emailPass);
+    // Fetch emails from IONOS with timeout
+    const emails = await Promise.race([
+      fetchEmailsFromIONOS(folder, limitNum, emailUser, emailPass),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Email sync timeout after 9 seconds')), 9000)
+      )
+    ]);
     
     res.status(200).json({
       emails: emails,
@@ -62,6 +67,7 @@ export default async function handler(req, res) {
 async function fetchEmailsFromIONOS(folder, limit, emailUser, emailPass) {
   return new Promise((resolve, reject) => {
     const emails = [];
+    let connectionTimeout;
     
     const imap = new Imap({
       user: emailUser,
@@ -73,10 +79,20 @@ async function fetchEmailsFromIONOS(folder, limit, emailUser, emailPass) {
         ciphers: 'SSLv3',
         rejectUnauthorized: false,
         servername: 'imap.ionos.de'
-      }
+      },
+      connTimeout: 8000,
+      authTimeout: 8000
     });
 
+    // Set connection timeout
+    connectionTimeout = setTimeout(() => {
+      console.error('⏱️ IMAP connection timeout');
+      imap.destroy();
+      reject(new Error('IMAP connection timeout'));
+    }, 8500);
+
     imap.once('ready', () => {
+      clearTimeout(connectionTimeout);
       console.log('✅ IMAP connection ready');
       
       imap.openBox(folder, false, (err, box) => {
@@ -98,8 +114,7 @@ async function fetchEmailsFromIONOS(folder, limit, emailUser, emailPass) {
         const fetchEnd = box.messages.total;
         
         const fetch = imap.seq.fetch(`${fetchStart}:${fetchEnd}`, {
-          bodies: '',
-          envelope: true,
+          bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
           struct: true
         });
 
@@ -108,8 +123,11 @@ async function fetchEmailsFromIONOS(folder, limit, emailUser, emailPass) {
             uid: null,
             seqno: seqno,
             flags: [],
-            envelope: null,
-            body: null
+            from: '',
+            to: '',
+            subject: '',
+            date: new Date(),
+            preview: ''
           };
 
           msg.on('body', (stream, info) => {
@@ -118,32 +136,25 @@ async function fetchEmailsFromIONOS(folder, limit, emailUser, emailPass) {
               buffer += chunk.toString('utf8');
             });
             stream.once('end', () => {
-              simpleParser(buffer)
-                .then(parsed => {
-                  emailData.body = {
-                    from: parsed.from?.text || '',
-                    to: parsed.to?.text || '',
-                    subject: parsed.subject || '(no subject)',
-                    date: parsed.date || new Date(),
-                    text: parsed.text || '',
-                    html: parsed.html || '',
-                    attachments: parsed.attachments?.map(att => ({
-                      filename: att.filename,
-                      size: att.size,
-                      contentType: att.contentType
-                    })) || []
-                  };
-                })
-                .catch(err => {
-                  console.error('Error parsing email:', err);
-                });
+              // Parse headers
+              const lines = buffer.split('\r\n');
+              lines.forEach(line => {
+                if (line.toLowerCase().startsWith('from:')) {
+                  emailData.from = line.substring(5).trim();
+                } else if (line.toLowerCase().startsWith('to:')) {
+                  emailData.to = line.substring(3).trim();
+                } else if (line.toLowerCase().startsWith('subject:')) {
+                  emailData.subject = line.substring(8).trim();
+                } else if (line.toLowerCase().startsWith('date:')) {
+                  emailData.date = new Date(line.substring(5).trim());
+                }
+              });
             });
           });
 
           msg.once('attributes', (attrs) => {
             emailData.uid = attrs.uid;
             emailData.flags = attrs.flags;
-            emailData.date = attrs.date;
           });
 
           msg.once('end', () => {
@@ -164,11 +175,13 @@ async function fetchEmailsFromIONOS(folder, limit, emailUser, emailPass) {
     });
 
     imap.once('error', (err) => {
+      clearTimeout(connectionTimeout);
       console.error('IMAP error:', err);
       reject(err);
     });
 
     imap.once('end', () => {
+      clearTimeout(connectionTimeout);
       console.log('📪 IMAP connection ended');
       resolve(emails);
     });
