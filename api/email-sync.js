@@ -1,19 +1,8 @@
 // Vercel Serverless Function für E-Mail-Sync
 // Diese Funktion läuft auf Vercel's Servern und umgeht CORS-Probleme
 
-import Imap from 'imap';
-import { simpleParser } from 'mailparser';
-import admin from 'firebase-admin';
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}
-
-const db = admin.firestore();
+const Imap = require('imap');
+const { simpleParser } = require('mailparser');
 
 export default async function handler(req, res) {
   // CORS Headers
@@ -34,84 +23,76 @@ export default async function handler(req, res) {
   try {
     const { folder = 'INBOX', limit = '50', forceSync = 'false' } = req.query;
     const limitNum = parseInt(limit);
-    const forceSyncBool = forceSync === 'true';
     
-    console.log(`📧 Syncing emails from folder: ${folder}, limit: ${limitNum}`);
+    console.log(`📧 API: Syncing emails from folder: ${folder}, limit: ${limitNum}`);
+    
+    // Check for required environment variables
+    if (!process.env.IONOS_EMAIL_USER || !process.env.IONOS_EMAIL_PASS) {
+      console.error('❌ Missing IONOS credentials in environment variables');
+      return res.status(500).json({
+        error: 'Email credentials not configured',
+        details: 'IONOS_EMAIL_USER or IONOS_EMAIL_PASS not set'
+      });
+    }
     
     // Fetch emails from IONOS
     const emails = await fetchEmailsFromIONOS(folder, limitNum);
     
-    // Store emails in Firestore if we have authentication
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const idToken = authHeader.split('Bearer ')[1];
-      try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const userId = decodedToken.uid;
-        
-        // Store emails in Firestore
-        const batch = db.batch();
-        const emailsRef = db.collection('emailClient');
-        
-        for (const email of emails) {
-          const docRef = emailsRef.doc(email.uid.toString());
-          batch.set(docRef, {
-            ...email,
-            userId,
-            syncedAt: admin.firestore.FieldValue.serverTimestamp()
-          }, { merge: !forceSyncBool });
-        }
-        
-        await batch.commit();
-      } catch (authError) {
-        console.log('Auth verification failed, skipping Firestore storage:', authError.message);
-      }
-    }
-    
-    console.log(`✅ Synced ${emails.length} emails successfully`);
-    
     res.status(200).json({
-      success: true,
       emails: emails,
+      folder: folder,
       count: emails.length,
-      folder: folder
+      timestamp: new Date().toISOString()
     });
+    
   } catch (error) {
-    console.error('Email sync error:', error);
+    console.error('❌ Email sync error:', error);
     res.status(500).json({
-      success: false,
-      error: error.message || 'Internal server error'
+      error: 'Failed to sync emails',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
 
-/**
- * Fetch emails from IONOS IMAP
- */
-async function fetchEmailsFromIONOS(folderName, maxEmails) {
+async function fetchEmailsFromIONOS(folder, limit) {
   return new Promise((resolve, reject) => {
     const emails = [];
     
     const imap = new Imap({
-      user: process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de',
+      user: process.env.IONOS_EMAIL_USER,
       password: process.env.IONOS_EMAIL_PASS,
-      host: 'imap.ionos.de',
+      host: 'mail.ionos.de',
       port: 993,
       tls: true,
-      tlsOptions: { rejectUnauthorized: false }
+      tlsOptions: { 
+        rejectUnauthorized: false,
+        servername: 'mail.ionos.de'
+      }
     });
 
     imap.once('ready', () => {
-      imap.openBox(folderName, true, (err, box) => {
+      console.log('✅ IMAP connection ready');
+      
+      imap.openBox(folder, false, (err, box) => {
         if (err) {
-          console.error('Error opening folder:', err);
+          console.error('❌ Error opening mailbox:', err);
           imap.end();
-          reject(err);
-          return;
+          return reject(err);
         }
 
-        // Fetch the latest emails
-        const fetch = imap.seq.fetch(`${Math.max(1, box.messages.total - maxEmails + 1)}:*`, {
+        console.log(`📂 Opened folder: ${folder} (${box.messages.total} messages)`);
+
+        if (box.messages.total === 0) {
+          imap.end();
+          return resolve([]);
+        }
+
+        // Fetch last N messages
+        const fetchStart = Math.max(1, box.messages.total - limit + 1);
+        const fetchEnd = box.messages.total;
+        
+        const fetch = imap.seq.fetch(`${fetchStart}:${fetchEnd}`, {
           bodies: '',
           envelope: true,
           struct: true
@@ -119,37 +100,49 @@ async function fetchEmailsFromIONOS(folderName, maxEmails) {
 
         fetch.on('message', (msg, seqno) => {
           const emailData = {
-            uid: seqno,
-            folder: folderName
+            uid: null,
+            seqno: seqno,
+            flags: [],
+            envelope: null,
+            body: null
           };
 
-          msg.on('body', (stream) => {
-            simpleParser(stream, async (err, parsed) => {
-              if (err) {
-                console.error('Parse error:', err);
-                return;
-              }
-
-              emailData.messageId = parsed.messageId;
-              emailData.from = parsed.from?.text || '';
-              emailData.to = parsed.to?.text || '';
-              emailData.subject = parsed.subject || '(Kein Betreff)';
-              emailData.date = parsed.date || new Date();
-              emailData.text = parsed.text || '';
-              emailData.html = parsed.html || parsed.textAsHtml || '';
-              emailData.attachments = parsed.attachments?.map(att => ({
-                filename: att.filename,
-                contentType: att.contentType,
-                size: att.size
-              })) || [];
-              
-              emails.push(emailData);
+          msg.on('body', (stream, info) => {
+            let buffer = '';
+            stream.on('data', (chunk) => {
+              buffer += chunk.toString('utf8');
+            });
+            stream.once('end', () => {
+              simpleParser(buffer)
+                .then(parsed => {
+                  emailData.body = {
+                    from: parsed.from?.text || '',
+                    to: parsed.to?.text || '',
+                    subject: parsed.subject || '(no subject)',
+                    date: parsed.date || new Date(),
+                    text: parsed.text || '',
+                    html: parsed.html || '',
+                    attachments: parsed.attachments?.map(att => ({
+                      filename: att.filename,
+                      size: att.size,
+                      contentType: att.contentType
+                    })) || []
+                  };
+                })
+                .catch(err => {
+                  console.error('Error parsing email:', err);
+                });
             });
           });
 
           msg.once('attributes', (attrs) => {
-            emailData.flags = attrs.flags;
             emailData.uid = attrs.uid;
+            emailData.flags = attrs.flags;
+            emailData.date = attrs.date;
+          });
+
+          msg.once('end', () => {
+            emails.push(emailData);
           });
         });
 
@@ -159,6 +152,7 @@ async function fetchEmailsFromIONOS(folderName, maxEmails) {
         });
 
         fetch.once('end', () => {
+          console.log(`✅ Fetched ${emails.length} emails`);
           imap.end();
         });
       });
@@ -170,9 +164,11 @@ async function fetchEmailsFromIONOS(folderName, maxEmails) {
     });
 
     imap.once('end', () => {
+      console.log('📪 IMAP connection ended');
       resolve(emails);
     });
 
+    console.log('🔌 Connecting to IONOS IMAP...');
     imap.connect();
   });
 }

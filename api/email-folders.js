@@ -1,16 +1,7 @@
 // Vercel Serverless Function für E-Mail-Ordner
 // Diese Funktion holt die Ordnerstruktur vom IONOS IMAP Server
 
-import Imap from 'imap';
-import admin from 'firebase-admin';
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}
+const Imap = require('imap');
 
 export default async function handler(req, res) {
   // CORS Headers

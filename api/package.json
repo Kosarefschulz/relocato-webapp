@@ -1,12 +1,10 @@
 {
-  "name": "umzugsapp-api",
+  "name": "relocato-api",
   "version": "1.0.0",
-  "description": "API endpoints for Umzugsapp",
-  "private": true,
+  "description": "Vercel API functions for Relocato",
   "dependencies": {
-    "firebase-admin": "^11.0.0",
     "imap": "^0.8.19",
     "mailparser": "^3.6.5",
-    "nodemailer": "^6.10.1"
+    "nodemailer": "^6.9.7"
   }
 }

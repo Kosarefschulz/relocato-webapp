@@ -1,16 +1,7 @@
 // Vercel Serverless Function für E-Mail-Aktionen
 // Diese Funktion behandelt verschiedene E-Mail-Aktionen wie markieren, verschieben, löschen
 
-import Imap from 'imap';
-import admin from 'firebase-admin';
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}
+const Imap = require('imap');
 
 const db = admin.firestore();
 
