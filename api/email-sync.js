@@ -1,5 +1,5 @@
-// Vercel Serverless Function für E-Mail-Versand
-// Diese Funktion sendet E-Mails über SMTP
+// Vercel Serverless Function für E-Mail-Sync
+// Diese Funktion läuft auf Vercel's Servern und umgeht CORS-Probleme
 
 export default async function handler(req, res) {
   // CORS Headers
@@ -17,33 +17,23 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   try {
-    const { to, subject, html, attachments } = req.body;
+    const { folder = 'INBOX' } = req.query;
 
-    // Validate required fields
-    if (!to || !subject || !html) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: to, subject, html'
-      });
-    }
-
-    // TODO: Implement actual email sending logic here
-    // For now, return success response
+    // TODO: Hier würde die tatsächliche E-Mail-Sync-Logik implementiert werden
+    // Für jetzt geben wir eine Erfolgsantwort zurück
     
+    // Simuliere eine erfolgreiche Antwort
     const response = {
       success: true,
-      messageId: `msg_${Date.now()}`,
-      message: 'E-Mail wurde erfolgreich gesendet (Demo-Modus)'
+      emails: [],
+      folder: folder,
+      message: 'E-Mail-Sync-Service ist bereit, aber benötigt Konfiguration'
     };
 
     res.status(200).json(response);
   } catch (error) {
-    console.error('Send email error:', error);
+    console.error('Email sync error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Internal server error'

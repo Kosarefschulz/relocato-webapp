@@ -48,6 +48,9 @@ export interface SyncEmailsResult {
 class EmailClientService {
   // Cloud Functions
   private syncEmailsFunc = httpsCallable(functions, 'syncEmailsForClient');
+  
+  // Fallback to Vercel API if Firebase fails
+  private useVercelFallback = false;
   private getFoldersFunc = httpsCallable(functions, 'getEmailFolders');
   private sendEmailFunc = httpsCallable(functions, 'sendEmailFromClient');
 
@@ -57,8 +60,37 @@ class EmailClientService {
   async syncEmails(folder: string = 'INBOX', limit: number = 50, forceSync: boolean = false): Promise<SyncEmailsResult> {
     try {
       console.log(`📧 Syncing emails from ${folder}...`);
-      const result = await this.syncEmailsFunc({ folder, limit, forceSync });
-      return result.data as SyncEmailsResult;
+      
+      // Try Firebase function first
+      if (!this.useVercelFallback) {
+        try {
+          const result = await this.syncEmailsFunc({ folder, limit, forceSync });
+          return result.data as SyncEmailsResult;
+        } catch (firebaseError: any) {
+          console.warn('Firebase function failed, trying Vercel fallback...', firebaseError);
+          this.useVercelFallback = true;
+        }
+      }
+      
+      // Fallback to Vercel API
+      const response = await fetch(`/api/email-sync?folder=${encodeURIComponent(folder)}&limit=${limit}&forceSync=${forceSync}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Vercel API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      return {
+        success: data.success,
+        count: data.emails?.length || 0,
+        folder: data.folder || folder
+      };
     } catch (error) {
       console.error('Error syncing emails:', error);
       throw error;

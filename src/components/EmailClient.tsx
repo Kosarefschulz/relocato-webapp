@@ -228,11 +228,34 @@ const EmailClient: React.FC = () => {
   const syncEmailsFromIONOS = async () => {
     try {
       // Sync INBOX
-      await emailClientService.syncEmails('INBOX', 50);
+      const inboxResult = await emailClientService.syncEmails('INBOX', 50);
+      if (inboxResult.success && inboxResult.count > 0) {
+        setSnackbar({
+          open: true,
+          message: `${inboxResult.count} neue E-Mails synchronisiert`,
+          severity: 'success'
+        });
+      }
+      
       // Sync Sent folder
       await emailClientService.syncEmails('Sent', 20);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error syncing from IONOS:', error);
+      
+      // Show user-friendly error message
+      let errorMessage = 'E-Mail-Synchronisation fehlgeschlagen';
+      if (error.message?.includes('403')) {
+        errorMessage = 'Zugriff verweigert. Bitte prüfen Sie die E-Mail-Einstellungen.';
+      } else if (error.message?.includes('CORS')) {
+        errorMessage = 'Verbindungsfehler. Die App nutzt jetzt den Fallback-Modus.';
+      }
+      
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: 'error'
+      });
+      
       // Don't throw - continue with loading from Firestore
     }
   };
