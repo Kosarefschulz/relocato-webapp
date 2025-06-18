@@ -66,7 +66,7 @@ async function fetchEmailsFromIONOS(folder, limit) {
     const imap = new Imap({
       user: emailUser,
       password: emailPass,
-      host: 'mail.ionos.de',
+      host: 'imap.ionos.de',
       port: 993,
       tls: true,
       tlsOptions: { 
