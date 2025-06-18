@@ -1,6 +1,19 @@
 // Vercel Serverless Function für E-Mail-Versand
 // Diese Funktion sendet E-Mails über SMTP
 
+import nodemailer from 'nodemailer';
+import admin from 'firebase-admin';
+
+// Initialize Firebase Admin
+if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+}
+
+const db = admin.firestore();
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -22,7 +35,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { to, subject, html, attachments } = req.body;
+    const { to, subject, html, cc, bcc, replyTo, attachments } = req.body;
 
     // Validate required fields
     if (!to || !subject || !html) {
@@ -32,13 +45,70 @@ export default async function handler(req, res) {
       });
     }
 
-    // TODO: Implement actual email sending logic here
-    // For now, return success response
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ionos.de',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de',
+        pass: process.env.IONOS_EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+
+    // Prepare email options
+    const mailOptions = {
+      from: `"Relocato Bielefeld" <${process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de'}>`,
+      to,
+      subject,
+      html,
+      cc,
+      bcc,
+      replyTo: replyTo || process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de',
+      attachments: attachments?.map(att => ({
+        filename: att.filename,
+        content: att.content,
+        encoding: att.encoding || 'base64'
+      }))
+    };
+
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully:', info.messageId);
+
+    // Store sent email in Firestore if we have authentication
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const idToken = authHeader.split('Bearer ')[1];
+      try {
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userId = decodedToken.uid;
+        
+        // Store sent email
+        await db.collection('emailClient').add({
+          folder: 'Sent',
+          from: mailOptions.from,
+          to,
+          cc,
+          bcc,
+          subject,
+          html,
+          sentAt: admin.firestore.FieldValue.serverTimestamp(),
+          userId,
+          messageId: info.messageId
+        });
+      } catch (authError) {
+        console.log('Auth verification failed, skipping Firestore storage:', authError.message);
+      }
+    }
     
     const response = {
       success: true,
-      messageId: `msg_${Date.now()}`,
-      message: 'E-Mail wurde erfolgreich gesendet (Demo-Modus)'
+      messageId: info.messageId,
+      message: 'E-Mail wurde erfolgreich gesendet'
     };
 
     res.status(200).json(response);

@@ -73,10 +73,15 @@ class EmailClientService {
       }
       
       // Fallback to Vercel API
+      const auth = await import('./authService').then(m => m.auth);
+      const user = auth.currentUser;
+      const idToken = user ? await user.getIdToken() : null;
+      
       const response = await fetch(`/api/email-sync?folder=${encodeURIComponent(folder)}&limit=${limit}&forceSync=${forceSync}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          ...(idToken && { 'Authorization': `Bearer ${idToken}` })
         },
       });
       
@@ -103,8 +108,40 @@ class EmailClientService {
   async getFolders(): Promise<EmailFolder[]> {
     try {
       console.log('📁 Fetching email folders...');
-      const result = await this.getFoldersFunc({});
-      return (result.data as any).folders || [];
+      
+      // Try Firebase function first
+      if (!this.useVercelFallback) {
+        try {
+          const result = await this.getFoldersFunc({});
+          return (result.data as any).folders || [];
+        } catch (firebaseError: any) {
+          console.warn('Firebase function failed, trying Vercel fallback...', firebaseError);
+          this.useVercelFallback = true;
+        }
+      }
+      
+      // Fallback to Vercel API
+      const auth = await import('./authService').then(m => m.auth);
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/email-folders', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Vercel API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.folders || [];
     } catch (error) {
       console.error('Error fetching folders:', error);
       throw error;
@@ -117,8 +154,37 @@ class EmailClientService {
   async sendEmail(emailData: SendEmailData) {
     try {
       console.log('📤 Sending email...');
-      const result = await this.sendEmailFunc(emailData);
-      return result.data;
+      
+      // Try Firebase function first
+      if (!this.useVercelFallback) {
+        try {
+          const result = await this.sendEmailFunc(emailData);
+          return result.data;
+        } catch (firebaseError: any) {
+          console.warn('Firebase function failed, trying Vercel fallback...', firebaseError);
+          this.useVercelFallback = true;
+        }
+      }
+      
+      // Fallback to Vercel API
+      const auth = await import('./authService').then(m => m.auth);
+      const user = auth.currentUser;
+      const idToken = user ? await user.getIdToken() : null;
+      
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken && { 'Authorization': `Bearer ${idToken}` })
+        },
+        body: JSON.stringify(emailData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Vercel API error: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error sending email:', error);
       throw error;
@@ -130,10 +196,33 @@ class EmailClientService {
    */
   async markAsRead(emailId: string, isRead: boolean = true) {
     try {
-      // This would typically update the IMAP flags
-      // For now, we'll just update Firestore
       console.log(`Marking email ${emailId} as ${isRead ? 'read' : 'unread'}`);
-      // Implementation would go here
+      
+      const auth = await import('./authService').then(m => m.auth);
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/email-actions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          action: 'markAsRead',
+          emailId,
+          isRead
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error marking email:', error);
       throw error;
@@ -146,7 +235,32 @@ class EmailClientService {
   async moveToFolder(emailId: string, targetFolder: string) {
     try {
       console.log(`Moving email ${emailId} to ${targetFolder}`);
-      // Implementation would go here
+      
+      const auth = await import('./authService').then(m => m.auth);
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/email-actions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          action: 'move',
+          emailId,
+          targetFolder
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error moving email:', error);
       throw error;
@@ -159,8 +273,31 @@ class EmailClientService {
   async deleteEmail(emailId: string) {
     try {
       console.log(`Deleting email ${emailId}`);
-      // Move to trash or mark for deletion
-      await this.moveToFolder(emailId, 'Trash');
+      
+      const auth = await import('./authService').then(m => m.auth);
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/email-actions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          emailId
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error deleting email:', error);
       throw error;
@@ -173,9 +310,33 @@ class EmailClientService {
   async searchEmails(query: string, folder?: string) {
     try {
       console.log(`Searching emails for: ${query}`);
-      // Implementation would search through synced emails in Firestore
-      // This is a placeholder for now
-      return [];
+      
+      const auth = await import('./authService').then(m => m.auth);
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const idToken = await user.getIdToken();
+      const params = new URLSearchParams({ query });
+      if (folder) {
+        params.append('folder', folder);
+      }
+      
+      const response = await fetch(`/api/email-search?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.results || [];
     } catch (error) {
       console.error('Error searching emails:', error);
       throw error;
