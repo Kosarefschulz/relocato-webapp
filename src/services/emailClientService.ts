@@ -73,7 +73,7 @@ class EmailClientService {
       }
       
       // Fallback to Vercel API
-      const auth = await import('./authService').then(m => m.auth);
+      const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       const idToken = user ? await user.getIdToken() : null;
       
@@ -167,7 +167,7 @@ class EmailClientService {
       }
       
       // Fallback to Vercel API
-      const auth = await import('./authService').then(m => m.auth);
+      const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       const idToken = user ? await user.getIdToken() : null;
       
