@@ -121,7 +121,7 @@ class EmailClientService {
       }
       
       // Fallback to Vercel API
-      const auth = await import('./authService').then(m => m.auth);
+      const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User not authenticated');
@@ -198,7 +198,7 @@ class EmailClientService {
     try {
       console.log(`Marking email ${emailId} as ${isRead ? 'read' : 'unread'}`);
       
-      const auth = await import('./authService').then(m => m.auth);
+      const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User not authenticated');
@@ -236,7 +236,7 @@ class EmailClientService {
     try {
       console.log(`Moving email ${emailId} to ${targetFolder}`);
       
-      const auth = await import('./authService').then(m => m.auth);
+      const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User not authenticated');
@@ -274,7 +274,7 @@ class EmailClientService {
     try {
       console.log(`Deleting email ${emailId}`);
       
-      const auth = await import('./authService').then(m => m.auth);
+      const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User not authenticated');
@@ -311,7 +311,7 @@ class EmailClientService {
     try {
       console.log(`Searching emails for: ${query}`);
       
-      const auth = await import('./authService').then(m => m.auth);
+      const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User not authenticated');
