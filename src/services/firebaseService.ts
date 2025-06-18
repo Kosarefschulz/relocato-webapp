@@ -94,12 +94,23 @@ class FirebaseService {
       const customerNumber = customer.customerNumber || await this.generateCustomerNumber();
       
       if (!this.customersCollection) throw new Error('Customers collection not initialized');
-      const docRef = await addDoc(this.customersCollection, {
+      
+      // Filter out undefined values
+      const customerData: any = {
         ...customer,
         customerNumber,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      };
+      
+      // Remove undefined fields
+      Object.keys(customerData).forEach(key => {
+        if (customerData[key] === undefined) {
+          delete customerData[key];
+        }
       });
+      
+      const docRef = await addDoc(this.customersCollection, customerData);
       
       console.log('✅ Kunde in Firestore erstellt:', docRef.id);
       return docRef.id;
@@ -113,10 +124,21 @@ class FirebaseService {
     try {
       if (!this.customersCollection) throw new Error('Customers collection not initialized');
       const docRef = doc(this.customersCollection, customerId);
-      await updateDoc(docRef, {
+      
+      // Filter out undefined values
+      const updateData: any = {
         ...updates,
         updatedAt: serverTimestamp(),
+      };
+      
+      // Remove undefined fields
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
       });
+      
+      await updateDoc(docRef, updateData);
       console.log('✅ Kunde aktualisiert:', customerId);
     } catch (error) {
       console.error('❌ Fehler beim Aktualisieren des Kunden:', error);
@@ -215,11 +237,22 @@ class FirebaseService {
   async addQuote(quote: Omit<Quote, 'id'>): Promise<string> {
     try {
       if (!this.quotesCollection) throw new Error('Quotes collection not initialized');
-      const docRef = await addDoc(this.quotesCollection, {
+      
+      // Filter out undefined values
+      const quoteData: any = {
         ...quote,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      };
+      
+      // Remove undefined fields
+      Object.keys(quoteData).forEach(key => {
+        if (quoteData[key] === undefined) {
+          delete quoteData[key];
+        }
       });
+      
+      const docRef = await addDoc(this.quotesCollection, quoteData);
       
       console.log('✅ Angebot in Firestore erstellt:', docRef.id);
       return docRef.id;
@@ -233,10 +266,21 @@ class FirebaseService {
     try {
       if (!this.quotesCollection) throw new Error('Quotes collection not initialized');
       const docRef = doc(this.quotesCollection, quoteId);
-      await updateDoc(docRef, {
+      
+      // Filter out undefined values
+      const updateData: any = {
         ...updates,
         updatedAt: serverTimestamp(),
+      };
+      
+      // Remove undefined fields
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
       });
+      
+      await updateDoc(docRef, updateData);
       console.log('✅ Angebot aktualisiert:', quoteId);
     } catch (error) {
       console.error('❌ Fehler beim Aktualisieren des Angebots:', error);
@@ -341,11 +385,20 @@ class FirebaseService {
   async addInvoice(invoice: Omit<Invoice, 'id'>): Promise<string> {
     try {
       if (!this.invoicesCollection) throw new Error('Invoices collection not initialized');
-      const docRef = await addDoc(this.invoicesCollection, {
+      
+      // Filter out undefined values
+      const invoiceData: any = {
         ...invoice,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      
+      // Remove undefined fields
+      if (invoiceData.paidDate === undefined) {
+        delete invoiceData.paidDate;
+      }
+      
+      const docRef = await addDoc(this.invoicesCollection, invoiceData);
       
       console.log('✅ Rechnung in Firestore erstellt:', docRef.id);
       return docRef.id;
@@ -359,10 +412,21 @@ class FirebaseService {
     try {
       if (!this.invoicesCollection) throw new Error('Invoices collection not initialized');
       const docRef = doc(this.invoicesCollection, invoiceId);
-      await updateDoc(docRef, {
+      
+      // Filter out undefined values
+      const updateData: any = {
         ...updates,
         updatedAt: serverTimestamp(),
+      };
+      
+      // Remove undefined fields
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
       });
+      
+      await updateDoc(docRef, updateData);
       console.log('✅ Rechnung aktualisiert:', invoiceId);
     } catch (error) {
       console.error('❌ Fehler beim Aktualisieren der Rechnung:', error);
@@ -531,6 +595,12 @@ class FirebaseService {
   async migrateCustomerFromGoogleSheets(customer: Customer): Promise<void> {
     try {
       if (!this.customersCollection) throw new Error('Customers collection not initialized');
+      
+      // Skip if customerNumber is undefined or empty
+      if (!customer.customerNumber) {
+        console.warn('⚠️ Kunde ohne Kundennummer übersprungen:', customer.id);
+        return;
+      }
       
       // Check if customer already exists
       const q = query(this.customersCollection, where('customerNumber', '==', customer.customerNumber));
