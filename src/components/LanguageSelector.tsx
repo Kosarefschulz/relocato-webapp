@@ -156,7 +156,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             onClick={() => handleLanguageChange(lang.code)}
             color={language === lang.code ? 'primary' : 'default'}
             variant={language === lang.code ? 'filled' : 'outlined'}
-            size={size}
+            size={size === 'large' ? 'medium' : size}
             sx={{
               cursor: 'pointer',
               '&:hover': {

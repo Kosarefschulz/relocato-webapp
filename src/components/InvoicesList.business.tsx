@@ -683,7 +683,11 @@ const InvoicesList: React.FC = () => {
                                 return;
                               }
                               
-                              const pdfBlob = await generateInvoicePDF(customer, invoice);
+                              if (!invoice.id) {
+                                alert('Rechnung hat keine ID');
+                                return;
+                              }
+                              const pdfBlob = await generateInvoicePDF(customer, {...invoice, id: invoice.id});
                               const url = URL.createObjectURL(pdfBlob);
                               const a = document.createElement('a');
                               a.href = url;

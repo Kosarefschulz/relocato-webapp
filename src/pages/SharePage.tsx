@@ -160,14 +160,14 @@ const SharePage: React.FC = () => {
 
       setCustomerData({
         id: customer.id,
-        customerNumber: customer.customerNumber,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
+        customerNumber: customer.customerNumber || '',
+        firstName: '',
+        lastName: '',
         email: customer.email,
         phone: customer.phone,
-        moveDate: acceptedQuote.moveDate || new Date().toISOString(),
-        fromAddress: acceptedQuote.fromAddress || customer.address,
-        toAddress: acceptedQuote.toAddress || '',
+        moveDate: customer.movingDate || new Date().toISOString(),
+        fromAddress: customer.fromAddress || '',
+        toAddress: customer.toAddress || '',
         assignedVehicles: dispositionData.assignedVehicles || [],
         quoteData: acceptedQuote,
       });

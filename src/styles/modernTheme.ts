@@ -184,16 +184,6 @@ export const modernTheme = createTheme({
   shape: {
     borderRadius: 12,
   },
-  shadows: [
-    'none',
-    '0px 2px 4px rgba(15, 23, 42, 0.05)',
-    '0px 4px 8px rgba(15, 23, 42, 0.08)',
-    '0px 8px 16px rgba(15, 23, 42, 0.12)',
-    '0px 12px 24px rgba(15, 23, 42, 0.16)',
-    '0px 16px 32px rgba(15, 23, 42, 0.20)',
-    '0px 20px 40px rgba(15, 23, 42, 0.24)',
-    ...Array(19).fill('0px 24px 48px rgba(15, 23, 42, 0.32)'),
-  ],
   components: {
     MuiCssBaseline: {
       styleOverrides: {

@@ -69,6 +69,18 @@ class FirebaseServiceWrapper {
     return firebaseService.updateQuote(quoteId, updates);
   }
 
+  async getQuote(quoteId: string): Promise<Quote | null> {
+    if (!this.isFirebaseAvailable()) return null;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getQuoteById?.(quoteId) || null;
+  }
+
+  async deleteQuote(quoteId: string): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.deleteQuote?.(quoteId);
+  }
+
   async getInvoices(): Promise<Invoice[]> {
     if (!this.isFirebaseAvailable()) return [];
     const { firebaseService } = await import('./firebaseService');
@@ -79,6 +91,30 @@ class FirebaseServiceWrapper {
     if (!this.isFirebaseAvailable()) return '';
     const { firebaseService } = await import('./firebaseService');
     return firebaseService.addInvoice(invoice);
+  }
+
+  async getInvoice(invoiceId: string): Promise<Invoice | null> {
+    if (!this.isFirebaseAvailable()) return null;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getInvoiceById?.(invoiceId) || null;
+  }
+
+  async updateInvoice(invoiceId: string, updates: Partial<Invoice>): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.updateInvoice?.(invoiceId, updates);
+  }
+
+  async deleteInvoice(invoiceId: string): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.deleteInvoice?.(invoiceId);
+  }
+
+  async getInvoicesByCustomer(customerId: string): Promise<Invoice[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getInvoicesByCustomer?.(customerId) || [];
   }
 
   async getEmailHistory(customerId?: string): Promise<EmailHistory[]> {
@@ -132,6 +168,34 @@ class FirebaseServiceWrapper {
     }
     const { firebaseService } = await import('./firebaseService');
     return firebaseService.migrateQuoteFromGoogleSheets(quote);
+  }
+
+  async getQuotesByCustomer(customerId: string): Promise<Quote[]> {
+    return this.getQuotesByCustomerId(customerId);
+  }
+
+  subscribeToInvoices(callback: (invoices: Invoice[]) => void): () => void {
+    if (!this.isFirebaseAvailable()) {
+      return () => {};
+    }
+    
+    import('./firebaseService').then(({ firebaseService }) => {
+      firebaseService.subscribeToInvoices?.(callback);
+    });
+    
+    return () => {};
+  }
+
+  isAvailable(): boolean {
+    return this.isFirebaseAvailable();
+  }
+
+  async getQuoteById(quoteId: string): Promise<Quote | null> {
+    return this.getQuote(quoteId);
+  }
+
+  async getInvoiceById(invoiceId: string): Promise<Invoice | null> {
+    return this.getInvoice(invoiceId);
   }
 }
 

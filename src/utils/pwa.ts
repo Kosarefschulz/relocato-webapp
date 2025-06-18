@@ -297,9 +297,9 @@ class PWAManager {
         this.trackPWAUsage('share_success');
         return true;
       } catch (error) {
-        if (error.name !== 'AbortError') {
+        if ((error as Error).name !== 'AbortError') {
           console.error('[PWA] Share failed:', error);
-          this.trackPWAUsage('share_error', { error: error.message });
+          this.trackPWAUsage('share_error', { error: (error as Error).message });
         }
         return false;
       }

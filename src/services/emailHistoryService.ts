@@ -90,6 +90,51 @@ class EmailHistoryService {
   clearHistory() {
     localStorage.removeItem(this.STORAGE_KEY);
   }
+
+  // Add received email record
+  addReceivedEmail(
+    from: string,
+    to: string,
+    subject: string,
+    customerId: string,
+    customerName: string,
+    date: Date = new Date()
+  ) {
+    const record: Omit<EmailRecord, 'id'> = {
+      customerId,
+      customerName,
+      to: from, // In received emails, 'to' is the sender
+      subject,
+      templateType: 'received',
+      sentAt: date.toISOString(),
+      status: 'sent'
+    };
+    
+    this.saveEmailRecord(record);
+  }
+
+  // Send email and record in history
+  sendEmail(
+    to: string,
+    subject: string,
+    content: string,
+    customerId: string,
+    attachments?: any[]
+  ) {
+    // This method is for compatibility - just save the record
+    const customerName = 'Unknown'; // Would need to be passed in or looked up
+    const record: Omit<EmailRecord, 'id'> = {
+      customerId,
+      customerName,
+      to,
+      subject,
+      templateType: 'custom',
+      sentAt: new Date().toISOString(),
+      status: 'sent'
+    };
+    
+    this.saveEmailRecord(record);
+  }
 }
 
 const emailHistoryService = new EmailHistoryService();

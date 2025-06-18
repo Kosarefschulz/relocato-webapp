@@ -285,7 +285,7 @@ const QuotesList: React.FC = () => {
         status: 'sent'
       };
 
-      await googleSheetsService.addInvoice(invoice);
+      await googleSheetsService.addInvoice({...invoice, id: `INV-${Date.now()}`});
 
       // Update quote status
       await googleSheetsService.updateQuote(quote.id, { status: 'invoiced' });
@@ -594,7 +594,7 @@ const QuotesList: React.FC = () => {
                         {quote.customerName}
                       </Typography>
                       <Chip
-                        icon={getStatusIcon(quote.status)}
+                        icon={getStatusIcon(quote.status) || undefined}
                         label={getStatusLabel(quote.status)}
                         color={getStatusColor(quote.status) as any}
                         size="small"
@@ -833,8 +833,8 @@ const QuotesList: React.FC = () => {
           setVersionManagerOpen(false);
           setSelectedQuoteForVersions(null);
         }}
-        quote={selectedQuoteForVersions}
-        onVersionRestore={(version) => {
+        quote={selectedQuoteForVersions!}
+        onVersionChange={(version: any) => {
           // Handle version restore logic here
           console.log('Restoring version:', version);
         }}

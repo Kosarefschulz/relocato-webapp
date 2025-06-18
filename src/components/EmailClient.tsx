@@ -158,8 +158,8 @@ const EmailClient: React.FC = () => {
           html: data.html,
           date: data.date?.toDate() || new Date(),
           folder: data.folder?.toLowerCase() || 'inbox',
-          isRead: data.flags?.includes('\\Seen') || false,
-          isStarred: data.flags?.includes('\\Flagged') || false,
+          isRead: data.isRead || false,
+          isStarred: data.isStarred || false,
           isImported: data.isImported || false,
           importedCustomerId: data.importedCustomerId,
           attachments: data.attachments || [],
@@ -206,8 +206,8 @@ const EmailClient: React.FC = () => {
           html: data.html,
           date: data.date?.toDate() || new Date(),
           folder: data.folder?.toLowerCase() || 'inbox',
-          isRead: data.flags?.includes('\\Seen') || false,
-          isStarred: data.flags?.includes('\\Flagged') || false,
+          isRead: data.isRead || false,
+          isStarred: data.isStarred || false,
           isImported: data.isImported || false,
           importedCustomerId: data.importedCustomerId,
           attachments: data.attachments || [],
@@ -304,8 +304,7 @@ const EmailClient: React.FC = () => {
     if (!email.isRead) {
       try {
         await updateDoc(doc(db, 'emailClient', email.id), { 
-          isRead: true,
-          flags: [...(email.flags || []), '\\Seen']
+          isRead: true
         });
         const updatedEmails = emails.map(e => 
           e.id === email.id ? { ...e, isRead: true } : e
@@ -324,13 +323,8 @@ const EmailClient: React.FC = () => {
     if (!email) return;
 
     try {
-      const newFlags = email.isStarred 
-        ? (email.flags || []).filter(f => f !== '\\Flagged')
-        : [...(email.flags || []), '\\Flagged'];
-      
       await updateDoc(doc(db, 'emailClient', emailId), { 
-        isStarred: !email.isStarred,
-        flags: newFlags
+        isStarred: !email.isStarred
       });
       const updatedEmails = emails.map(e => 
         e.id === emailId ? { ...e, isStarred: !e.isStarred } : e
@@ -372,7 +366,22 @@ const EmailClient: React.FC = () => {
       setImportDialog({
         open: true,
         email: selectedEmail,
-        parsedData: parsedData as ParsedCustomerData
+        parsedData: {
+          name: parsedData.name,
+          email: parsedData.email || '',
+          phone: parsedData.phone || '',
+          fromAddress: parsedData.fromAddress || '',
+          toAddress: parsedData.toAddress || '',
+          movingDate: parsedData.movingDate || '',
+          apartment: {
+            rooms: parsedData.apartment?.rooms || 0,
+            area: parsedData.apartment?.area || 0,
+            floor: parsedData.apartment?.floor || 0,
+            hasElevator: parsedData.apartment?.hasElevator || false
+          },
+          services: [],
+          notes: parsedData.notes
+        }
       });
     } catch (error) {
       console.error('Error parsing email:', error);
@@ -398,14 +407,14 @@ const EmailClient: React.FC = () => {
       await setDoc(customerRef, newCustomer);
 
       // Update email as imported
-      await updateDoc(doc(db, 'emails', importDialog.email.id), {
+      await updateDoc(doc(db, 'emails', importDialog.email!.id), {
         isImported: true,
         importedCustomerId: customerRef.id,
         importedAt: Timestamp.now()
       });
 
       const updatedEmails = emails.map(e => 
-        e.id === importDialog.email.id 
+        e.id === importDialog.email!.id 
           ? { ...e, isImported: true, importedCustomerId: customerRef.id } 
           : e
       );

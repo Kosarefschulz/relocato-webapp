@@ -518,7 +518,7 @@ class EmailTemplateService {
   /**
    * Extrahiert verwendete Variablen aus dem Template-Text
    */
-  private extractVariables(text: string): string[] {
+  extractVariables(text: string): string[] {
     const regex = /{{(\w+)}}/g;
     const matches = text.match(regex) || [];
     const variables = matches.map(match => match.replace(/{{|}}/g, ''));

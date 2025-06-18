@@ -373,12 +373,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
               boxShadow: 'none',
             },
           },
-          small: {
-            '@media (max-width:600px)': {
-              padding: '6px 12px',
-              minHeight: '36px',
-            },
-          },
         },
       },
       MuiCard: {

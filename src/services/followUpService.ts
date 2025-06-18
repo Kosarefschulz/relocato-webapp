@@ -390,9 +390,8 @@ class FollowUpService {
         customerName: followUp.customerName,
         to: followUp.customerEmail,
         subject,
-        content,
         templateType: 'follow_up',
-        sentAt: new Date(),
+        sentAt: new Date().toISOString(),
         status: 'sent'
       });
 

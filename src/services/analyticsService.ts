@@ -69,8 +69,8 @@ class AnalyticsService {
       window.dataLayer.push(arguments);
     };
 
-    // Initialisiere mit Zeitstempel
-    window.gtag('js', new Date());
+    // Initialisiere mit config
+    window.gtag('config', this.measurementId);
 
     // Konfiguriere GA4
     window.gtag('config', this.measurementId, {

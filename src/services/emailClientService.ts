@@ -39,6 +39,12 @@ export interface SendEmailData {
   attachments?: any[];
 }
 
+export interface SyncEmailsResult {
+  success: boolean;
+  count: number;
+  folder: string;
+}
+
 class EmailClientService {
   // Cloud Functions
   private syncEmailsFunc = httpsCallable(functions, 'syncEmailsForClient');
@@ -48,11 +54,11 @@ class EmailClientService {
   /**
    * Sync emails from IONOS to Firebase
    */
-  async syncEmails(folder: string = 'INBOX', limit: number = 50, forceSync: boolean = false) {
+  async syncEmails(folder: string = 'INBOX', limit: number = 50, forceSync: boolean = false): Promise<SyncEmailsResult> {
     try {
       console.log(`📧 Syncing emails from ${folder}...`);
       const result = await this.syncEmailsFunc({ folder, limit, forceSync });
-      return result.data;
+      return result.data as SyncEmailsResult;
     } catch (error) {
       console.error('Error syncing emails:', error);
       throw error;

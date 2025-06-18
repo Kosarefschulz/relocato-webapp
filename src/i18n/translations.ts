@@ -7,6 +7,7 @@ export interface TranslationKeys {
   'nav.settings': string;
   'nav.profile': string;
   'nav.help': string;
+  'nav.logout': string;
 
   // Common UI Elements
   'common.save': string;

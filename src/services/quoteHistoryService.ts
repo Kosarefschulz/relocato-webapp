@@ -138,7 +138,7 @@ class QuoteHistoryService {
       const quote2 = quotes.find(q => q.id === quoteId2);
       
       if (!quote1 || !quote2) {
-        return { quote1, quote2, differences: [] };
+        return { quote1: quote1 || null, quote2: quote2 || null, differences: [] };
       }
       
       const differences: { field: string; oldValue: any; newValue: any }[] = [];

@@ -24,7 +24,7 @@ class UnifiedDatabaseService {
 
   async getCustomer(customerId: string): Promise<Customer | null> {
     try {
-      return await firebaseService.getCustomer(customerId);
+      return await firebaseService.getCustomerById(customerId);
     } catch (error) {
       console.error('Error fetching customer from Firebase:', error);
       return null;
@@ -37,12 +37,11 @@ class UnifiedDatabaseService {
       if (customer.phone) {
         customer.phone = cleanPhoneNumber(customer.phone);
       }
-      if (customer.whatsapp) {
-        customer.whatsapp = cleanPhoneNumber(customer.whatsapp);
-      }
+      // WhatsApp field removed - not in Customer interface
 
       // Save directly to Firebase
-      return await firebaseService.addCustomer(customer);
+      const customerId = await firebaseService.addCustomer(customer);
+      return !!customerId;
     } catch (error) {
       console.error('Error adding customer to Firebase:', error);
       return false;
@@ -55,12 +54,11 @@ class UnifiedDatabaseService {
       if (updates.phone) {
         updates.phone = cleanPhoneNumber(updates.phone);
       }
-      if (updates.whatsapp) {
-        updates.whatsapp = cleanPhoneNumber(updates.whatsapp);
-      }
+      // WhatsApp field removed - not in Customer interface
 
       // Update directly in Firebase
-      return await firebaseService.updateCustomer(customerId, updates);
+      await firebaseService.updateCustomer(customerId, updates);
+      return true;
     } catch (error) {
       console.error('Error updating customer in Firebase:', error);
       return false;
@@ -69,7 +67,8 @@ class UnifiedDatabaseService {
 
   async deleteCustomer(customerId: string): Promise<boolean> {
     try {
-      return await firebaseService.deleteCustomer(customerId);
+      await firebaseService.deleteCustomer(customerId);
+      return true;
     } catch (error) {
       console.error('Error deleting customer from Firebase:', error);
       return false;
@@ -114,9 +113,19 @@ class UnifiedDatabaseService {
     }
   }
 
+  async deleteQuote(quoteId: string): Promise<boolean> {
+    try {
+      await firebaseService.deleteQuote(quoteId);
+      return true;
+    } catch (error) {
+      console.error('Error deleting quote from Firebase:', error);
+      return false;
+    }
+  }
+
   async getQuotesByCustomer(customerId: string): Promise<Quote[]> {
     try {
-      return await firebaseService.getQuotesByCustomer(customerId);
+      return await firebaseService.getQuotesByCustomerId(customerId);
     } catch (error) {
       console.error('Error fetching customer quotes from Firebase:', error);
       return [];
@@ -125,7 +134,8 @@ class UnifiedDatabaseService {
 
   async addQuote(quote: Quote): Promise<boolean> {
     try {
-      return await firebaseService.addQuote(quote);
+      const quoteId = await firebaseService.addQuote(quote);
+      return !!quoteId;
     } catch (error) {
       console.error('Error adding quote to Firebase:', error);
       return false;
@@ -134,21 +144,14 @@ class UnifiedDatabaseService {
 
   async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<boolean> {
     try {
-      return await firebaseService.updateQuote(quoteId, updates);
+      await firebaseService.updateQuote(quoteId, updates);
+      return true;
     } catch (error) {
       console.error('Error updating quote in Firebase:', error);
       return false;
     }
   }
 
-  async deleteQuote(quoteId: string): Promise<boolean> {
-    try {
-      return await firebaseService.deleteQuote(quoteId);
-    } catch (error) {
-      console.error('Error deleting quote from Firebase:', error);
-      return false;
-    }
-  }
 
   /**
    * Invoice Operations
@@ -173,16 +176,28 @@ class UnifiedDatabaseService {
 
   async getInvoicesByCustomer(customerId: string): Promise<Invoice[]> {
     try {
-      return await firebaseService.getInvoicesByCustomer(customerId);
+      return await firebaseService.getInvoicesByCustomer(customerId) || [];
     } catch (error) {
       console.error('Error fetching customer invoices from Firebase:', error);
       return [];
     }
   }
 
+  async deleteInvoice(invoiceId: string): Promise<boolean> {
+    try {
+      await firebaseService.deleteInvoice(invoiceId);
+      return true;
+    } catch (error) {
+      console.error('Error deleting invoice from Firebase:', error);
+      return false;
+    }
+  }
+
+
   async addInvoice(invoice: Invoice): Promise<boolean> {
     try {
-      return await firebaseService.addInvoice(invoice);
+      const invoiceId = await firebaseService.addInvoice(invoice);
+      return !!invoiceId;
     } catch (error) {
       console.error('Error adding invoice to Firebase:', error);
       return false;
@@ -191,18 +206,10 @@ class UnifiedDatabaseService {
 
   async updateInvoice(invoiceId: string, updates: Partial<Invoice>): Promise<boolean> {
     try {
-      return await firebaseService.updateInvoice(invoiceId, updates);
+      await firebaseService.updateInvoice(invoiceId, updates);
+      return true;
     } catch (error) {
       console.error('Error updating invoice in Firebase:', error);
-      return false;
-    }
-  }
-
-  async deleteInvoice(invoiceId: string): Promise<boolean> {
-    try {
-      return await firebaseService.deleteInvoice(invoiceId);
-    } catch (error) {
-      console.error('Error deleting invoice from Firebase:', error);
       return false;
     }
   }
@@ -221,7 +228,8 @@ class UnifiedDatabaseService {
 
   async addEmailHistory(emailHistory: EmailHistory): Promise<boolean> {
     try {
-      return await firebaseService.addEmailHistory(emailHistory);
+      const historyId = await firebaseService.addEmailHistory(emailHistory);
+      return !!historyId;
     } catch (error) {
       console.error('Error adding email history to Firebase:', error);
       return false;
@@ -271,9 +279,7 @@ class UnifiedDatabaseService {
           if (customer.phone) {
             customer.phone = cleanPhoneNumber(customer.phone);
           }
-          if (customer.whatsapp) {
-            customer.whatsapp = cleanPhoneNumber(customer.whatsapp);
-          }
+          // WhatsApp field removed - not in Customer interface
 
           const success = await this.addCustomer(customer);
           if (success) {

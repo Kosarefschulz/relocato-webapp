@@ -1,4 +1,14 @@
-import { emailHistoryService, EmailMessage } from './emailHistoryService';
+import emailHistoryService from './emailHistoryService';
+
+export interface EmailMessage {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  body: string;
+  date: Date;
+  attachments?: any[];
+}
 
 export interface EmailSyncConfig {
   enabled: boolean;

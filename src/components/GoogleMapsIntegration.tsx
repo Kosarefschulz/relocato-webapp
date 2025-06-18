@@ -38,7 +38,7 @@ interface RouteInfo {
   estimatedCost: number;
   fuelCost: number;
   tollCost: number;
-  points: google.maps.LatLng[];
+  points: any[];
 }
 
 interface PricingSettings {
@@ -65,10 +65,10 @@ const GoogleMapsIntegration: React.FC<GoogleMapsIntegrationProps> = ({
 }) => {
   const theme = useTheme();
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const directionsRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
-  const directionsServiceRef = useRef<google.maps.DirectionsService | null>(null);
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const directionsRendererRef = useRef<any>(null);
+  const directionsServiceRef = useRef<any>(null);
+  const placesServiceRef = useRef<any>(null);
   
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -76,7 +76,7 @@ const GoogleMapsIntegration: React.FC<GoogleMapsIntegrationProps> = ({
   const [destination, setDestination] = useState(defaultDestination);
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [suggestions, setSuggestions] = useState<Location[]>([]);
-  const [selectedTravelMode, setSelectedTravelMode] = useState<google.maps.TravelMode>(google.maps.TravelMode.DRIVING);
+  const [selectedTravelMode, setSelectedTravelMode] = useState<string>('DRIVING');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [pricing, setPricing] = useState<PricingSettings>({
     baseRate: 1.5,
@@ -340,7 +340,7 @@ const GoogleMapsIntegration: React.FC<GoogleMapsIntegrationProps> = ({
                 <Select
                   value={selectedTravelMode}
                   label="Verkehrsmittel"
-                  onChange={(e) => setSelectedTravelMode(e.target.value as google.maps.TravelMode)}
+                  onChange={(e) => setSelectedTravelMode(e.target.value)}
                 >
                   <MenuItem value="DRIVING">
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

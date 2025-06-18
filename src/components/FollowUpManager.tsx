@@ -99,6 +99,11 @@ const FollowUpManager: React.FC = () => {
       customerPriority: [] as string[],
       minQuoteValue: undefined as number | undefined,
       maxQuoteValue: undefined as number | undefined
+    } as {
+      quoteStatus?: string[];
+      customerPriority?: string[];
+      minQuoteValue?: number;
+      maxQuoteValue?: number;
     }
   });
 
@@ -411,7 +416,7 @@ const FollowUpManager: React.FC = () => {
                     
                     {rule.conditions && (
                       <Box mt={1}>
-                        {rule.conditions.quoteStatus?.length > 0 && (
+                        {rule.conditions.quoteStatus && rule.conditions.quoteStatus.length > 0 && (
                           <Typography variant="caption" color="text.secondary">
                             Status: {rule.conditions.quoteStatus.join(', ')}
                           </Typography>

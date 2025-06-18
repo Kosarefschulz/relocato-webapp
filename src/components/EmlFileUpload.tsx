@@ -193,7 +193,7 @@ const EmlFileUpload: React.FC = () => {
           updatedFiles[i].status = 'parsed';
         } catch (error) {
           updatedFiles[i].status = 'error';
-          updatedFiles[i].error = error.message;
+          updatedFiles[i].error = (error as Error).message;
         }
       }
     }
@@ -250,8 +250,8 @@ const EmlFileUpload: React.FC = () => {
       
       // Create customer
       const newCustomer: Customer = {
-        id: customerId,
         ...file.customer as Customer,
+        id: customerId,
         createdAt: new Date(),
       };
       
@@ -278,7 +278,7 @@ const EmlFileUpload: React.FC = () => {
       
     } catch (error) {
       console.error('Error importing customer:', error);
-      alert('Fehler beim Importieren: ' + error.message);
+      alert('Fehler beim Importieren: ' + (error as Error).message);
     }
   };
 

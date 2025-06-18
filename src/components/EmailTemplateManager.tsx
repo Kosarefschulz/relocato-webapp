@@ -212,9 +212,12 @@ const EmailTemplateManager: React.FC = () => {
         setSuccess('Vorlage erfolgreich aktualisiert');
       } else {
         // Create new template
+        const variables = emailTemplateService.extractVariables(formData.content);
         await emailTemplateService.createTemplate({
           ...formData,
-          createdBy: 'user'
+          createdBy: 'user',
+          variables,
+          isSystem: false
         });
         setSuccess('Vorlage erfolgreich erstellt');
       }

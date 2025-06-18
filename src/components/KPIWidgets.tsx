@@ -24,10 +24,6 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-  SparklineChart,
-  Sparklines,
-  SparklinesLine,
-  SparklinesSpots,
 } from 'recharts';
 import { AnimatedCard, CountUpNumber, AnimatedProgressBar } from './MicroAnimations';
 import LoadingSkeleton from './LoadingSkeleton';

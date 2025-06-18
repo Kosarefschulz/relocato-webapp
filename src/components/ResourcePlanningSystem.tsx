@@ -812,7 +812,7 @@ const ResourcePlanningSystem: React.FC<ResourcePlanningSystemProps> = ({
                     </Typography>
                     
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                      <Star sx={{ fontSize: 16, color: theme.palette.warning.main }} />
+                      <StarIcon sx={{ fontSize: 16, color: theme.palette.warning.main }} />
                       <Typography variant="body2">
                         {member.performance.rating.toFixed(1)}
                       </Typography>

@@ -25,10 +25,10 @@ interface Quote {
   customerId: string;
   customerName: string;
   price: number;
-  comment: string;
+  comment?: string;
   createdAt: Date;
   createdBy: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'invoiced';
 }
 
 const QuotesList: React.FC = () => {
@@ -181,54 +181,56 @@ const QuotesList: React.FC = () => {
       minWidth: 200,
       sortable: false,
       filterable: false,
-      format: (value: any, row: Quote) => (
-        <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-          <IconButton
-            size="small"
-            color="primary"
-            title="Anzeigen"
-            onClick={() => console.log('View quote:', row.id)}
-          >
-            <VisibilityIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="default"
-            title="Bearbeiten"
-            onClick={() => console.log('Edit quote:', row.id)}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="success"
-            title="E-Mail senden"
-            onClick={() => console.log('Send email for quote:', row.id)}
-          >
-            <EmailIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="info"
-            title="PDF herunterladen"
-            onClick={() => console.log('Download PDF for quote:', row.id)}
-          >
-            <GetAppIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="error"
-            title="Löschen"
-            onClick={() => {
-              if (window.confirm('Angebot wirklich löschen?')) {
-                console.log('Delete quote:', row.id);
-              }
-            }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
+      format: (value: any) => {
+        return (
+          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+            <IconButton
+              size="small"
+              color="primary"
+              title="Anzeigen"
+              onClick={() => console.log('View quote')}
+            >
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="default"
+              title="Bearbeiten"
+              onClick={() => console.log('Edit quote')}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="success"
+              title="E-Mail senden"
+              onClick={() => console.log('Send email')}
+            >
+              <EmailIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="info"
+              title="PDF herunterladen"
+              onClick={() => console.log('Download PDF')}
+            >
+              <GetAppIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="error"
+              title="Löschen"
+              onClick={() => {
+                if (window.confirm('Angebot wirklich löschen?')) {
+                  console.log('Delete quote');
+                }
+              }}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        );
+      },
     },
   ];
 

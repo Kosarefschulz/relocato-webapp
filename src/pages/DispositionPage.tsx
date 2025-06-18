@@ -126,13 +126,13 @@ const DispositionPage: React.FC = () => {
         return {
           id: customer.id,
           customerNumber: customer.customerNumber,
-          firstName: customer.firstName,
-          lastName: customer.lastName,
+          firstName: '',
+          lastName: '',
           email: customer.email,
           phone: customer.phone,
-          moveDate: quote.moveDate || new Date().toISOString(),
-          fromAddress: quote.fromAddress || customer.address,
-          toAddress: quote.toAddress || '',
+          moveDate: customer.movingDate || new Date().toISOString(),
+          fromAddress: customer.fromAddress || '',
+          toAddress: customer.toAddress || '',
           status: savedData.status || 'accepted' as const,
           quoteId: quote.id,
           createdAt: quote.createdAt,
@@ -140,7 +140,7 @@ const DispositionPage: React.FC = () => {
         };
       }).filter(Boolean);
       
-      setCustomers(dispositionCustomers);
+      setCustomers(dispositionCustomers.filter(c => c !== null) as DispositionCustomer[]);
     } catch (error) {
       console.error('Fehler beim Laden der Dispositionsdaten:', error);
     }

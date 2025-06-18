@@ -79,7 +79,7 @@ class AutoSyncService {
       
     } catch (error) {
       console.error('❌ Fehler bei Synchronisation:', error);
-      this.syncStatus.errors.push(error.message);
+      this.syncStatus.errors.push((error as Error).message);
     } finally {
       this.isSyncing = false;
     }
@@ -119,7 +119,7 @@ class AutoSyncService {
           }
         } catch (error) {
           console.error(`Fehler bei Kunde ${customer.id}:`, error);
-          this.syncStatus.errors.push(`Kunde ${customer.id}: ${error.message}`);
+          this.syncStatus.errors.push(`Kunde ${customer.id}: ${(error as Error).message}`);
         }
       }
       
@@ -158,7 +158,7 @@ class AutoSyncService {
           }
         } catch (error) {
           console.error(`Fehler bei Angebot ${quote.id}:`, error);
-          this.syncStatus.errors.push(`Angebot ${quote.id}: ${error.message}`);
+          this.syncStatus.errors.push(`Angebot ${quote.id}: ${(error as Error).message}`);
         }
       }
       
@@ -194,7 +194,7 @@ class AutoSyncService {
           }
         } catch (error) {
           console.error(`Fehler bei Rechnung ${invoice.id}:`, error);
-          this.syncStatus.errors.push(`Rechnung ${invoice.id}: ${error.message}`);
+          this.syncStatus.errors.push(`Rechnung ${invoice.id}: ${(error as Error).message}`);
         }
       }
       

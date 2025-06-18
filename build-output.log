@@ -1,0 +1,18 @@
+
+> relocato-webapp@1.0.0 build
+> GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/craco build
+
+Cannot find ESLint plugin (ESLintWebpackPlugin).
+Creating an optimized production build...
+Failed to compile.
+
+TS2339: Property 'flags' does not exist on type 'EmailMessage'.
+    306 |         await updateDoc(doc(db, 'emailClient', email.id), { 
+    307 |           isRead: true,
+  > 308 |           flags: [...(email.flags || []), '\\Seen']
+        |                             ^^^^^
+    309 |         });
+    310 |         const updatedEmails = emails.map(e => 
+    311 |           e.id === email.id ? { ...e, isRead: true } : e
+
+

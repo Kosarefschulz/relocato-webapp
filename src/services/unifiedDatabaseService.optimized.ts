@@ -44,7 +44,7 @@ class UnifiedDatabaseServiceOptimized {
       // Then check service cache
       return await cacheService.getOrFetch(
         CACHE_KEYS.CUSTOMER_DETAILS(customerId),
-        () => firebaseService.getCustomer(customerId),
+        () => firebaseService.getCustomerById(customerId),
         { expiresIn: 10 * 60 * 1000 } // 10 minutes
       );
     } catch (error) {
@@ -59,12 +59,11 @@ class UnifiedDatabaseServiceOptimized {
       if (customer.phone) {
         customer.phone = cleanPhoneNumber(customer.phone);
       }
-      if (customer.whatsapp) {
-        customer.whatsapp = cleanPhoneNumber(customer.whatsapp);
-      }
+      // WhatsApp field removed - not in Customer interface
 
       // Save to Firebase
-      const result = await firebaseService.addCustomer(customer);
+      const customerId = await firebaseService.addCustomer(customer);
+      const result = !!customerId;
       
       if (result) {
         // Invalidate cache
@@ -88,12 +87,11 @@ class UnifiedDatabaseServiceOptimized {
       if (updates.phone) {
         updates.phone = cleanPhoneNumber(updates.phone);
       }
-      if (updates.whatsapp) {
-        updates.whatsapp = cleanPhoneNumber(updates.whatsapp);
-      }
+      // WhatsApp field removed - not in Customer interface
 
       // Update in Firebase
-      const result = await firebaseService.updateCustomer(customerId, updates);
+      await firebaseService.updateCustomer(customerId, updates);
+      const result = true;
       
       if (result) {
         // Invalidate cache
@@ -116,7 +114,8 @@ class UnifiedDatabaseServiceOptimized {
 
   async deleteCustomer(customerId: string): Promise<boolean> {
     try {
-      const result = await firebaseService.deleteCustomer(customerId);
+      await firebaseService.deleteCustomer(customerId);
+      const result = true;
       
       if (result) {
         // Invalidate cache
@@ -201,7 +200,8 @@ class UnifiedDatabaseServiceOptimized {
 
   async addQuote(quote: Quote): Promise<boolean> {
     try {
-      const result = await firebaseService.addQuote(quote);
+      const quoteId = await firebaseService.addQuote(quote);
+      const result = !!quoteId;
       
       if (result) {
         // Invalidate cache
@@ -220,7 +220,8 @@ class UnifiedDatabaseServiceOptimized {
 
   async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<boolean> {
     try {
-      const result = await firebaseService.updateQuote(quoteId, updates);
+      await firebaseService.updateQuote(quoteId, updates);
+      const result = true;
       
       if (result) {
         // Invalidate cache
@@ -260,7 +261,7 @@ class UnifiedDatabaseServiceOptimized {
         CACHE_KEYS.INVOICES_UNPAID,
         async () => {
           const invoices = await this.getInvoices();
-          return invoices.filter(invoice => invoice.status === 'unpaid');
+          return invoices.filter(invoice => invoice.status !== 'paid' && invoice.status !== 'cancelled');
         },
         { expiresIn: 3 * 60 * 1000 } // 3 minutes
       );
@@ -290,7 +291,8 @@ class UnifiedDatabaseServiceOptimized {
 
   async addInvoice(invoice: Invoice): Promise<boolean> {
     try {
-      const result = await firebaseService.addInvoice(invoice);
+      const invoiceId = await firebaseService.addInvoice(invoice);
+      const result = !!invoiceId;
       
       if (result) {
         // Invalidate cache
@@ -309,7 +311,8 @@ class UnifiedDatabaseServiceOptimized {
 
   async updateInvoice(invoiceId: string, updates: Partial<Invoice>): Promise<boolean> {
     try {
-      const result = await firebaseService.updateInvoice(invoiceId, updates);
+      await firebaseService.updateInvoice(invoiceId, updates);
+      const result = true;
       
       if (result) {
         // Invalidate cache
@@ -330,6 +333,42 @@ class UnifiedDatabaseServiceOptimized {
     }
   }
 
+  async deleteInvoice(invoiceId: string): Promise<boolean> {
+    try {
+      await firebaseService.deleteInvoice(invoiceId);
+      
+      // Invalidate cache
+      cacheService.remove(CACHE_KEYS.INVOICE_DETAILS(invoiceId));
+      cacheService.remove(CACHE_KEYS.INVOICES_UNPAID);
+      
+      // Remove from local cache
+      this.invoiceCache.delete(invoiceId);
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting invoice:', error);
+      return false;
+    }
+  }
+
+  async deleteQuote(quoteId: string): Promise<boolean> {
+    try {
+      await firebaseService.deleteQuote(quoteId);
+      
+      // Invalidate cache
+      cacheService.remove(CACHE_KEYS.QUOTE_DETAILS(quoteId));
+      cacheService.remove(CACHE_KEYS.QUOTES_RECENT);
+      
+      // Remove from local cache
+      this.quoteCache.delete(quoteId);
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+      return false;
+    }
+  }
+
   /**
    * Email History Operations
    */
@@ -344,7 +383,8 @@ class UnifiedDatabaseServiceOptimized {
 
   async addEmailHistory(emailHistory: EmailHistory): Promise<boolean> {
     try {
-      return await firebaseService.addEmailHistory(emailHistory);
+      const emailId = await firebaseService.addEmailHistory(emailHistory);
+      return !!emailId;
     } catch (error) {
       console.error('Error adding email history:', error);
       return false;
@@ -373,6 +413,53 @@ class UnifiedDatabaseServiceOptimized {
     this.customerCache.clear();
     this.quoteCache.clear();
     this.invoiceCache.clear();
+  }
+
+  /**
+   * Generic document operations
+   */
+  async getDocument(collection: string, documentId: string): Promise<any | null> {
+    try {
+      // For now, return null - this can be implemented later if needed
+      console.warn(`getDocument not implemented for ${collection}/${documentId}`);
+      return null;
+    } catch (error) {
+      console.error('Error fetching document:', error);
+      return null;
+    }
+  }
+
+  async getCollection(collectionName: string): Promise<any[]> {
+    try {
+      // For now, return empty array - this can be implemented later if needed
+      console.warn(`getCollection not implemented for ${collectionName}`);
+      return [];
+    } catch (error) {
+      console.error('Error fetching collection:', error);
+      return [];
+    }
+  }
+
+  async updateDocument(collection: string, documentId: string, data: any): Promise<boolean> {
+    try {
+      // For now, return false - this can be implemented later if needed
+      console.warn(`updateDocument not implemented for ${collection}/${documentId}`);
+      return false;
+    } catch (error) {
+      console.error('Error updating document:', error);
+      return false;
+    }
+  }
+
+  async testConnection(): Promise<void> {
+    console.log('🧪 Testing database connection...');
+    try {
+      const customers = await this.getCustomers();
+      console.log('✅ Connection successful! Number of customers:', customers.length);
+    } catch (error) {
+      console.error('❌ Connection test failed:', error);
+      throw error;
+    }
   }
 }
 

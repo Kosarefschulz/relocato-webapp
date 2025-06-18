@@ -171,21 +171,21 @@ const FailedEmailRecovery: React.FC = () => {
     // Initialize customer data
     setCustomerData({
       name: parsed.name || 'Unbekannt',
-      firstName: parsed.firstName || '',
-      lastName: parsed.lastName || '',
+      firstName: '',
+      lastName: '',
       email: parsed.email || '',
       phone: parsed.phone || '',
       fromAddress: parsed.fromAddress || '',
       toAddress: parsed.toAddress || '',
-      moveDate: parsed.moveDate,
+      moveDate: parsed.movingDate,
       apartment: {
         rooms: parsed.apartment?.rooms || 0,
         area: parsed.apartment?.area || 0,
         floor: parsed.apartment?.floor || 0,
         hasElevator: parsed.apartment?.hasElevator || false,
-        type: parsed.apartment?.type || ''
+        type: ''
       },
-      services: parsed.services || ['Umzug'],
+      services: ['Umzug'],
       notes: parsed.notes || ''
     });
   };
@@ -248,7 +248,7 @@ const FailedEmailRecovery: React.FC = () => {
       alert(`Kunde ${customerNumber} erfolgreich angelegt!`);
     } catch (error) {
       console.error('Error saving customer:', error);
-      alert('Fehler beim Speichern: ' + error.message);
+      alert('Fehler beim Speichern: ' + (error as Error).message);
     } finally {
       setSaving(false);
     }
@@ -377,7 +377,7 @@ const FailedEmailRecovery: React.FC = () => {
       floor: customer.apartment?.floor || 0,
       hasElevator: customer.apartment?.hasElevator || false,
       items: [],
-      services: customer.services.map(service => ({
+      services: customer.services?.map((service: any) => ({
         name: service,
         description: service,
         price: service === 'Umzug' ? price : 0

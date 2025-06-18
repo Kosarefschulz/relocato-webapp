@@ -286,7 +286,7 @@ class GoogleSheetsPublicService {
       
       // Lösche auch zugehörige Fotos (import wird zur Laufzeit aufgelöst)
       try {
-        const { googleDriveService } = await import('./googleDriveService');
+        const googleDriveService = (await import('./googleDriveService')).default;
         await googleDriveService.deleteCustomerPhotos(customerId);
       } catch (error) {
         console.warn('Hinweis: Fotos konnten nicht automatisch gelöscht werden:', error);
@@ -404,30 +404,6 @@ class GoogleSheetsPublicService {
     }
   }
 
-  async addInvoice(invoice: Omit<Invoice, 'id'>): Promise<boolean> {
-    try {
-      const newInvoice: Invoice = {
-        ...invoice,
-        id: `local_invoice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      };
-      
-      const invoices = this.getLocalInvoices();
-      invoices.push(newInvoice);
-      this.saveLocalInvoices(invoices);
-      
-      console.log('💰 Rechnung erfolgreich erstellt:', {
-        rechnungsnummer: invoice.invoiceNumber,
-        kunde: invoice.customerName,
-        betrag: `€ ${invoice.totalPrice.toFixed(2)}`,
-        status: invoice.status
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Fehler beim Speichern der Rechnung:', error);
-      return false;
-    }
-  }
 
   async getQuotes(): Promise<Quote[]> {
     // Lade lokale Angebote
@@ -775,6 +751,36 @@ class GoogleSheetsPublicService {
     }
   }
 
+  async deleteQuote(quoteId: string): Promise<boolean> {
+    try {
+      const quotes = this.getLocalQuotes();
+      const filteredQuotes = quotes.filter(q => q.id !== quoteId);
+      this.saveLocalQuotes(filteredQuotes);
+      console.log('📝 Angebot gelöscht:', quoteId);
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Löschen des Angebots:', error);
+      return false;
+    }
+  }
+
+
+
+  async getDocument(collection: string, documentId: string): Promise<any | null> {
+    console.warn(`getDocument not implemented for ${collection}/${documentId}`);
+    return null;
+  }
+
+  async getCollection(collectionName: string): Promise<any[]> {
+    console.warn(`getCollection not implemented for ${collectionName}`);
+    return [];
+  }
+
+  async updateDocument(collection: string, documentId: string, data: any): Promise<boolean> {
+    console.warn(`updateDocument not implemented for ${collection}/${documentId}`);
+    return false;
+  }
+
   private getDemoInvoices(): Invoice[] {
     const today = new Date();
     const dueDate = new Date(today);
@@ -891,7 +897,7 @@ class GoogleSheetsPublicService {
   }
 
   // Test-Methode
-  async testConnection(): Promise<boolean> {
+  async testConnection(): Promise<void> {
     try {
       console.log('🧪 Teste Google Sheets Zugriff...');
       console.log('📊 Spreadsheet ID:', this.spreadsheetId);
@@ -899,11 +905,9 @@ class GoogleSheetsPublicService {
       
       const customers = await this.getCustomers();
       console.log(`✅ Test erfolgreich - ${customers.length} Kunden geladen`);
-      
-      return true;
     } catch (error) {
       console.error('❌ Test fehlgeschlagen:', error);
-      return false;
+      throw error;
     }
   }
 }

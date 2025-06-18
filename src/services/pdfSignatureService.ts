@@ -132,7 +132,7 @@ class PDFSignatureService {
       // Hier würde normalerweise eine echte Signaturvalidierung stattfinden
       // Für diese Demo-Implementation prüfen wir nur, ob Signaturen vorhanden sind
       const title = pdfDoc.getTitle();
-      const isValid = title.includes('Digital signiert');
+      const isValid = title ? title.includes('Digital signiert') : false;
       
       return {
         isValid,

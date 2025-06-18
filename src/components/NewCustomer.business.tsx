@@ -155,6 +155,7 @@ const NewCustomer: React.FC = () => {
           floor: customer.apartment!.floor,
           hasElevator: customer.apartment!.hasElevator
         },
+        services: customer.services || [],
         createdAt: new Date()
       };
       

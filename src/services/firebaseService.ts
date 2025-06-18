@@ -66,6 +66,10 @@ class FirebaseService {
 
   async getCustomerById(customerId: string): Promise<Customer | null> {
     try {
+      if (!this.customersCollection) {
+        console.error('Customers collection not initialized');
+        return null;
+      }
       const docRef = doc(this.customersCollection, customerId);
       const docSnap = await getDoc(docRef);
       
@@ -89,6 +93,7 @@ class FirebaseService {
       // Generiere Kundennummer wenn nicht vorhanden
       const customerNumber = customer.customerNumber || await this.generateCustomerNumber();
       
+      if (!this.customersCollection) throw new Error('Customers collection not initialized');
       const docRef = await addDoc(this.customersCollection, {
         ...customer,
         customerNumber,
@@ -106,6 +111,7 @@ class FirebaseService {
 
   async updateCustomer(customerId: string, updates: Partial<Customer>): Promise<void> {
     try {
+      if (!this.customersCollection) throw new Error('Customers collection not initialized');
       const docRef = doc(this.customersCollection, customerId);
       await updateDoc(docRef, {
         ...updates,
@@ -120,6 +126,7 @@ class FirebaseService {
 
   async deleteCustomer(customerId: string): Promise<void> {
     try {
+      if (!this.customersCollection) throw new Error('Customers collection not initialized');
       const docRef = doc(this.customersCollection, customerId);
       await deleteDoc(docRef);
       console.log('✅ Kunde gelöscht:', customerId);
@@ -133,6 +140,7 @@ class FirebaseService {
 
   async getQuotes(): Promise<Quote[]> {
     try {
+      if (!this.quotesCollection) return [];
       const querySnapshot = await getDocs(this.quotesCollection);
       
       const quotes: Quote[] = [];
@@ -152,8 +160,33 @@ class FirebaseService {
     }
   }
 
+  async getQuoteById(quoteId: string): Promise<Quote | null> {
+    try {
+      if (!this.quotesCollection) {
+        console.error('Quotes collection not initialized');
+        return null;
+      }
+      const docRef = doc(this.quotesCollection, quoteId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+        } as Quote;
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden des Angebots:', error);
+      throw error;
+    }
+  }
+
   async getQuotesByCustomerId(customerId: string): Promise<Quote[]> {
     try {
+      if (!this.quotesCollection) return [];
       const q = query(
         this.quotesCollection,
         where('customerId', '==', customerId),
@@ -181,6 +214,7 @@ class FirebaseService {
 
   async addQuote(quote: Omit<Quote, 'id'>): Promise<string> {
     try {
+      if (!this.quotesCollection) throw new Error('Quotes collection not initialized');
       const docRef = await addDoc(this.quotesCollection, {
         ...quote,
         createdAt: serverTimestamp(),
@@ -197,6 +231,7 @@ class FirebaseService {
 
   async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<void> {
     try {
+      if (!this.quotesCollection) throw new Error('Quotes collection not initialized');
       const docRef = doc(this.quotesCollection, quoteId);
       await updateDoc(docRef, {
         ...updates,
@@ -209,10 +244,23 @@ class FirebaseService {
     }
   }
 
+  async deleteQuote(quoteId: string): Promise<void> {
+    try {
+      if (!this.quotesCollection) throw new Error('Quotes collection not initialized');
+      const docRef = doc(this.quotesCollection, quoteId);
+      await deleteDoc(docRef);
+      console.log('✅ Angebot gelöscht:', quoteId);
+    } catch (error) {
+      console.error('❌ Fehler beim Löschen des Angebots:', error);
+      throw error;
+    }
+  }
+
   // ==================== INVOICES ====================
 
   async getInvoices(): Promise<Invoice[]> {
     try {
+      if (!this.invoicesCollection) return [];
       const querySnapshot = await getDocs(this.invoicesCollection);
       
       const invoices: Invoice[] = [];
@@ -234,8 +282,65 @@ class FirebaseService {
     }
   }
 
+  async getInvoiceById(invoiceId: string): Promise<Invoice | null> {
+    try {
+      if (!this.invoicesCollection) {
+        console.error('Invoices collection not initialized');
+        return null;
+      }
+      const docRef = doc(this.invoicesCollection, invoiceId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          dueDate: data.dueDate?.toDate() || new Date(),
+          paidDate: data.paidDate?.toDate(),
+        } as Invoice;
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden der Rechnung:', error);
+      throw error;
+    }
+  }
+
+  async getInvoicesByCustomer(customerId: string): Promise<Invoice[]> {
+    try {
+      if (!this.invoicesCollection) return [];
+      const q = query(
+        this.invoicesCollection,
+        where('customerId', '==', customerId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const invoices: Invoice[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        invoices.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          dueDate: data.dueDate?.toDate() || new Date(),
+          paidDate: data.paidDate?.toDate(),
+        } as Invoice);
+      });
+      
+      return invoices;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden der Kundenrechnungen:', error);
+      throw error;
+    }
+  }
+
   async addInvoice(invoice: Omit<Invoice, 'id'>): Promise<string> {
     try {
+      if (!this.invoicesCollection) throw new Error('Invoices collection not initialized');
       const docRef = await addDoc(this.invoicesCollection, {
         ...invoice,
         createdAt: serverTimestamp(),
@@ -250,10 +355,39 @@ class FirebaseService {
     }
   }
 
+  async updateInvoice(invoiceId: string, updates: Partial<Invoice>): Promise<void> {
+    try {
+      if (!this.invoicesCollection) throw new Error('Invoices collection not initialized');
+      const docRef = doc(this.invoicesCollection, invoiceId);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+      console.log('✅ Rechnung aktualisiert:', invoiceId);
+    } catch (error) {
+      console.error('❌ Fehler beim Aktualisieren der Rechnung:', error);
+      throw error;
+    }
+  }
+
+  async deleteInvoice(invoiceId: string): Promise<void> {
+    try {
+      if (!this.invoicesCollection) throw new Error('Invoices collection not initialized');
+      const docRef = doc(this.invoicesCollection, invoiceId);
+      await deleteDoc(docRef);
+      console.log('✅ Rechnung gelöscht:', invoiceId);
+    } catch (error) {
+      console.error('❌ Fehler beim Löschen der Rechnung:', error);
+      throw error;
+    }
+  }
+
   // ==================== EMAIL HISTORY ====================
 
   async getEmailHistory(customerId?: string): Promise<EmailHistory[]> {
     try {
+      if (!this.emailHistoryCollection) throw new Error('Email history collection not initialized');
+      
       let q;
       if (customerId) {
         q = query(
@@ -269,7 +403,7 @@ class FirebaseService {
       const emails: EmailHistory[] = [];
       
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
+        const data = doc.data() as any;
         emails.push({
           id: doc.id,
           ...data,
@@ -286,6 +420,7 @@ class FirebaseService {
 
   async addEmailHistory(email: Omit<EmailHistory, 'id'>): Promise<string> {
     try {
+      if (!this.emailHistoryCollection) throw new Error('Email history collection not initialized');
       const docRef = await addDoc(this.emailHistoryCollection, {
         ...email,
         sentAt: serverTimestamp(),
@@ -302,6 +437,10 @@ class FirebaseService {
   // ==================== REAL-TIME LISTENERS ====================
 
   subscribeToCustomers(callback: (customers: Customer[]) => void): () => void {
+    if (!this.customersCollection) {
+      console.warn('Customers collection not initialized');
+      return () => {};
+    }
     const unsubscribe = onSnapshot(this.customersCollection, (snapshot) => {
       const customers: Customer[] = [];
       snapshot.forEach((doc) => {
@@ -319,6 +458,10 @@ class FirebaseService {
   }
 
   subscribeToQuotes(callback: (quotes: Quote[]) => void): () => void {
+    if (!this.quotesCollection) {
+      console.warn('Quotes collection not initialized');
+      return () => {};
+    }
     const unsubscribe = onSnapshot(this.quotesCollection, (snapshot) => {
       const quotes: Quote[] = [];
       snapshot.forEach((doc) => {
@@ -335,6 +478,29 @@ class FirebaseService {
     return unsubscribe;
   }
 
+  subscribeToInvoices(callback: (invoices: Invoice[]) => void): () => void {
+    if (!this.invoicesCollection) {
+      console.warn('Invoices collection not initialized');
+      return () => {};
+    }
+    const unsubscribe = onSnapshot(this.invoicesCollection, (snapshot) => {
+      const invoices: Invoice[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        invoices.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          dueDate: data.dueDate?.toDate() || new Date(),
+          paidDate: data.paidDate?.toDate(),
+        } as Invoice);
+      });
+      callback(invoices);
+    });
+    
+    return unsubscribe;
+  }
+
   // ==================== HELPER FUNCTIONS ====================
 
   private async generateCustomerNumber(): Promise<string> {
@@ -345,6 +511,8 @@ class FirebaseService {
     // Zähle bestehende Kunden für diesen Monat
     const startOfMonth = new Date(year, date.getMonth(), 1);
     const endOfMonth = new Date(year, date.getMonth() + 1, 0);
+    
+    if (!this.customersCollection) throw new Error('Customers collection not initialized');
     
     const q = query(
       this.customersCollection,
@@ -362,13 +530,15 @@ class FirebaseService {
 
   async migrateCustomerFromGoogleSheets(customer: Customer): Promise<void> {
     try {
+      if (!this.customersCollection) throw new Error('Customers collection not initialized');
+      
       // Check if customer already exists
       const q = query(this.customersCollection, where('customerNumber', '==', customer.customerNumber));
       const snapshot = await getDocs(q);
       
       if (snapshot.empty) {
         // Create new customer
-        await setDoc(doc(this.customersCollection, customer.id), {
+        await setDoc(doc(this.customersCollection!, customer.id), {
           ...customer,
           migratedFrom: 'googleSheets',
           migratedAt: serverTimestamp(),
@@ -385,6 +555,7 @@ class FirebaseService {
 
   async migrateQuoteFromGoogleSheets(quote: Quote): Promise<void> {
     try {
+      if (!this.quotesCollection) throw new Error('Quotes collection not initialized');
       await setDoc(doc(this.quotesCollection, quote.id), {
         ...quote,
         migratedFrom: 'googleSheets',

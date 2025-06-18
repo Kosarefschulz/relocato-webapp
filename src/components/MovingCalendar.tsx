@@ -18,7 +18,7 @@ import {
   NavigateNext as NavigateNextIcon,
   ViewWeek as ViewWeekIcon,
   ViewDay as ViewDayIcon,
-  ViewMonth as ViewMonthIcon,
+  CalendarMonth as ViewMonthIcon,
 } from '@mui/icons-material';
 import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';

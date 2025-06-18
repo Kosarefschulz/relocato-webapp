@@ -125,8 +125,8 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
       customerName: customer.name || '',
       customerEmail: customer.email || '',
       customerPhone: customer.phone || '',
-      fromAddress: `${customer.address?.street || ''}, ${customer.address?.city || ''}`,
-      toAddress: `${customer.movingToAddress?.street || ''}, ${customer.movingToAddress?.city || ''}`,
+      fromAddress: customer.fromAddress || '',
+      toAddress: customer.toAddress || '',
       moveDate: customer.movingDate ? new Date(customer.movingDate).toLocaleDateString('de-DE') : '',
       employeeName: 'Thomas Schmidt' // TODO: Get from current user
     };
@@ -207,11 +207,9 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
         customerName: customer.name,
         to: customer.email!,
         subject,
-        content,
         templateType: emailData.templateType,
-        sentAt: new Date(),
-        status: 'sent',
-        attachments: emailAttachments.map(a => a.filename)
+        sentAt: new Date().toISOString(),
+        status: 'sent'
       });
 
       setSuccess('E-Mail erfolgreich versendet');
@@ -229,11 +227,10 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
         customerName: customer.name,
         to: customer.email!,
         subject,
-        content,
         templateType: 'custom',
-        sentAt: new Date(),
+        sentAt: new Date().toISOString(),
         status: 'failed',
-        error: error.message
+        errorMessage: error.message
       });
     } finally {
       setSending(false);

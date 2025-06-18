@@ -25,7 +25,7 @@ import {
   VisibilityOff as VisibilityOffIcon,
   Settings as SettingsIcon,
   History as HistoryIcon,
-  Device as DeviceIcon,
+  Devices as DeviceIcon,
   AccessTime as AccessTimeIcon,
   LocationOn as LocationIcon,
   Computer as ComputerIcon,
