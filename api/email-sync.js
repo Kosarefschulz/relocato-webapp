@@ -27,11 +27,15 @@ export default async function handler(req, res) {
     console.log(`📧 API: Syncing emails from folder: ${folder}, limit: ${limitNum}`);
     
     // Check for required environment variables
-    if (!process.env.IONOS_EMAIL_USER || !process.env.IONOS_EMAIL_PASS) {
-      console.error('❌ Missing IONOS credentials in environment variables');
+    const emailUser = process.env.IONOS_EMAIL_USER || process.env.REACT_APP_EMAIL_USERNAME || process.env.SMTP_USER;
+    const emailPass = process.env.IONOS_EMAIL_PASS || process.env.REACT_APP_EMAIL_PASSWORD || process.env.SMTP_PASS;
+    
+    if (!emailUser || !emailPass) {
+      console.error('❌ Missing email credentials in environment variables');
+      console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('EMAIL') || k.includes('SMTP') || k.includes('IONOS')));
       return res.status(500).json({
         error: 'Email credentials not configured',
-        details: 'IONOS_EMAIL_USER or IONOS_EMAIL_PASS not set'
+        details: 'Email user or password not found in environment variables'
       });
     }
     
@@ -60,8 +64,8 @@ async function fetchEmailsFromIONOS(folder, limit) {
     const emails = [];
     
     const imap = new Imap({
-      user: process.env.IONOS_EMAIL_USER,
-      password: process.env.IONOS_EMAIL_PASS,
+      user: emailUser,
+      password: emailPass,
       host: 'mail.ionos.de',
       port: 993,
       tls: true,

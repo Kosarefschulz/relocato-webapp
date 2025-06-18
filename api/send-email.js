@@ -36,14 +36,18 @@ export default async function handler(req, res) {
       });
     }
 
+    // Get email credentials from environment
+    const emailUser = process.env.IONOS_EMAIL_USER || process.env.REACT_APP_EMAIL_USERNAME || process.env.SMTP_USER;
+    const emailPass = process.env.IONOS_EMAIL_PASS || process.env.REACT_APP_EMAIL_PASSWORD || process.env.SMTP_PASS;
+    
     // Create transporter
     const transporter = nodemailer.createTransport({
-      host: 'smtp.ionos.de',
-      port: 587,
+      host: process.env.SMTP_HOST || 'smtp.ionos.de',
+      port: parseInt(process.env.SMTP_PORT || '587'),
       secure: false,
       auth: {
-        user: process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de',
-        pass: process.env.IONOS_EMAIL_PASS,
+        user: emailUser,
+        pass: emailPass,
       },
       tls: {
         rejectUnauthorized: false
@@ -52,7 +56,7 @@ export default async function handler(req, res) {
 
     // Prepare email options
     const mailOptions = {
-      from: `"Relocato Bielefeld" <${process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de'}>`,
+      from: `"Relocato Bielefeld" <${emailUser}>`,
       to,
       subject,
       html,

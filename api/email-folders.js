@@ -56,10 +56,13 @@ async function fetchFoldersFromIONOS() {
   return new Promise((resolve, reject) => {
     const folders = [];
     
+    const emailUser = process.env.IONOS_EMAIL_USER || process.env.REACT_APP_EMAIL_USERNAME || process.env.SMTP_USER;
+    const emailPass = process.env.IONOS_EMAIL_PASS || process.env.REACT_APP_EMAIL_PASSWORD || process.env.SMTP_PASS;
+    
     const imap = new Imap({
-      user: process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de',
-      password: process.env.IONOS_EMAIL_PASS,
-      host: 'imap.ionos.de',
+      user: emailUser,
+      password: emailPass,
+      host: 'mail.ionos.de',
       port: 993,
       tls: true,
       tlsOptions: { rejectUnauthorized: false }
