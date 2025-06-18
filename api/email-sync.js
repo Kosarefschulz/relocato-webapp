@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     }
     
     // Fetch emails from IONOS
-    const emails = await fetchEmailsFromIONOS(folder, limitNum);
+    const emails = await fetchEmailsFromIONOS(folder, limitNum, emailUser, emailPass);
     
     res.status(200).json({
       emails: emails,
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function fetchEmailsFromIONOS(folder, limit) {
+async function fetchEmailsFromIONOS(folder, limit, emailUser, emailPass) {
   return new Promise((resolve, reject) => {
     const emails = [];
     
@@ -70,8 +70,9 @@ async function fetchEmailsFromIONOS(folder, limit) {
       port: 993,
       tls: true,
       tlsOptions: { 
+        ciphers: 'SSLv3',
         rejectUnauthorized: false,
-        servername: 'mail.ionos.de'
+        servername: 'imap.ionos.de'
       }
     });
 

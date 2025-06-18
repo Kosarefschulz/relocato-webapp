@@ -43,13 +43,14 @@ export default async function handler(req, res) {
     // Create transporter
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.ionos.de',
-      port: parseInt(process.env.SMTP_PORT || '465'),
-      secure: true,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false,
       auth: {
         user: emailUser,
         pass: emailPass,
       },
       tls: {
+        ciphers: 'SSLv3',
         rejectUnauthorized: false
       }
     });

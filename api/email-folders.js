@@ -65,7 +65,11 @@ async function fetchFoldersFromIONOS() {
       host: 'imap.ionos.de',
       port: 993,
       tls: true,
-      tlsOptions: { rejectUnauthorized: false }
+      tlsOptions: { 
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false,
+        servername: 'imap.ionos.de'
+      }
     });
 
     imap.once('ready', () => {
