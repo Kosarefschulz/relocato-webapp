@@ -12,13 +12,25 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ],
   "functions": {
     "api/email-sync.js": {
       "maxDuration": 30
+    },
+    "api/email-sync-v2.js": {
+      "maxDuration": 10
+    },
+    "api/email-self-test.js": {
+      "maxDuration": 10
+    },
+    "api/backend-send-email.js": {
+      "maxDuration": 10
+    },
+    "api/test-email-simple.js": {
+      "maxDuration": 10
     }
   }
 }
