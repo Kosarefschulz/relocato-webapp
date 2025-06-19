@@ -38,7 +38,7 @@ import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, o
 import { db } from '../config/firebase';
 import { Customer } from '../types';
 import { emailParser } from '../utils/emailParser';
-import { emailClientService, Email as ServiceEmail } from '../services/emailClientService';
+import { emailClientServiceV2 as emailClientService, Email as ServiceEmail } from '../services/emailClientServiceV2';
 import EmailCompose from './EmailCompose';
 
 interface EmailMessage {

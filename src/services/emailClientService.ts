@@ -77,7 +77,8 @@ class EmailClientService {
       const user = auth.currentUser;
       const idToken = user ? await user.getIdToken() : null;
       
-      const response = await fetch(`/api/email-sync?folder=${encodeURIComponent(folder)}&limit=${limit}&forceSync=${forceSync}`, {
+      // Try v2 endpoint first, fallback to v1
+      let response = await fetch(`/api/email-sync-v2?folder=${encodeURIComponent(folder)}&limit=${limit}&forceSync=${forceSync}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
