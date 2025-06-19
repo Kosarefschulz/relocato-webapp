@@ -66,6 +66,46 @@ export const VisibilityFix: React.FC = () => {
       * {
         filter: none !important;
       }
+      
+      /* EXTREME FIX: Force all text to be black on white in customer details */
+      .MuiListItemText-secondary,
+      .MuiListItemText-secondary * {
+        color: #000000 !important;
+        background-color: transparent !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: inline-block !important;
+        position: relative !important;
+        z-index: 999 !important;
+      }
+      
+      /* Force links to be visible */
+      .MuiListItemText-secondary a {
+        color: #1976d2 !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      
+      /* Ensure all Typography in Lists is visible */
+      .MuiList-root .MuiTypography-root {
+        color: inherit !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      
+      /* Dark mode override */
+      .MuiPaper-root[class*="dark"] .MuiTypography-root,
+      [data-theme="dark"] .MuiTypography-root {
+        color: #ffffff !important;
+      }
+      
+      /* Light mode override */
+      .MuiPaper-root:not([class*="dark"]) .MuiTypography-root,
+      [data-theme="light"] .MuiTypography-root {
+        color: #000000 !important;
+      }
     `;
     
     // Append to head

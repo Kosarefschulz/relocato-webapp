@@ -46,6 +46,8 @@ import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
+import CustomerInfoDebug from './CustomerInfoDebug';
+import CustomerInfoSimple from './CustomerInfoSimple';
 
 const HeroSection = motion(Box);
 
@@ -582,6 +584,10 @@ const CustomerDetails: React.FC = () => {
           {/* Tab Panels */}
           <TabPanel value={tabValue} index={0}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
+              {/* Debug Components with different approaches */}
+              <CustomerInfoDebug customer={customer} />
+              <CustomerInfoSimple customer={customer} />
+              
               <CustomerInfo
                 customer={customer}
                 editedCustomer={editedCustomer}
