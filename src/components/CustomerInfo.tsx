@@ -36,6 +36,26 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
 }) => {
   const theme = useTheme();
 
+  // Force text color to ensure visibility
+  const textStyle = {
+    color: theme.palette.text.primary,
+    opacity: 1,
+    visibility: 'visible' as const,
+    display: 'block',
+    zIndex: 1
+  };
+
+  const linkStyle = {
+    color: theme.palette.primary.main,
+    fontWeight: 600,
+    textDecoration: 'none',
+    opacity: 1,
+    visibility: 'visible' as const,
+    display: 'inline-block',
+    zIndex: 1,
+    '&:hover': { textDecoration: 'underline' }
+  };
+
   return (
     <Grid container spacing={2}>
       {/* Kontaktdaten */}
@@ -44,7 +64,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
           whileHover={!isMobile && !editMode ? { y: -4, boxShadow: theme.shadows[8] } : {}}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.3 }}
-          sx={{ height: '100%' }}
+          sx={{ height: '100%', position: 'relative' }}
         >
           <CardContent>
             <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -58,7 +78,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText 
-                  primary="Telefon"
+                  primary={<Typography sx={textStyle}>Telefon</Typography>}
                   secondary={
                     editMode ? (
                       <TextField
@@ -72,14 +92,9 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                       <Typography 
                         component="a"
                         href={`tel:${customer.phone}`}
-                        sx={{ 
-                          color: 'primary.main',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                          '&:hover': { textDecoration: 'underline' }
-                        }}
+                        sx={linkStyle}
                       >
-                        {customer.phone}
+                        {customer.phone || 'Keine Telefonnummer'}
                       </Typography>
                     )
                   }
@@ -92,7 +107,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText 
-                  primary="E-Mail"
+                  primary={<Typography sx={textStyle}>E-Mail</Typography>}
                   secondary={
                     editMode ? (
                       <TextField
@@ -107,14 +122,9 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                       <Typography 
                         component="a"
                         href={`mailto:${customer.email}`}
-                        sx={{ 
-                          color: 'primary.main',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                          '&:hover': { textDecoration: 'underline' }
-                        }}
+                        sx={linkStyle}
                       >
-                        {customer.email}
+                        {customer.email || 'Keine E-Mail'}
                       </Typography>
                     )
                   }
@@ -127,7 +137,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText 
-                  primary="Umzugstermin"
+                  primary={<Typography sx={textStyle}>Umzugstermin</Typography>}
                   secondary={
                     editMode ? (
                       <TextField
@@ -139,7 +149,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                         sx={{ mt: 0.5 }}
                       />
                     ) : (
-                      <Typography component="span" sx={{ fontWeight: 600 }}>
+                      <Typography sx={{ ...textStyle, fontWeight: 600 }}>
                         {formatDate(customer.movingDate, { includeWeekday: true, fallback: 'Datum nicht festgelegt' })}
                       </Typography>
                     )
@@ -157,78 +167,66 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
           whileHover={!isMobile && !editMode ? { y: -4, boxShadow: theme.shadows[8] } : {}}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.3 }}
-          sx={{ height: '100%' }}
+          sx={{ height: '100%', position: 'relative' }}
         >
           <CardContent>
             <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <LocationIcon /> Umzugsroute
+              <LocationIcon /> Adressen
             </Typography>
-            <Box sx={{ mt: 2 }}>
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Box sx={{ mb: 3 }}>
-                  <Chip label="Von" size="small" color="primary" sx={{ mb: 1 }} />
-                  {editMode ? (
-                    <TextField
-                      value={editedCustomer.fromAddress}
-                      onChange={(e) => onFieldChange('fromAddress', e.target.value)}
-                      variant="outlined"
-                      fullWidth
-                      multiline
-                      rows={2}
-                    />
-                  ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 500, flex: 1 }}>
-                        {customer.fromAddress}
+            <List sx={{ pt: 0 }}>
+              <ListItem sx={{ px: 0 }}>
+                <ListItemAvatar>
+                  <Avatar sx={{ backgroundColor: alpha(theme.palette.warning.main, 0.1) }}>
+                    <HomeIcon color="warning" />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText 
+                  primary={<Typography sx={textStyle}>Von</Typography>}
+                  secondary={
+                    editMode ? (
+                      <TextField
+                        value={editedCustomer.fromAddress}
+                        onChange={(e) => onFieldChange('fromAddress', e.target.value)}
+                        variant="standard"
+                        fullWidth
+                        multiline
+                        sx={{ mt: 0.5 }}
+                      />
+                    ) : (
+                      <Typography sx={{ ...textStyle, fontWeight: 600 }}>
+                        {customer.fromAddress || 'Keine Startadresse'}
                       </Typography>
-                      <IconButton 
-                        size="small" 
-                        onClick={() => window.open(`https://maps.google.com/maps?q=${encodeURIComponent(customer.fromAddress)}`, '_blank')}
-                        sx={{ color: 'primary.main' }}
-                      >
-                        <LocationIcon />
-                      </IconButton>
-                    </Box>
-                  )}
-                </Box>
-              </motion.div>
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Box>
-                  <Chip label="Nach" size="small" color="success" sx={{ mb: 1 }} />
-                  {editMode ? (
-                    <TextField
-                      value={editedCustomer.toAddress}
-                      onChange={(e) => onFieldChange('toAddress', e.target.value)}
-                      variant="outlined"
-                      fullWidth
-                      multiline
-                      rows={2}
-                    />
-                  ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 500, flex: 1 }}>
-                        {customer.toAddress}
+                    )
+                  }
+                />
+              </ListItem>
+              <ListItem sx={{ px: 0 }}>
+                <ListItemAvatar>
+                  <Avatar sx={{ backgroundColor: alpha(theme.palette.success.main, 0.1) }}>
+                    <LocationIcon color="success" />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText 
+                  primary={<Typography sx={textStyle}>Nach</Typography>}
+                  secondary={
+                    editMode ? (
+                      <TextField
+                        value={editedCustomer.toAddress}
+                        onChange={(e) => onFieldChange('toAddress', e.target.value)}
+                        variant="standard"
+                        fullWidth
+                        multiline
+                        sx={{ mt: 0.5 }}
+                      />
+                    ) : (
+                      <Typography sx={{ ...textStyle, fontWeight: 600 }}>
+                        {customer.toAddress || 'Keine Zieladresse'}
                       </Typography>
-                      <IconButton 
-                        size="small" 
-                        onClick={() => window.open(`https://maps.google.com/maps?q=${encodeURIComponent(customer.toAddress)}`, '_blank')}
-                        sx={{ color: 'success.main' }}
-                      >
-                        <LocationIcon />
-                      </IconButton>
-                    </Box>
-                  )}
-                </Box>
-              </motion.div>
-            </Box>
+                    )
+                  }
+                />
+              </ListItem>
+            </List>
           </CardContent>
         </AnimatedCard>
       </Grid>
@@ -239,129 +237,129 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
           whileHover={!isMobile && !editMode ? { y: -4, boxShadow: theme.shadows[8] } : {}}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.3 }}
+          sx={{ position: 'relative' }}
         >
           <CardContent>
             <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <HomeIcon /> Wohnungsdetails
             </Typography>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid container spacing={2}>
               <Grid xs={6} sm={3}>
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  p: 2, 
-                  borderRadius: 2, 
-                  backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
-                }}>
+                <Box sx={{ textAlign: 'center', p: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Zimmer</Typography>
                   {editMode ? (
                     <TextField
                       value={editedCustomer.apartment?.rooms || ''}
                       onChange={(e) => onFieldChange('apartment.rooms', parseInt(e.target.value) || 0)}
-                      type="number"
                       variant="standard"
-                      sx={{ 
-                        width: '60px',
-                        '& input': { textAlign: 'center', fontSize: '2rem', fontWeight: 700 }
-                      }}
+                      type="number"
+                      inputProps={{ min: 1, max: 20 }}
+                      sx={{ width: '80px', mt: 1 }}
                     />
                   ) : (
-                    <Typography variant="h4" color="primary" sx={{ fontWeight: 700 }}>
+                    <Typography variant="h4" color="primary" sx={{ ...textStyle, mt: 1 }}>
                       {customer.apartment?.rooms || '-'}
                     </Typography>
                   )}
-                  <Typography variant="body2" color="text.secondary">
-                    Zimmer
-                  </Typography>
                 </Box>
               </Grid>
               <Grid xs={6} sm={3}>
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  p: 2, 
-                  borderRadius: 2, 
-                  backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
-                }}>
+                <Box sx={{ textAlign: 'center', p: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Fläche</Typography>
                   {editMode ? (
                     <TextField
                       value={editedCustomer.apartment?.area || ''}
                       onChange={(e) => onFieldChange('apartment.area', parseInt(e.target.value) || 0)}
-                      type="number"
                       variant="standard"
-                      sx={{ 
-                        width: '80px',
-                        '& input': { textAlign: 'center', fontSize: '2rem', fontWeight: 700 }
-                      }}
+                      type="number"
+                      inputProps={{ min: 10, max: 500 }}
+                      sx={{ width: '80px', mt: 1 }}
                     />
                   ) : (
-                    <Typography variant="h4" color="primary" sx={{ fontWeight: 700 }}>
-                      {customer.apartment?.area || '-'}
+                    <Typography variant="h4" color="primary" sx={{ ...textStyle, mt: 1 }}>
+                      {customer.apartment?.area ? `${customer.apartment.area}m²` : '-'}
                     </Typography>
                   )}
-                  <Typography variant="body2" color="text.secondary">
-                    m² Fläche
-                  </Typography>
                 </Box>
               </Grid>
               <Grid xs={6} sm={3}>
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  p: 2, 
-                  borderRadius: 2, 
-                  backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
-                }}>
+                <Box sx={{ textAlign: 'center', p: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Etage</Typography>
                   {editMode ? (
                     <TextField
-                      value={editedCustomer.apartment?.floor || 0}
+                      value={editedCustomer.apartment?.floor || ''}
                       onChange={(e) => onFieldChange('apartment.floor', parseInt(e.target.value) || 0)}
-                      type="number"
                       variant="standard"
-                      sx={{ 
-                        width: '60px',
-                        '& input': { textAlign: 'center', fontSize: '2rem', fontWeight: 700 }
-                      }}
+                      type="number"
+                      inputProps={{ min: 0, max: 20 }}
+                      sx={{ width: '80px', mt: 1 }}
                     />
                   ) : (
-                    <Typography variant="h4" color="primary" sx={{ fontWeight: 700 }}>
-                      {customer.apartment?.floor || 'EG'}
+                    <Typography variant="h4" color="primary" sx={{ ...textStyle, mt: 1 }}>
+                      {customer.apartment?.floor !== undefined ? customer.apartment.floor : '-'}
                     </Typography>
                   )}
-                  <Typography variant="body2" color="text.secondary">
-                    Etage
-                  </Typography>
                 </Box>
               </Grid>
               <Grid xs={6} sm={3}>
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  p: 2, 
-                  borderRadius: 2, 
-                  backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
-                }}>
+                <Box sx={{ textAlign: 'center', p: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Aufzug</Typography>
                   {editMode ? (
                     <FormControlLabel
                       control={
                         <Switch
                           checked={editedCustomer.apartment?.hasElevator || false}
                           onChange={(e) => onFieldChange('apartment.hasElevator', e.target.checked)}
-                          color="success"
                         />
                       }
-                      label={editedCustomer.apartment?.hasElevator ? 'Ja' : 'Nein'}
+                      label=""
+                      sx={{ mt: 1 }}
                     />
                   ) : (
-                    <Chip
-                      icon={customer.apartment?.hasElevator ? <CheckIcon /> : <CrossIcon />}
-                      label={customer.apartment?.hasElevator ? 'Aufzug' : 'Kein Aufzug'}
-                      color={customer.apartment?.hasElevator ? 'success' : 'default'}
-                      sx={{ fontWeight: 600, width: '100%' }}
-                    />
+                    <Box sx={{ mt: 2 }}>
+                      {customer.apartment?.hasElevator ? (
+                        <CheckIcon fontSize="large" color="success" />
+                      ) : (
+                        <CrossIcon fontSize="large" color="error" />
+                      )}
+                    </Box>
                   )}
                 </Box>
               </Grid>
             </Grid>
+          </CardContent>
+        </AnimatedCard>
+      </Grid>
+
+      {/* Dienstleistungen */}
+      <Grid xs={12}>
+        <AnimatedCard
+          whileHover={!isMobile && !editMode ? { y: -4, boxShadow: theme.shadows[8] } : {}}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.3 }}
+          sx={{ position: 'relative' }}
+        >
+          <CardContent>
+            <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CheckIcon /> Dienstleistungen
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+              {customer.services && customer.services.length > 0 ? (
+                customer.services.map((service, index) => (
+                  <Chip 
+                    key={index} 
+                    label={service} 
+                    color="primary" 
+                    variant="outlined"
+                    sx={{ ...textStyle, borderWidth: 2 }}
+                  />
+                ))
+              ) : (
+                <Typography color="text.secondary" sx={textStyle}>
+                  Keine Dienstleistungen ausgewählt
+                </Typography>
+              )}
+            </Box>
           </CardContent>
         </AnimatedCard>
       </Grid>
@@ -372,43 +370,32 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
           whileHover={!isMobile && !editMode ? { y: -4, boxShadow: theme.shadows[8] } : {}}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.3 }}
+          sx={{ position: 'relative' }}
         >
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" color="primary">
                 Notizen
               </Typography>
-              {!editMode && onEditNotes && (
-                <IconButton 
-                  onClick={onEditNotes}
-                  color="primary"
-                  sx={{ 
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                    '&:hover': {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                    }
-                  }}
-                >
+              {onEditNotes && (
+                <IconButton onClick={onEditNotes} size="small" color="primary">
                   <EditIcon />
                 </IconButton>
               )}
             </Box>
-            {editMode ? (
-              <TextField
-                value={editedCustomer.notes || ''}
-                onChange={(e) => onFieldChange('notes', e.target.value)}
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={4}
-                placeholder="Notizen zum Kunden hinzufügen..."
-                autoFocus
-              />
-            ) : (
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                {customer.notes || 'Keine Notizen vorhanden'}
-              </Typography>
-            )}
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                ...textStyle,
+                whiteSpace: 'pre-wrap',
+                backgroundColor: alpha(theme.palette.action.hover, 0.04),
+                p: 2,
+                borderRadius: 1,
+                minHeight: 60
+              }}
+            >
+              {customer.notes || 'Keine Notizen vorhanden'}
+            </Typography>
           </CardContent>
         </AnimatedCard>
       </Grid>

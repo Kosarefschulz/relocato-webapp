@@ -36,6 +36,7 @@ import PWAInstallPrompt from './components/PWAInstallPrompt';
 import AdminToolsPage from './pages/AdminToolsPage';
 import EmailClient from './components/EmailClient';
 import { EmailTestDashboard } from './components/EmailTestDashboard';
+import VisibilityFix from './components/VisibilityFix';
 
 
 export const AuthContext = React.createContext<{
@@ -325,6 +326,7 @@ function App() {
 
   return (
     <ThemeProvider>
+      <VisibilityFix />
       <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
         <Router>
           <AppRoutes user={user} />
