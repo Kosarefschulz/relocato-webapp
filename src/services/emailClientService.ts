@@ -167,11 +167,37 @@ class EmailClientService {
         }
       }
       
-      // Fallback to Vercel API
+      // Fallback to Vercel API - try smart endpoint first
       const { auth } = await import('../config/firebase');
       const user = auth.currentUser;
       const idToken = user ? await user.getIdToken() : null;
       
+      // Try smart email service (with automatic fallback)
+      try {
+        const response = await fetch('/api/email-smart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken && { 'Authorization': `Bearer ${idToken}` })
+          },
+          body: JSON.stringify({
+            to: emailData.to,
+            subject: emailData.subject,
+            html: emailData.html,
+            text: emailData.html.replace(/<[^>]*>/g, '') // Simple HTML to text conversion
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`✅ Email sent via ${result.provider}`);
+          return result;
+        }
+      } catch (smartError) {
+        console.warn('Smart email service failed, trying legacy endpoint...', smartError);
+      }
+      
+      // Fallback to legacy endpoint
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {

@@ -35,6 +35,7 @@ import FailedEmailRecovery from './components/FailedEmailRecovery';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import AdminToolsPage from './pages/AdminToolsPage';
 import EmailClient from './components/EmailClient';
+import { EmailTestDashboard } from './components/EmailTestDashboard';
 
 
 export const AuthContext = React.createContext<{
@@ -222,6 +223,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/email-client" 
         element={user ? <EmailClient /> : <Navigate to="/login" />} 
+      />
+      
+      {/* Email Test Dashboard */}
+      <Route 
+        path="/email-test" 
+        element={user ? <EmailTestDashboard /> : <Navigate to="/login" />} 
       />
       
       {/* Default Route */}
