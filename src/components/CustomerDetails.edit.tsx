@@ -48,6 +48,7 @@ import RoutePlanner from './RoutePlanner';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import CustomerInfoDebug from './CustomerInfoDebug';
 import CustomerInfoSimple from './CustomerInfoSimple';
+import CustomerDataTester from './CustomerDataTester';
 
 const HeroSection = motion(Box);
 
@@ -130,9 +131,17 @@ const CustomerDetails: React.FC = () => {
     try {
       setLoading(true);
       
+      // Debug logging
+      console.log('🔍 CustomerDetails - Loading data for ID:', customerId);
+      
       // Lade Kundendaten
       const customersData = await googleSheetsService.getCustomers();
+      console.log('📊 Total customers loaded:', customersData.length);
+      console.log('🔍 Looking for customer with ID:', customerId);
+      console.log('📋 All customer IDs:', customersData.map(c => c.id));
+      
       const foundCustomer = customersData.find(c => c.id === customerId);
+      console.log('✅ Customer found:', foundCustomer);
       
       if (foundCustomer) {
         setCustomer(foundCustomer);
@@ -312,6 +321,9 @@ const CustomerDetails: React.FC = () => {
 
   return (
     <>
+      {/* Data Tester - Floating Debug Panel */}
+      <CustomerDataTester />
+      
       <Container maxWidth="lg" sx={{ mt: { xs: 0, md: 4 }, mb: { xs: 10, md: 4 }, px: { xs: 0, sm: 2 } }}>
         {/* Hero Section */}
         <HeroSection
