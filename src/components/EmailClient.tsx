@@ -363,7 +363,7 @@ const EmailClient: React.FC = () => {
     setRefreshing(true);
     try {
       // Sync emails from IONOS
-      const result = await emailClientService.syncEmails('INBOX', 50, true);
+      const result = await emailClientService.syncEmails('INBOX', 50);
       
       if (result && result.success) {
         showSnackbar(`${result.count || 0} E-Mails synchronisiert`, 'success');

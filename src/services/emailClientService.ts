@@ -57,14 +57,14 @@ class EmailClientService {
   /**
    * Sync emails from IONOS to Firebase
    */
-  async syncEmails(folder: string = 'INBOX', limit: number = 50, forceSync: boolean = false): Promise<SyncEmailsResult> {
+  async syncEmails(folder: string = 'INBOX', limit: number = 50): Promise<SyncEmailsResult> {
     try {
       console.log(`📧 Syncing emails from ${folder}...`);
       
       // Try Firebase function first
       if (!this.useVercelFallback) {
         try {
-          const result = await this.syncEmailsFunc({ folder, limit, forceSync });
+          const result = await this.syncEmailsFunc({ folder, limit });
           return result.data as SyncEmailsResult;
         } catch (firebaseError: any) {
           console.warn('Firebase function failed, trying Vercel fallback...', firebaseError);
@@ -78,7 +78,7 @@ class EmailClientService {
       const idToken = user ? await user.getIdToken() : null;
       
       // Try v2 endpoint first, fallback to v1
-      let response = await fetch(`/api/email-sync-v2?folder=${encodeURIComponent(folder)}&limit=${limit}&forceSync=${forceSync}`, {
+      let response = await fetch(`/api/email-sync-v2?folder=${encodeURIComponent(folder)}&limit=${limit}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
