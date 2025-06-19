@@ -49,6 +49,7 @@ import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import CustomerInfoDebug from './CustomerInfoDebug';
 import CustomerInfoSimple from './CustomerInfoSimple';
 import CustomerDataTester from './CustomerDataTester';
+import PlainTextCustomerInfo from './PlainTextCustomerInfo';
 
 const HeroSection = motion(Box);
 
@@ -139,8 +140,16 @@ const CustomerDetails: React.FC = () => {
       console.log('📊 Total customers loaded:', customersData.length);
       console.log('🔍 Looking for customer with ID:', customerId);
       console.log('📋 All customer IDs:', customersData.map(c => c.id));
+      console.log('📋 All customer numbers:', customersData.map(c => c.customerNumber));
       
-      const foundCustomer = customersData.find(c => c.id === customerId);
+      // Try to find by ID first, then by customerNumber
+      let foundCustomer = customersData.find(c => c.id === customerId);
+      
+      if (!foundCustomer) {
+        console.log('🔄 ID not found, trying customerNumber...');
+        foundCustomer = customersData.find(c => c.customerNumber === customerId);
+      }
+      
       console.log('✅ Customer found:', foundCustomer);
       
       if (foundCustomer) {
@@ -597,6 +606,7 @@ const CustomerDetails: React.FC = () => {
           <TabPanel value={tabValue} index={0}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
               {/* Debug Components with different approaches */}
+              <PlainTextCustomerInfo customer={customer} />
               <CustomerInfoDebug customer={customer} />
               <CustomerInfoSimple customer={customer} />
               
