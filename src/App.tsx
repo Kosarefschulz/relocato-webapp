@@ -28,6 +28,8 @@ import QuoteTemplateManager from './components/QuoteTemplateManager';
 import EmailTemplateManager from './components/EmailTemplateManager';
 import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
+// Import test utils for development
+import './utils/emailTestUtils';
 import EmailImportSettings from './components/EmailImportSettings';
 import FailedEmailRecovery from './components/FailedEmailRecovery';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
