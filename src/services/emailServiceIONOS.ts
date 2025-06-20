@@ -46,14 +46,19 @@ class IONOSEmailService {
   // Get folders
   async getFolders(): Promise<Folder[]> {
     try {
+      console.log('📁 Fetching folders...');
       const response = await fetch(`${this.baseUrl}/folders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
       
-      if (!response.ok) throw new Error('Failed to get folders');
+      if (!response.ok) {
+        console.error('❌ Folders API error:', response.status, response.statusText);
+        throw new Error('Failed to get folders');
+      }
       
       const data = await response.json();
+      console.log('📂 Folders API response:', data);
       // Map to Folder type with proper specialUse
       return (data.folders || []).map((folder: any) => ({
         name: folder.name,
@@ -75,26 +80,33 @@ class IONOSEmailService {
   // Get emails
   async getEmails(folder: string = 'INBOX', page: number = 1, limit: number = 50): Promise<{ emails: EmailType[], total: number }> {
     try {
+      console.log('📧 Fetching emails:', { folder, page, limit });
       const response = await fetch(`${this.baseUrl}/list`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ folder, page, limit })
       });
       
-      if (!response.ok) throw new Error('Failed to get emails');
+      if (!response.ok) {
+        console.error('❌ Email API error:', response.status, response.statusText);
+        throw new Error('Failed to get emails');
+      }
       
       const data = await response.json();
-      // Convert SimpleEmail to EmailType
-      const emails: EmailType[] = (data.emails || []).map((email: SimpleEmail) => ({
+      console.log('📬 Email API response:', data);
+      // Convert API response to EmailType
+      const emails: EmailType[] = (data.emails || []).map((email: any) => ({
         id: email.id,
         uid: email.id,
         folder: email.folder,
-        from: { address: email.from, name: email.from.split('@')[0] },
-        to: [{ address: email.to }],
+        from: email.from || { address: 'unknown@email.com', name: 'Unknown' },
+        to: email.to || [],
+        cc: email.cc || [],
         subject: email.subject || '',
         date: email.date,
-        text: email.body,
+        text: email.text || email.body,
         html: email.html,
+        snippet: email.snippet || '',
         flags: email.flags || [],
         attachments: email.attachments || []
       }));
@@ -129,12 +141,14 @@ class IONOSEmailService {
         id: email.id,
         uid: email.id,
         folder: email.folder,
-        from: { address: email.from, name: email.from.split('@')[0] },
-        to: [{ address: email.to }],
+        from: email.from || { address: 'unknown@email.com', name: 'Unknown' },
+        to: email.to || [],
+        cc: email.cc || [],
         subject: email.subject || '',
         date: email.date,
-        text: email.body,
+        text: email.text || email.body,
         html: email.html,
+        snippet: email.snippet || '',
         flags: email.flags || [],
         attachments: email.attachments || []
       };
