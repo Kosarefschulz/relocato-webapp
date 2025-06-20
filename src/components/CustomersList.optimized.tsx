@@ -133,7 +133,7 @@ const CustomersListOptimized: React.FC = () => {
       const result = await paginationService.loadInitialCustomers({
         pageSize: 100, // Load first 100 customers
         orderByField: 'createdAt',
-        orderDirection: 'desc'
+        orderDirection: 'desc' // Neueste Importe zuerst
       });
 
       setCustomers(result.data);
@@ -512,6 +512,15 @@ const CustomersListOptimized: React.FC = () => {
                         size="small"
                         sx={{ ml: 2 }}
                       />
+                      {customer.createdAt && (
+                        <Typography 
+                          variant="caption" 
+                          color="text.secondary"
+                          sx={{ ml: 'auto' }}
+                        >
+                          Importiert: {formatDate(customer.createdAt)}
+                        </Typography>
+                      )}
                     </Box>
                     
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 1 }}>
@@ -615,7 +624,7 @@ const CustomersListOptimized: React.FC = () => {
           <ListItemIcon>
             {sortBy === 'created' && (sortOrder === 'desc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />)}
           </ListItemIcon>
-          <ListItemText>Neueste zuerst</ListItemText>
+          <ListItemText>Import-Datum (Neueste zuerst)</ListItemText>
         </MenuItem>
         
         <MenuItem 

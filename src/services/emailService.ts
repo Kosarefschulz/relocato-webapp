@@ -179,4 +179,36 @@ class EmailService {
 
 const emailService = new EmailService();
 
-export const sendEmail = emailService.sendEmail.bind(emailService);
+export const sendEmail = async (emailData: EmailData): Promise<boolean> => {
+  try {
+    // Verwende direkt die IONOS API
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: emailData.to,
+        subject: emailData.subject,
+        content: emailData.content,
+        html: emailData.content,
+        attachments: emailData.attachments ? await processAttachments(emailData.attachments) : undefined,
+        bcc: 'bielefeld@relocato.de' // Kopie für Gesendet-Ordner
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      console.error('❌ E-Mail-Versand fehlgeschlagen:', errorData);
+      return false;
+    }
+    
+    const result = await response.json();
+    console.log('✅ E-Mail erfolgreich gesendet:', result);
+    return true;
+    
+  } catch (error) {
+    console.error('❌ E-Mail Fehler:', error);
+    return false;
+  }
+};

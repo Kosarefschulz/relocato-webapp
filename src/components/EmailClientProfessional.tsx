@@ -59,9 +59,8 @@ import {
 } from '@mui/icons-material';
 import EmailComposerProfessional from './EmailComposerProfessional';
 import EmailViewerProfessional from './EmailViewerProfessional';
-import { emailService } from '../services/emailServiceVercel';
-import { auth, db } from '../config/firebase';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { ionosEmailService as emailService } from '../services/emailServiceIONOS';
+// Firebase imports entfernt - nicht mehr benötigt
 import { Email, Folder, EmailFolder } from '../types/email';
 import { format, isToday, isYesterday } from 'date-fns';
 
@@ -102,43 +101,6 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
 
   // Load folders on mount
   useEffect(() => {
-    // Check and create user document if needed
-    const initializeUser = async () => {
-      if (auth.currentUser) {
-        try {
-          const userDocRef = doc(db, 'users', auth.currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (!userDoc.exists()) {
-            // Create user document with email access
-            await setDoc(userDocRef, {
-              uid: auth.currentUser.uid,
-              email: auth.currentUser.email,
-              displayName: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0],
-              photoURL: auth.currentUser.photoURL,
-              emailAccess: true, // Automatically grant email access
-              role: 'user',
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp(),
-              authProvider: auth.currentUser.providerData[0]?.providerId || 'password',
-              isActive: true
-            });
-            console.log('✅ User document created with email access');
-          } else if (!userDoc.data().emailAccess) {
-            // Update existing document to grant email access
-            await updateDoc(userDocRef, {
-              emailAccess: true,
-              updatedAt: serverTimestamp()
-            });
-            console.log('✅ Email access granted to existing user');
-          }
-        } catch (error) {
-          console.error('Error creating/updating user document:', error);
-        }
-      }
-    };
-    
-    initializeUser();
     loadFolders();
     setupWebSocket();
     
@@ -153,46 +115,10 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
     loadEmails();
   }, [selectedFolder, page]);
 
-  // Setup WebSocket for real-time updates
+  // Setup WebSocket for real-time updates (not used with IONOS)
   const setupWebSocket = () => {
-    emailService.on('email-new', (email: Email) => {
-      if (selectedFolder === 'INBOX') {
-        setEmails(prev => [email, ...prev]);
-        showSnackbar('New email received', 'info');
-      }
-    });
-
-    emailService.on('email-read', ({ id, folder }: { id: string; folder: string }) => {
-      if (folder === selectedFolder) {
-        setEmails(prev => prev.map(email => 
-          email.id === id ? { ...email, flags: [...email.flags, 'SEEN'] } : email
-        ));
-      }
-    });
-
-    emailService.on('email-starred', ({ id, folder, starred }: { id: string; folder: string; starred: boolean }) => {
-      if (folder === selectedFolder) {
-        setEmails(prev => prev.map(email => 
-          email.id === id 
-            ? { 
-                ...email, 
-                flags: starred 
-                  ? [...email.flags, 'FLAGGED'] 
-                  : email.flags.filter(f => f !== 'FLAGGED')
-              } 
-            : email
-        ));
-      }
-    });
-
-    emailService.on('email-deleted', ({ id, folder }: { id: string; folder: string }) => {
-      if (folder === selectedFolder) {
-        setEmails(prev => prev.filter(email => email.id !== id));
-        if (selectedEmail?.id === id) {
-          setSelectedEmail(null);
-        }
-      }
-    });
+    // IONOS service doesn't support real-time updates
+    // We'll rely on manual refresh instead
   };
 
   // Load folders
@@ -210,12 +136,7 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
   const loadEmails = async () => {
     try {
       setLoading(true);
-      const response = await emailService.getEmails({
-        folder: selectedFolder,
-        page,
-        limit: 50,
-        search: searchQuery
-      });
+      const response = await emailService.getEmails(selectedFolder, page, 50);
       
       if (page === 1) {
         setEmails(response.emails);
@@ -317,7 +238,7 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
   // Star/unstar email
   const handleStar = async (email: Email) => {
     const starred = !email.flags.includes('FLAGGED');
-    await emailService.starEmail(email.id, selectedFolder, starred);
+    await emailService.toggleStar(email.id, selectedFolder, starred);
   };
 
   // Delete emails

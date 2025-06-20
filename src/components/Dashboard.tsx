@@ -1,15 +1,12 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../App';
-import { Container, Paper, Typography, Button, Box, AppBar, Toolbar, IconButton, Avatar, Menu, MenuItem, Card, CardContent, useTheme } from '@mui/material';
+import { Container, Paper, Typography, Button, Box, AppBar, Toolbar, Card, CardContent, useTheme } from '@mui/material';
 import Grid from './GridCompat';
 import { 
   Search as SearchIcon, 
   Add as AddIcon,
-  Logout as LogoutIcon,
   Description as DescriptionIcon,
   People as PeopleIcon,
-  AccountCircle as AccountCircleIcon,
   Receipt as ReceiptIcon,
   CalendarMonth as CalendarIcon,
   Assignment as DispositionIcon,
@@ -24,27 +21,7 @@ import { motion } from 'framer-motion';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useContext(AuthContext);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const theme = useTheme();
-
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      handleClose();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
 
   const dashboardItems = [
     {
@@ -129,45 +106,6 @@ const Dashboard: React.FC = () => {
             
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <SyncStatus />
-              <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
-                {user?.email}
-              </Typography>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-                  {user?.email?.charAt(0).toUpperCase()}
-                </Avatar>
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose} disabled>
-                  <AccountCircleIcon sx={{ mr: 1 }} />
-                  {user?.email}
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <LogoutIcon sx={{ mr: 1 }} />
-                  Abmelden
-                </MenuItem>
-              </Menu>
             </Box>
           </Toolbar>
         </AppBar>

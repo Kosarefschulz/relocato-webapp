@@ -1,0 +1,41 @@
+[
+  {
+    "id": "AP7LhEMEGTa2OVjqeizCFVYw2co2",
+    "email": "test@relocato.de",
+    "displayName": "Test User",
+    "role": "admin",
+    "createdAt": "2025-06-19T19:57:55.161Z",
+    "permissions": {
+      "canCreateQuotes": true,
+      "canViewAllCustomers": true,
+      "canEditSettings": true,
+      "canManageUsers": true
+    }
+  },
+  {
+    "id": "DJkc40VZ5ieCyxzN202zwCjuNgw2",
+    "uid": "DJkc40VZ5ieCyxzN202zwCjuNgw2",
+    "email": "sergej.schulz92@gmail.com",
+    "displayName": "Sergej Schulz",
+    "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocKIOu5HSqGjk-yzeOWXMmFIQRkbrFbZWUNRHLMZ8luTfbB0AdMd=s96-c",
+    "emailAccess": true,
+    "role": "user",
+    "authProvider": "google.com",
+    "isActive": true,
+    "createdAt": "2025-06-20T11:01:19.000Z",
+    "updatedAt": "2025-06-20T11:01:19.000Z"
+  },
+  {
+    "id": "UUnsLWfqQBTZDKaQkRxo23qsI7R2",
+    "email": "admin@ruempel-schmiede.com",
+    "displayName": "Admin User",
+    "role": "admin",
+    "createdAt": "2025-06-19T20:09:08.510Z",
+    "permissions": {
+      "canCreateQuotes": true,
+      "canViewAllCustomers": true,
+      "canEditSettings": true,
+      "canManageUsers": true
+    }
+  }
+]

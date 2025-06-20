@@ -3,25 +3,21 @@ const Imap = require('imap');
 module.exports = async (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Auth check
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // No auth check for now - we're using dummy auth
 
-    const { id, folder = 'INBOX' } = req.body;
+    const { id, folder = 'INBOX' } = req.method === 'GET' ? req.query : req.body;
     
     if (!id) {
       return res.status(400).json({ error: 'Email ID is required' });
@@ -30,7 +26,7 @@ module.exports = async (req, res) => {
     // IMAP Configuration
     const imapConfig = {
       user: process.env.IONOS_EMAIL || 'bielefeld@relocato.de',
-      password: process.env.IONOS_PASSWORD || 'Bicm1308!',
+      password: process.env.IONOS_PASSWORD || 'Bicm1308',
       host: process.env.IONOS_IMAP_HOST || 'imap.ionos.de',
       port: 993,
       tls: true,

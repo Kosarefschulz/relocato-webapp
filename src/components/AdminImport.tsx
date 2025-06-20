@@ -23,6 +23,8 @@ const AdminImport: React.FC = () => {
   const [startFrom, setStartFrom] = useState(0);
   const [progress, setProgress] = useState(0);
   const [tabValue, setTabValue] = useState(0);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -39,40 +41,42 @@ const AdminImport: React.FC = () => {
     setProgress(0);
 
     try {
-      addLog('🚀 Starte Single-Batch E-Mail-Import...');
-      addLog(`📦 Importiere E-Mails ${startFrom} bis ${startFrom + batchSize}...`);
+      addLog('🚀 Starte E-Mail-Import (ALLE E-Mails)...');
       
       // Analytics: Import started
       analytics.trackImportStarted(batchSize);
       
-      // Verwende importAllEmails für korrektes Batch-Handling
-      const response = await fetch(
-        `https://europe-west1-umzugsapp.cloudfunctions.net/importAllEmails?batchSize=${batchSize}&startFrom=${startFrom}&skipExisting=true`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // Verwende neue Import-Funktion die ALLE E-Mails importiert
+      const response = await fetch('/api/import-all-emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          skipDuplicates: true, // Überspringe Duplikate
+          dateFrom: dateFrom || undefined,
+          dateTo: dateTo || undefined
+        })
+      });
 
       const result = await response.json();
       
       if (result.success) {
         addLog(`✅ Import abgeschlossen:`);
-        addLog(`   - ${result.imported || 0} neue Kunden importiert`);
-        addLog(`   - ${result.skipped || 0} existierende übersprungen`);
-        addLog(`   - ${result.failed || 0} fehlgeschlagen`);
+        addLog(`   - ${result.totalEmails || 0} E-Mails gefunden`);
+        addLog(`   - ${result.newCustomers || 0} neue Kunden importiert`);
+        addLog(`   - ${result.duplicates || 0} Duplikate übersprungen`);
+        addLog(`   - ${result.errors || 0} Fehler`);
         
         setStats({
-          total: result.total || 0,
-          imported: result.imported || 0,
-          failed: result.failed || 0,
-          skipped: result.skipped || 0
+          total: result.totalEmails || 0,
+          imported: result.newCustomers || 0,
+          failed: result.errors || 0,
+          skipped: result.duplicates || 0
         });
         
         // Analytics: Import completed
-        analytics.trackImportCompleted(result.imported || 0);
+        analytics.trackImportCompleted(result.newCustomers || 0);
       } else {
         addLog(`❌ Fehler: ${result.error || 'Unbekannter Fehler'}`);
       }
@@ -265,6 +269,30 @@ const AdminImport: React.FC = () => {
                   onChange={(e) => setStartFrom(parseInt(e.target.value) || 0)}
                   disabled={importing}
                   helperText="Von welcher E-Mail-Nummer starten"
+                  sx={{ mb: 2 }}
+                />
+                
+                <TextField
+                  fullWidth
+                  label="Von Datum"
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  disabled={importing}
+                  InputLabelProps={{ shrink: true }}
+                  helperText="Nur E-Mails ab diesem Datum"
+                  sx={{ mb: 2 }}
+                />
+                
+                <TextField
+                  fullWidth
+                  label="Bis Datum"
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  disabled={importing}
+                  InputLabelProps={{ shrink: true }}
+                  helperText="Nur E-Mails bis zu diesem Datum"
                   sx={{ mb: 3 }}
                 />
                 

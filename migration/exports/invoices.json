@@ -1,0 +1,24 @@
+[
+  {
+    "id": "local_invoice_1749828002341_xwhcax1j2",
+    "quoteId": "local_quote_1749826511150_vz6gbpwox",
+    "customerId": "csv_3",
+    "customerName": "Sergej Schulz",
+    "invoiceNumber": "RE-202506-092",
+    "price": 2149,
+    "taxAmount": 408.31,
+    "totalPrice": 2557.31,
+    "items": [
+      {
+        "description": "Umzugsdienstleistung gemäß Angebot local_quote_1749826511150_vz6gbpwox",
+        "quantity": 1,
+        "unitPrice": 2149,
+        "totalPrice": 2149
+      }
+    ],
+    "dueDate": "2025-06-27T15:20:02.000Z",
+    "status": "sent",
+    "createdAt": "2025-06-18T13:22:41.000Z",
+    "updatedAt": "2025-06-18T13:22:41.000Z"
+  }
+]

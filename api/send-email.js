@@ -2,8 +2,20 @@
 // Diese Funktion sendet E-Mails über SMTP
 
 const nodemailer = require('nodemailer');
+const admin = require('firebase-admin');
 
-const db = admin.firestore();
+// Initialize Firebase Admin if not already initialized
+if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
+  if (serviceAccount.project_id) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID
+    });
+  }
+}
+
+const db = admin.apps.length > 0 ? admin.firestore() : null;
 
 export default async function handler(req, res) {
   // CORS Headers
@@ -26,13 +38,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { to, subject, html, cc, bcc, replyTo, attachments } = req.body;
+    const { to, subject, content, html, cc, bcc, replyTo, attachments } = req.body;
+    
+    // Support both 'content' and 'html' for backwards compatibility
+    const emailHtml = html || content;
 
     // Validate required fields
-    if (!to || !subject || !html) {
+    if (!to || !subject || !emailHtml) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: to, subject, html'
+        error: 'Missing required fields: to, subject, content/html'
       });
     }
 
@@ -60,10 +75,10 @@ export default async function handler(req, res) {
       from: `"Relocato Bielefeld" <${emailUser}>`,
       to,
       subject,
-      html,
+      html: emailHtml,
       cc,
       bcc,
-      replyTo: replyTo || process.env.IONOS_EMAIL_USER || 'bielefeld@relocato.de',
+      replyTo: replyTo || emailUser || 'bielefeld@relocato.de',
       attachments: attachments?.map(att => ({
         filename: att.filename,
         content: att.content,
@@ -75,15 +90,9 @@ export default async function handler(req, res) {
     const info = await transporter.sendMail(mailOptions);
     console.log('✅ Email sent successfully:', info.messageId);
 
-    // Store sent email in Firestore if we have authentication
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const idToken = authHeader.split('Bearer ')[1];
+    // Store sent email in Firestore if database is available
+    if (db) {
       try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const userId = decodedToken.uid;
-        
-        // Store sent email
         await db.collection('emailClient').add({
           folder: 'Sent',
           from: mailOptions.from,
@@ -91,13 +100,12 @@ export default async function handler(req, res) {
           cc,
           bcc,
           subject,
-          html,
+          html: emailHtml,
           sentAt: admin.firestore.FieldValue.serverTimestamp(),
-          userId,
           messageId: info.messageId
         });
-      } catch (authError) {
-        console.log('Auth verification failed, skipping Firestore storage:', authError.message);
+      } catch (dbError) {
+        console.log('Failed to store email in Firestore:', dbError.message);
       }
     }
     

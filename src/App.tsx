@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CircularProgress, Box } from '@mui/material';
-import { User } from 'firebase/auth';
+import { User } from './services/authService';
 import { authService } from './services/authService';
 import { usePageTracking } from './hooks/useAnalytics';
 import { autoSyncService } from './services/autoSyncService';
@@ -38,6 +38,7 @@ import EmailClientWrapper from './components/EmailClientWrapper';
 import { EmailTestDashboard } from './components/EmailTestDashboard';
 import VisibilityFix from './components/VisibilityFix';
 import EmailDebugger from './components/EmailDebugger';
+import EmailTestIONOS from './components/EmailTestIONOS';
 
 
 export const AuthContext = React.createContext<{
@@ -61,92 +62,92 @@ function AppRoutes({ user }: { user: User | null }) {
 
   return (
     <Routes>
-      {/* Login Route */}
+      {/* Login Route - Redirect to dashboard */}
       <Route 
         path="/login" 
-        element={!user ? <Login /> : <Navigate to="/dashboard" />} 
+        element={<Navigate to="/dashboard" />} 
       />
 
       {/* Search Customer for Quote Creation */}
       <Route 
         path="/search-customer" 
-        element={user ? <CustomerSearch /> : <Navigate to="/login" />} 
+        element={<CustomerSearch />} 
       />
       
       {/* Create Quote */}
       <Route 
         path="/create-quote" 
-        element={user ? <CreateQuote /> : <Navigate to="/login" />} 
+        element={<CreateQuote />} 
       />
       <Route 
         path="/create-quote/:customerId" 
-        element={user ? <CreateQuote /> : <Navigate to="/login" />} 
+        element={<CreateQuote />} 
       />
       
       {/* Create New Customer */}
       <Route 
         path="/new-customer" 
-        element={user ? <NewCustomer /> : <Navigate to="/login" />} 
+        element={<NewCustomer />} 
       />
       
       {/* Dashboard */}
       <Route 
         path="/dashboard" 
-        element={user ? <Dashboard /> : <Navigate to="/login" />} 
+        element={<Dashboard />} 
       />
       
       {/* Customer List */}
       <Route 
         path="/customers" 
-        element={user ? <CustomersList /> : <Navigate to="/login" />} 
+        element={<CustomersList />} 
       />
       
       {/* Customer Details */}
       <Route 
         path="/customer/:id" 
-        element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
+        element={<CustomerDetails />} 
       />
       <Route 
         path="/customer-details/:customerId" 
-        element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
+        element={<CustomerDetails />} 
       />
       <Route 
         path="/edit-customer/:customerId" 
-        element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
+        element={<CustomerDetails />} 
       />
       <Route 
         path="/customers/:customerId" 
-        element={user ? <CustomerDetails /> : <Navigate to="/login" />} 
+        element={<CustomerDetails />} 
       />
       
       {/* Quotes List */}
       <Route 
         path="/quotes" 
-        element={user ? <QuotesList /> : <Navigate to="/login" />} 
+        element={<QuotesList />} 
       />
       
       {/* Invoices List */}
       <Route 
         path="/invoices" 
-        element={user ? <InvoicesList /> : <Navigate to="/login" />} 
+        element={<InvoicesList />} 
       />
       
       {/* Sales Page */}
       <Route 
         path="/sales" 
-        element={user ? <SalesPage /> : <Navigate to="/login" />} 
+        element={<SalesPage />} 
       />
       
       {/* Calendar View */}
       <Route 
         path="/calendar" 
-        element={user ? <CalendarView /> : <Navigate to="/login" />} 
+        element={<CalendarView />} 
       />
       
       {/* Disposition */}
       <Route 
         path="/disposition" 
-        element={user ? <DispositionPage /> : <Navigate to="/login" />} 
+        element={<DispositionPage />} 
       />
       
       {/* Share Page (Public Route) */}
@@ -156,109 +157,105 @@ function AppRoutes({ user }: { user: User | null }) {
       {/* Migration Tool */}
       <Route 
         path="/migration" 
-        element={user ? <MigrationTool /> : <Navigate to="/login" />} 
+        element={<MigrationTool />} 
       />
       
       {/* Admin Import Tool */}
       <Route 
         path="/admin-import" 
-        element={user ? <AdminImport /> : <Navigate to="/login" />} 
+        element={<AdminImport />} 
       />
       
       {/* Photo Gallery */}
       <Route 
         path="/photos" 
-        element={user ? <PhotoGallery /> : <Navigate to="/login" />} 
+        element={<PhotoGallery />} 
       />
       <Route 
         path="/gallery" 
-        element={user ? <PhotoGallery /> : <Navigate to="/login" />} 
+        element={<PhotoGallery />} 
       />
       
       {/* Analytics Dashboard */}
       <Route 
         path="/analytics" 
-        element={user ? <AnalyticsDashboard /> : <Navigate to="/login" />} 
+        element={<AnalyticsDashboard />} 
       />
       
       {/* Quote Templates */}
       <Route 
         path="/templates" 
-        element={user ? <QuoteTemplateManager /> : <Navigate to="/login" />} 
+        element={<QuoteTemplateManager />} 
       />
       
       <Route 
         path="/email-templates" 
-        element={user ? <EmailTemplateManager /> : <Navigate to="/login" />} 
+        element={<EmailTemplateManager />} 
       />
       
       <Route 
         path="/follow-ups" 
-        element={user ? <FollowUpManager /> : <Navigate to="/login" />} 
+        element={<FollowUpManager />} 
       />
       
       {/* Email Import Monitor */}
       <Route 
         path="/import-monitor" 
-        element={user ? <EmailImportMonitor /> : <Navigate to="/login" />} 
+        element={<EmailImportMonitor />} 
       />
       
       {/* Email Import Settings */}
       <Route 
         path="/import-settings" 
-        element={user ? <EmailImportSettings /> : <Navigate to="/login" />} 
+        element={<EmailImportSettings />} 
       />
       
       {/* Failed Email Recovery */}
       <Route 
         path="/failed-email-recovery" 
-        element={user ? <FailedEmailRecovery /> : <Navigate to="/login" />} 
+        element={<FailedEmailRecovery />} 
       />
       
       {/* Admin Tools */}
       <Route 
         path="/admin-tools" 
-        element={user ? <AdminToolsPage /> : <Navigate to="/login" />} 
+        element={<AdminToolsPage />} 
       />
       
       {/* Email Client */}
       <Route 
         path="/email-client" 
-        element={user ? <EmailClientWrapper /> : <Navigate to="/login" />} 
+        element={<EmailClientWrapper />} 
       />
       <Route 
         path="/email" 
-        element={user ? <EmailClientWrapper /> : <Navigate to="/login" />} 
+        element={<EmailClientWrapper />} 
       />
       
       {/* Email Test Dashboard */}
       <Route 
         path="/email-test" 
-        element={user ? <EmailTestDashboard /> : <Navigate to="/login" />} 
+        element={<EmailTestDashboard />} 
+      />
+      
+      {/* IONOS Email Test */}
+      <Route 
+        path="/email-test-ionos" 
+        element={<EmailTestIONOS />} 
       />
       
       {/* Default Route */}
       <Route 
         path="/" 
-        element={<Navigate to={user ? "/dashboard" : "/login"} />} 
+        element={<Navigate to="/dashboard" />} 
       />
     </Routes>
   );
 }
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState<string>('');
-
-  useEffect(() => {
-    const unsubscribe = authService.onAuthStateChange((user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  // Dummy user - immer eingeloggt
+  const user = { uid: 'dummy-user', email: 'user@example.com', displayName: 'User' } as User;
 
   // Automatische Synchronisation beim App-Start
   useEffect(() => {
@@ -277,57 +274,26 @@ function App() {
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      setAuthError('');
-      await authService.login({ email, password });
-    } catch (error: any) {
-      setAuthError(error.message);
-      throw error;
-    }
+    // Dummy login
+    await authService.login({ email, password });
   };
 
   const logout = async () => {
-    try {
-      await authService.logout();
-    } catch (error: any) {
-      console.error('Logout error:', error);
-    }
+    // Dummy logout
+    await authService.logout();
   };
 
   const resetPassword = async (email: string) => {
-    try {
-      setAuthError('');
-      await authService.resetPassword(email);
-    } catch (error: any) {
-      setAuthError(error.message);
-      throw error;
-    }
+    // Dummy reset
+    await authService.resetPassword(email);
   };
 
   const loginWithGoogle = async () => {
-    try {
-      setAuthError('');
-      await authService.signInWithGoogle();
-    } catch (error: any) {
-      setAuthError(error.message);
-      throw error;
-    }
+    // Dummy Google login
+    await authService.signInWithGoogle();
   };
 
-  if (loading) {
-    return (
-      <ThemeProvider>
-        <Box 
-          display="flex" 
-          justifyContent="center" 
-          alignItems="center" 
-          minHeight="100vh"
-        >
-          <CircularProgress size={60} />
-        </Box>
-      </ThemeProvider>
-    );
-  }
+  // Loading State entfernt - nicht mehr nötig
 
   return (
     <ThemeProvider>

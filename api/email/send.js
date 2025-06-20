@@ -15,11 +15,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Auth check
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // No auth check for now - we're using dummy auth
 
     // Get email data from request body
     const { to, cc, bcc, subject, text, html, attachments, replyTo } = req.body;
@@ -35,7 +31,7 @@ module.exports = async (req, res) => {
       secure: false, // true for 465, false for other ports
       auth: {
         user: process.env.IONOS_EMAIL || 'bielefeld@relocato.de',
-        pass: process.env.IONOS_PASSWORD || 'Bicm1308!'
+        pass: process.env.IONOS_PASSWORD || 'Bicm1308'
       },
       tls: {
         rejectUnauthorized: false

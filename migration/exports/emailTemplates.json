@@ -1,0 +1,238 @@
+[
+  {
+    "id": "138qc0xo5sNSoawHiBJz",
+    "createdBy": "system",
+    "name": "Rechnung versenden",
+    "updatedAt": "2025-06-17T09:16:11.000Z",
+    "attachmentTypes": [
+      "invoice_pdf"
+    ],
+    "variables": [
+      "customerName",
+      "invoiceNumber",
+      "currentDate",
+      "quotePrice",
+      "companyName",
+      "companyPhone",
+      "companyEmail"
+    ],
+    "category": "invoice",
+    "subject": "Ihre Rechnung von {{companyName}} - {{invoiceNumber}}",
+    "content": "Sehr geehrte/r {{customerName}},\n\nanbei erhalten Sie Ihre Rechnung für den durchgeführten Umzug.\n\n**Rechnungsdetails:**\n- Rechnungsnummer: {{invoiceNumber}}\n- Rechnungsdatum: {{currentDate}}\n- Gesamtbetrag: {{quotePrice}}\n\nBitte überweisen Sie den Betrag innerhalb von 14 Tagen auf unser Konto.\n\nVielen Dank für Ihr Vertrauen!\n\nMit freundlichen Grüßen\n{{companyName}}\n\nTel: {{companyPhone}}\nE-Mail: {{companyEmail}}",
+    "isActive": true,
+    "isSystem": true,
+    "createdAt": "2025-06-17T09:16:11.000Z",
+    "description": "Standard-Vorlage für den Versand von Rechnungen"
+  },
+  {
+    "id": "7Vni5sYbrEUNnvpw2C8O",
+    "isSystem": true,
+    "content": "Sehr geehrte/r {{customerName}},\n\nvor einigen Tagen haben wir Ihnen ein Angebot für Ihren geplanten Umzug zugesandt.\n\nGerne möchten wir nachfragen, ob Sie noch Fragen zu unserem Angebot haben oder weitere Informationen benötigen.\n\nWir stehen Ihnen für ein persönliches Gespräch gerne zur Verfügung und können das Angebot auch an Ihre individuellen Wünsche anpassen.\n\nSie erreichen uns unter {{companyPhone}} oder per E-Mail an {{companyEmail}}.\n\nWir freuen uns auf Ihre Rückmeldung!\n\nMit freundlichen Grüßen\n{{employeeName}}\n{{companyName}}",
+    "createdBy": "system",
+    "category": "follow_up",
+    "description": "Nachfass-E-Mail nach Angebotsversand",
+    "isActive": true,
+    "subject": "Rückfrage zu Ihrem Umzugsangebot",
+    "updatedAt": "2025-06-17T09:16:11.000Z",
+    "name": "Follow-Up nach Angebot",
+    "createdAt": "2025-06-17T09:16:11.000Z",
+    "variables": [
+      "customerName",
+      "companyPhone",
+      "companyEmail",
+      "employeeName",
+      "companyName"
+    ]
+  },
+  {
+    "id": "HdfAHJveR6vXKp7rL8qt",
+    "createdAt": "2025-06-17T09:16:10.000Z",
+    "isActive": true,
+    "name": "Angebot versenden",
+    "attachmentTypes": [
+      "quote_pdf"
+    ],
+    "createdBy": "system",
+    "content": "Sehr geehrte/r {{customerName}},\n\nvielen Dank für Ihre Anfrage. Anbei erhalten Sie Ihr persönliches Umzugsangebot.\n\n**Details Ihres Umzugs:**\n- Umzugsdatum: {{moveDate}}\n- Von: {{fromAddress}}\n- Nach: {{toAddress}}\n- Gesamtpreis: {{quotePrice}}\n\nIhr Angebot ist gültig bis: {{quoteValidUntil}}\n\nBei Fragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen\n{{employeeName}}\n{{companyName}}\n\nTel: {{companyPhone}}\nE-Mail: {{companyEmail}}",
+    "updatedAt": "2025-06-17T09:16:10.000Z",
+    "variables": [
+      "customerName",
+      "moveDate",
+      "fromAddress",
+      "toAddress",
+      "quotePrice",
+      "quoteValidUntil",
+      "employeeName",
+      "companyName",
+      "companyPhone",
+      "companyEmail"
+    ],
+    "isSystem": true,
+    "subject": "Ihr Umzugsangebot von {{companyName}}",
+    "category": "quote",
+    "description": "Standard-Vorlage für den Versand von Umzugsangeboten"
+  },
+  {
+    "id": "KN068oBYclw7M6SaLJZE",
+    "variables": [
+      "customerName",
+      "invoiceNumber",
+      "currentDate",
+      "quotePrice",
+      "companyName",
+      "companyPhone",
+      "companyEmail"
+    ],
+    "content": "Sehr geehrte/r {{customerName}},\n\nanbei erhalten Sie Ihre Rechnung für den durchgeführten Umzug.\n\n**Rechnungsdetails:**\n- Rechnungsnummer: {{invoiceNumber}}\n- Rechnungsdatum: {{currentDate}}\n- Gesamtbetrag: {{quotePrice}}\n\nBitte überweisen Sie den Betrag innerhalb von 14 Tagen auf unser Konto.\n\nVielen Dank für Ihr Vertrauen!\n\nMit freundlichen Grüßen\n{{companyName}}\n\nTel: {{companyPhone}}\nE-Mail: {{companyEmail}}",
+    "createdBy": "system",
+    "description": "Standard-Vorlage für den Versand von Rechnungen",
+    "subject": "Ihre Rechnung von {{companyName}} - {{invoiceNumber}}",
+    "isSystem": true,
+    "attachmentTypes": [
+      "invoice_pdf"
+    ],
+    "isActive": true,
+    "updatedAt": "2025-06-17T09:16:11.000Z",
+    "category": "invoice",
+    "name": "Rechnung versenden",
+    "createdAt": "2025-06-17T09:16:11.000Z"
+  },
+  {
+    "id": "OucsUUmhrTjkHoj5RAIJ",
+    "name": "Erinnerung Umzugstermin",
+    "updatedAt": "2025-06-17T09:16:11.000Z",
+    "isActive": true,
+    "description": "Erinnerung an bevorstehenden Umzugstermin",
+    "subject": "Erinnerung: Ihr Umzug am {{moveDate}}",
+    "createdBy": "system",
+    "isSystem": true,
+    "variables": [
+      "customerName",
+      "moveDate",
+      "fromAddress",
+      "toAddress",
+      "companyPhone",
+      "companyName"
+    ],
+    "content": "Sehr geehrte/r {{customerName}},\n\nwir möchten Sie daran erinnern, dass Ihr Umzug am {{moveDate}} stattfindet.\n\n**Wichtige Informationen:**\n- Startzeit: 8:00 Uhr\n- Startadresse: {{fromAddress}}\n- Zieladresse: {{toAddress}}\n\n**Bitte denken Sie daran:**\n- Alle Kartons sollten gepackt und beschriftet sein\n- Wertgegenstände separat transportieren\n- Parkplätze für den Umzugswagen freihalten\n\nBei Fragen erreichen Sie uns unter {{companyPhone}}.\n\nWir freuen uns auf einen reibungslosen Umzug!\n\nMit freundlichen Grüßen\n{{companyName}}",
+    "createdAt": "2025-06-17T09:16:11.000Z",
+    "category": "reminder"
+  },
+  {
+    "id": "fc5q1EKqoLIhD9CUv28A",
+    "createdAt": "2025-06-17T09:16:11.000Z",
+    "name": "Bestätigung Umzugstermin",
+    "subject": "Bestätigung: Ihr Umzugstermin am {{moveDate}}",
+    "description": "Bestätigung eines vereinbarten Umzugstermins",
+    "createdBy": "system",
+    "variables": [
+      "customerName",
+      "moveDate",
+      "fromAddress",
+      "toAddress",
+      "quoteNumber",
+      "employeeName",
+      "companyName",
+      "companyPhone",
+      "companyEmail"
+    ],
+    "category": "confirmation",
+    "isSystem": true,
+    "content": "Sehr geehrte/r {{customerName}},\n\nhiermit bestätigen wir Ihren Umzugstermin:\n\n**Terminbestätigung:**\n- Datum: {{moveDate}}\n- Startzeit: 8:00 Uhr\n- Von: {{fromAddress}}\n- Nach: {{toAddress}}\n- Angebotsnummer: {{quoteNumber}}\n\nUnser Team wird pünktlich bei Ihnen sein. \n\nSollten Sie noch Fragen haben oder Änderungen vornehmen müssen, kontaktieren Sie uns bitte umgehend.\n\nMit freundlichen Grüßen\n{{employeeName}}\n{{companyName}}\n\nTel: {{companyPhone}}\nE-Mail: {{companyEmail}}",
+    "isActive": true,
+    "updatedAt": "2025-06-17T09:16:11.000Z"
+  },
+  {
+    "id": "hhiHxi6v41CNorrof2bZ",
+    "variables": [
+      "customerName",
+      "companyPhone",
+      "companyEmail",
+      "employeeName",
+      "companyName"
+    ],
+    "description": "Nachfass-E-Mail nach Angebotsversand",
+    "updatedAt": "2025-06-17T09:16:11.000Z",
+    "subject": "Rückfrage zu Ihrem Umzugsangebot",
+    "createdAt": "2025-06-17T09:16:11.000Z",
+    "name": "Follow-Up nach Angebot",
+    "content": "Sehr geehrte/r {{customerName}},\n\nvor einigen Tagen haben wir Ihnen ein Angebot für Ihren geplanten Umzug zugesandt.\n\nGerne möchten wir nachfragen, ob Sie noch Fragen zu unserem Angebot haben oder weitere Informationen benötigen.\n\nWir stehen Ihnen für ein persönliches Gespräch gerne zur Verfügung und können das Angebot auch an Ihre individuellen Wünsche anpassen.\n\nSie erreichen uns unter {{companyPhone}} oder per E-Mail an {{companyEmail}}.\n\nWir freuen uns auf Ihre Rückmeldung!\n\nMit freundlichen Grüßen\n{{employeeName}}\n{{companyName}}",
+    "isActive": true,
+    "createdBy": "system",
+    "category": "follow_up",
+    "isSystem": true
+  },
+  {
+    "id": "nGeoRas59UYo2GgEh3uu",
+    "name": "Erinnerung Umzugstermin",
+    "category": "reminder",
+    "variables": [
+      "customerName",
+      "moveDate",
+      "fromAddress",
+      "toAddress",
+      "companyPhone",
+      "companyName"
+    ],
+    "description": "Erinnerung an bevorstehenden Umzugstermin",
+    "updatedAt": "2025-06-17T09:16:11.000Z",
+    "subject": "Erinnerung: Ihr Umzug am {{moveDate}}",
+    "isActive": true,
+    "createdAt": "2025-06-17T09:16:11.000Z",
+    "createdBy": "system",
+    "content": "Sehr geehrte/r {{customerName}},\n\nwir möchten Sie daran erinnern, dass Ihr Umzug am {{moveDate}} stattfindet.\n\n**Wichtige Informationen:**\n- Startzeit: 8:00 Uhr\n- Startadresse: {{fromAddress}}\n- Zieladresse: {{toAddress}}\n\n**Bitte denken Sie daran:**\n- Alle Kartons sollten gepackt und beschriftet sein\n- Wertgegenstände separat transportieren\n- Parkplätze für den Umzugswagen freihalten\n\nBei Fragen erreichen Sie uns unter {{companyPhone}}.\n\nWir freuen uns auf einen reibungslosen Umzug!\n\nMit freundlichen Grüßen\n{{companyName}}",
+    "isSystem": true
+  },
+  {
+    "id": "uUXBWnliJFDhm3w9IvWj",
+    "isActive": true,
+    "isSystem": true,
+    "content": "Sehr geehrte/r {{customerName}},\n\nhiermit bestätigen wir Ihren Umzugstermin:\n\n**Terminbestätigung:**\n- Datum: {{moveDate}}\n- Startzeit: 8:00 Uhr\n- Von: {{fromAddress}}\n- Nach: {{toAddress}}\n- Angebotsnummer: {{quoteNumber}}\n\nUnser Team wird pünktlich bei Ihnen sein. \n\nSollten Sie noch Fragen haben oder Änderungen vornehmen müssen, kontaktieren Sie uns bitte umgehend.\n\nMit freundlichen Grüßen\n{{employeeName}}\n{{companyName}}\n\nTel: {{companyPhone}}\nE-Mail: {{companyEmail}}",
+    "createdBy": "system",
+    "variables": [
+      "customerName",
+      "moveDate",
+      "fromAddress",
+      "toAddress",
+      "quoteNumber",
+      "employeeName",
+      "companyName",
+      "companyPhone",
+      "companyEmail"
+    ],
+    "category": "confirmation",
+    "description": "Bestätigung eines vereinbarten Umzugstermins",
+    "updatedAt": "2025-06-17T09:16:11.000Z",
+    "name": "Bestätigung Umzugstermin",
+    "subject": "Bestätigung: Ihr Umzugstermin am {{moveDate}}",
+    "createdAt": "2025-06-17T09:16:11.000Z"
+  },
+  {
+    "id": "zL9wdteHAXcn9zfnXoSo",
+    "subject": "Ihr Umzugsangebot von {{companyName}}",
+    "updatedAt": "2025-06-17T09:16:10.000Z",
+    "attachmentTypes": [
+      "quote_pdf"
+    ],
+    "isSystem": true,
+    "name": "Angebot versenden",
+    "content": "Sehr geehrte/r {{customerName}},\n\nvielen Dank für Ihre Anfrage. Anbei erhalten Sie Ihr persönliches Umzugsangebot.\n\n**Details Ihres Umzugs:**\n- Umzugsdatum: {{moveDate}}\n- Von: {{fromAddress}}\n- Nach: {{toAddress}}\n- Gesamtpreis: {{quotePrice}}\n\nIhr Angebot ist gültig bis: {{quoteValidUntil}}\n\nBei Fragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen\n{{employeeName}}\n{{companyName}}\n\nTel: {{companyPhone}}\nE-Mail: {{companyEmail}}",
+    "category": "quote",
+    "createdBy": "system",
+    "createdAt": "2025-06-17T09:16:10.000Z",
+    "isActive": true,
+    "description": "Standard-Vorlage für den Versand von Umzugsangeboten",
+    "variables": [
+      "customerName",
+      "moveDate",
+      "fromAddress",
+      "toAddress",
+      "quotePrice",
+      "quoteValidUntil",
+      "employeeName",
+      "companyName",
+      "companyPhone",
+      "companyEmail"
+    ]
+  }
+]

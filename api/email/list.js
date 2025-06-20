@@ -11,26 +11,23 @@ module.exports = async (req, res) => {
     return res.status(204).end();
   }
 
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Auth check
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // No auth check for now - we're using dummy auth
 
-    // Get query parameters
-    const { folder = 'INBOX', page = 1, limit = 50, search } = req.query;
+    // Get parameters from query or body
+    const params = req.method === 'POST' ? req.body : req.query;
+    const { folder = 'INBOX', page = 1, limit = 50, search } = params;
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
 
     // IMAP Configuration
     const imapConfig = {
       user: process.env.IONOS_EMAIL || 'bielefeld@relocato.de',
-      password: process.env.IONOS_PASSWORD || 'Bicm1308!',
+      password: process.env.IONOS_PASSWORD || 'Bicm1308',
       host: process.env.IONOS_IMAP_HOST || 'imap.ionos.de',
       port: 993,
       tls: true,
