@@ -110,6 +110,7 @@ const CustomerDetails: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [routePlannerOpen, setRoutePlannerOpen] = useState(false);
+  const [linkedEmailsCount, setLinkedEmailsCount] = useState(0);
 
   // E-Mail-Statistiken für Tab-Counter
   const emailStats = React.useMemo(() => {
@@ -119,6 +120,30 @@ const CustomerDetails: React.FC = () => {
     } catch {
       return { totalMessages: 0, sentMessages: 0, receivedMessages: 0, activeThreads: 0 };
     }
+  }, [customer?.id]);
+
+  // Load linked emails count
+  useEffect(() => {
+    const loadLinkedEmailsCount = async () => {
+      if (!customer?.id) return;
+      
+      try {
+        const { collection, query, where, getDocs } = await import('firebase/firestore');
+        const { db } = await import('../config/firebase');
+        
+        const linksQuery = query(
+          collection(db, 'emailCustomerLinks'),
+          where('customerId', '==', customer.id)
+        );
+        
+        const snapshot = await getDocs(linksQuery);
+        setLinkedEmailsCount(snapshot.size);
+      } catch (err) {
+        console.error('Error loading linked emails count:', err);
+      }
+    };
+    
+    loadLinkedEmailsCount();
   }, [customer?.id]);
 
   const navigateBack = useCallback(() => {
@@ -309,7 +334,7 @@ const CustomerDetails: React.FC = () => {
   const tabCount = {
     quotes: quotes.length,
     invoices: invoices.length,
-    emails: 'total' in emailStats ? emailStats.total : emailStats.totalMessages
+    emails: (('total' in emailStats ? emailStats.total : emailStats.totalMessages) + linkedEmailsCount)
   };
 
   return (

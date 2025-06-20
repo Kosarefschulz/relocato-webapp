@@ -22,7 +22,9 @@ import {
   Tooltip,
   Paper,
   CircularProgress,
-  Alert
+  Alert,
+  Stack,
+  useTheme
 } from '@mui/material';
 import {
   Email as EmailIcon,
@@ -30,20 +32,38 @@ import {
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Refresh as RefreshIcon,
-  Add as AddIcon
+  Add as AddIcon,
+  AttachFile as AttachFileIcon,
+  OpenInNew as OpenInNewIcon,
+  Link as LinkIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import emailHistoryService, { EmailRecord } from '../services/emailHistoryService';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { useNavigate } from 'react-router-dom';
 
 interface CustomerCommunicationProps {
   customer: Customer;
 }
 
+interface LinkedEmail {
+  id: string;
+  emailId: string;
+  subject: string;
+  from: string;
+  date: Date;
+  hasAttachments?: boolean;
+}
+
 const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer }) => {
+  const theme = useTheme();
+  const navigate = useNavigate();
   const [emailRecords, setEmailRecords] = useState<EmailRecord[]>([]);
+  const [linkedEmails, setLinkedEmails] = useState<LinkedEmail[]>([]);
   const [loading, setLoading] = useState(true);
   const [composeOpen, setComposeOpen] = useState(false);
   const [newEmail, setNewEmail] = useState({
@@ -56,6 +76,7 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
 
   useEffect(() => {
     loadEmailHistory();
+    loadLinkedEmails();
   }, [customer.id]);
 
   const loadEmailHistory = () => {
@@ -68,6 +89,34 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
       setError('Fehler beim Laden der E-Mail-Historie');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadLinkedEmails = async () => {
+    try {
+      // Load linked emails from Firestore
+      const linksQuery = query(
+        collection(db, 'emailCustomerLinks'),
+        where('customerId', '==', customer.id),
+        orderBy('linkedAt', 'desc')
+      );
+      
+      const snapshot = await getDocs(linksQuery);
+      const emails: LinkedEmail[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          emailId: data.emailId,
+          subject: data.emailSubject || 'Kein Betreff',
+          from: data.emailFrom || 'Unbekannt',
+          date: data.linkedAt?.toDate() || new Date(),
+          hasAttachments: data.hasAttachments || false
+        };
+      });
+      
+      setLinkedEmails(emails);
+    } catch (err) {
+      console.error('Fehler beim Laden verknüpfter E-Mails:', err);
     }
   };
 
@@ -150,7 +199,10 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
         </Typography>
         <Box>
           <Tooltip title="Aktualisieren">
-            <IconButton onClick={loadEmailHistory} size="small">
+            <IconButton onClick={() => {
+              loadEmailHistory();
+              loadLinkedEmails();
+            }} size="small">
               <RefreshIcon />
             </IconButton>
           </Tooltip>
@@ -171,12 +223,68 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
         </Alert>
       )}
 
+      {/* Linked Emails from Email Client */}
+      {linkedEmails.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+            Verknüpfte E-Mails aus dem E-Mail-Client
+          </Typography>
+          <Stack spacing={2}>
+            {linkedEmails.map((email) => (
+              <Paper
+                key={email.id}
+                sx={{
+                  p: 2,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                    transform: 'translateY(-2px)',
+                    boxShadow: 2
+                  }
+                }}
+                onClick={() => navigate('/email-client')}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                    <LinkIcon />
+                  </Avatar>
+                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                    <Typography variant="subtitle2" noWrap>
+                      {email.subject}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" noWrap>
+                      Von: {email.from} • {format(email.date, 'dd.MM.yyyy HH:mm', { locale: de })}
+                    </Typography>
+                  </Box>
+                  {email.hasAttachments && (
+                    <Tooltip title="Hat Anhänge">
+                      <AttachFileIcon fontSize="small" color="action" />
+                    </Tooltip>
+                  )}
+                  <Tooltip title="Im E-Mail-Client öffnen">
+                    <IconButton size="small">
+                      <OpenInNewIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Paper>
+            ))}
+          </Stack>
+        </Box>
+      )}
+
+      {/* System Generated Emails */}
+      <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+        System-generierte E-Mails
+      </Typography>
+      
       {/* Email List */}
-      {emailRecords.length === 0 ? (
+      {emailRecords.length === 0 && linkedEmails.length === 0 ? (
         <Paper sx={{ p: 3, textAlign: 'center' }}>
           <EmailIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
           <Typography color="text.secondary">
-            Noch keine E-Mails gesendet
+            Noch keine E-Mails
           </Typography>
           <Button
             variant="outlined"
@@ -186,6 +294,12 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
           >
             Erste E-Mail senden
           </Button>
+        </Paper>
+      ) : emailRecords.length === 0 ? (
+        <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Keine system-generierten E-Mails vorhanden
+          </Typography>
         </Paper>
       ) : (
         <List sx={{ bgcolor: 'background.paper' }}>

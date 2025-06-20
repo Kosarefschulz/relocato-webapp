@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -17,7 +17,11 @@ import {
   ListItemText,
   Collapse,
   Link,
-  CircularProgress
+  CircularProgress,
+  Alert,
+  Card,
+  CardContent,
+  CardActions
 } from '@mui/material';
 import {
   Reply as ReplyIcon,
@@ -38,10 +42,16 @@ import {
   Person as PersonIcon,
   Mail as MailIcon,
   Phone as PhoneIcon,
-  Business as BusinessIcon
+  Business as BusinessIcon,
+  Link as LinkIcon,
+  PersonAdd as PersonAddIcon
 } from '@mui/icons-material';
 import { Email } from '../types/email';
 import { format } from 'date-fns';
+import EmailToCustomerDialog from './EmailToCustomerDialog';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { useNavigate } from 'react-router-dom';
 
 interface EmailViewerProfessionalProps {
   email: Email;
@@ -60,9 +70,13 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
   onStar,
   onMove
 }) => {
+  const navigate = useNavigate();
   const [moreMenuAnchor, setMoreMenuAnchor] = useState<null | HTMLElement>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [downloadingAttachment, setDownloadingAttachment] = useState<string | null>(null);
+  const [linkCustomerDialogOpen, setLinkCustomerDialogOpen] = useState(false);
+  const [linkedCustomer, setLinkedCustomer] = useState<any>(null);
+  const [loadingCustomer, setLoadingCustomer] = useState(false);
 
   // Format email date
   const formatEmailDate = (date: Date | string) => {
@@ -86,6 +100,46 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
     const hash = email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const colors = ['#1976d2', '#388e3c', '#d32f2f', '#f57c00', '#7b1fa2'];
     return colors[hash % colors.length];
+  };
+
+  // Load linked customer
+  useEffect(() => {
+    loadLinkedCustomer();
+  }, [email.id]);
+
+  const loadLinkedCustomer = async () => {
+    try {
+      setLoadingCustomer(true);
+      
+      // Check if email is linked to a customer
+      const linksQuery = query(
+        collection(db, 'emailCustomerLinks'),
+        where('emailId', '==', email.id)
+      );
+      const linksSnapshot = await getDocs(linksQuery);
+      
+      if (!linksSnapshot.empty) {
+        const link = linksSnapshot.docs[0].data();
+        const customerDoc = await getDoc(doc(db, 'customers', link.customerId));
+        
+        if (customerDoc.exists()) {
+          setLinkedCustomer({
+            id: customerDoc.id,
+            ...customerDoc.data()
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading linked customer:', error);
+    } finally {
+      setLoadingCustomer(false);
+    }
+  };
+
+  // Handle customer linked
+  const handleCustomerLinked = (customerId: string) => {
+    loadLinkedCustomer();
+    navigate(`/customer-details/${customerId}`);
   };
 
   // Handle print
@@ -238,6 +292,73 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
           </Box>
         </Paper>
 
+        {/* Customer Link Section */}
+        <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'background.paper' }}>
+          {loadingCustomer ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <CircularProgress size={20} />
+              <Typography variant="body2">Lade Kundenverknüpfung...</Typography>
+            </Box>
+          ) : linkedCustomer ? (
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Verknüpfter Kunde:
+              </Typography>
+              <Card variant="outlined" sx={{ mt: 1 }}>
+                <CardContent sx={{ py: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                      {linkedCustomer.name?.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography variant="subtitle1">
+                        {linkedCustomer.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {linkedCustomer.company && `${linkedCustomer.company} • `}
+                        {linkedCustomer.email}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+                <CardActions>
+                  <Button 
+                    size="small" 
+                    startIcon={<PersonIcon />}
+                    onClick={() => navigate(`/customer-details/${linkedCustomer.id}`)}
+                  >
+                    Kunde anzeigen
+                  </Button>
+                </CardActions>
+              </Card>
+            </Box>
+          ) : (
+            <Alert 
+              severity="info" 
+              action={
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button 
+                    size="small" 
+                    startIcon={<LinkIcon />}
+                    onClick={() => setLinkCustomerDialogOpen(true)}
+                  >
+                    Kunde verknüpfen
+                  </Button>
+                  <Button 
+                    size="small" 
+                    startIcon={<PersonAddIcon />}
+                    onClick={() => setLinkCustomerDialogOpen(true)}
+                  >
+                    Kunde erstellen
+                  </Button>
+                </Box>
+              }
+            >
+              Diese E-Mail ist noch keinem Kunden zugeordnet.
+            </Alert>
+          )}
+        </Paper>
+
         {/* Email Body */}
         <Paper elevation={0} sx={{ p: 3, mb: 2 }}>
           <Box
@@ -372,6 +493,14 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
           Download message
         </MenuItem>
       </Menu>
+
+      {/* Email to Customer Dialog */}
+      <EmailToCustomerDialog
+        open={linkCustomerDialogOpen}
+        onClose={() => setLinkCustomerDialogOpen(false)}
+        email={email}
+        onCustomerLinked={handleCustomerLinked}
+      />
     </Box>
   );
 };
