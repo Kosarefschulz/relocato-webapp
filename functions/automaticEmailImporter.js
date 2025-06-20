@@ -329,7 +329,16 @@ async function getLastImportTimestamp(db) {
     const doc = await db.collection('system').doc('import_metadata').get();
     if (doc.exists) {
       const data = doc.data();
-      return data.lastImport ? data.lastImport.toDate() : null;
+      // Safely convert to Date
+      if (data.lastImport) {
+        // Check if it's a Firestore Timestamp
+        if (data.lastImport.toDate && typeof data.lastImport.toDate === 'function') {
+          return data.lastImport.toDate();
+        }
+        // If it's already a Date or string, return as is
+        return new Date(data.lastImport);
+      }
+      return null;
     }
     return null;
   } catch (error) {

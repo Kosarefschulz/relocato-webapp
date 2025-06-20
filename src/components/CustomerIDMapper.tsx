@@ -36,7 +36,7 @@ const CustomerIDMapper: React.FC = () => {
           if (customer && customer.id !== actualId) {
             console.log('✅ Found customer with Firebase ID:', customer.id);
             // Redirect to the correct Firebase ID
-            navigate(`/customer/${customer.id}`, { replace: true });
+            navigate(`/customer-details/${customer.id}`, { replace: true });
           } else if (!customer) {
             console.error('❌ Customer not found with ID:', actualId);
           }

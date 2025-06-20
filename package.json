@@ -2,7 +2,6 @@
   "name": "relocato-webapp",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://ruempel-schmiede.com",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -24,14 +23,11 @@
     "@types/uuid": "^10.0.0",
     "axios": "^1.9.0",
     "date-fns": "^4.1.0",
-    "dotenv": "^16.5.0",
     "firebase": "^11.9.0",
     "framer-motion": "^12.17.0",
     "googleapis": "^150.0.1",
     "html2canvas": "^1.4.1",
-    "imap": "^0.8.19",
     "jspdf": "^3.0.1",
-    "mailparser": "^3.7.3",
     "nodemailer": "^6.10.1",
     "pdf-lib": "^1.17.1",
     "react": "^19.1.0",
@@ -39,16 +35,22 @@
     "react-hook-form": "^7.57.0",
     "react-intersection-observer": "^9.16.0",
     "react-qr-code": "^2.0.15",
+    "react-quill": "^2.0.0",
     "react-router-dom": "^7.6.2",
     "react-scripts": "5.0.1",
     "react-syntax-highlighter": "^15.6.1",
     "recharts": "^2.15.3",
+    "socket.io-client": "^4.6.1",
     "typescript": "^4.9.5",
     "uuid": "^11.1.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "PORT=3001 node --max_old_space_size=12288 node_modules/.bin/craco start",
+    "start:email": "node start-email-server.js",
+    "start:email-backend": "cd email-backend && npm start",
+    "dev": "concurrently \"npm run start:email-backend\" \"npm start\"",
+    "dev:all": "concurrently \"npm run start:email\" \"npm run start:email-backend\" \"npm start\"",
     "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
@@ -82,6 +84,13 @@
   },
   "devDependencies": {
     "@craco/craco": "^7.1.0",
-    "@types/react-router-dom": "^5.3.3"
+    "@types/react-router-dom": "^5.3.3",
+    "body-parser": "^2.2.0",
+    "concurrently": "^9.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "imap": "^0.8.19",
+    "mailparser": "^3.7.3"
   }
 }

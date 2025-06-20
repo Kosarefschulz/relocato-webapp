@@ -31,6 +31,33 @@
     },
     "api/test-email-simple.js": {
       "maxDuration": 10
+    },
+    "api/email/folders.js": {
+      "maxDuration": 10
+    },
+    "api/email/list.js": {
+      "maxDuration": 30
+    },
+    "api/email/read.js": {
+      "maxDuration": 10
+    },
+    "api/email/send.js": {
+      "maxDuration": 10
+    },
+    "api/email/delete.js": {
+      "maxDuration": 10
+    },
+    "api/email/mark-read.js": {
+      "maxDuration": 10
+    },
+    "api/email/mark-unread.js": {
+      "maxDuration": 10
+    },
+    "api/email/move.js": {
+      "maxDuration": 10
+    },
+    "api/email/star.js": {
+      "maxDuration": 10
     }
   }
 }

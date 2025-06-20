@@ -3,6 +3,7 @@
 # Dependencies
 /node_modules
 backend/node_modules
+email-backend/node_modules
 /.pnp
 .pnp.js
 

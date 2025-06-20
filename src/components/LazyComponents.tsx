@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 
 // Lazy load heavy components
-export const EmailClient = lazy(() => import('./EmailClient'));
+export const EmailClient = lazy(() => import('./EmailClientProfessional'));
 export const PhotoGallery = lazy(() => import('./PhotoGallery'));
 export const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 export const MigrationTool = lazy(() => import('./MigrationTool'));
@@ -12,7 +12,7 @@ export const FollowUpManager = lazy(() => import('./FollowUpManager'));
 export const EmailImportMonitor = lazy(() => import('./EmailImportMonitor'));
 export const EmailImportSettings = lazy(() => import('./EmailImportSettings'));
 export const FailedEmailRecovery = lazy(() => import('./FailedEmailRecovery'));
-export const EmailCompose = lazy(() => import('./EmailCompose'));
+// export const EmailCompose = lazy(() => import('./EmailCompose'));
 
 // Lazy load pages
 export const SalesPage = lazy(() => import('../pages/SalesPage'));

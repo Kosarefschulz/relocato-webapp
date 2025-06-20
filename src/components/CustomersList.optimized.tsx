@@ -249,7 +249,7 @@ const CustomersListOptimized: React.FC = () => {
   }, [filteredAndSortedCustomers]);
 
   const handleSelectCustomer = (customer: Customer) => {
-    navigate(`/customer/${customer.id}`);
+    navigate(`/customer-details/${customer.id}`);
   };
 
   const handleCreateQuote = (customer: Customer) => {

@@ -1,47 +1,138 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read/write access on all documents to authenticated users
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function hasEmailAccess() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.emailAccess == true;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+    
+    // Customers collection
+    match /customers/{customerId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+    
+    // Quotes collection
+    match /quotes/{quoteId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+    
+    // Invoices collection
+    match /invoices/{invoiceId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
     
     // Public share links
     match /shareLinks/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAuthenticated();
     }
     
     // Email collections
     match /emails/{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isAuthenticated();
     }
     
-    match /emailClient/{document=**} {
-      allow read, write: if request.auth != null;
+    // Email client collection - stores synced emails
+    match /emailClient/{emailId} {
+      allow read: if hasEmailAccess() && 
+                    (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if hasEmailAccess() && 
+                      request.resource.data.userId == request.auth.uid;
+      allow update: if hasEmailAccess() && 
+                      (resource == null || resource.data.userId == request.auth.uid);
+      allow delete: if hasEmailAccess() && 
+                      (resource == null || resource.data.userId == request.auth.uid || isAdmin());
     }
     
-    match /emailFolders/{document=**} {
-      allow read, write: if request.auth != null;
+    // Email folders collection
+    match /emailFolders/{folderId} {
+      allow read: if hasEmailAccess();
+      allow write: if hasEmailAccess();
     }
     
+    // Email import status
     match /emailImportStatus/{document=**} {
-      allow read, write: if request.auth != null;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Email history
+    match /emailHistory/{emailId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
     
     // Failed imports collection
     match /failed_imports/{document=**} {
-      allow read, write: if request.auth != null;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Failed emails (for debugging)
+    match /failedEmails/{emailId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
     }
     
     // Import history
     match /import_history/{document=**} {
-      allow read, write: if request.auth != null;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
     
     // System collections
     match /system/{document=**} {
-      allow read, write: if request.auth != null;
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Counters collection (for generating IDs)
+    match /counters/{counterId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Email sync status
+    match /emailSyncStatus/{statusId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Email parser logs
+    match /emailParserLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Only functions can write
     }
   }
 }

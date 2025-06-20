@@ -1,5 +1,6 @@
-// Simplified Email Client Service V2
+// Simplified Email Client Service V2 with Firestore option
 import { auth } from '../config/firebase';
+// import { emailClientServiceFirestore } from './emailClientServiceFirestore';
 
 export interface Email {
   uid: number;
@@ -21,19 +22,93 @@ export interface SyncEmailsResult {
   folder: string;
 }
 
+// Check if we should use Firestore mode
+const USE_FIRESTORE = false; // Set to true to use Firestore, false for HTTP
+
 class EmailClientServiceV2 {
-  private baseUrl = '/api';
+  private baseUrl = '';
+  
+  constructor() {
+    // Check if we're on Firebase hosting or local development
+    const hostname = window.location.hostname;
+    if (hostname.includes('firebaseapp.com') || hostname.includes('web.app')) {
+      // Production: Use Firebase Functions
+      this.baseUrl = 'https://europe-west3-umzugsapp.cloudfunctions.net';
+    } else if (hostname === 'localhost') {
+      // Development: Use local proxy
+      this.baseUrl = '/api';
+    } else {
+      // Fallback: Try Firebase Functions
+      this.baseUrl = 'https://europe-west3-umzugsapp.cloudfunctions.net';
+    }
+  }
   
   async syncEmails(folder: string = 'INBOX', limit: number = 50): Promise<SyncEmailsResult> {
+    // Use Firestore service if enabled
+    // if (USE_FIRESTORE) {
+    //   return emailClientServiceFirestore.syncEmails(folder, limit);
+    // }
+    
     try {
       console.log(`📧 Syncing emails from ${folder}...`);
       
-      // Try v2 endpoint (mock data for now)
-      let response = await fetch(`${this.baseUrl}/email-sync-v2?folder=${encodeURIComponent(folder)}&limit=${limit}`);
+      let response;
       
-      if (!response.ok) {
-        // Fallback to v1 endpoint
-        response = await fetch(`${this.baseUrl}/email-sync?folder=${encodeURIComponent(folder)}&limit=${limit}`);
+      if (this.baseUrl.includes('cloudfunctions.net')) {
+        // Firebase Functions endpoint - try multiple endpoints with fallback
+        try {
+          // First try the real sync endpoint
+          response = await fetch(`${this.baseUrl}/emailSyncReal?folder=${encodeURIComponent(folder)}&limit=${limit}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          // If real sync fails or times out, try the v2 endpoint
+          if (!response.ok) {
+            console.log('📧 Real email sync failed, trying v2 endpoint...');
+            response = await fetch(`${this.baseUrl}/emailSyncV2?folder=${encodeURIComponent(folder)}&limit=${limit}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+          }
+          
+          // If v2 also fails, fall back to mock data
+          if (!response.ok) {
+            console.log('📧 V2 email sync failed, using mock data...');
+            response = await fetch(`${this.baseUrl}/emailMock?folder=${encodeURIComponent(folder)}&limit=${limit}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+          }
+        } catch (error) {
+          // On any network error, try mock endpoint as final fallback
+          console.log('📧 Email sync error, falling back to mock data...');
+          try {
+            response = await fetch(`${this.baseUrl}/emailMock?folder=${encodeURIComponent(folder)}&limit=${limit}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+          } catch (mockError) {
+            console.error('Even mock endpoint failed:', mockError);
+            throw mockError;
+          }
+        }
+      } else {
+        // Local development endpoint
+        response = await fetch(`${this.baseUrl}/email-sync-v2?folder=${encodeURIComponent(folder)}&limit=${limit}`);
+        
+        if (!response.ok) {
+          // Fallback to v1 endpoint
+          response = await fetch(`${this.baseUrl}/email-sync?folder=${encodeURIComponent(folder)}&limit=${limit}`);
+        }
       }
       
       if (!response.ok) {
@@ -96,6 +171,12 @@ class EmailClientServiceV2 {
   }
   
   async getFolders(): Promise<string[]> {
+    // Use Firestore service if enabled
+    if (USE_FIRESTORE) {
+      // return emailClientServiceFirestore.getFolders();
+      return ['INBOX', 'Sent', 'Drafts', 'Trash'];
+    }
+    
     try {
       const response = await fetch(`${this.baseUrl}/email-folders`);
       
@@ -112,6 +193,12 @@ class EmailClientServiceV2 {
   }
   
   async markAsRead(emailId: string, isRead: boolean): Promise<boolean> {
+    // Use Firestore service if enabled
+    if (USE_FIRESTORE) {
+      // return emailClientServiceFirestore.markAsRead(emailId, isRead);
+      return false;
+    }
+    
     try {
       const response = await fetch(`${this.baseUrl}/email-actions`, {
         method: 'POST',
@@ -133,6 +220,12 @@ class EmailClientServiceV2 {
   }
   
   async deleteEmail(emailId: string): Promise<boolean> {
+    // Use Firestore service if enabled
+    if (USE_FIRESTORE) {
+      // return emailClientServiceFirestore.deleteEmail(emailId);
+      return false;
+    }
+    
     try {
       const response = await fetch(`${this.baseUrl}/email-actions`, {
         method: 'POST',
@@ -153,6 +246,12 @@ class EmailClientServiceV2 {
   }
   
   async searchEmails(query: string, folder: string = 'all'): Promise<Email[]> {
+    // Use Firestore service if enabled
+    if (USE_FIRESTORE) {
+      // return emailClientServiceFirestore.searchEmails(query, folder);
+      return [];
+    }
+    
     try {
       const response = await fetch(`${this.baseUrl}/email-search?query=${encodeURIComponent(query)}&folder=${encodeURIComponent(folder)}`);
       

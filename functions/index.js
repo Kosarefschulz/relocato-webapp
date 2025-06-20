@@ -16,6 +16,7 @@ const { getEmailsWithStatus } = require('./getEmailsWithStatus');
 const { previewEmailData } = require('./previewEmailData');
 const { importSingleEmail } = require('./importSingleEmail');
 const { syncEmailsForClient, getEmailFolders, sendEmailFromClient } = require('./emailClientSync');
+const { addTestEmails, clearTestEmails } = require('./addTestEmails');
 
 // Firebase Admin initialisieren - nur wenn noch nicht initialisiert
 if (!admin.apps.length) {
@@ -41,6 +42,250 @@ exports.importSingleEmail = importSingleEmail;
 exports.syncEmailsForClient = syncEmailsForClient;
 exports.getEmailFolders = getEmailFolders;
 exports.sendEmailFromClient = sendEmailFromClient;
+exports.addTestEmails = addTestEmails;
+exports.clearTestEmails = clearTestEmails;
+
+/**
+ * Firebase Auth Trigger: Creates user document when new user signs up
+ * This function triggers when a user is created through any auth method (Google, Email, etc.)
+ * and automatically creates a corresponding document in the users collection
+ */
+exports.createUserDocument = functions
+  .region('europe-west1')
+  .auth.user()
+  .onCreate(async (user) => {
+    console.log('🆕 New user created:', user.uid, user.email);
+    
+    try {
+      // Define allowed email domains and specific email addresses
+      const allowedDomains = ['relocato.de', 'umzugsapp.de'];
+      const allowedEmails = ['admin@example.com', 'test@example.com', 'sergej.schulz92@gmail.com']; // Add specific allowed emails here
+      
+      // Check if user email has access
+      let hasEmailAccess = false;
+      
+      if (user.email) {
+        // Check if email matches allowed domains
+        const emailDomain = user.email.split('@')[1];
+        if (allowedDomains.includes(emailDomain)) {
+          hasEmailAccess = true;
+        }
+        
+        // Check if email is in allowed emails list
+        if (allowedEmails.includes(user.email.toLowerCase())) {
+          hasEmailAccess = true;
+        }
+      }
+      
+      // Create user document data
+      const userData = {
+        uid: user.uid,
+        email: user.email || null,
+        displayName: user.displayName || null,
+        photoURL: user.photoURL || null,
+        emailAccess: hasEmailAccess,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+        authProvider: user.providerData?.[0]?.providerId || 'unknown',
+        isActive: true,
+        role: hasEmailAccess ? 'admin' : 'user' // Assign admin role if has email access
+      };
+      
+      // Save to Firestore users collection with UID as document ID
+      await db.collection('users').doc(user.uid).set(userData);
+      
+      console.log('✅ User document created successfully:', {
+        uid: user.uid,
+        email: user.email,
+        emailAccess: hasEmailAccess
+      });
+      
+      // Optional: Send welcome email for new users
+      if (user.email && hasEmailAccess) {
+        await db.collection('emailHistory').add({
+          to: user.email,
+          subject: 'Willkommen bei Relocato Admin',
+          content: `Hallo ${user.displayName || 'Admin'},\n\nIhr Account wurde erfolgreich erstellt und Sie haben Zugriff auf die E-Mail-Funktionen.\n\nBeste Grüße,\nRelocato Team`,
+          sentAt: admin.firestore.FieldValue.serverTimestamp(),
+          status: 'pending',
+          source: 'auth-trigger',
+          userId: user.uid
+        });
+      }
+      
+    } catch (error) {
+      console.error('❌ Error creating user document:', error);
+      
+      // Log error for debugging
+      await db.collection('errors').add({
+        type: 'user-creation-error',
+        userId: user.uid,
+        email: user.email,
+        error: error.message,
+        stack: error.stack,
+        timestamp: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  });
+
+/**
+ * HTTP Trigger: Manually grant or revoke email access for a user
+ * This can be called by admins to update user permissions
+ */
+exports.updateUserEmailAccess = functions
+  .region('europe-west1')
+  .https.onCall(async (data, context) => {
+    // Check if the caller is authenticated
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'User must be authenticated to call this function'
+      );
+    }
+    
+    // Check if the caller has admin privileges
+    const callerDoc = await db.collection('users').doc(context.auth.uid).get();
+    const callerData = callerDoc.data();
+    
+    if (!callerData || callerData.role !== 'admin') {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Only admins can update user email access'
+      );
+    }
+    
+    // Validate input
+    const { userId, emailAccess } = data;
+    
+    if (!userId || typeof emailAccess !== 'boolean') {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'userId and emailAccess (boolean) are required'
+      );
+    }
+    
+    try {
+      // Update user document
+      await db.collection('users').doc(userId).update({
+        emailAccess: emailAccess,
+        role: emailAccess ? 'admin' : 'user',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedBy: context.auth.uid
+      });
+      
+      console.log(`✅ Updated email access for user ${userId} to ${emailAccess}`);
+      
+      return {
+        success: true,
+        userId: userId,
+        emailAccess: emailAccess
+      };
+      
+    } catch (error) {
+      console.error('❌ Error updating email access:', error);
+      throw new functions.https.HttpsError(
+        'internal',
+        'Failed to update user email access'
+      );
+    }
+  });
+
+/**
+ * HTTP Trigger: Create user document for existing authenticated users
+ * This is useful for migration or when users signed up before this function was deployed
+ */
+exports.createUserDocumentManually = functions
+  .region('europe-west1')
+  .https.onCall(async (data, context) => {
+    // Check if the caller is authenticated
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'User must be authenticated to call this function'
+      );
+    }
+    
+    const { ensureUserDocument } = require('./userManagement');
+    
+    try {
+      // Get current user data from auth context
+      const userData = {
+        uid: context.auth.uid,
+        email: context.auth.token.email || null,
+        displayName: context.auth.token.name || null,
+        photoURL: context.auth.token.picture || null
+      };
+      
+      // Ensure user document exists
+      const result = await ensureUserDocument(userData);
+      
+      if (result.success) {
+        console.log('✅ User document created/updated manually:', context.auth.uid);
+        return {
+          success: true,
+          message: 'User document created/updated successfully',
+          uid: context.auth.uid
+        };
+      } else {
+        throw new Error(result.error);
+      }
+      
+    } catch (error) {
+      console.error('❌ Error creating user document manually:', error);
+      throw new functions.https.HttpsError(
+        'internal',
+        'Failed to create user document'
+      );
+    }
+  });
+
+/**
+ * HTTP Trigger: List all users (admin only)
+ */
+exports.listUsers = functions
+  .region('europe-west1')
+  .https.onCall(async (data, context) => {
+    // Check if the caller is authenticated
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'User must be authenticated to call this function'
+      );
+    }
+    
+    // Check if the caller has admin privileges
+    const callerDoc = await db.collection('users').doc(context.auth.uid).get();
+    const callerData = callerDoc.data();
+    
+    if (!callerData || callerData.role !== 'admin') {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Only admins can list users'
+      );
+    }
+    
+    const { listUsers } = require('./userManagement');
+    
+    try {
+      // Get filters from request data
+      const filters = data.filters || {};
+      const users = await listUsers(filters);
+      
+      return {
+        success: true,
+        users: users,
+        count: users.length
+      };
+      
+    } catch (error) {
+      console.error('❌ Error listing users:', error);
+      throw new functions.https.HttpsError(
+        'internal',
+        'Failed to list users'
+      );
+    }
+  });
 
 /**
  * Test-Version: Verarbeitet die letzten 50 E-Mails aus einem Ordner
@@ -550,3 +795,36 @@ www.relocato.de
 
 // Import automatic email importer functions (they export themselves)
 require('./automaticEmailImporter');
+
+// Email sync functions
+const { emailSync, emailSyncV2 } = require('./emailSync');
+exports.emailSync = emailSync;
+exports.emailSyncV2 = emailSyncV2;
+
+// Mock email function for demo
+const { emailMock } = require('./emailMockData');
+exports.emailMock = emailMock;
+
+// Real email sync function
+const { emailSyncReal } = require('./emailSyncReal');
+exports.emailSyncReal = emailSyncReal;
+
+
+// Scheduled email sync to Firestore
+const { scheduledEmailSync, triggerEmailSync, cleanupOldEmails } = require('./scheduledEmailSync');
+exports.scheduledEmailSync = scheduledEmailSync;
+exports.cleanupOldEmails = cleanupOldEmails;
+
+// Professional Email Client Functions
+const emailProfessional = require('./emailProfessional');
+exports.getEmailFolders = emailProfessional.getEmailFolders;
+exports.getEmails = emailProfessional.getEmails;
+exports.getEmail = emailProfessional.getEmail;
+exports.sendEmail = emailProfessional.sendEmail;
+exports.deleteEmail = emailProfessional.deleteEmail;
+exports.moveEmail = emailProfessional.moveEmail;
+exports.markAsRead = emailProfessional.markAsRead;
+exports.markAsUnread = emailProfessional.markAsUnread;
+exports.searchEmails = emailProfessional.searchEmails;
+exports.syncEmailsPeriodically = emailProfessional.syncEmailsPeriodically;
+exports.triggerEmailSync = emailProfessional.triggerEmailSync;

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Email Client Firebase Functions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Client Firebase Functions Test</h1>
+    
+    <div class="test-section">
+        <h2>Authentication</h2>
+        <input type="email" id="email" placeholder="Email" value="admin@relocato.de">
+        <input type="password" id="password" placeholder="Password" value="admin123">
+        <button onclick="login()">Login</button>
+        <button onclick="logout()">Logout</button>
+        <div id="authStatus" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Functions</h2>
+        <button onclick="testGetFolders()" id="btnGetFolders" disabled>Get Folders</button>
+        <button onclick="testGetEmails()" id="btnGetEmails" disabled>Get Emails</button>
+        <button onclick="testSearchEmails()" id="btnSearchEmails" disabled>Search Emails</button>
+        <button onclick="testSendEmail()" id="btnSendEmail" disabled>Send Test Email</button>
+        <button onclick="testTriggerSync()" id="btnTriggerSync" disabled>Trigger Sync</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCeOBZw96klWFkolRQMnhr5DG4Ol2eMjY",
+            authDomain: "umzugsapp.firebaseapp.com",
+            projectId: "umzugsapp",
+            storageBucket: "umzugsapp.firebasestorage.app",
+            messagingSenderId: "130199132038",
+            appId: "1:130199132038:web:3be72ffeb2b1f55be93e07",
+            measurementId: "G-MQWV0M47PN"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const functions = firebase.app().functions('europe-west3');
+        
+        // Auth state
+        let currentUser = null;
+        
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            updateAuthStatus();
+            updateButtonStates();
+        });
+        
+        function updateAuthStatus() {
+            const status = document.getElementById('authStatus');
+            if (currentUser) {
+                status.textContent = `Logged in as: ${currentUser.email}`;
+                status.className = 'status success';
+            } else {
+                status.textContent = 'Not logged in';
+                status.className = 'status error';
+            }
+        }
+        
+        function updateButtonStates() {
+            const buttons = ['btnGetFolders', 'btnGetEmails', 'btnSearchEmails', 'btnSendEmail', 'btnTriggerSync'];
+            buttons.forEach(btnId => {
+                document.getElementById(btnId).disabled = !currentUser;
+            });
+        }
+        
+        function showResult(message, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+            resultDiv.className = 'result ' + (isError ? 'error' : 'success');
+        }
+        
+        async function login() {
+            try {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                await auth.signInWithEmailAndPassword(email, password);
+                showResult('Login successful!');
+            } catch (error) {
+                showResult(`Login failed: ${error.message}`, true);
+            }
+        }
+        
+        async function logout() {
+            try {
+                await auth.signOut();
+                showResult('Logged out successfully!');
+            } catch (error) {
+                showResult(`Logout failed: ${error.message}`, true);
+            }
+        }
+        
+        async function testGetFolders() {
+            try {
+                showResult('Getting folders...');
+                const getEmailFolders = functions.httpsCallable('getEmailFolders');
+                const result = await getEmailFolders();
+                showResult(result.data);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, true);
+            }
+        }
+        
+        async function testGetEmails() {
+            try {
+                showResult('Getting emails...');
+                const getEmails = functions.httpsCallable('getEmails');
+                const result = await getEmails({
+                    folder: 'INBOX',
+                    page: 1,
+                    limit: 10
+                });
+                showResult(result.data);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, true);
+            }
+        }
+        
+        async function testSearchEmails() {
+            try {
+                showResult('Searching emails...');
+                const searchEmails = functions.httpsCallable('searchEmails');
+                const result = await searchEmails({
+                    query: 'test',
+                    folder: 'INBOX'
+                });
+                showResult(result.data);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, true);
+            }
+        }
+        
+        async function testSendEmail() {
+            try {
+                showResult('Sending test email...');
+                const sendEmail = functions.httpsCallable('sendEmail');
+                const result = await sendEmail({
+                    to: 'test@example.com',
+                    subject: 'Test Email from Firebase Functions',
+                    text: 'This is a test email sent from Firebase Functions.',
+                    html: '<p>This is a <strong>test email</strong> sent from Firebase Functions.</p>'
+                });
+                showResult(result.data);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, true);
+            }
+        }
+        
+        async function testTriggerSync() {
+            try {
+                showResult('Triggering email sync...');
+                const triggerEmailSync = functions.httpsCallable('triggerEmailSync');
+                const result = await triggerEmailSync({
+                    folders: ['INBOX', 'Sent']
+                });
+                showResult(result.data);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>

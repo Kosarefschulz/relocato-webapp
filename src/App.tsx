@@ -34,9 +34,10 @@ import EmailImportSettings from './components/EmailImportSettings';
 import FailedEmailRecovery from './components/FailedEmailRecovery';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import AdminToolsPage from './pages/AdminToolsPage';
-import EmailClient from './components/EmailClient';
+import EmailClientWrapper from './components/EmailClientWrapper';
 import { EmailTestDashboard } from './components/EmailTestDashboard';
 import VisibilityFix from './components/VisibilityFix';
+import EmailDebugger from './components/EmailDebugger';
 
 
 export const AuthContext = React.createContext<{
@@ -223,7 +224,11 @@ function AppRoutes({ user }: { user: User | null }) {
       {/* Email Client */}
       <Route 
         path="/email-client" 
-        element={user ? <EmailClient /> : <Navigate to="/login" />} 
+        element={user ? <EmailClientWrapper /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/email" 
+        element={user ? <EmailClientWrapper /> : <Navigate to="/login" />} 
       />
       
       {/* Email Test Dashboard */}

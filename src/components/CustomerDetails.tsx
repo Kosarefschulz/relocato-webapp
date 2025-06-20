@@ -1,3 +1,3 @@
-// Re-export the edit-enabled version as the default
-export { default } from './CustomerDetails.edit';
-export * from './CustomerDetails.edit';
+// Re-export the modern version as the default
+export { default } from './CustomerDetails.modern';
+export * from './CustomerDetails.modern';
