@@ -55,7 +55,7 @@ import {
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { Email } from '../types/email';
-import { emailService } from '../services/emailServiceProfessional';
+import { ionosEmailService as emailService } from '../services/emailServiceIONOS';
 
 interface EmailComposerProfessionalProps {
   open: boolean;
@@ -251,18 +251,16 @@ const EmailComposerProfessional: React.FC<EmailComposerProfessionalProps> = ({
   const saveDraft = async () => {
     try {
       setAutoSaveStatus('saving');
-      await emailService.saveDraft({
+      // Draft saving not implemented in IONOS service
+      // We could save to local storage or implement a draft folder
+      localStorage.setItem('emailDraft', JSON.stringify({
         to,
         cc,
         bcc,
         subject,
         html: content,
-        attachments: attachments.map(att => ({
-          filename: att.name,
-          content: att.file,
-          contentType: att.type
-        }))
-      });
+        savedAt: new Date().toISOString()
+      }));
       setAutoSaveStatus('saved');
       setTimeout(() => setAutoSaveStatus(''), 2000);
     } catch (error) {
@@ -286,30 +284,46 @@ const EmailComposerProfessional: React.FC<EmailComposerProfessionalProps> = ({
     try {
       setSending(true);
 
-      // Prepare form data
-      const formData = new FormData();
-      formData.append('to', JSON.stringify(to));
-      formData.append('cc', JSON.stringify(cc));
-      formData.append('bcc', JSON.stringify(bcc));
-      formData.append('subject', subject);
-      formData.append('html', content);
-      formData.append('priority', priority);
+      // IONOS service expects a simple format
+      const recipients = to.join(', ');
       
-      if (mode === 'reply' && replyTo) {
-        formData.append('inReplyTo', replyTo.messageId || '');
-        formData.append('references', replyTo.references || '');
+      // Process attachments for IONOS
+      const processedAttachments = [];
+      if (attachments.length > 0) {
+        for (const att of attachments) {
+          const reader = new FileReader();
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onload = () => {
+              const base64String = (reader.result as string).split(',')[1];
+              resolve(base64String);
+            };
+            reader.readAsDataURL(att.file);
+          });
+          
+          processedAttachments.push({
+            filename: att.name,
+            content: base64,
+            encoding: 'base64'
+          });
+        }
       }
 
-      // Add attachments
-      attachments.forEach(att => {
-        formData.append('attachments', att.file, att.name);
-      });
-
-      await emailService.sendEmail(formData);
+      // Send via IONOS service
+      const success = await emailService.sendEmail(
+        recipients,
+        subject,
+        content,
+        processedAttachments
+      );
       
-      onSend();
-      handleClose();
+      if (success) {
+        onSend();
+        handleClose();
+      } else {
+        setEmailError('Failed to send email. Please try again.');
+      }
     } catch (error) {
+      console.error('Send error:', error);
       setEmailError('Failed to send email. Please try again.');
     } finally {
       setSending(false);
