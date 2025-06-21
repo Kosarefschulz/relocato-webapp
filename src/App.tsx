@@ -29,7 +29,6 @@ import QuoteTemplateManager from './components/QuoteTemplateManager';
 import EmailTemplateManager from './components/EmailTemplateManager';
 import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
-import AppLayout from './components/AppLayout';
 // Import test utils for development
 import './utils/emailTestUtils';
 import EmailImportSettings from './components/EmailImportSettings';
@@ -69,35 +68,33 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route path="/share/:shareId" element={<SharePage />} />
       <Route path="/share/:token" element={<SharePage />} />
       
-      {/* Routes with layout */}
-      <Route element={<AppLayout />}>
-        {/* Search Customer for Quote Creation */}
-        <Route 
-          path="/search-customer" 
-          element={<CustomerSearch />} 
-        />
-        
-        {/* Create Quote */}
-        <Route 
-          path="/create-quote" 
-          element={<CreateQuote />} 
-        />
-        <Route 
-          path="/create-quote/:customerId" 
-          element={<CreateQuote />} 
-        />
-        
-        {/* Create New Customer */}
-        <Route 
-          path="/new-customer" 
-          element={<NewCustomer />} 
-        />
-        
-        {/* Dashboard */}
-        <Route 
-          path="/dashboard" 
-          element={<Dashboard />} 
-        />
+      {/* Search Customer for Quote Creation */}
+      <Route 
+        path="/search-customer" 
+        element={<CustomerSearch />} 
+      />
+      
+      {/* Create Quote */}
+      <Route 
+        path="/create-quote" 
+        element={<CreateQuote />} 
+      />
+      <Route 
+        path="/create-quote/:customerId" 
+        element={<CreateQuote />} 
+      />
+      
+      {/* Create New Customer */}
+      <Route 
+        path="/new-customer" 
+        element={<NewCustomer />} 
+      />
+      
+      {/* Dashboard */}
+      <Route 
+        path="/dashboard" 
+        element={<Dashboard />} 
+      />
       
       {/* Customer List */}
       <Route 
@@ -243,12 +240,11 @@ function AppRoutes({ user }: { user: User | null }) {
         element={<EmailTestIONOS />} 
       />
       
-        {/* Default Route */}
-        <Route 
-          path="/" 
-          element={<Navigate to="/dashboard" />} 
-        />
-      </Route>
+      {/* Default Route */}
+      <Route 
+        path="/" 
+        element={<Navigate to="/dashboard" />} 
+      />
     </Routes>
   );
 }
