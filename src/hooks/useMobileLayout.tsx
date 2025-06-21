@@ -1,4 +1,8 @@
 import { useTheme, useMediaQuery } from '@mui/material';
+import { Variant } from '@mui/material/styles/createTypography';
+
+type IconSize = 'small' | 'medium' | 'large';
+type ButtonSize = 'small' | 'medium' | 'large';
 
 export const useMobileLayout = () => {
   const theme = useTheme();
@@ -17,11 +21,11 @@ export const useMobileLayout = () => {
     containerPadding: isMobile ? 2 : 3,
     gridSpacing: isMobile ? 2 : 3,
     // Typography variants
-    titleVariant: isMobile ? 'h5' : 'h4',
-    subtitleVariant: isMobile ? 'body1' : 'h6',
+    titleVariant: (isMobile ? 'h5' : 'h4') as Variant,
+    subtitleVariant: (isMobile ? 'body1' : 'h6') as Variant,
     // Sizes
-    iconSize: isMobile ? 'medium' : 'large',
-    buttonSize: isMobile ? 'medium' : 'large',
-    fabSize: isMobile ? 'medium' : 'large'
+    iconSize: (isMobile ? 'medium' : 'large') as IconSize,
+    buttonSize: (isMobile ? 'medium' : 'large') as ButtonSize,
+    fabSize: (isMobile ? 'medium' : 'large') as ButtonSize
   };
 };
