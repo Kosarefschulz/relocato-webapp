@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, InputAdornment, FormControlLabel, Switch, Divider } from '@mui/material';
+import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, InputAdornment, FormControlLabel, Switch, Divider, useTheme, useMediaQuery } from '@mui/material';
 import Grid from './GridCompat';
+import MobileLayout from './MobileLayout';
+import { useMobileLayout } from '../hooks/useMobileLayout';
 import { 
   ArrowBack as ArrowBackIcon,
   Calculate as CalculateIcon,
@@ -19,6 +21,8 @@ import { generatePDF } from '../services/pdfService';
 const CreateQuote: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const { isMobile, spacing, cardPadding, titleVariant } = useMobileLayout();
   const initialCustomer = location.state?.customer as Customer;
   
   // Kundendaten
@@ -274,28 +278,30 @@ const CreateQuote: React.FC = () => {
     return null;
   }
 
-  return (
-    <Container maxWidth="xl" sx={{ mt: { xs: 1, sm: 2 }, mb: 4 }}>
+  const quoteContent = (
+    <Container maxWidth="xl" sx={{ mt: isMobile ? 1 : 2, mb: isMobile ? 10 : 4, px: isMobile ? 2 : 3 }}>
       {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <IconButton onClick={() => navigate(`/customer-details/${customer.id}`)} sx={{ mb: 2 }}>
-          <ArrowBackIcon />
-        </IconButton>
-        
-        <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-          Angebot erstellen
-        </Typography>
-      </Box>
+      {!isMobile && (
+        <Box sx={{ mb: 3 }}>
+          <IconButton onClick={() => navigate(`/customer-details/${customer.id}`)} sx={{ mb: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          
+          <Typography variant="h4" gutterBottom>
+            Angebot erstellen
+          </Typography>
+        </Box>
+      )}
 
       {/* Kundendaten Card */}
       <Card sx={{ mb: 3 }}>
-        <CardContent>
+        <CardContent sx={{ p: cardPadding }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+            <Typography variant={isMobile ? 'subtitle1' : 'h6'} sx={{ fontWeight: 600 }}>
               Kundendaten
             </Typography>
-            <IconButton onClick={() => setEditMode(!editMode)} size="small">
-              <EditIcon />
+            <IconButton onClick={() => setEditMode(!editMode)} size={isMobile ? 'small' : 'medium'}>
+              <EditIcon fontSize={isMobile ? 'small' : 'medium'} />
             </IconButton>
           </Box>
           
@@ -747,6 +753,19 @@ const CreateQuote: React.FC = () => {
         </Grid>
       </form>
     </Container>
+  );
+
+  return isMobile ? (
+    <MobileLayout 
+      title="Angebot erstellen" 
+      showBottomNav={true}
+      showBackButton={true}
+      onBackClick={() => navigate(`/customer-details/${customer.id}`)}
+    >
+      {quoteContent}
+    </MobileLayout>
+  ) : (
+    quoteContent
   );
 };
 

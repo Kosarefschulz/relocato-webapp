@@ -31,6 +31,11 @@ import {
   Divider,
   LinearProgress,
   CircularProgress,
+  Fab,
+  SwipeableDrawer,
+  List,
+  ListItem,
+  ListItemButton,
 } from '@mui/material';
 import { 
   ArrowBack as ArrowBackIcon,
@@ -61,6 +66,9 @@ import { paginationService } from '../services/paginationService';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { databaseService } from '../config/database.config';
 import { cleanPhoneNumber } from '../utils/phoneUtils';
+import MobileLayout from './MobileLayout';
+import CustomerCard from './CustomerCard';
+import { useMobileLayout } from '../hooks/useMobileLayout';
 
 // Motion components
 const MotionCard = motion(Card);
@@ -89,6 +97,7 @@ const CustomerSkeleton = () => (
 const CustomersListOptimized: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { isMobile, isSmallMobile, spacing, titleVariant } = useMobileLayout();
   
   // State management
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -108,6 +117,8 @@ const CustomersListOptimized: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [totalCustomers, setTotalCustomers] = useState(0);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Load initial customers
   useEffect(() => {
@@ -341,106 +352,261 @@ const CustomersListOptimized: React.FC = () => {
     setExportDialogOpen(false);
   };
 
-  return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
-            Kundenliste
-          </Typography>
-          <Chip 
-            label={`${displayedCustomers.length} von ${totalCustomers} Kunden`}
-            color="primary"
-            sx={{ mr: 2 }}
-          />
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => navigate('/new-customer')}
+  // Mobile search drawer
+  const MobileSearchDrawer = () => (
+    <SwipeableDrawer
+      anchor="top"
+      open={mobileSearchOpen}
+      onClose={() => setMobileSearchOpen(false)}
+      onOpen={() => setMobileSearchOpen(true)}
+      disableSwipeToOpen={false}
+      PaperProps={{
+        sx: { 
+          borderBottomLeftRadius: 16,
+          borderBottomRightRadius: 16,
+          maxHeight: '80vh'
+        }
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Kunden suchen</Typography>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Name, E-Mail, Telefon oder Adresse..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          autoFocus
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+            endAdornment: searchTerm && (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchTerm('')}>
+                  <ClearIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+          <Button onClick={() => setMobileSearchOpen(false)}>Abbrechen</Button>
+          <Button 
+            variant="contained" 
+            onClick={() => setMobileSearchOpen(false)}
           >
-            Neuer Kunde
+            Suchen
           </Button>
         </Box>
-
-        {/* Search and Actions Bar */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3 }}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Suche nach Name, E-Mail, Telefon oder Adresse..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-              endAdornment: searchTerm && (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setSearchTerm('')}>
-                    <ClearIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Tooltip title="Sortierung">
-            <IconButton onClick={(e) => setSortAnchorEl(e.currentTarget)}>
-              <SortIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Auswahl-Modus">
-            <IconButton 
-              onClick={() => {
-                setSelectMode(!selectMode);
-                setSelectedCustomers([]);
-              }}
-              color={selectMode ? 'primary' : 'default'}
-            >
-              <Checkbox />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Exportieren">
-            <IconButton onClick={handleExport}>
-              <UploadIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-
-        {/* Selection Actions */}
-        {selectMode && (
-          <Fade in={selectMode}>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
-              <Checkbox
-                checked={selectedCustomers.length === displayedCustomers.length && displayedCustomers.length > 0}
-                indeterminate={selectedCustomers.length > 0 && selectedCustomers.length < displayedCustomers.length}
-                onChange={handleSelectAll}
-              />
-              <Typography variant="body2">
-                {selectedCustomers.length} ausgewählt
-              </Typography>
-              {selectedCustomers.length > 0 && (
-                <Button
-                  size="small"
-                  startIcon={<DeleteIcon />}
-                  onClick={handleDeleteSelected}
-                  color="error"
-                >
-                  Löschen
-                </Button>
-              )}
-            </Box>
-          </Fade>
-        )}
       </Box>
+    </SwipeableDrawer>
+  );
+
+  // Mobile filter drawer
+  const MobileFilterDrawer = () => (
+    <SwipeableDrawer
+      anchor="bottom"
+      open={filterDrawerOpen}
+      onClose={() => setFilterDrawerOpen(false)}
+      onOpen={() => setFilterDrawerOpen(true)}
+      disableSwipeToOpen={false}
+      PaperProps={{
+        sx: { 
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16
+        }
+      }}
+    >
+      <Box sx={{ p: 3 }}>
+        <Box sx={{ width: 40, height: 4, bgcolor: 'divider', mx: 'auto', mb: 2, borderRadius: 2 }} />
+        <Typography variant="h6" sx={{ mb: 2 }}>Sortierung</Typography>
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton
+              selected={sortBy === 'created'}
+              onClick={() => {
+                setSortBy('created');
+                setSortOrder('desc');
+                setFilterDrawerOpen(false);
+              }}
+            >
+              <ListItemIcon>
+                {sortBy === 'created' && (sortOrder === 'desc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />)}
+              </ListItemIcon>
+              <ListItemText primary="Import-Datum (Neueste zuerst)" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              selected={sortBy === 'name'}
+              onClick={() => {
+                setSortBy('name');
+                setSortOrder('asc');
+                setFilterDrawerOpen(false);
+              }}
+            >
+              <ListItemIcon>
+                {sortBy === 'name' && (sortOrder === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+              </ListItemIcon>
+              <ListItemText primary="Name (A-Z)" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              selected={sortBy === 'movingDate'}
+              onClick={() => {
+                setSortBy('movingDate');
+                setSortOrder('asc');
+                setFilterDrawerOpen(false);
+              }}
+            >
+              <ListItemIcon>
+                {sortBy === 'movingDate' && (sortOrder === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+              </ListItemIcon>
+              <ListItemText primary="Umzugsdatum" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Box>
+    </SwipeableDrawer>
+  );
+
+  const customersListContent = (
+    <Container maxWidth="lg" sx={{ mt: isMobile ? 2 : 4, mb: isMobile ? 10 : 4, px: isMobile ? 0 : 3 }}>
+      {/* Header */}
+      {!isMobile && (
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
+              Kundenliste
+            </Typography>
+            <Chip 
+              label={`${displayedCustomers.length} von ${totalCustomers} Kunden`}
+              color="primary"
+              sx={{ mr: 2 }}
+            />
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/new-customer')}
+            >
+              Neuer Kunde
+            </Button>
+          </Box>
+
+          {/* Search and Actions Bar */}
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Suche nach Name, E-Mail, Telefon oder Adresse..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchTerm('')}>
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Tooltip title="Sortierung">
+              <IconButton onClick={(e) => setSortAnchorEl(e.currentTarget)}>
+                <SortIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Auswahl-Modus">
+              <IconButton 
+                onClick={() => {
+                  setSelectMode(!selectMode);
+                  setSelectedCustomers([]);
+                }}
+                color={selectMode ? 'primary' : 'default'}
+              >
+                <Checkbox />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Exportieren">
+              <IconButton onClick={handleExport}>
+                <UploadIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+      )}
+
+      {/* Mobile Header */}
+      {isMobile && (
+        <Box sx={{ px: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Typography variant={titleVariant} sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+              {displayedCustomers.length} Kunden
+            </Typography>
+            <IconButton onClick={() => setMobileSearchOpen(true)}>
+              <SearchIcon />
+            </IconButton>
+            <IconButton onClick={() => setFilterDrawerOpen(true)}>
+              <FilterIcon />
+            </IconButton>
+          </Box>
+          {searchTerm && (
+            <Chip
+              label={`Suche: ${searchTerm}`}
+              onDelete={() => setSearchTerm('')}
+              size="small"
+              sx={{ mb: 1 }}
+            />
+          )}
+        </Box>
+      )}
+
+      {/* Selection Actions */}
+      {selectMode && (
+        <Fade in={selectMode}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            mb: 2, 
+            alignItems: 'center',
+            px: isMobile ? 2 : 0
+          }}>
+            <Checkbox
+              checked={selectedCustomers.length === displayedCustomers.length && displayedCustomers.length > 0}
+              indeterminate={selectedCustomers.length > 0 && selectedCustomers.length < displayedCustomers.length}
+              onChange={handleSelectAll}
+            />
+            <Typography variant="body2">
+              {selectedCustomers.length} ausgewählt
+            </Typography>
+            {selectedCustomers.length > 0 && (
+              <Button
+                size="small"
+                startIcon={<DeleteIcon />}
+                onClick={handleDeleteSelected}
+                color="error"
+              >
+                Löschen
+              </Button>
+            )}
+          </Box>
+        </Fade>
+      )}
 
       {/* Progress indicator for loading more */}
       {loadingMore && (
@@ -450,40 +616,63 @@ const CustomersListOptimized: React.FC = () => {
       )}
 
       {/* Customer List */}
-      {loading ? (
-        // Show skeletons during initial load
-        <Box>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <CustomerSkeleton key={i} />
-          ))}
-        </Box>
-      ) : displayedCustomers.length === 0 ? (
-        <Alert severity="info">
-          {searchTerm 
-            ? 'Keine Kunden gefunden. Versuchen Sie eine andere Suche.'
-            : 'Noch keine Kunden vorhanden. Erstellen Sie Ihren ersten Kunden!'}
-        </Alert>
-      ) : (
-        <AnimatePresence mode="popLayout">
-          {displayedCustomers.map((customer, index) => (
-            <MotionCard
-              key={customer.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.5) }}
-              custom={Math.min(index, 10)} // Only animate first 10 items
-              sx={{ 
-                mb: 2, 
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: theme.shadows[4],
-                },
-              }}
-              onClick={() => !selectMode && handleSelectCustomer(customer)}
-            >
+      <Box sx={{ px: isMobile ? 2 : 0 }}>
+        {loading ? (
+          // Show skeletons during initial load
+          <Box>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <CustomerSkeleton key={i} />
+            ))}
+          </Box>
+        ) : displayedCustomers.length === 0 ? (
+          <Alert severity="info" sx={{ mx: isMobile ? 0 : 0 }}>
+            {searchTerm 
+              ? 'Keine Kunden gefunden. Versuchen Sie eine andere Suche.'
+              : 'Noch keine Kunden vorhanden. Erstellen Sie Ihren ersten Kunden!'}
+          </Alert>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {displayedCustomers.map((customer, index) => (
+              isMobile ? (
+                <Box key={customer.id} sx={{ position: 'relative' }}>
+                  {selectMode && (
+                    <Box sx={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                      <Checkbox
+                        checked={selectedCustomers.includes(customer.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleToggleSelect(customer.id);
+                        }}
+                      />
+                    </Box>
+                  )}
+                  <Box sx={{ pl: selectMode ? 6 : 0 }}>
+                    <CustomerCard
+                      customer={customer}
+                      onClick={() => !selectMode && handleSelectCustomer(customer)}
+                      index={index}
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                <MotionCard
+                  key={customer.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.5) }}
+                  custom={Math.min(index, 10)} // Only animate first 10 items
+                  sx={{ 
+                    mb: 2, 
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.shadows[4],
+                    },
+                  }}
+                  onClick={() => !selectMode && handleSelectCustomer(customer)}
+                >
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                   {selectMode && (
@@ -585,13 +774,21 @@ const CustomersListOptimized: React.FC = () => {
                   </Box>
                 </Box>
               </CardContent>
-            </MotionCard>
-          ))}
-        </AnimatePresence>
-      )}
+                </MotionCard>
+              )
+            ))}
+          </AnimatePresence>
+        )}
+      </Box>
 
       {/* Load more indicator */}
-      <Box ref={loadMoreRef} sx={{ height: 50, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Box ref={loadMoreRef} sx={{ 
+        height: 50, 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        mb: isMobile ? 2 : 0
+      }}>
         {loadingMore && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <CircularProgress size={24} />
@@ -607,7 +804,69 @@ const CustomersListOptimized: React.FC = () => {
         )}
       </Box>
 
-      {/* Sort Menu */}
+      {/* Mobile FAB */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{
+            position: 'fixed',
+            bottom: 80,
+            right: 16,
+            zIndex: 1000
+          }}
+          onClick={() => navigate('/new-customer')}
+        >
+          <AddIcon />
+        </Fab>
+      )}
+
+    </Container>
+  );
+
+  return (
+    <>
+      {isMobile ? (
+        <MobileLayout 
+          title="Kunden" 
+          showBottomNav={true}
+          rightActions={
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {selectMode && (
+                <IconButton 
+                  onClick={() => {
+                    setSelectMode(false);
+                    setSelectedCustomers([]);
+                  }}
+                  color="primary"
+                >
+                  <ClearIcon />
+                </IconButton>
+              )}
+              <IconButton onClick={handleExport}>
+                <UploadIcon />
+              </IconButton>
+              <IconButton 
+                onClick={() => {
+                  setSelectMode(!selectMode);
+                  setSelectedCustomers([]);
+                }}
+                color={selectMode ? 'primary' : 'default'}
+              >
+                <Checkbox />
+              </IconButton>
+            </Box>
+          }
+        >
+          {customersListContent}
+          <MobileSearchDrawer />
+          <MobileFilterDrawer />
+        </MobileLayout>
+      ) : (
+        customersListContent
+      )}
+
+      {/* Sort Menu - Desktop only */}
       <Menu
         anchorEl={sortAnchorEl}
         open={Boolean(sortAnchorEl)}
@@ -690,7 +949,7 @@ const CustomersListOptimized: React.FC = () => {
         onClose={() => setSnackbarOpen(false)}
         message={snackbarMessage}
       />
-    </Container>
+    </>
   );
 };
 

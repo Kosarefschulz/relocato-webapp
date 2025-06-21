@@ -22,7 +22,14 @@ import {
   Snackbar,
   Divider,
   Stack,
-  Tooltip
+  Tooltip,
+  SwipeableDrawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Badge
 } from '@mui/material';
 import Grid from './GridCompat';
 import {
@@ -56,6 +63,8 @@ import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
+import MobileLayout from './MobileLayout';
+import { useMobileLayout } from '../hooks/useMobileLayout';
 
 const HeroSection = motion(Box);
 
@@ -98,7 +107,8 @@ const CustomerDetails: React.FC = () => {
   const location = useLocation() as { state?: { from?: string } };
   const theme = useTheme();
   const { darkMode } = useCustomTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { isMobile, isSmallMobile, spacing, cardPadding, titleVariant } = useMobileLayout();
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [editedCustomer, setEditedCustomer] = useState<Customer | null>(null);
@@ -111,6 +121,7 @@ const CustomerDetails: React.FC = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [routePlannerOpen, setRoutePlannerOpen] = useState(false);
   const [linkedEmailsCount, setLinkedEmailsCount] = useState(0);
+  const [mobileTabsDrawerOpen, setMobileTabsDrawerOpen] = useState(false);
 
   // E-Mail-Statistiken für Tab-Counter
   const emailStats = React.useMemo(() => {
@@ -531,35 +542,66 @@ const CustomerDetails: React.FC = () => {
             overflow: 'hidden'
           }}
         >
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs 
-              value={tabValue} 
-              onChange={handleTabChange}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                '& .MuiTabs-indicator': {
-                  height: 3,
-                },
-                '& .MuiTab-root': {
-                  minHeight: 56,
-                  textTransform: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                },
-                '& .Mui-selected': {
-                  fontWeight: 700,
-                }
-              }}
-            >
-              <Tab label="Informationen" />
-              <Tab label="Tags & Notizen" />
-              <Tab label="Fotos" disabled={editMode} />
-              <Tab label="Angebote" icon={<Chip size="small" label={tabCount.quotes} />} iconPosition="end" disabled={editMode} />
-              <Tab label="Rechnungen" icon={<Chip size="small" label={tabCount.invoices} />} iconPosition="end" disabled={editMode} />
-              <Tab label="E-Mails" icon={<Chip size="small" label={tabCount.emails} />} iconPosition="end" disabled={editMode} />
-            </Tabs>
-          </Box>
+          {isMobile ? (
+            // Mobile: Show current tab and button to open drawer
+            <Box sx={{ 
+              p: 2, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              borderBottom: 1,
+              borderColor: 'divider'
+            }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                {[
+                  'Informationen',
+                  'Tags & Notizen',
+                  'Fotos',
+                  `Angebote (${tabCount.quotes})`,
+                  `Rechnungen (${tabCount.invoices})`,
+                  `E-Mails (${tabCount.emails})`
+                ][tabValue]}
+              </Typography>
+              <Button 
+                endIcon={<ArrowBackIcon sx={{ transform: 'rotate(-90deg)' }} />}
+                onClick={() => setMobileTabsDrawerOpen(true)}
+                size="small"
+              >
+                Wechseln
+              </Button>
+            </Box>
+          ) : (
+            // Desktop: Regular tabs
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs 
+                value={tabValue} 
+                onChange={handleTabChange}
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{
+                  '& .MuiTabs-indicator': {
+                    height: 3,
+                  },
+                  '& .MuiTab-root': {
+                    minHeight: 56,
+                    textTransform: 'none',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                  },
+                  '& .Mui-selected': {
+                    fontWeight: 700,
+                  }
+                }}
+              >
+                <Tab label="Informationen" />
+                <Tab label="Tags & Notizen" />
+                <Tab label="Fotos" disabled={editMode} />
+                <Tab label="Angebote" icon={<Chip size="small" label={tabCount.quotes} />} iconPosition="end" disabled={editMode} />
+                <Tab label="Rechnungen" icon={<Chip size="small" label={tabCount.invoices} />} iconPosition="end" disabled={editMode} />
+                <Tab label="E-Mails" icon={<Chip size="small" label={tabCount.emails} />} iconPosition="end" disabled={editMode} />
+              </Tabs>
+            </Box>
+          )}
 
           {/* Tab Panels */}
           <TabPanel value={tabValue} index={0}>

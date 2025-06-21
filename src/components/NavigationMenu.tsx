@@ -36,7 +36,11 @@ interface MenuItem {
   badge?: string;
 }
 
-const NavigationMenu: React.FC = () => {
+interface NavigationMenuProps {
+  mobile?: boolean;
+}
+
+const NavigationMenu: React.FC<NavigationMenuProps> = ({ mobile = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -136,34 +140,48 @@ const NavigationMenu: React.FC = () => {
   ];
 
   return (
-    <Paper sx={{ width: 240, height: '100%', borderRadius: 0 }}>
-      <Box sx={{ p: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          RELOCATO®
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Umzugsmanagement
-        </Typography>
-      </Box>
+    <Paper sx={{ 
+      width: mobile ? '100%' : 240, 
+      height: '100%', 
+      borderRadius: 0,
+      boxShadow: 'none',
+      bgcolor: mobile ? 'transparent' : 'background.paper'
+    }}>
+      {!mobile && (
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            RELOCATO®
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Umzugsmanagement
+          </Typography>
+        </Box>
+      )}
       
-      <Divider />
+      {!mobile && <Divider />}
       
-      <List>
+      <List sx={{ pt: mobile ? 0 : 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.path} disablePadding>
             <ListItemButton
               selected={location.pathname === item.path}
               onClick={() => navigate(item.path)}
               sx={{
+                py: mobile ? 1.5 : 1,
+                px: mobile ? 3 : 2,
                 '&.Mui-selected': {
-                  backgroundColor: 'primary.main',
-                  color: 'primary.contrastText',
+                  backgroundColor: mobile ? 'action.selected' : 'primary.main',
+                  color: mobile ? 'primary.main' : 'primary.contrastText',
+                  borderLeft: mobile ? `4px solid ${theme => theme.palette.primary.main}` : 'none',
                   '& .MuiListItemIcon-root': {
-                    color: 'primary.contrastText'
+                    color: mobile ? 'primary.main' : 'primary.contrastText'
                   },
                   '&:hover': {
-                    backgroundColor: 'primary.dark'
+                    backgroundColor: mobile ? 'action.selected' : 'primary.dark'
                   }
+                },
+                '&:hover': {
+                  backgroundColor: mobile ? 'action.hover' : 'rgba(0, 0, 0, 0.04)'
                 }
               }}
             >

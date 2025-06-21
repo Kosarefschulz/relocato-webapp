@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Paper, Typography, Button, Box, AppBar, Toolbar, Card, CardContent, useTheme } from '@mui/material';
+import { Container, Paper, Typography, Button, Box, AppBar, Toolbar, Card, CardContent, useTheme, useMediaQuery, Fab } from '@mui/material';
 import Grid from './GridCompat';
 import { 
   Search as SearchIcon, 
@@ -16,6 +16,7 @@ import {
   Email as EmailIcon
 } from '@mui/icons-material';
 import NavigationMenu from './NavigationMenu';
+import MobileLayout from './MobileLayout';
 import SyncStatus from './SyncStatus';
 import LogoutButton from './LogoutButton';
 import { motion } from 'framer-motion';
@@ -23,6 +24,7 @@ import { motion } from 'framer-motion';
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const dashboardItems = [
     {
@@ -91,43 +93,45 @@ const Dashboard: React.FC = () => {
     }
   ];
 
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Navigation Sidebar */}
-      <NavigationMenu />
-      
-      {/* Main Content */}
-      <Box sx={{ flexGrow: 1, backgroundColor: 'background.default' }}>
-        {/* AppBar */}
+  const rightActions = (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <SyncStatus />
+      <LogoutButton />
+    </Box>
+  );
+
+  const dashboardContent = (
+    <>
+      {!isMobile && (
         <AppBar position="sticky" elevation={0} sx={{ backgroundColor: 'background.paper', color: 'text.primary' }}>
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Dashboard
             </Typography>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SyncStatus />
-              <LogoutButton />
-            </Box>
+            {rightActions}
           </Toolbar>
         </AppBar>
+      )}
 
-        {/* Dashboard Content */}
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {/* Dashboard Content */}
+      <Container maxWidth="lg" sx={{ mt: isMobile ? 2 : 4, mb: 4, px: isMobile ? 2 : 3 }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 'bold' }}>
               Willkommen zurück!
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              Hier ist Ihre Übersicht für heute, {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}
+            <Typography variant="body1" color="text.secondary" sx={{ mb: isMobile ? 3 : 4, fontSize: isMobile ? '0.9rem' : '1rem' }}>
+              {isMobile 
+                ? new Date().toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })
+                : `Hier ist Ihre Übersicht für heute, ${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}`
+              }
             </Typography>
           </motion.div>
           
-          <Grid container spacing={3}>
+          <Grid container spacing={isMobile ? 2 : 3}>
             {dashboardItems.map((item, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <motion.div
@@ -139,10 +143,15 @@ const Dashboard: React.FC = () => {
                     sx={{ 
                       cursor: 'pointer',
                       transition: 'all 0.3s',
+                      height: '100%',
                       '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: theme.shadows[4]
-                      }
+                        transform: isMobile ? 'none' : 'translateY(-4px)',
+                        boxShadow: isMobile ? theme.shadows[2] : theme.shadows[4]
+                      },
+                      '&:active': isMobile ? {
+                        transform: 'scale(0.98)',
+                        transition: 'transform 0.1s'
+                      } : {}
                     }}
                     onClick={() => navigate(item.path)}
                   >
@@ -178,8 +187,18 @@ const Dashboard: React.FC = () => {
             ))}
           </Grid>
         </Container>
-      </Box>
-    </Box>
+    </>
+  );
+
+  // Return with MobileLayout wrapper
+  return (
+    <MobileLayout 
+      title="Dashboard" 
+      showBottomNav={true}
+      rightActions={isMobile ? rightActions : null}
+    >
+      {dashboardContent}
+    </MobileLayout>
   );
 };
 
