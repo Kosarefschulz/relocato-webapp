@@ -29,6 +29,7 @@ import QuoteTemplateManager from './components/QuoteTemplateManager';
 import EmailTemplateManager from './components/EmailTemplateManager';
 import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
+import AppLayout from './components/AppLayout';
 // Import test utils for development
 import './utils/emailTestUtils';
 import EmailImportSettings from './components/EmailImportSettings';
@@ -63,39 +64,40 @@ function AppRoutes({ user }: { user: User | null }) {
 
   return (
     <Routes>
-      {/* Login Route - Redirect to dashboard */}
-      <Route 
-        path="/login" 
-        element={<Navigate to="/dashboard" />} 
-      />
-
-      {/* Search Customer for Quote Creation */}
-      <Route 
-        path="/search-customer" 
-        element={<CustomerSearch />} 
-      />
+      {/* Public routes without layout */}
+      <Route path="/login" element={<Navigate to="/dashboard" />} />
+      <Route path="/share/:shareId" element={<SharePage />} />
+      <Route path="/share/:token" element={<SharePage />} />
       
-      {/* Create Quote */}
-      <Route 
-        path="/create-quote" 
-        element={<CreateQuote />} 
-      />
-      <Route 
-        path="/create-quote/:customerId" 
-        element={<CreateQuote />} 
-      />
-      
-      {/* Create New Customer */}
-      <Route 
-        path="/new-customer" 
-        element={<NewCustomer />} 
-      />
-      
-      {/* Dashboard */}
-      <Route 
-        path="/dashboard" 
-        element={<Dashboard />} 
-      />
+      {/* Routes with layout */}
+      <Route element={<AppLayout />}>
+        {/* Search Customer for Quote Creation */}
+        <Route 
+          path="/search-customer" 
+          element={<CustomerSearch />} 
+        />
+        
+        {/* Create Quote */}
+        <Route 
+          path="/create-quote" 
+          element={<CreateQuote />} 
+        />
+        <Route 
+          path="/create-quote/:customerId" 
+          element={<CreateQuote />} 
+        />
+        
+        {/* Create New Customer */}
+        <Route 
+          path="/new-customer" 
+          element={<NewCustomer />} 
+        />
+        
+        {/* Dashboard */}
+        <Route 
+          path="/dashboard" 
+          element={<Dashboard />} 
+        />
       
       {/* Customer List */}
       <Route 
@@ -150,10 +152,6 @@ function AppRoutes({ user }: { user: User | null }) {
         path="/disposition" 
         element={<DispositionPage />} 
       />
-      
-      {/* Share Page (Public Route) */}
-      <Route path="/share/:shareId" element={<SharePage />} />
-      <Route path="/share/:token" element={<SharePage />} />
       
       {/* Migration Tool */}
       <Route 
@@ -245,11 +243,12 @@ function AppRoutes({ user }: { user: User | null }) {
         element={<EmailTestIONOS />} 
       />
       
-      {/* Default Route */}
-      <Route 
-        path="/" 
-        element={<Navigate to="/dashboard" />} 
-      />
+        {/* Default Route */}
+        <Route 
+          path="/" 
+          element={<Navigate to="/dashboard" />} 
+        />
+      </Route>
     </Routes>
   );
 }

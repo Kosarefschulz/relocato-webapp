@@ -15,7 +15,6 @@ import {
   AdminPanelSettings as AdminIcon,
   Email as EmailIcon
 } from '@mui/icons-material';
-import NavigationMenu from './NavigationMenu';
 import MobileLayout from './MobileLayout';
 import SyncStatus from './SyncStatus';
 import LogoutButton from './LogoutButton';

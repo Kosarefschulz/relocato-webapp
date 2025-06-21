@@ -13,7 +13,8 @@ import {
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 import NavigationMenu from './NavigationMenu';
 import BottomNavigation from './BottomNavigation';
@@ -23,13 +24,17 @@ interface MobileLayoutProps {
   title?: string;
   showBottomNav?: boolean;
   rightActions?: React.ReactNode;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
 }
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
   children,
   title = 'RELOCATO®',
   showBottomNav = true,
-  rightActions
+  rightActions,
+  showBackButton = false,
+  onBackClick
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -79,15 +84,27 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
         }}
       >
         <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={toggleDrawer(true)}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
+          {showBackButton && onBackClick ? (
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="back"
+              onClick={onBackClick}
+              sx={{ mr: 2 }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={toggleDrawer(true)}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           
           <Typography 
             variant="h6" 
