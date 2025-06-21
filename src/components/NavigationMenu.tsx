@@ -10,7 +10,8 @@ import {
   Divider,
   Paper,
   Typography,
-  Chip
+  Chip,
+  useTheme
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -43,6 +44,7 @@ interface NavigationMenuProps {
 const NavigationMenu: React.FC<NavigationMenuProps> = ({ mobile = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
 
   const menuItems: MenuItem[] = [
     {
@@ -208,7 +210,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ mobile = false }) => {
                   backdropFilter: mobile ? 'none' : 'blur(5px)',
                   WebkitBackdropFilter: mobile ? 'none' : 'blur(5px)',
                   color: mobile ? 'primary.main' : 'primary.main',
-                  borderLeft: mobile ? `4px solid ${theme => theme.palette.primary.main}` : 'none',
+                  borderLeft: mobile ? `4px solid ${theme.palette.primary.main}` : 'none',
                   boxShadow: mobile ? 'none' : '0 4px 20px 0 rgba(31, 38, 135, 0.1)',
                   border: mobile ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
                   '&::before': {
