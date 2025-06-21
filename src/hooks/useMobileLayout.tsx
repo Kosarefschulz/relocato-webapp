@@ -1,8 +1,9 @@
 import { useTheme, useMediaQuery } from '@mui/material';
-import { Variant } from '@mui/material/styles/createTypography';
+import type { TypographyProps } from '@mui/material/Typography';
 
 type IconSize = 'small' | 'medium' | 'large';
 type ButtonSize = 'small' | 'medium' | 'large';
+type TypographyVariant = TypographyProps['variant'];
 
 export const useMobileLayout = () => {
   const theme = useTheme();
@@ -21,8 +22,8 @@ export const useMobileLayout = () => {
     containerPadding: isMobile ? 2 : 3,
     gridSpacing: isMobile ? 2 : 3,
     // Typography variants
-    titleVariant: (isMobile ? 'h5' : 'h4') as Variant,
-    subtitleVariant: (isMobile ? 'body1' : 'h6') as Variant,
+    titleVariant: (isMobile ? 'h5' : 'h4') as TypographyVariant,
+    subtitleVariant: (isMobile ? 'body1' : 'h6') as TypographyVariant,
     // Sizes
     iconSize: (isMobile ? 'medium' : 'large') as IconSize,
     buttonSize: (isMobile ? 'medium' : 'large') as ButtonSize,
