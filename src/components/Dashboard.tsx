@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import NavigationMenu from './NavigationMenu';
 import SyncStatus from './SyncStatus';
+import LogoutButton from './LogoutButton';
 import { motion } from 'framer-motion';
 
 const Dashboard: React.FC = () => {
@@ -104,8 +105,9 @@ const Dashboard: React.FC = () => {
               Dashboard
             </Typography>
             
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <SyncStatus />
+              <LogoutButton />
             </Box>
           </Toolbar>
         </AppBar>

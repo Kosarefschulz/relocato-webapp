@@ -6,6 +6,7 @@ import { User } from './services/authService';
 import { authService } from './services/authService';
 import { usePageTracking } from './hooks/useAnalytics';
 import { autoSyncService } from './services/autoSyncService';
+import SimpleAuth from './components/SimpleAuth';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -297,15 +298,17 @@ function App() {
 
   return (
     <ThemeProvider>
-      <VisibilityFix />
-      <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
-        <Router>
-          <AppRoutes user={user} />
-          
-          {/* PWA Install Prompt - Only show when user is logged in */}
-          {/* {user && <PWAInstallPrompt />} */}
-        </Router>
-      </AuthContext.Provider>
+      <SimpleAuth>
+        <VisibilityFix />
+        <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
+          <Router>
+            <AppRoutes user={user} />
+            
+            {/* PWA Install Prompt - Only show when user is logged in */}
+            {/* {user && <PWAInstallPrompt />} */}
+          </Router>
+        </AuthContext.Provider>
+      </SimpleAuth>
     </ThemeProvider>
   );
 }
