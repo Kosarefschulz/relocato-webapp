@@ -24,6 +24,9 @@ export interface Customer {
   priority?: 'low' | 'medium' | 'high';
   source?: string; // Woher kam der Kunde (Website, Empfehlung, etc.)
   customerNumber?: string;
+  company?: string; // Firmenname (optional)
+  status?: string; // Kundenstatus
+  address?: string; // Zusätzliche Adresse
 }
 
 export interface CustomerNote {
