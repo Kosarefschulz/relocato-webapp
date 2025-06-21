@@ -29,67 +29,67 @@ const Dashboard: React.FC = () => {
   const dashboardItems = [
     {
       title: 'Kunde suchen',
-      description: 'Bestehenden Kunden finden und Angebot erstellen',
-      icon: <SearchIcon sx={{ fontSize: 32 }} />,
+      description: 'Bestehenden Kunden finden',
+      icon: <SearchIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/search-customer',
       color: 'primary.main',
-      stats: { label: 'Aktive Kunden', value: '248' }
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     },
     {
       title: 'Neuer Kunde',
-      description: 'Neuen Kunden anlegen',
-      icon: <AddIcon sx={{ fontSize: 32 }} />,
+      description: 'Kunden anlegen',
+      icon: <AddIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/new-customer',
       color: 'success.main',
-      stats: { label: 'Heute hinzugefügt', value: '3' }
+      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
     },
     {
       title: 'Angebote',
-      description: 'Alle Angebote verwalten',
-      icon: <DescriptionIcon sx={{ fontSize: 32 }} />,
+      description: 'Angebote verwalten',
+      icon: <DescriptionIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/quotes',
       color: 'warning.main',
-      stats: { label: 'Offene Angebote', value: '12' }
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
     },
     {
       title: 'Rechnungen',
-      description: 'Rechnungen verwalten',
-      icon: <ReceiptIcon sx={{ fontSize: 32 }} />,
+      description: 'Rechnungen',
+      icon: <ReceiptIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/invoices',
       color: 'error.main',
-      stats: { label: 'Unbezahlt', value: '7' }
+      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
     },
     {
       title: 'Kalender',
-      description: 'Termine und Planung',
-      icon: <CalendarIcon sx={{ fontSize: 32 }} />,
+      description: 'Termine',
+      icon: <CalendarIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/calendar',
       color: 'info.main',
-      stats: { label: 'Heute', value: '4' }
+      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
     },
     {
       title: 'Vertrieb',
-      description: 'Verkaufsübersicht',
-      icon: <SalesIcon sx={{ fontSize: 32 }} />,
+      description: 'Verkauf',
+      icon: <SalesIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/sales',
       color: 'secondary.main',
-      stats: { label: 'Diesen Monat', value: '€ 48.320' }
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
     },
     {
       title: 'Admin Tools',
-      description: 'Duplikate & E-Mail Import',
-      icon: <AdminIcon sx={{ fontSize: 32 }} />,
+      description: 'Verwaltung',
+      icon: <AdminIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/admin-tools',
       color: 'warning.main',
-      stats: { label: 'Verwaltung', value: '3 Tools' }
+      gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
     },
     {
-      title: 'E-Mail Client',
-      description: 'E-Mails verwalten und importieren',
-      icon: <EmailIcon sx={{ fontSize: 32 }} />,
+      title: 'E-Mail',
+      description: 'E-Mails',
+      icon: <EmailIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/email-client',
       color: 'info.main',
-      stats: { label: 'Ungelesen', value: '0' }
+      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     }
   ];
 
@@ -131,22 +131,30 @@ const Dashboard: React.FC = () => {
             </Typography>
           </motion.div>
           
-          <Grid container spacing={isMobile ? 2 : 3}>
+          <Grid container spacing={isMobile ? 2 : 3} sx={{ justifyContent: 'center' }}>
             {dashboardItems.map((item, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+              <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
                   <Card 
+                    elevation={0}
                     sx={{ 
                       cursor: 'pointer',
                       transition: 'all 0.3s',
                       height: '100%',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      overflow: 'hidden',
                       '&:hover': {
-                        transform: isMobile ? 'none' : 'translateY(-4px)',
-                        boxShadow: isMobile ? theme.shadows[2] : theme.shadows[4]
+                        transform: isMobile ? 'none' : 'translateY(-8px)',
+                        boxShadow: isMobile ? theme.shadows[2] : theme.shadows[8],
+                        borderColor: item.color,
+                        '& .icon-box': {
+                          transform: 'scale(1.1)',
+                        }
                       },
                       '&:active': isMobile ? {
                         transform: 'scale(0.98)',
@@ -155,29 +163,51 @@ const Dashboard: React.FC = () => {
                     }}
                     onClick={() => navigate(item.path)}
                   >
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                        <Box sx={{ 
-                          p: 1.5, 
-                          borderRadius: 2, 
-                          bgcolor: `${item.color}15`,
-                          color: item.color
-                        }}>
-                          {item.icon}
-                        </Box>
-                        <Box sx={{ textAlign: 'right' }}>
-                          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                            {item.stats.value}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {item.stats.label}
-                          </Typography>
-                        </Box>
+                    <CardContent sx={{ 
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      p: isMobile ? 3 : 4
+                    }}>
+                      <Box 
+                        className="icon-box"
+                        sx={{ 
+                          width: { xs: 70, sm: 80, md: 100 },
+                          height: { xs: 70, sm: 80, md: 100 },
+                          borderRadius: '50%',
+                          background: item.gradient,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mb: { xs: 2, sm: 3 },
+                          transition: 'transform 0.3s',
+                          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                          color: 'white'
+                        }}
+                      >
+                        {item.icon}
                       </Box>
-                      <Typography variant="h6" gutterBottom>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          fontWeight: 700,
+                          mb: 1,
+                          fontSize: isMobile ? '1.1rem' : '1.25rem'
+                        }}
+                      >
                         {item.title}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{ 
+                          fontSize: { xs: '0.75rem', sm: '0.875rem', md: '0.95rem' },
+                          display: { xs: 'none', sm: 'block' }
+                        }}
+                      >
                         {item.description}
                       </Typography>
                     </CardContent>
