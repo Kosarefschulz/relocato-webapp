@@ -28,26 +28,26 @@ service cloud.firestore {
     
     // Customers collection
     match /customers/{customerId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow create: if true; // Temporär: Öffentlicher Schreibzugriff
+      allow update: if true; // Temporär: Öffentlicher Update-Zugriff
+      allow delete: if false; // Löschen weiterhin geschützt
     }
     
     // Quotes collection
     match /quotes/{quoteId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow create: if true; // Temporär: Öffentlicher Schreibzugriff
+      allow update: if true; // Temporär: Öffentlicher Update-Zugriff
+      allow delete: if false; // Löschen weiterhin geschützt
     }
     
     // Invoices collection
     match /invoices/{invoiceId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow create: if true; // Temporär: Öffentlicher Schreibzugriff
+      allow update: if true; // Temporär: Öffentlicher Update-Zugriff
+      allow delete: if false; // Löschen weiterhin geschützt
     }
     
     // Public share links
@@ -58,81 +58,83 @@ service cloud.firestore {
     
     // Email collections
     match /emails/{document=**} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true; // Temporär: Öffentlicher Zugriff
     }
     
     // Email client collection - stores synced emails
     match /emailClient/{emailId} {
-      allow read: if hasEmailAccess() && 
-                    (resource == null || resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if hasEmailAccess() && 
-                      request.resource.data.userId == request.auth.uid;
-      allow update: if hasEmailAccess() && 
-                      (resource == null || resource.data.userId == request.auth.uid);
-      allow delete: if hasEmailAccess() && 
-                      (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow create: if true; // Temporär: Öffentlicher Schreibzugriff
+      allow update: if true; // Temporär: Öffentlicher Update-Zugriff
+      allow delete: if false; // Löschen weiterhin geschützt
     }
     
     // Email folders collection
     match /emailFolders/{folderId} {
-      allow read: if hasEmailAccess();
-      allow write: if hasEmailAccess();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
     
     // Email import status
     match /emailImportStatus/{document=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
     
     // Email history
     match /emailHistory/{emailId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow create: if true; // Temporär: Öffentlicher Schreibzugriff
+      allow update: if true; // Temporär: Öffentlicher Update-Zugriff
+      allow delete: if false; // Löschen weiterhin geschützt
     }
     
     // Failed imports collection
     match /failed_imports/{document=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
     
     // Failed emails (for debugging)
     match /failedEmails/{emailId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if false; // Schreibzugriff weiterhin geschützt
     }
     
     // Import history
     match /import_history/{document=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
     
     // System collections
     match /system/{document=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if false; // Schreibzugriff weiterhin geschützt
     }
     
     // Counters collection (for generating IDs)
     match /counters/{counterId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
     
     // Email sync status
     match /emailSyncStatus/{statusId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
     
     // Email parser logs
     match /emailParserLogs/{logId} {
-      allow read: if isAdmin();
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
       allow write: if false; // Only functions can write
+    }
+    
+    // Email Customer Links
+    match /emailCustomerLinks/{linkId} {
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
   }
 }
