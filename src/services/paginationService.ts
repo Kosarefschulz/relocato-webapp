@@ -37,7 +37,7 @@ class PaginationService {
   /**
    * Load initial batch of customers (most recent ones)
    */
-  async loadInitialCustomers(options: PaginationOptions = { pageSize: 100 }): Promise<PaginatedResult<Customer>> {
+  async loadInitialCustomers(options: PaginationOptions = { pageSize: 500 }): Promise<PaginatedResult<Customer>> {
     const cacheKey = 'customers_initial';
     
     // Return cached data if available

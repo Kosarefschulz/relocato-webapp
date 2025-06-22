@@ -69,6 +69,9 @@ import { cleanPhoneNumber } from '../utils/phoneUtils';
 import MobileLayout from './MobileLayout';
 import CustomerCard from './CustomerCard';
 import { useMobileLayout } from '../hooks/useMobileLayout';
+import { collection, getCountFromServer } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { useDebounce } from '../hooks/useDebounce';
 
 // Motion components
 const MotionCard = motion(Card);
@@ -120,6 +123,9 @@ const CustomersListOptimized: React.FC = () => {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
+  // Debounced search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   // Load initial customers
   useEffect(() => {
     loadInitialCustomers();
@@ -141,20 +147,25 @@ const CustomersListOptimized: React.FC = () => {
   const loadInitialCustomers = async () => {
     setLoading(true);
     try {
-      const result = await paginationService.loadInitialCustomers({
-        pageSize: 100, // Load first 100 customers
-        orderByField: 'createdAt',
-        orderDirection: 'desc' // Neueste Importe zuerst
-      });
+      // Load customers and count in parallel for better performance
+      const [result, _] = await Promise.all([
+        paginationService.loadInitialCustomers({
+          pageSize: 500, // Load first 500 customers for better performance
+          orderByField: 'createdAt',
+          orderDirection: 'desc' // Neueste Importe zuerst
+        }),
+        getTotalCount() // Load count in parallel
+      ]);
 
       setCustomers(result.data);
       setDisplayedCustomers(result.data);
       setLastDoc(result.lastDoc);
       setHasMore(result.hasMore);
-      setTotalCustomers(result.totalLoaded);
       
-      // Preload total count in background
-      getTotalCount();
+      // If we loaded all customers, set exact count
+      if (!result.hasMore) {
+        setTotalCustomers(result.data.length);
+      }
     } catch (error) {
       console.error('Error loading customers:', error);
     } finally {
@@ -186,11 +197,18 @@ const CustomersListOptimized: React.FC = () => {
     }
   }, [hasMore, loadingMore, lastDoc]);
 
-  // Get total count for display
+  // Get total count for display using efficient count query
   const getTotalCount = async () => {
     try {
-      const allCustomers = await databaseService.getCustomers();
-      setTotalCustomers(allCustomers.length);
+      if (db) {
+        const customersRef = collection(db, 'customers');
+        const snapshot = await getCountFromServer(customersRef);
+        setTotalCustomers(snapshot.data().count);
+      } else {
+        // Fallback for non-Firebase mode
+        const allCustomers = await databaseService.getCustomers();
+        setTotalCustomers(allCustomers.length);
+      }
     } catch (error) {
       console.error('Error getting total count:', error);
     }
@@ -209,9 +227,9 @@ const CustomersListOptimized: React.FC = () => {
   const filteredAndSortedCustomers = useMemo(() => {
     let filtered = customers;
 
-    // Apply search filter
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
+    // Apply search filter with debounced term
+    if (debouncedSearchTerm) {
+      const search = debouncedSearchTerm.toLowerCase();
       filtered = customers.filter(customer => 
         customer.name.toLowerCase().includes(search) ||
         customer.id.includes(search) ||
@@ -252,7 +270,7 @@ const CustomersListOptimized: React.FC = () => {
     });
 
     return sorted;
-  }, [customers, searchTerm, sortBy, sortOrder]);
+  }, [customers, debouncedSearchTerm, sortBy, sortOrder]);
 
   // Update displayed customers when filtered list changes
   useEffect(() => {

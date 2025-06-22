@@ -18,6 +18,17 @@ import {
 import { db } from '../config/firebase';
 import { Customer, Quote, Invoice, EmailHistory } from '../types';
 
+interface ShareLink {
+  id: string;
+  customerId: string;
+  quoteId: string;
+  token: string;
+  expiresAt: Date;
+  createdAt: Date;
+  createdBy?: string;
+  usedAt?: Date;
+}
+
 class FirebaseService {
   // Collections - nur initialisieren wenn db vorhanden
   private customersCollection = db ? collection(db, 'customers') : null;
@@ -25,6 +36,7 @@ class FirebaseService {
   private invoicesCollection = db ? collection(db, 'invoices') : null;
   private emailHistoryCollection = db ? collection(db, 'emailHistory') : null;
   private dispositionsCollection = db ? collection(db, 'dispositions') : null;
+  private shareLinksCollection = db ? collection(db, 'shareLinks') : null;
 
   // Prüfe ob Firebase verfügbar ist
   private checkFirebase(): boolean {
@@ -634,6 +646,111 @@ class FirebaseService {
       console.log('✅ Angebot migriert:', quote.id);
     } catch (error) {
       console.error('❌ Fehler bei Angebots-Migration:', error);
+      throw error;
+    }
+  }
+
+  // ==================== SHARE LINKS ====================
+
+  async createShareLink(customerId: string, quoteId: string, createdBy?: string): Promise<ShareLink> {
+    try {
+      if (!this.shareLinksCollection) throw new Error('ShareLinks collection not initialized');
+      
+      // Generate unique token
+      const token = btoa(`${customerId}-${Date.now()}-${Math.random()}`).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+      
+      // Create expiration date (7 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      const shareLinkData = {
+        customerId,
+        quoteId,
+        token,
+        expiresAt: Timestamp.fromDate(expiresAt),
+        createdAt: serverTimestamp(),
+        createdBy,
+      };
+      
+      const docRef = await addDoc(this.shareLinksCollection, shareLinkData);
+      
+      console.log('✅ Share Link erstellt:', docRef.id);
+      
+      return {
+        id: docRef.id,
+        customerId,
+        quoteId,
+        token,
+        expiresAt,
+        createdAt: new Date(),
+        createdBy,
+      };
+    } catch (error) {
+      console.error('❌ Fehler beim Erstellen des Share Links:', error);
+      throw error;
+    }
+  }
+
+  async getShareLinkByToken(token: string): Promise<ShareLink | null> {
+    try {
+      if (!this.shareLinksCollection) throw new Error('ShareLinks collection not initialized');
+      
+      const q = query(this.shareLinksCollection, where('token', '==', token));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        return null;
+      }
+      
+      const doc = querySnapshot.docs[0];
+      const data = doc.data();
+      
+      return {
+        id: doc.id,
+        customerId: data.customerId,
+        quoteId: data.quoteId,
+        token: data.token,
+        expiresAt: data.expiresAt?.toDate() || new Date(),
+        createdAt: data.createdAt?.toDate() || new Date(),
+        createdBy: data.createdBy,
+        usedAt: data.usedAt?.toDate(),
+      };
+    } catch (error) {
+      console.error('❌ Fehler beim Abrufen des Share Links:', error);
+      throw error;
+    }
+  }
+
+  async updateShareLinkUsage(linkId: string): Promise<void> {
+    try {
+      if (!this.shareLinksCollection) throw new Error('ShareLinks collection not initialized');
+      
+      const docRef = doc(this.shareLinksCollection, linkId);
+      await updateDoc(docRef, {
+        usedAt: serverTimestamp(),
+      });
+      
+      console.log('✅ Share Link Nutzung aktualisiert:', linkId);
+    } catch (error) {
+      console.error('❌ Fehler beim Aktualisieren der Share Link Nutzung:', error);
+      throw error;
+    }
+  }
+
+  async deleteExpiredShareLinks(): Promise<void> {
+    try {
+      if (!this.shareLinksCollection) throw new Error('ShareLinks collection not initialized');
+      
+      const now = new Date();
+      const q = query(this.shareLinksCollection, where('expiresAt', '<', Timestamp.fromDate(now)));
+      const querySnapshot = await getDocs(q);
+      
+      const deletions = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletions);
+      
+      console.log(`✅ ${querySnapshot.size} abgelaufene Share Links gelöscht`);
+    } catch (error) {
+      console.error('❌ Fehler beim Löschen abgelaufener Share Links:', error);
       throw error;
     }
   }

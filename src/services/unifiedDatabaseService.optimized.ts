@@ -23,7 +23,7 @@ class UnifiedDatabaseServiceOptimized {
       return await cacheService.getOrFetch(
         CACHE_KEYS.CUSTOMERS_INITIAL,
         async () => {
-          const result = await paginationService.loadInitialCustomers({ pageSize: 100 });
+          const result = await paginationService.loadInitialCustomers({ pageSize: 500 });
           return result.data;
         },
         { expiresIn: 5 * 60 * 1000 } // 5 minutes
@@ -148,16 +148,8 @@ class UnifiedDatabaseServiceOptimized {
       return result.data;
     } catch (error) {
       console.error('Error searching customers:', error);
-      // Fallback to local search
-      const customers = await this.getCustomers();
-      const term = searchTerm.toLowerCase();
-      
-      return customers.filter(customer => 
-        customer.name.toLowerCase().includes(term) ||
-        customer.email.toLowerCase().includes(term) ||
-        customer.phone?.includes(term) ||
-        customer.id.toLowerCase().includes(term)
-      );
+      // Return empty array instead of loading all customers
+      return [];
     }
   }
 

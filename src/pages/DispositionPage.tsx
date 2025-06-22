@@ -46,6 +46,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { databaseService as googleSheetsService } from '../config/database.config';
+import { firebaseService } from '../services/firebaseService';
 
 interface Vehicle {
   id: string;
@@ -213,36 +214,27 @@ const DispositionPage: React.FC = () => {
     setSnackbarOpen(true);
   };
 
-  const handleGenerateLink = (customer: DispositionCustomer) => {
+  const handleGenerateLink = async (customer: DispositionCustomer) => {
     setSelectedCustomer(customer);
     
-    // Generate unique token
-    const token = btoa(`${customer.id}-${Date.now()}-${Math.random()}`).replace(/[^a-zA-Z0-9]/g, '');
-    
-    // Create expiration date (7 days from now)
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-    
-    // Create share link
-    const shareLink: ShareLink = {
-      id: Date.now().toString(),
-      customerId: customer.id,
-      token,
-      expiresAt: expiresAt.toISOString(),
-      createdAt: new Date().toISOString(),
-      quoteId: customer.quoteId,
-    };
-    
-    // Save to localStorage
-    const existingLinks = JSON.parse(localStorage.getItem('shareLinks') || '[]');
-    existingLinks.push(shareLink);
-    localStorage.setItem('shareLinks', JSON.stringify(existingLinks));
-    
-    // Generate URL
-    const baseUrl = window.location.origin;
-    const link = `${baseUrl}/share/${token}`;
-    setGeneratedLink(link);
-    setLinkDialogOpen(true);
+    try {
+      // Create share link in Firebase
+      const shareLink = await firebaseService.createShareLink(
+        customer.id,
+        customer.quoteId,
+        'disposition' // You can add user ID here if available
+      );
+      
+      // Generate URL
+      const baseUrl = window.location.origin;
+      const link = `${baseUrl}/share/${shareLink.token}`;
+      setGeneratedLink(link);
+      setLinkDialogOpen(true);
+    } catch (error) {
+      console.error('Fehler beim Generieren des Links:', error);
+      setSnackbarMessage('Fehler beim Generieren des Links');
+      setSnackbarOpen(true);
+    }
   };
 
   const handleCopyLink = () => {

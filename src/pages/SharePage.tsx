@@ -18,6 +18,7 @@ import { de } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { generateArbeitsschein, ArbeitsscheinData } from '../services/arbeitsscheinService';
 import { databaseService as googleSheetsService } from '../config/database.config';
+import { firebaseService } from '../services/firebaseService';
 
 interface CustomerData {
   id: string;
@@ -104,9 +105,8 @@ const SharePage: React.FC = () => {
 
   const loadShareData = async () => {
     try {
-      // Get share links from localStorage
-      const shareLinks = JSON.parse(localStorage.getItem('shareLinks') || '[]');
-      const shareLink = shareLinks.find((link: any) => link.token === token);
+      // Get share link from Firebase
+      const shareLink = await firebaseService.getShareLinkByToken(token || '');
 
       if (!shareLink) {
         setError('Ungültiger oder abgelaufener Link');
@@ -121,6 +121,9 @@ const SharePage: React.FC = () => {
         setLoading(false);
         return;
       }
+
+      // Update link usage
+      await firebaseService.updateShareLinkUsage(shareLink.id);
 
       // Load data from Google Sheets
       const [customers, quotes] = await Promise.all([

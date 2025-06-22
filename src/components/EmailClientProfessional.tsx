@@ -182,9 +182,26 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
   };
 
   // Select email
-  const handleSelectEmail = (email: Email) => {
+  const handleSelectEmail = async (email: Email) => {
+    // First, set the email as selected (for UI feedback)
     setSelectedEmail(email);
     setSelectedEmails([email.id]);
+    
+    // Fetch the full email content
+    try {
+      const fullEmail = await emailService.getEmail(email.id, selectedFolder);
+      if (fullEmail) {
+        setSelectedEmail(fullEmail);
+        
+        // Update the email in the list with full content
+        setEmails(prevEmails => 
+          prevEmails.map(e => e.id === email.id ? fullEmail : e)
+        );
+      }
+    } catch (error) {
+      console.error('Failed to load full email:', error);
+      showSnackbar('Failed to load email content', 'error');
+    }
     
     // Mark as read
     if (!email.flags.includes('SEEN')) {

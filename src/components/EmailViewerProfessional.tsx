@@ -77,6 +77,7 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
   const [linkCustomerDialogOpen, setLinkCustomerDialogOpen] = useState(false);
   const [linkedCustomer, setLinkedCustomer] = useState<any>(null);
   const [loadingCustomer, setLoadingCustomer] = useState(false);
+  const [loadingContent, setLoadingContent] = useState(false);
 
   // Format email date
   const formatEmailDate = (date: Date | string) => {
@@ -162,6 +163,14 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
 
   // Extract email content
   const getEmailContent = () => {
+    // Check if content is still loading (no html and no text)
+    if (!email.html && !email.text && !email.textAsHtml) {
+      setLoadingContent(true);
+      return { __html: '<div style="text-align: center; padding: 20px;">Loading email content...</div>' };
+    }
+    
+    setLoadingContent(false);
+    
     if (email.html) {
       return { __html: email.html };
     }
@@ -361,35 +370,41 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
 
         {/* Email Body */}
         <Paper elevation={0} sx={{ p: 3, mb: 2 }}>
-          <Box
-            className="email-content"
-            dangerouslySetInnerHTML={getEmailContent()}
-            sx={{
-              '& img': {
-                maxWidth: '100%',
-                height: 'auto'
-              },
-              '& a': {
-                color: theme => theme.palette.primary.main,
-                textDecoration: 'none',
-                '&:hover': {
-                  textDecoration: 'underline'
+          {loadingContent ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Box
+              className="email-content"
+              dangerouslySetInnerHTML={getEmailContent()}
+              sx={{
+                '& img': {
+                  maxWidth: '100%',
+                  height: 'auto'
+                },
+                '& a': {
+                  color: theme => theme.palette.primary.main,
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                },
+                '& blockquote': {
+                  borderLeft: '4px solid #ccc',
+                  marginLeft: 0,
+                  paddingLeft: '16px',
+                  color: 'text.secondary'
+                },
+                '& pre': {
+                  backgroundColor: 'grey.100',
+                  padding: 2,
+                  borderRadius: 1,
+                  overflow: 'auto'
                 }
-              },
-              '& blockquote': {
-                borderLeft: '4px solid #ccc',
-                marginLeft: 0,
-                paddingLeft: '16px',
-                color: 'text.secondary'
-              },
-              '& pre': {
-                backgroundColor: 'grey.100',
-                padding: 2,
-                borderRadius: 1,
-                overflow: 'auto'
-              }
-            }}
-          />
+              }}
+            />
+          )}
         </Paper>
 
         {/* Attachments */}

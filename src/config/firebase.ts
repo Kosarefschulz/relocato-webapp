@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
 
@@ -34,7 +34,12 @@ if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
   try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-    db = getFirestore(app);
+    
+    // Initialize Firestore with persistent cache
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache()
+    });
+    
     storage = getStorage(app);
     functions = getFunctions(app, 'europe-west1');
 
