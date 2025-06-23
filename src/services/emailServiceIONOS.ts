@@ -189,7 +189,7 @@ class IONOSEmailService {
       const response = await fetch(`${this.baseUrl}/mark-read`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, folder })
+        body: JSON.stringify({ id: uid, folder })
       });
       
       return response.ok;
@@ -205,7 +205,7 @@ class IONOSEmailService {
       const response = await fetch(`${this.baseUrl}/mark-unread`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, folder })
+        body: JSON.stringify({ id: uid, folder })
       });
       
       return response.ok;
@@ -221,7 +221,7 @@ class IONOSEmailService {
       const response = await fetch(`${this.baseUrl}/delete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, folder })
+        body: JSON.stringify({ id: uid, folder })
       });
       
       return response.ok;
@@ -237,7 +237,7 @@ class IONOSEmailService {
       const response = await fetch(`${this.baseUrl}/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, fromFolder, toFolder })
+        body: JSON.stringify({ id: uid, fromFolder, toFolder })
       });
       
       return response.ok;
@@ -253,7 +253,7 @@ class IONOSEmailService {
       const response = await fetch(`${this.baseUrl}/star`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, folder, starred })
+        body: JSON.stringify({ id: uid, folder, starred })
       });
       
       return response.ok;
