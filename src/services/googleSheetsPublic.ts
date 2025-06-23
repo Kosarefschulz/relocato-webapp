@@ -3,7 +3,8 @@ import { cleanPhoneNumber } from '../utils/phoneUtils';
 import { toISODateString } from '../utils/dateUtils';
 
 class GoogleSheetsPublicService {
-  private spreadsheetId = '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
+  private spreadsheetId = process.env.REACT_APP_GOOGLE_SHEETS_ID || '178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU';
+  private apiKey = process.env.REACT_APP_GOOGLE_SHEETS_API_KEY || '';
   private localStorageKey = 'relocato_local_customers';
   private localQuotesKey = 'relocato_local_quotes';
   private localInvoicesKey = 'relocato_local_invoices';
