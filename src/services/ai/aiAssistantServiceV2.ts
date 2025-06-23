@@ -473,10 +473,6 @@ PREISTABELLE (Auszug):
     };
   }
 
-  clearHistory(): void {
-    this.conversationHistory = [];
-  }
-
   getHistory(): Array<{ role: string; content: string }> {
     return this.conversationHistory;
   }
