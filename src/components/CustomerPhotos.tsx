@@ -264,7 +264,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                 <Card sx={{ height: '100%' }}>
                   <CardMedia
                     component="img"
-                    height="200"
+                    height="300"
                     image={photo.base64Thumbnail}
                     alt={photo.fileName}
                     sx={{ cursor: 'pointer', objectFit: 'cover' }}

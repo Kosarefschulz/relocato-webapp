@@ -215,7 +215,7 @@ class FirebaseStorageService {
   /**
    * Komprimiere Bild vor Upload (Client-seitig)
    */
-  async compressImage(file: File, maxWidth: number = 1920, quality: number = 0.8): Promise<File> {
+  async compressImage(file: File, maxWidth: number = 2560, quality: number = 0.95): Promise<File> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       

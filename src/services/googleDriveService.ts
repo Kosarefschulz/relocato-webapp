@@ -230,7 +230,7 @@ class GoogleDriveServiceEnhanced {
           }
 
           // Thumbnail-Größe
-          const maxSize = 200;
+          const maxSize = 400;
           const scale = Math.min(maxSize / img.width, maxSize / img.height);
           
           canvas.width = img.width * scale;
@@ -238,7 +238,7 @@ class GoogleDriveServiceEnhanced {
           
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           
-          resolve(canvas.toDataURL('image/jpeg', 0.7));
+          resolve(canvas.toDataURL('image/jpeg', 0.95));
         };
         img.src = e.target?.result as string;
       };
