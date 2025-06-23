@@ -569,8 +569,8 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                     totalPrice: convertingQuote.price
                   }],
                   invoiceNumber: invoiceNumber,
-                  createdAt: new Date(),
-                  dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
+                  createdAt: new Date().toISOString(),
+                  dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days
                   status: 'sent' as const
                 };
 

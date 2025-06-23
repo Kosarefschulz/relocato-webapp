@@ -291,7 +291,9 @@ class UnifiedDatabaseServiceOptimized {
         cacheService.remove(CACHE_KEYS.INVOICES_UNPAID);
         
         // Add to local cache
-        this.invoiceCache.set(invoice.id, invoice);
+        if (invoice.id) {
+          this.invoiceCache.set(invoice.id, invoice);
+        }
       }
       
       return result;

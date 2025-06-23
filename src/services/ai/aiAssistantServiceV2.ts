@@ -351,9 +351,24 @@ PREISTABELLE (Auszug):
     const calculation = quoteCalculationService.calculateQuote(customer, {
       volume,
       distance,
-      floors: { pickup: 0, delivery: 0 },
+      packingRequested: false,
       additionalServices: [],
-      manualAdjustment: 0
+      notes: '',
+      boxCount: 0,
+      parkingZonePrice: 0,
+      storagePrice: 0,
+      furnitureAssemblyPrice: 0,
+      furnitureDisassemblyPrice: 0,
+      cleaningService: false,
+      cleaningHours: 0,
+      clearanceService: false,
+      clearanceVolume: 0,
+      renovationService: false,
+      renovationHours: 0,
+      pianoTransport: false,
+      heavyItemsCount: 0,
+      packingMaterials: false,
+      manualBasePrice: 0
     });
 
     return {
@@ -364,7 +379,7 @@ PREISTABELLE (Auszug):
         volume,
         distance
       },
-      message: `Angebot für ${customer.name} vorbereitet: ${calculation.total.toFixed(2)}€ für ${volume}m³`
+      message: `Angebot für ${customer.name} vorbereitet: ${calculation.totalPrice.toFixed(2)}€ für ${volume}m³`
     };
   }
 
@@ -389,15 +404,30 @@ PREISTABELLE (Auszug):
     const calculation = quoteCalculationService.calculateQuote({} as Customer, {
       volume: data.volume,
       distance: data.distance || 50,
-      floors: data.floors || { pickup: 0, delivery: 0 },
+      packingRequested: false,
       additionalServices: data.services || [],
-      manualAdjustment: 0
+      notes: '',
+      boxCount: 0,
+      parkingZonePrice: 0,
+      storagePrice: 0,
+      furnitureAssemblyPrice: 0,
+      furnitureDisassemblyPrice: 0,
+      cleaningService: false,
+      cleaningHours: 0,
+      clearanceService: false,
+      clearanceVolume: 0,
+      renovationService: false,
+      renovationHours: 0,
+      pianoTransport: false,
+      heavyItemsCount: 0,
+      packingMaterials: false,
+      manualBasePrice: 0
     });
 
     return {
       success: true,
       data: calculation,
-      message: `Preisberechnung: ${calculation.total.toFixed(2)}€ für ${data.volume}m³`
+      message: `Preisberechnung: ${calculation.totalPrice.toFixed(2)}€ für ${data.volume}m³`
     };
   }
 

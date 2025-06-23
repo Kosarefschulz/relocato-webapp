@@ -622,7 +622,7 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     
     let pos = 1;
     doc.setDrawColor(238, 238, 238);
-    invoice.items.forEach((item, index) => {
+    (invoice.items || []).forEach((item, index) => {
       doc.text(pos.toString(), margin + 3, yPosition + 3);
       
       // Beschreibung auf mehrere Zeilen aufteilen wenn nötig
@@ -630,11 +630,11 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
       doc.text(descLines[0], margin + 15, yPosition + 3);
       
       doc.text(item.quantity.toString(), rightMargin - 60, yPosition + 3, { align: 'right' });
-      doc.text(item.unitPrice.toFixed(2).replace('.', ',') + ' €', rightMargin - 35, yPosition + 3, { align: 'right' });
-      doc.text(item.totalPrice.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 3, { align: 'right' });
+      doc.text((item.unitPrice || 0).toFixed(2).replace('.', ',') + ' €', rightMargin - 35, yPosition + 3, { align: 'right' });
+      doc.text((item.totalPrice || 0).toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 3, { align: 'right' });
       
       // Trennlinie nach jeder Zeile
-      if (index < invoice.items.length - 1) {
+      if (index < (invoice.items || []).length - 1) {
         doc.line(margin, yPosition + 6, rightMargin, yPosition + 6);
       }
       
@@ -657,14 +657,14 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.text('Zwischensumme:', sumX, yPosition + 2);
-    doc.text(invoice.price.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 2, { align: 'right' });
+    doc.text((invoice.price || 0).toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 2, { align: 'right' });
     
     // Trennlinie
     doc.setDrawColor(238, 238, 238);
     doc.line(sumX - 5, yPosition + 5, rightMargin - 5, yPosition + 5);
     
     doc.text('MwSt. 19,00 %:', sumX, yPosition + 10);
-    doc.text(invoice.taxAmount.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 10, { align: 'right' });
+    doc.text((invoice.taxAmount || 0).toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 10, { align: 'right' });
     
     // Dicke Linie vor Gesamtbetrag
     doc.setDrawColor(51, 51, 51);

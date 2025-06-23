@@ -122,7 +122,7 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
   }
 
   private async createQuote(data: any): Promise<Quote> {
-    const customer = await firebaseService.getCustomer(data.customerId);
+    const customer = await firebaseService.getCustomerById(data.customerId);
     if (!customer) {
       throw new Error('Kunde nicht gefunden');
     }
@@ -130,31 +130,44 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
     const calculation = quoteCalculationService.calculateQuote(customer, {
       volume: data.volume || 30,
       distance: data.distance || 50,
-      floors: data.floors || { pickup: 0, delivery: 0 },
+      packingRequested: false,
       additionalServices: data.additionalServices || [],
-      manualAdjustment: data.manualAdjustment || 0
+      notes: '',
+      boxCount: 0,
+      parkingZonePrice: 0,
+      storagePrice: 0,
+      furnitureAssemblyPrice: 0,
+      furnitureDisassemblyPrice: 0,
+      cleaningService: false,
+      cleaningHours: 0,
+      clearanceService: false,
+      clearanceVolume: 0,
+      renovationService: false,
+      renovationHours: 0,
+      pianoTransport: false,
+      heavyItemsCount: 0,
+      packingMaterials: false,
+      manualBasePrice: data.manualAdjustment || 0
     });
 
     const quote: Partial<Quote> = {
       customerId: data.customerId,
       customerName: customer.name,
-      customerEmail: customer.email,
-      date: new Date().toISOString(),
-      volume: data.volume || 30,
-      distance: data.distance || 50,
-      services: data.services || ['Transport'],
-      pricing: calculation,
+      price: calculation.totalPrice,
+      comment: data.notes || '',
+      createdAt: new Date(),
+      createdBy: 'AI Assistant',
       status: 'draft',
-      notes: data.notes || '',
-      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      volume: data.volume || 30,
+      distance: data.distance || 50
     };
 
-    const quoteId = await firebaseService.createQuote(quote as Quote);
+    const quoteId = await firebaseService.addQuote(quote as Omit<Quote, 'id'>);
     return { ...quote, id: quoteId } as Quote;
   }
 
   private async createInvoice(data: any): Promise<Invoice> {
-    const customer = await firebaseService.getCustomer(data.customerId);
+    const customer = await firebaseService.getCustomerById(data.customerId);
     if (!customer) {
       throw new Error('Kunde nicht gefunden');
     }
@@ -164,27 +177,27 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
       customerName: customer.name,
       quoteId: data.quoteId,
       invoiceNumber: await this.generateInvoiceNumber(),
-      date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       items: data.items || [],
-      subtotal: data.subtotal || 0,
-      tax: data.tax || 0,
-      total: data.total || 0,
-      status: 'unpaid',
+      price: data.subtotal || 0,
+      taxAmount: data.tax || 0,
+      totalPrice: data.total || 0,
+      status: 'sent',
       notes: data.notes || ''
     };
 
-    const invoiceId = await firebaseService.createInvoice(invoice as Invoice);
+    const invoiceId = await firebaseService.addInvoice(invoice as Omit<Invoice, 'id'>);
     return { ...invoice, id: invoiceId } as Invoice;
   }
 
   private async sendEmail(data: any): Promise<any> {
     const { to, subject, html, attachments } = data;
     
-    return await emailService.sendEmail({
+    return await sendEmail({
       to,
       subject,
-      html,
+      content: html,
       attachments
     });
   }
@@ -213,9 +226,9 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
       case 'customer':
         return await this.contextManager.getCustomerContext(id);
       case 'quote':
-        return await firebaseService.getQuote(id);
+        return await firebaseService.getQuoteById(id);
       case 'invoice':
-        return await firebaseService.getInvoice(id);
+        return await firebaseService.getInvoiceById(id);
       default:
         return null;
     }

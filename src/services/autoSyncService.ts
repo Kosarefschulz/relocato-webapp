@@ -185,10 +185,10 @@ class AutoSyncService {
       let synced = 0;
       
       for (const invoice of sheetsInvoices) {
-        if (invoice.id.startsWith('demo_')) continue;
+        if (invoice.id?.startsWith('demo_')) continue;
         
         try {
-          if (!firestoreInvoiceIds.has(invoice.id)) {
+          if (invoice.id && !firestoreInvoiceIds.has(invoice.id)) {
             await firebaseService.addInvoice(invoice);
             synced++;
           }

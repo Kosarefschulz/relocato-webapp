@@ -280,8 +280,8 @@ const QuotesList: React.FC = () => {
           unitPrice: quote.price,
           totalPrice: quote.price
         }],
-        createdAt: new Date(),
-        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 Tage Zahlungsziel
+        createdAt: new Date().toISOString(),
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 Tage Zahlungsziel
         status: 'sent'
       };
 

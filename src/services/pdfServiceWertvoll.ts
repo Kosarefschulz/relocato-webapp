@@ -325,7 +325,7 @@ export const generateWertvollInvoicePDF = (customer: Customer, invoice: Invoice)
       position: index + 1,
       name: item.name || 'Leistung',
       description: item.description || '',
-      quantity: item.quantity || 'pauschal',
+      quantity: String(item.quantity || 'pauschal'),
       price: item.price || 0
     }))
   };

@@ -683,7 +683,7 @@ class GoogleSheetsPublicService {
         kunde: invoice.customerName,
         rechnungsnummer: invoice.invoiceNumber,
         betrag: `€ ${invoice.totalPrice.toFixed(2)}`,
-        datum: invoice.createdAt.toLocaleDateString('de-DE'),
+        datum: new Date(invoice.createdAt).toLocaleDateString('de-DE'),
         status: invoice.status
       });
       
@@ -810,9 +810,9 @@ class GoogleSheetsPublicService {
             totalPrice: 1615.13
           }
         ],
-        createdAt: new Date(today.getTime() - 35 * 24 * 60 * 60 * 1000),
-        dueDate: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000),
-        paidDate: paidDate,
+        createdAt: new Date(today.getTime() - 35 * 24 * 60 * 60 * 1000).toISOString(),
+        dueDate: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        paidDate: paidDate.toISOString(),
         status: 'paid' as const
       },
       {
@@ -832,8 +832,8 @@ class GoogleSheetsPublicService {
             totalPrice: 756.30
           }
         ],
-        createdAt: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000),
-        dueDate: dueDate,
+        createdAt: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        dueDate: dueDate.toISOString(),
         status: 'sent' as const
       },
       {
@@ -853,8 +853,8 @@ class GoogleSheetsPublicService {
             totalPrice: 1058.82
           }
         ],
-        createdAt: new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000),
-        dueDate: overdueDate,
+        createdAt: new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+        dueDate: overdueDate.toISOString(),
         status: 'sent' as const
       }
     ];
@@ -876,13 +876,13 @@ class GoogleSheetsPublicService {
       return [
         invoice.invoiceNumber,
         invoice.customerName,
-        invoice.price.toFixed(2).replace('.', ','),
-        invoice.taxAmount.toFixed(2).replace('.', ','),
+        (invoice.price || 0).toFixed(2).replace('.', ','),
+        (invoice.taxAmount || 0).toFixed(2).replace('.', ','),
         invoice.totalPrice.toFixed(2).replace('.', ','),
         invoice.status,
-        invoice.createdAt.toLocaleDateString('de-DE'),
-        invoice.dueDate.toLocaleDateString('de-DE'),
-        invoice.paidDate ? invoice.paidDate.toLocaleDateString('de-DE') : ''
+        new Date(invoice.createdAt).toLocaleDateString('de-DE'),
+        new Date(invoice.dueDate).toLocaleDateString('de-DE'),
+        invoice.paidDate ? new Date(invoice.paidDate).toLocaleDateString('de-DE') : ''
       ].map(field => {
         // Escape fields that contain commas or quotes
         const str = String(field);

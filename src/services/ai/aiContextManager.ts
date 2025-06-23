@@ -53,9 +53,9 @@ export class AIContextManager {
     ]);
     
     // Customer notes are part of the customer object
-    const notes = customer.notes || [];
+    const notes = customer.extendedNotes || [];
 
-    const emails = customer.emailHistory || [];
+    const emails: any[] = [];
 
     return {
       customer,
@@ -95,7 +95,7 @@ export class AIContextManager {
     templates: any[];
     sendEmail: (params: any) => Promise<any>;
   }> {
-    const templates = await emailTemplateService.getTemplates();
+    const templates = await emailTemplateService.getAllTemplates();
     
     return {
       templates,
@@ -119,7 +119,7 @@ export class AIContextManager {
         this.getAllCustomers(),
         this.getAllQuotes(),
         this.getAllInvoices(),
-        emailTemplateService.getTemplates()
+        emailTemplateService.getAllTemplates()
       ]);
 
       this.context = {
@@ -145,13 +145,16 @@ export class AIContextManager {
   }
 
   private async getAllCustomers(): Promise<Customer[]> {
-    const allCustomers: Customer[] = [];
-    let lastDoc: any = null;
-    let hasMore = true;
+    // Load initial batch first
+    const initialResult = await paginationService.loadInitialCustomers({ pageSize: 500 });
+    const allCustomers: Customer[] = [...initialResult.data];
+    let lastDoc = initialResult.lastDoc;
+    let hasMore = initialResult.hasMore;
 
-    while (hasMore) {
-      const result = await paginationService.fetchCustomersPage(20, lastDoc);
-      allCustomers.push(...result.customers);
+    // Load remaining customers if any
+    while (hasMore && lastDoc) {
+      const result = await paginationService.loadMoreCustomers(lastDoc, { pageSize: 20 });
+      allCustomers.push(...result.data);
       lastDoc = result.lastDoc;
       hasMore = result.hasMore;
     }
@@ -160,33 +163,13 @@ export class AIContextManager {
   }
 
   private async getAllQuotes(): Promise<Quote[]> {
-    const allQuotes: Quote[] = [];
-    let lastDoc: any = null;
-    let hasMore = true;
-
-    while (hasMore) {
-      const result = await paginationService.fetchQuotesPage(20, lastDoc);
-      allQuotes.push(...result.quotes);
-      lastDoc = result.lastDoc;
-      hasMore = result.hasMore;
-    }
-
-    return allQuotes;
+    // Just return all quotes from firebase for now
+    return await firebaseService.getQuotes();
   }
 
   private async getAllInvoices(): Promise<Invoice[]> {
-    const allInvoices: Invoice[] = [];
-    let lastDoc: any = null;
-    let hasMore = true;
-
-    while (hasMore) {
-      const result = await paginationService.fetchInvoicesPage(20, lastDoc);
-      allInvoices.push(...result.invoices);
-      lastDoc = result.lastDoc;
-      hasMore = result.hasMore;
-    }
-
-    return allInvoices;
+    // Just return all invoices from firebase for now
+    return await firebaseService.getInvoices();
   }
 
   async getSystemCapabilities(): Promise<string> {

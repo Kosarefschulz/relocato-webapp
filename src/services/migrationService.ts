@@ -148,7 +148,7 @@ class MigrationService {
       for (const invoice of invoices) {
         try {
           // Überspringe Demo-Rechnungen
-          if (invoice.id.startsWith('demo_')) {
+          if (invoice.id?.startsWith('demo_')) {
             console.log('⏭️ Überspringe Demo-Rechnung:', invoice.id);
             completed++;
             continue;
@@ -237,7 +237,7 @@ class MigrationService {
       // Filter Demo-Daten aus Google Sheets
       const realGsCustomers = gsCustomers.filter(c => !c.id.startsWith('demo_'));
       const realGsQuotes = gsQuotes.filter(q => !q.id.startsWith('demo_'));
-      const realGsInvoices = gsInvoices.filter(i => !i.id.startsWith('demo_'));
+      const realGsInvoices = gsInvoices.filter(i => i.id && !i.id.startsWith('demo_'));
 
       if (realGsCustomers.length !== fsCustomers.length) {
         differences.push(
