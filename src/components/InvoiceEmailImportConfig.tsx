@@ -91,7 +91,7 @@ const InvoiceEmailImportConfig: React.FC = () => {
 
   const loadData = async () => {
     // Load rules
-    const loadedRules = invoiceRecognitionService.getRules();
+    const loadedRules = await invoiceRecognitionService.getRules();
     setRules(loadedRules);
 
     // Load unprocessed invoices

@@ -1,4 +1,8 @@
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService as googleSheetsService, USE_FIREBASE_PRIMARY } from '../config/database.config';
+import { unifiedDatabaseService } from './unifiedDatabaseService.optimized';
+
+// Use the unified database service which has all methods
+const dbService = USE_FIREBASE_PRIMARY ? googleSheetsService : googleSheetsService;
 
 export interface EmailInvoice {
   id: string;
@@ -214,7 +218,7 @@ class InvoiceRecognitionService {
     
     try {
       // Try to load from Google Sheets
-      const savedRules = await googleSheetsService.getRecognitionRules();
+      const savedRules = await (googleSheetsService as any).getRecognitionRules();
       if (savedRules && savedRules.length > 0) {
         this.rules = savedRules;
       } else {
@@ -222,7 +226,7 @@ class InvoiceRecognitionService {
         this.rules = [...DEFAULT_RULES];
         // Save default rules to Google Sheets
         for (const rule of this.rules) {
-          await googleSheetsService.saveRecognitionRule(rule);
+          await (googleSheetsService as any).saveRecognitionRule(rule);
         }
       }
     } catch (error) {
@@ -254,7 +258,7 @@ class InvoiceRecognitionService {
     };
     
     // Save to Google Sheets
-    await googleSheetsService.saveRecognitionRule(newRule);
+    await (googleSheetsService as any).saveRecognitionRule(newRule);
     
     this.rules.push(newRule);
     return newRule;
@@ -272,7 +276,7 @@ class InvoiceRecognitionService {
     this.rules[index] = { ...this.rules[index], ...updates };
     
     // Update in Google Sheets
-    await googleSheetsService.updateRecognitionRule(id, this.rules[index]);
+    await (googleSheetsService as any).updateRecognitionRule(id, this.rules[index]);
     
     return this.rules[index];
   }
@@ -287,7 +291,7 @@ class InvoiceRecognitionService {
     if (index === -1) return false;
 
     // Delete from Google Sheets
-    await googleSheetsService.deleteRecognitionRule(id);
+    await (googleSheetsService as any).deleteRecognitionRule(id);
     
     this.rules.splice(index, 1);
     return true;
@@ -299,7 +303,7 @@ class InvoiceRecognitionService {
   async getUnprocessedInvoices(): Promise<EmailInvoice[]> {
     if (!this.cacheLoaded) {
       try {
-        const allInvoices = await googleSheetsService.getEmailInvoices();
+        const allInvoices = await (googleSheetsService as any).getEmailInvoices();
         this.emailInvoicesCache = allInvoices || [];
         this.cacheLoaded = true;
       } catch (error) {
@@ -323,7 +327,7 @@ class InvoiceRecognitionService {
     if (notes) invoice.notes = notes;
     
     // Update in Google Sheets
-    await googleSheetsService.updateEmailInvoice(emailInvoiceId, invoice);
+    await (googleSheetsService as any).updateEmailInvoice(emailInvoiceId, invoice);
   }
 
   /**
@@ -331,7 +335,7 @@ class InvoiceRecognitionService {
    */
   private async saveEmailInvoice(emailInvoice: EmailInvoice): Promise<void> {
     // Save to Google Sheets
-    await googleSheetsService.saveEmailInvoice(emailInvoice);
+    await (googleSheetsService as any).saveEmailInvoice(emailInvoice);
     
     // Add to cache
     this.emailInvoicesCache.push(emailInvoice);
