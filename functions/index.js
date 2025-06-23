@@ -26,22 +26,25 @@ const db = admin.firestore();
 
 // Exportiere andere Funktionen
 exports.showEmails = showEmails;
-exports.scheduledEmailCheck = scheduledEmailCheck;
+// TEMPORARILY DISABLED FOR CLEANUP
+// exports.scheduledEmailCheck = scheduledEmailCheck;
 exports.backendApi = backendApi;
 exports.importAllEmails = importAllEmails;
 exports.importAllCustomers = importAllCustomers;
 exports.processFollowUps = processFollowUps;
 exports.triggerFollowUpProcessor = triggerFollowUpProcessor;
-exports.scheduledCustomerImport = scheduledCustomerImport;
+// TEMPORARILY DISABLED FOR CLEANUP
+// exports.scheduledCustomerImport = scheduledCustomerImport;
 exports.triggerCustomerImport = triggerCustomerImport;
 exports.retryFailedImports = retryFailedImports;
 exports.handleWebhook = handleWebhook;
 exports.getEmailsWithStatus = getEmailsWithStatus;
 exports.previewEmailData = previewEmailData;
 exports.importSingleEmail = importSingleEmail;
-exports.syncEmailsForClient = syncEmailsForClient;
-exports.getEmailFolders = getEmailFolders;
-exports.sendEmailFromClient = sendEmailFromClient;
+// Disabled to prevent duplicate email storage
+// exports.syncEmailsForClient = syncEmailsForClient;
+// exports.getEmailFolders = getEmailFolders;
+// exports.sendEmailFromClient = sendEmailFromClient;
 exports.addTestEmails = addTestEmails;
 exports.clearTestEmails = clearTestEmails;
 
@@ -507,9 +510,7 @@ async function checkIONOSInbox(folderName, maxEmails, testMode, req) {
                       date: parsed.date,
                       reason: 'Kein Name gefunden',
                       extractedData: customer,
-                      // Speichere kompletten E-Mail-Inhalt für Debug
-                      fullText: parsed.text?.substring(0, 5000), // Erste 5000 Zeichen
-                      fullHtml: parsed.html?.substring(0, 5000), // Erste 5000 Zeichen  
+                      // Don't store full email content
                       headers: {
                         contentType: parsed.headers?.get('content-type'),
                         messageId: parsed.messageId
@@ -577,7 +578,7 @@ async function checkIONOSInbox(folderName, maxEmails, testMode, req) {
                     from: parsed.from?.text,
                     subject: parsed.subject,
                     date: parsed.date,
-                    text: parsed.text?.substring(0, 1000), // Erste 1000 Zeichen
+                    // Don't store email text content
                     error: error.message,
                     timestamp: admin.firestore.FieldValue.serverTimestamp(),
                     folder: currentFolder
@@ -810,10 +811,10 @@ const { emailSyncReal } = require('./emailSyncReal');
 exports.emailSyncReal = emailSyncReal;
 
 
-// Scheduled email sync to Firestore
-const { scheduledEmailSync, triggerEmailSync, cleanupOldEmails } = require('./scheduledEmailSync');
-exports.scheduledEmailSync = scheduledEmailSync;
-exports.cleanupOldEmails = cleanupOldEmails;
+// Scheduled email sync to Firestore - DISABLED to prevent duplicate email storage
+// const { scheduledEmailSync, triggerEmailSync, cleanupOldEmails } = require('./scheduledEmailSync');
+// exports.scheduledEmailSync = scheduledEmailSync;
+// exports.cleanupOldEmails = cleanupOldEmails;
 
 // Professional Email Client Functions
 const emailProfessional = require('./emailProfessional');
@@ -828,3 +829,33 @@ exports.markAsUnread = emailProfessional.markAsUnread;
 exports.searchEmails = emailProfessional.searchEmails;
 exports.syncEmailsPeriodically = emailProfessional.syncEmailsPeriodically;
 exports.triggerEmailSync = emailProfessional.triggerEmailSync;
+
+// Email Data Cleanup Functions
+const { cleanupEmailData, getEmailDataStats } = require('./cleanupEmailData');
+exports.cleanupEmailData = cleanupEmailData;
+exports.getEmailDataStats = getEmailDataStats;
+
+// Delete All Customers Function (WARNING: Dangerous!)
+const { deleteAllCustomers } = require('./deleteAllCustomers');
+exports.deleteAllCustomers = deleteAllCustomers;
+
+// Import 300 Customers Function
+const { import300Customers } = require('./import300Customers');
+exports.import300Customers = import300Customers;
+
+// Import Recent Customers Function
+const { importRecentCustomers } = require('./importRecentCustomers');
+exports.importRecentCustomers = importRecentCustomers;
+
+// Import from Google Sheets Function
+const { importFromGoogleSheets } = require('./importFromGoogleSheets');
+exports.importFromGoogleSheets = importFromGoogleSheets;
+
+// Scheduled Google Sheets Import
+const { scheduledSheetsImport, triggerSheetsImport } = require('./scheduledSheetsImport');
+exports.scheduledSheetsImport = scheduledSheetsImport;
+exports.triggerSheetsImport = triggerSheetsImport;
+
+// Calendar Import Functions
+const { importCalendarCSV } = require('./importCalendarCSV');
+exports.importCalendarCSV = importCalendarCSV;

@@ -136,11 +136,18 @@ async function performAutomaticImport(db) {
           return;
         }
         
-        // Build search criteria
+        // Build search criteria - ALWAYS limit to last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysStr = thirtyDaysAgo.toISOString().split('T')[0];
+        
         const searchCriteria = ['ALL'];
         
-        // If we have a last import timestamp, only get newer emails
-        if (lastImport) {
+        // Always apply 30-day limit
+        searchCriteria.push(['SINCE', thirtyDaysStr]);
+        
+        // If we have a last import timestamp that's more recent than 30 days ago, use it
+        if (lastImport && lastImport > thirtyDaysAgo) {
           const dateStr = lastImport.toISOString().split('T')[0];
           searchCriteria.push(['SINCE', dateStr]);
         }
@@ -620,8 +627,15 @@ async function sendErrorNotification(db, error) {
 
 async function logFailedImport(db, emailData, reason, parsedData) {
   try {
+    // Only store minimal email data, not full content
     await db.collection('failed_imports').add({
-      emailData: emailData,
+      emailData: {
+        from: emailData.from,
+        subject: emailData.subject,
+        date: emailData.date,
+        messageId: emailData.messageId
+        // Removed full text/html content
+      },
       reason: reason,
       parsedData: parsedData || null,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),

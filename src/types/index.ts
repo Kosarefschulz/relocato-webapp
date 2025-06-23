@@ -30,6 +30,19 @@ export interface Customer {
   city?: string; // Stadt
   zip?: string; // PLZ
   salutation?: string; // Anrede
+  // Vertriebsstatus-Felder
+  salesStatus?: 'reached' | 'not_reached' | 'cancelled'; // Vertriebsstatus
+  cancelledAt?: Date; // Wann wurde storniert
+  cancelledReason?: string; // Grund für Stornierung
+  salesNotes?: SalesNote[]; // Vertriebsnotizen
+}
+
+export interface SalesNote {
+  id: string;
+  content: string;
+  createdAt: Date;
+  createdBy: string;
+  type: 'call' | 'email' | 'meeting' | 'other';
 }
 
 export interface CustomerNote {

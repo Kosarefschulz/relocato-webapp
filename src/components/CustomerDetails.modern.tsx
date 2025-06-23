@@ -62,6 +62,7 @@ import CustomerInvoicesMultiCompany from './CustomerInvoices.multicompany';
 import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
+import SalesActions from './SalesActions';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import MobileLayout from './MobileLayout';
 import { useMobileLayout } from '../hooks/useMobileLayout';
@@ -619,6 +620,10 @@ const CustomerDetails: React.FC = () => {
           {/* Tab Panels */}
           <TabPanel value={tabValue} index={0}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
+              <SalesActions
+                customer={customer}
+                onUpdate={loadCustomerData}
+              />
               <CustomerInfo
                 customer={customer}
                 editedCustomer={editedCustomer}

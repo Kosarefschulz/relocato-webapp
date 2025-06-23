@@ -189,6 +189,30 @@ const CustomerRow = React.memo(({
                   size="small"
                   sx={{ ml: 2 }}
                 />
+                {customer.salesStatus === 'reached' && (
+                  <Chip
+                    label="Erreicht"
+                    size="small"
+                    color="success"
+                    sx={{ ml: 1 }}
+                  />
+                )}
+                {customer.salesStatus === 'not_reached' && (
+                  <Chip
+                    label="Nicht erreicht"
+                    size="small"
+                    color="warning"
+                    sx={{ ml: 1 }}
+                  />
+                )}
+                {customer.salesStatus === 'cancelled' && (
+                  <Chip
+                    label="Storniert"
+                    size="small"
+                    color="error"
+                    sx={{ ml: 1 }}
+                  />
+                )}
                 {customer.createdAt && (
                   <Typography 
                     variant="caption" 
