@@ -2,6 +2,8 @@ import { OpenAIService } from './openaiService';
 import { AIContextManager } from './aiContextManager';
 import { AIVisionService } from './aiVisionService';
 import { AIBackgroundService } from './aiBackgroundService';
+import { AISystemAnalyzer } from './aiSystemAnalyzer';
+import { AIVoiceService } from './aiVoiceService';
 import { Customer, Quote, Invoice } from '../../types';
 import { firebaseService } from '../firebaseService';
 import { sendEmail } from '../emailService';
@@ -19,6 +21,7 @@ export interface AIResponse {
   suggestions?: string[];
   requiresConfirmation?: boolean;
   data?: any;
+  audioResponse?: string;
 }
 
 export class AIAssistantServiceV2 {
@@ -26,9 +29,13 @@ export class AIAssistantServiceV2 {
   private contextManager: AIContextManager;
   private visionService: AIVisionService;
   private backgroundService: AIBackgroundService;
+  private systemAnalyzer: AISystemAnalyzer;
+  private voiceService: AIVoiceService;
   private conversationHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
+  private apiKey: string;
 
   constructor(config: AIAssistantConfig) {
+    this.apiKey = config.apiKey;
     this.openai = new OpenAIService({
       apiKey: config.apiKey,
       model: config.model || 'gpt-4o',
@@ -38,6 +45,8 @@ export class AIAssistantServiceV2 {
     this.contextManager = new AIContextManager();
     this.visionService = new AIVisionService(config.apiKey);
     this.backgroundService = new AIBackgroundService();
+    this.systemAnalyzer = new AISystemAnalyzer();
+    this.voiceService = new AIVoiceService();
   }
 
   async processMessage(userMessage: string, context?: any, images?: string[]): Promise<AIResponse> {
@@ -463,6 +472,32 @@ PREISTABELLE (Auszug):
     return this.conversationHistory;
   }
 
+  // Voice-Support Methoden
+  async startVoiceListening(): Promise<string> {
+    return await this.voiceService.startListening();
+  }
+
+  stopVoiceListening(): void {
+    this.voiceService.stopListening();
+  }
+
+  async speakResponse(text: string): Promise<void> {
+    return await this.voiceService.speak(text);
+  }
+
+  isVoiceSupported(): boolean {
+    return this.voiceService.isSupported();
+  }
+
+  // System-Analyse Methoden
+  async getSystemHealth(): Promise<string> {
+    return await this.systemAnalyzer.getCompleteSystemState();
+  }
+
+  async getDatabaseStructure(): Promise<string> {
+    return await this.systemAnalyzer.getDatabaseStructure();
+  }
+
   async processImage(imageBase64: string): Promise<any> {
     return await this.visionService.analyzeImage(imageBase64);
   }
@@ -485,10 +520,36 @@ PREISTABELLE (Auszug):
   }
 
   // Erweiterte Aktionserkennung für Bilder und Hintergrundaufgaben
-  async processEnhancedMessage(message: string, images?: string[]): Promise<AIResponse> {
+  async processEnhancedMessage(message: string, images?: string[], audioData?: string): Promise<AIResponse> {
+    // Verarbeite Sprachnachricht wenn vorhanden
+    let finalMessage = message;
+    if (audioData && this.voiceService.isSupported()) {
+      try {
+        const transcription = await this.voiceService.transcribeAudio(audioData, this.apiKey);
+        finalMessage = transcription || message;
+      } catch (error) {
+        console.error('Fehler bei Sprachtranskription:', error);
+      }
+    }
+
+    // Erkenne System-Analyse-Anfragen
+    const systemAnalysisPattern = /(?:zeige?|was ist|wie ist|analysiere?).*?(?:system|struktur|app|gesundheit|status)/i;
+    if (systemAnalysisPattern.test(finalMessage)) {
+      const systemState = await this.systemAnalyzer.getCompleteSystemState();
+      return {
+        message: systemState,
+        suggestions: [
+          'Zeige Datenbankstruktur',
+          'Prüfe System-Performance',
+          'Analysiere Geschäftstrends',
+          'Zeige verfügbare Funktionen'
+        ]
+      };
+    }
+
     // Erkenne Hintergrund-Aufgaben
     const backgroundPattern = /(?:mach|erstelle|sende).*?(?:für|an)\s+(?:herrn|frau|firma)?\s*([A-Za-zÄÖÜäöüß\s]+?)(?:\s+ein|\s+eine|\s+noch).*?(?:angebot|rechnung).*?(\d+)\s*€.*?(?:und\s+sende|versende|schicke)/i;
-    const match = message.match(backgroundPattern);
+    const match = finalMessage.match(backgroundPattern);
     
     if (match) {
       const customerName = match[1].trim();
@@ -497,7 +558,7 @@ PREISTABELLE (Auszug):
       const taskId = await this.createBackgroundTask('auto_quote', {
         customerName,
         amount,
-        notes: `Automatisch erstellt: ${message}`
+        notes: `Automatisch erstellt: ${finalMessage}`
       });
       
       return {
@@ -515,6 +576,6 @@ PREISTABELLE (Auszug):
     }
 
     // Normale Verarbeitung mit optionalen Bildern
-    return await this.processMessage(message, null, images);
+    return await this.processMessage(finalMessage, null, images);
   }
 }

@@ -41,7 +41,10 @@ import {
   AttachFile as AttachIcon,
   Image as ImageIcon,
   Assignment as TaskIcon,
-  CheckCircle as CheckIcon
+  CheckCircle as CheckIcon,
+  Mic as MicIcon,
+  MicOff as MicOffIcon,
+  VolumeUp as VolumeUpIcon
 } from '@mui/icons-material';
 import { AIAssistantServiceV2, AIResponse } from '../../services/ai/aiAssistantServiceV2';
 import { useAuth } from '../../contexts/AuthContext';
@@ -103,7 +106,11 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [backgroundTasks, setBackgroundTasks] = useState<Map<string, any>>(new Map());
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [voiceSupported, setVoiceSupported] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -115,10 +122,12 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
       try {
         const config = await aiConfigService.getConfig();
         if (config && config.apiKey) {
-          setAiService(new AIAssistantServiceV2({ 
+          const service = new AIAssistantServiceV2({ 
             apiKey: config.apiKey,
             model: config.model 
-          }));
+          });
+          setAiService(service);
+          setVoiceSupported(service.isVoiceSupported());
         }
       } catch (error) {
         console.error('Error initializing AI service:', error);
@@ -144,11 +153,11 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
 
   const handleSend = async (text?: string) => {
     const messageText = text || input;
-    if ((!messageText.trim() && attachedImages.length === 0) || !aiService || loading) return;
+    if ((!messageText.trim() && attachedImages.length === 0 && !audioBlob) || !aiService || loading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: messageText,
+      text: messageText || '🎤 Sprachnachricht',
       sender: 'user',
       timestamp: new Date()
     };
@@ -169,8 +178,22 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
     setMessages(prev => [...prev, thinkingMessage]);
 
     try {
-      // Verwende erweiterte Funktion für Hintergrundaufgaben
-      const response: AIResponse = await aiService.processEnhancedMessage(messageText, attachedImages);
+      // Konvertiere Audio zu Base64 wenn vorhanden
+      let audioBase64: string | undefined;
+      if (audioBlob) {
+        const reader = new FileReader();
+        audioBase64 = await new Promise<string>((resolve) => {
+          reader.onloadend = () => {
+            const base64 = reader.result as string;
+            resolve(base64.split(',')[1]);
+          };
+          reader.readAsDataURL(audioBlob);
+        });
+        setAudioBlob(null);
+      }
+
+      // Verwende erweiterte Funktion für Hintergrundaufgaben und Sprache
+      const response: AIResponse = await aiService.processEnhancedMessage(messageText, attachedImages, audioBase64);
       
       // Entferne "Denkt nach..." und füge echte Antwort hinzu
       setMessages(prev => {
@@ -248,6 +271,7 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setLoading(false);
+      setAttachedImages([]);
     }
   };
 
@@ -317,6 +341,37 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
     };
     
     checkStatus();
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Fehler beim Starten der Aufnahme:', error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
   };
 
   if (!aiService) {
@@ -644,6 +699,21 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
                 }
               }}
             />
+            {audioBlob && (
+              <Box sx={{ mb: 1, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  <VolumeUpIcon sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle' }} />
+                  Sprachnachricht aufgenommen
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => setAudioBlob(null)}
+                  sx={{ ml: 1 }}
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            )}
             <Box sx={{ display: 'flex', gap: 1 }}>
               <IconButton
                 size="small"
@@ -652,6 +722,24 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
               >
                 <AttachIcon />
               </IconButton>
+              {voiceSupported && (
+                <IconButton
+                  size="small"
+                  color={isRecording ? 'error' : 'default'}
+                  onClick={isRecording ? stopRecording : startRecording}
+                  sx={{ 
+                    alignSelf: 'flex-end',
+                    animation: isRecording ? 'pulse 1.5s infinite' : 'none',
+                    '@keyframes pulse': {
+                      '0%': { opacity: 1 },
+                      '50%': { opacity: 0.5 },
+                      '100%': { opacity: 1 }
+                    }
+                  }}
+                >
+                  {isRecording ? <MicOffIcon /> : <MicIcon />}
+                </IconButton>
+              )}
               <TextField
                 inputRef={inputRef}
                 fullWidth
@@ -678,7 +766,7 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
               <IconButton
                 color="primary"
                 onClick={() => handleSend()}
-                disabled={!input.trim() || loading}
+                disabled={(!input.trim() && attachedImages.length === 0 && !audioBlob) || loading}
                 sx={{
                   bgcolor: 'primary.main',
                   color: 'white',
