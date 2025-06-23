@@ -1,5 +1,7 @@
 import { OpenAIService } from './openaiService';
 import { AIContextManager } from './aiContextManager';
+import { AIVisionService } from './aiVisionService';
+import { AIBackgroundService } from './aiBackgroundService';
 import { Customer, Quote, Invoice } from '../../types';
 import { firebaseService } from '../firebaseService';
 import { sendEmail } from '../emailService';
@@ -22,6 +24,8 @@ export interface AIResponse {
 export class AIAssistantServiceV2 {
   private openai: OpenAIService;
   private contextManager: AIContextManager;
+  private visionService: AIVisionService;
+  private backgroundService: AIBackgroundService;
   private conversationHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
 
   constructor(config: AIAssistantConfig) {
@@ -32,10 +36,18 @@ export class AIAssistantServiceV2 {
       temperature: 0.8
     });
     this.contextManager = new AIContextManager();
+    this.visionService = new AIVisionService(config.apiKey);
+    this.backgroundService = new AIBackgroundService();
   }
 
-  async processMessage(userMessage: string, context?: any): Promise<AIResponse> {
+  async processMessage(userMessage: string, context?: any, images?: string[]): Promise<AIResponse> {
     try {
+      // Verarbeite Bilder wenn vorhanden
+      let imageAnalysisResults = null;
+      if (images && images.length > 0) {
+        imageAnalysisResults = await this.visionService.processMultipleImages(images);
+      }
+
       // Hole aktuellen System-Kontext
       const systemContext = await this.buildSystemContext();
       
@@ -69,6 +81,18 @@ DEINE FÄHIGKEITEN:
    - Kundenkommunikationsstrategien
    - Geschäftsanalysen und Trends
    - Best Practices im Umzugsgeschäft
+
+4. BILDVERARBEITUNG:
+   - Analyse von Fotos (Besichtigungen, Notizen, Kalender)
+   - Automatische Datenextraktion aus Bildern
+   - Kundenerstellung aus Visitenkarten
+   - Volumenberechnung aus Raumfotos
+
+5. HINTERGRUND-AUFGABEN:
+   - Angebote im Hintergrund erstellen und versenden
+   - Automatische Follow-ups
+   - E-Mail-Versand mit Wiederholung bei Fehlern
+   - Status-Updates für laufende Aufgaben
 
 AKTUELLE SYSTEM-DATEN:
 ${systemContext}
@@ -437,5 +461,60 @@ PREISTABELLE (Auszug):
 
   getHistory(): Array<{ role: string; content: string }> {
     return this.conversationHistory;
+  }
+
+  async processImage(imageBase64: string): Promise<any> {
+    return await this.visionService.analyzeImage(imageBase64);
+  }
+
+  async getBackgroundTaskStatus(taskId: string): Promise<any> {
+    return await this.backgroundService.getTaskStatus(taskId);
+  }
+
+  async createBackgroundTask(type: string, data: any): Promise<string> {
+    // Parse spezielle Anweisungen für Hintergrundaufgaben
+    if (type === 'auto_quote') {
+      // "Mach für Herrn Schulz ein Angebot für 1500€ und sende es"
+      return await this.backgroundService.addTask('create_quote', {
+        ...data,
+        sendEmail: true
+      });
+    }
+    
+    return await this.backgroundService.addTask(type as any, data);
+  }
+
+  // Erweiterte Aktionserkennung für Bilder und Hintergrundaufgaben
+  async processEnhancedMessage(message: string, images?: string[]): Promise<AIResponse> {
+    // Erkenne Hintergrund-Aufgaben
+    const backgroundPattern = /(?:mach|erstelle|sende).*?(?:für|an)\s+(?:herrn|frau|firma)?\s*([A-Za-zÄÖÜäöüß\s]+?)(?:\s+ein|\s+eine|\s+noch).*?(?:angebot|rechnung).*?(\d+)\s*€.*?(?:und\s+sende|versende|schicke)/i;
+    const match = message.match(backgroundPattern);
+    
+    if (match) {
+      const customerName = match[1].trim();
+      const amount = parseInt(match[2]);
+      
+      const taskId = await this.createBackgroundTask('auto_quote', {
+        customerName,
+        amount,
+        notes: `Automatisch erstellt: ${message}`
+      });
+      
+      return {
+        message: `Verstanden! Ich erstelle im Hintergrund ein Angebot für ${customerName} über ${amount}€ und sende es automatisch zu. Task-ID: ${taskId}`,
+        actions: [{
+          type: 'background_task',
+          data: { taskId, customerName, amount }
+        }],
+        suggestions: [
+          `Status von Task ${taskId} prüfen`,
+          'Weitere Angebote erstellen',
+          'E-Mail-Verlauf anzeigen'
+        ]
+      };
+    }
+
+    // Normale Verarbeitung mit optionalen Bildern
+    return await this.processMessage(message, null, images);
   }
 }

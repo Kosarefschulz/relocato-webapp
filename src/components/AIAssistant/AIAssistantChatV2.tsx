@@ -21,7 +21,8 @@ import {
   InputAdornment,
   Collapse,
   Menu,
-  MenuItem
+  MenuItem,
+  LinearProgress
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -36,7 +37,11 @@ import {
   ThumbUp as ThumbUpIcon,
   ThumbDown as ThumbDownIcon,
   MoreVert as MoreIcon,
-  Lightbulb as SuggestionIcon
+  Lightbulb as SuggestionIcon,
+  AttachFile as AttachIcon,
+  Image as ImageIcon,
+  Assignment as TaskIcon,
+  CheckCircle as CheckIcon
 } from '@mui/icons-material';
 import { AIAssistantServiceV2, AIResponse } from '../../services/ai/aiAssistantServiceV2';
 import { useAuth } from '../../contexts/AuthContext';
@@ -96,6 +101,9 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const [backgroundTasks, setBackgroundTasks] = useState<Map<string, any>>(new Map());
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -136,7 +144,7 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
 
   const handleSend = async (text?: string) => {
     const messageText = text || input;
-    if (!messageText.trim() || !aiService || loading) return;
+    if ((!messageText.trim() && attachedImages.length === 0) || !aiService || loading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -161,7 +169,8 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
     setMessages(prev => [...prev, thinkingMessage]);
 
     try {
-      const response: AIResponse = await aiService.processMessage(messageText);
+      // Verwende erweiterte Funktion für Hintergrundaufgaben
+      const response: AIResponse = await aiService.processEnhancedMessage(messageText, attachedImages);
       
       // Entferne "Denkt nach..." und füge echte Antwort hinzu
       setMessages(prev => {
@@ -193,6 +202,17 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
                 sender: 'ai',
                 timestamp: new Date()
               }]);
+            }
+            
+            // Verfolge Hintergrundaufgaben
+            if (action.type === 'background_task' && result.taskId) {
+              setBackgroundTasks(prev => new Map(prev).set(result.taskId, {
+                status: 'processing',
+                ...action.data
+              }));
+              
+              // Prüfe Status periodisch
+              checkBackgroundTaskStatus(result.taskId);
             }
           } catch (error) {
             console.error('Error executing action:', error);
@@ -263,6 +283,40 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
     if (aiService) {
       aiService.clearHistory();
     }
+  };
+
+  const checkBackgroundTaskStatus = async (taskId: string) => {
+    if (!aiService) return;
+    
+    const checkStatus = async () => {
+      const status = await aiService.getBackgroundTaskStatus(taskId);
+      
+      if (status) {
+        setBackgroundTasks(prev => new Map(prev).set(taskId, status));
+        
+        if (status.status === 'completed') {
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            text: `✅ Hintergrundaufgabe abgeschlossen: ${status.result?.message || 'Erfolgreich'}`,
+            sender: 'ai',
+            timestamp: new Date()
+          }]);
+        } else if (status.status === 'failed') {
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            text: `❌ Hintergrundaufgabe fehlgeschlagen: ${status.error}`,
+            sender: 'ai',
+            timestamp: new Date(),
+            error: true
+          }]);
+        } else if (status.status === 'processing') {
+          // Prüfe erneut in 2 Sekunden
+          setTimeout(checkStatus, 2000);
+        }
+      }
+    };
+    
+    checkStatus();
   };
 
   if (!aiService) {
@@ -529,9 +583,75 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
 
           <Divider />
 
+          {/* Attached Images */}
+          {attachedImages.length > 0 && (
+            <Box sx={{ px: 2, pb: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                Angehängte Bilder:
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                {attachedImages.map((img, idx) => (
+                  <Chip
+                    key={idx}
+                    icon={<ImageIcon />}
+                    label={`Bild ${idx + 1}`}
+                    size="small"
+                    onDelete={() => setAttachedImages(prev => prev.filter((_, i) => i !== idx))}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          {/* Background Tasks */}
+          {backgroundTasks.size > 0 && (
+            <Box sx={{ px: 2, pb: 1 }}>
+              {Array.from(backgroundTasks.entries()).map(([id, task]) => (
+                <Box key={id} sx={{ mb: 0.5 }}>
+                  <LinearProgress 
+                    variant={task.status === 'processing' ? 'indeterminate' : 'determinate'} 
+                    value={task.status === 'completed' ? 100 : 0}
+                    sx={{ height: 2, mb: 0.5 }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    <TaskIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                    {task.customerName} - {task.amount}€
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+
           {/* Input */}
           <Box sx={{ p: 2 }}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files) {
+                  Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      const base64 = reader.result as string;
+                      setAttachedImages(prev => [...prev, base64.split(',')[1]]);
+                    };
+                    reader.readAsDataURL(file);
+                  });
+                }
+              }}
+            />
             <Box sx={{ display: 'flex', gap: 1 }}>
+              <IconButton
+                size="small"
+                onClick={() => fileInputRef.current?.click()}
+                sx={{ alignSelf: 'flex-end' }}
+              >
+                <AttachIcon />
+              </IconButton>
               <TextField
                 inputRef={inputRef}
                 fullWidth

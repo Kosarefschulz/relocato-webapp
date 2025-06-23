@@ -28,7 +28,7 @@ export class OpenAIService {
     this.temperature = config.temperature || 0.7;
   }
 
-  async generateText(prompt: string, systemPrompt?: string): Promise<string> {
+  async generateText(prompt: string, systemPrompt?: string, images?: any[]): Promise<string> {
     try {
       const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
       
@@ -36,7 +36,18 @@ export class OpenAIService {
         messages.push({ role: 'system', content: systemPrompt });
       }
       
-      messages.push({ role: 'user', content: prompt });
+      // Wenn Bilder vorhanden, verwende Vision-API
+      if (images && images.length > 0) {
+        messages.push({ 
+          role: 'user', 
+          content: [
+            { type: 'text', text: prompt },
+            ...images
+          ] as any
+        });
+      } else {
+        messages.push({ role: 'user', content: prompt });
+      }
 
       const completion = await this.openai.chat.completions.create({
         model: this.model,
