@@ -3,7 +3,7 @@ import { firebaseService } from '../firebaseService';
 import { paginationService } from '../paginationService';
 import { quoteCalculationService } from '../quoteCalculation';
 import { sendEmail } from '../emailService';
-import { emailTemplateService } from '../emailTemplateService';
+import emailTemplateService from '../emailTemplateService';
 import { pdfService } from '../pdfServiceWrapper';
 
 export interface AIContext {
@@ -36,7 +36,7 @@ export class AIContextManager {
     notes: CustomerNote[];
     emails: any[];
   }> {
-    const customer = await firebaseService.getCustomer(customerId);
+    const customer = await firebaseService.getCustomerById(customerId);
     if (!customer) {
       return {
         customer: null,
@@ -47,11 +47,13 @@ export class AIContextManager {
       };
     }
 
-    const [quotes, invoices, notes] = await Promise.all([
-      firebaseService.getQuotesByCustomer(customerId),
-      firebaseService.getInvoicesByCustomer(customerId),
-      firebaseService.getCustomerNotes(customerId)
+    const [quotes, invoices] = await Promise.all([
+      firebaseService.getQuotesByCustomerId(customerId),
+      firebaseService.getInvoicesByCustomer(customerId)
     ]);
+    
+    // Customer notes are part of the customer object
+    const notes = customer.notes || [];
 
     const emails = customer.emailHistory || [];
 
@@ -98,14 +100,14 @@ export class AIContextManager {
     return {
       templates,
       sendEmail: async (params) => {
-        return await emailService.sendEmail(params);
+        return await sendEmail(params);
       }
     };
   }
 
   async generatePDF(type: 'quote' | 'invoice', data: any): Promise<Blob> {
     if (type === 'quote') {
-      return await pdfService.generateQuotePDF(data.quote, data.customer);
+      return await pdfService.generatePDF(data.customer, data.quote);
     } else {
       return await pdfService.generateInvoicePDF(data.invoice, data.customer);
     }
@@ -113,11 +115,10 @@ export class AIContextManager {
 
   private async updateContext(): Promise<void> {
     try {
-      const [customers, quotes, invoices, consultants, emailTemplates] = await Promise.all([
+      const [customers, quotes, invoices, emailTemplates] = await Promise.all([
         this.getAllCustomers(),
         this.getAllQuotes(),
         this.getAllInvoices(),
-        firebaseService.getConsultants(),
         emailTemplateService.getTemplates()
       ]);
 
@@ -125,9 +126,10 @@ export class AIContextManager {
         customers,
         quotes,
         invoices,
-        consultants,
+        consultants: [], // TODO: Implement consultants loading
         emailTemplates,
-        priceCalculations: quoteCalculationService
+        priceCalculations: quoteCalculationService,
+        customerNotes: [] // TODO: Implement customer notes loading
       };
 
       this.lastUpdate = new Date();
