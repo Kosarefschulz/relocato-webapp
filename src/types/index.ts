@@ -49,7 +49,7 @@ export interface Quote {
   comment?: string;
   createdAt: Date;
   createdBy: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'invoiced';
+  status: 'draft' | 'sent' | 'confirmed' | 'accepted' | 'rejected' | 'invoiced';
   volume?: number;
   company?: 'relocato' | 'wertvoll'; // Firma für das Angebot
   distance?: number;
@@ -61,6 +61,23 @@ export interface Quote {
   // Template-Referenz
   templateId?: string;
   templateName?: string;
+  // Bestätigung
+  confirmationToken?: string;
+  confirmedAt?: Date;
+  confirmedBy?: string; // Email oder Name des Bestätigers
+  // Zahlungsinformationen
+  paymentInfo?: PaymentInfo;
+}
+
+export interface PaymentInfo {
+  method: 'cash' | 'ec_card' | 'bank_transfer' | 'paypal' | 'not_paid';
+  status: 'pending' | 'paid_on_site' | 'paid' | 'partially_paid';
+  paidAmount?: number;
+  paidDate?: Date;
+  confirmedBy?: string; // Mitarbeiter-ID oder Name
+  confirmedAt?: Date;
+  receiptNumber?: string;
+  notes?: string;
 }
 
 export interface QuoteVersion {

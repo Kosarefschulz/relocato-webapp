@@ -28,7 +28,7 @@ interface Quote {
   comment?: string;
   createdAt: Date;
   createdBy: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'invoiced';
+  status: 'draft' | 'sent' | 'confirmed' | 'accepted' | 'rejected' | 'invoiced';
 }
 
 const QuotesList: React.FC = () => {

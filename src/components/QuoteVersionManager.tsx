@@ -153,6 +153,7 @@ const QuoteVersionManager: React.FC<QuoteVersionManagerProps> = ({
     const colors = {
       draft: 'default',
       sent: 'primary',
+      confirmed: 'info',
       accepted: 'success',
       rejected: 'error',
       invoiced: 'secondary'
@@ -164,6 +165,7 @@ const QuoteVersionManager: React.FC<QuoteVersionManagerProps> = ({
     const labels = {
       draft: 'Entwurf',
       sent: 'Versendet',
+      confirmed: 'Bestätigt',
       accepted: 'Angenommen',
       rejected: 'Abgelehnt',
       invoiced: 'Berechnet'

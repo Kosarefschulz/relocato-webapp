@@ -13,7 +13,9 @@ import {
   Cancel as CancelIcon,
   Send as SendIcon,
   History as HistoryIcon,
-  Draw as DrawIcon
+  Draw as DrawIcon,
+  Payment as PaymentIcon,
+  Euro as EuroIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -198,8 +200,21 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                     Angebot #{quote.id}
                   </Typography>
                   <Chip 
-                    label={quote.status === 'draft' ? 'Entwurf' : quote.status === 'sent' ? 'Gesendet' : quote.status === 'accepted' ? 'Angenommen' : quote.status === 'rejected' ? 'Abgelehnt' : 'In Rechnung gestellt'}
-                    color={quote.status === 'accepted' ? 'success' : quote.status === 'sent' ? 'warning' : quote.status === 'rejected' ? 'error' : 'default'}
+                    label={
+                      quote.status === 'draft' ? 'Entwurf' : 
+                      quote.status === 'sent' ? 'Gesendet' : 
+                      quote.status === 'confirmed' ? 'Bestätigt' :
+                      quote.status === 'accepted' ? 'Angenommen' : 
+                      quote.status === 'rejected' ? 'Abgelehnt' : 
+                      'In Rechnung gestellt'
+                    }
+                    color={
+                      quote.status === 'confirmed' ? 'info' :
+                      quote.status === 'accepted' ? 'success' : 
+                      quote.status === 'sent' ? 'warning' : 
+                      quote.status === 'rejected' ? 'error' : 
+                      'default'
+                    }
                     size="small"
                   />
                 </Box>
@@ -208,9 +223,35 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   €{quote.price.toFixed(2)}
                 </Typography>
                 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   Erstellt am {quote.createdAt.toLocaleDateString('de-DE')}
                 </Typography>
+                
+                {quote.confirmedAt && (
+                  <Typography variant="body2" color="info.main" sx={{ mb: 1 }}>
+                    ✓ Bestätigt am {new Date(quote.confirmedAt).toLocaleDateString('de-DE')}
+                  </Typography>
+                )}
+                
+                {quote.paymentInfo && (
+                  <Box sx={{ mb: 2, p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
+                    <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <EuroIcon fontSize="small" />
+                      {quote.paymentInfo.status === 'paid' || quote.paymentInfo.status === 'paid_on_site' ? (
+                        <span style={{ color: 'green' }}>
+                          ✓ Bezahlt
+                          {quote.paymentInfo.method === 'ec_card' && ' (EC-Karte)'}
+                          {quote.paymentInfo.method === 'cash' && ' (Bar)'}
+                          {quote.paymentInfo.paidDate && ` am ${new Date(quote.paymentInfo.paidDate).toLocaleDateString('de-DE')}`}
+                        </span>
+                      ) : (
+                        <span style={{ color: 'orange' }}>
+                          ⏳ Zahlung ausstehend
+                        </span>
+                      )}
+                    </Typography>
+                  </Box>
+                )}
                 
                 {quote.comment && (
                   <Typography variant="body2" sx={{ 
@@ -345,13 +386,18 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                       <Button
                         size="small"
                         variant="contained"
-                        color="success"
+                        color="info"
                         startIcon={updatingStatus === quote.id ? <CircularProgress size={16} /> : <CheckCircleIcon />}
                         onClick={async (e) => {
                           e.stopPropagation();
                           setUpdatingStatus(quote.id);
                           try {
-                            await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'accepted' });
+                            await googleSheetsService.updateQuote(quote.id, { 
+                              ...quote, 
+                              status: 'confirmed',
+                              confirmedAt: new Date(),
+                              confirmedBy: 'Intern bestätigt'
+                            });
                             window.location.reload(); // Reload to refresh data
                           } catch (error) {
                             console.error('Error updating quote status:', error);
@@ -362,7 +408,7 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                         }}
                         disabled={updatingStatus === quote.id}
                       >
-                        Als angenommen markieren
+                        Als bestätigt markieren
                       </Button>
                       <Button
                         size="small"
@@ -385,6 +431,37 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                         disabled={updatingStatus === quote.id}
                       >
                         Als abgelehnt markieren
+                      </Button>
+                    </>
+                  )}
+                  
+                  {quote.status === 'confirmed' && (
+                    <>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<PaymentIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Open Payment Dialog
+                          alert('Zahlungsdialog wird implementiert');
+                        }}
+                      >
+                        Zahlung erfassen
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="success"
+                        startIcon={<ReceiptIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConvertingQuote(quote);
+                          setConvertDialogOpen(true);
+                        }}
+                      >
+                        Rechnung erstellen
                       </Button>
                     </>
                   )}

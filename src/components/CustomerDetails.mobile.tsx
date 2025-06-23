@@ -87,6 +87,7 @@ function TabPanel(props: TabPanelProps) {
 const quoteStatusConfig = {
   draft: { color: 'default', icon: <EditIcon />, label: 'Entwurf' },
   sent: { color: 'info', icon: <EmailIcon />, label: 'Gesendet' },
+  confirmed: { color: 'primary', icon: <CheckIcon />, label: 'Bestätigt' },
   accepted: { color: 'success', icon: <CheckIcon />, label: 'Angenommen' },
   rejected: { color: 'error', icon: <CancelIcon />, label: 'Abgelehnt' },
   invoiced: { color: 'warning', icon: <ReceiptIcon />, label: 'Berechnet' }
