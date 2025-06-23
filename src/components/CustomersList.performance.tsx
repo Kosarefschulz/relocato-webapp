@@ -314,6 +314,42 @@ const CustomersListPerformance: React.FC = () => {
     return () => window.removeEventListener('resize', updateHeight);
   }, [isMobile]);
 
+  const loadInitialCustomers = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Check cache first
+      const cachedCustomers = customerCacheService.getCachedCustomerList();
+      if (cachedCustomers && cachedCustomers.length > 0) {
+        setCustomers(cachedCustomers);
+        setLoading(false);
+        setTotalCustomers(cachedCustomers.length);
+      }
+
+      // Load customers and count in parallel
+      const [result, _] = await Promise.all([
+        paginationService.loadInitialCustomers({
+          pageSize: 500, // Load more customers initially to ensure none are missing
+          orderByField: sortBy === 'created' || sortBy === 'date' ? 'createdAt' : sortBy === 'name' ? 'name' : 'createdAt',
+          orderDirection: sortOrder
+        }),
+        getTotalCount()
+      ]);
+
+      setCustomers(result.data);
+      customerCacheService.cacheCustomerList(result.data);
+      setLastDoc(result.lastDoc);
+      setHasMore(result.hasMore);
+      
+      if (!result.hasMore) {
+        setTotalCustomers(result.data.length);
+      }
+    } catch (error) {
+      console.error('Error loading customers:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [sortBy, sortOrder]);
+
   // Load initial customers
   useEffect(() => {
     loadInitialCustomers();
@@ -334,43 +370,15 @@ const CustomersListPerformance: React.FC = () => {
       unsubscribe();
       paginationService.cleanup();
     };
-  }, []);
+  }, [loadInitialCustomers]);
 
-  const loadInitialCustomers = async () => {
-    setLoading(true);
-    try {
-      // Check cache first
-      const cachedCustomers = customerCacheService.getCachedCustomerList();
-      if (cachedCustomers && cachedCustomers.length > 0) {
-        setCustomers(cachedCustomers);
-        setLoading(false);
-        setTotalCustomers(cachedCustomers.length);
-      }
-
-      // Load customers and count in parallel
-      const [result, _] = await Promise.all([
-        paginationService.loadInitialCustomers({
-          pageSize: 100, // Load first 100 for better performance
-          orderByField: 'createdAt',
-          orderDirection: 'desc'
-        }),
-        getTotalCount()
-      ]);
-
-      setCustomers(result.data);
-      customerCacheService.cacheCustomerList(result.data);
-      setLastDoc(result.lastDoc);
-      setHasMore(result.hasMore);
-      
-      if (!result.hasMore) {
-        setTotalCustomers(result.data.length);
-      }
-    } catch (error) {
-      console.error('Error loading customers:', error);
-    } finally {
-      setLoading(false);
+  // Reload customers when sort changes (only for server-side sorting fields)
+  useEffect(() => {
+    if (sortBy === 'name' || (sortBy === 'created' && sortOrder === 'asc')) {
+      // For these cases, we need to reload from server with correct order
+      loadInitialCustomers();
     }
-  };
+  }, [sortBy, sortOrder, loadInitialCustomers]);
 
   const loadMoreCustomers = useCallback(async () => {
     if (!hasMore || loadingMore || !lastDoc) return;
@@ -379,8 +387,8 @@ const CustomersListPerformance: React.FC = () => {
     try {
       const result = await paginationService.loadMoreCustomers(lastDoc, {
         pageSize: 50,
-        orderByField: 'createdAt',
-        orderDirection: 'desc'
+        orderByField: sortBy === 'created' || sortBy === 'date' ? 'createdAt' : sortBy === 'name' ? 'name' : 'createdAt',
+        orderDirection: sortOrder
       });
 
       if (result.data.length > 0) {
@@ -398,7 +406,7 @@ const CustomersListPerformance: React.FC = () => {
     } finally {
       setLoadingMore(false);
     }
-  }, [hasMore, loadingMore, lastDoc]);
+  }, [hasMore, loadingMore, lastDoc, sortBy, sortOrder]);
 
   // Get total count
   const getTotalCount = async () => {
@@ -473,9 +481,9 @@ const CustomersListPerformance: React.FC = () => {
           comparison = movingA - movingB;
           break;
         case 'created':
-          const createdA = a.customerNumber ? parseInt(a.customerNumber.replace(/\D/g, '')) : 0;
-          const createdB = b.customerNumber ? parseInt(b.customerNumber.replace(/\D/g, '')) : 0;
-          comparison = createdB - createdA;
+          const createdA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const createdB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          comparison = createdA - createdB;
           break;
       }
       
