@@ -314,17 +314,17 @@ const CustomerInvoices: React.FC<CustomerInvoicesProps> = ({ invoices, customer 
                 {selectedInvoice.items?.map((item, idx) => (
                   <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">{item.description}</Typography>
-                    <Typography variant="body2">€{item.totalPrice.toFixed(2)}</Typography>
+                    <Typography variant="body2">€{(item.totalPrice || 0).toFixed(2)}</Typography>
                   </Box>
                 ))}
                 <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 2, pt: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">Netto</Typography>
-                    <Typography variant="body2">€{selectedInvoice.price.toFixed(2)}</Typography>
+                    <Typography variant="body2">€{(selectedInvoice.price || 0).toFixed(2)}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">MwSt. (19%)</Typography>
-                    <Typography variant="body2">€{selectedInvoice.taxAmount.toFixed(2)}</Typography>
+                    <Typography variant="body2">€{(selectedInvoice.taxAmount || 0).toFixed(2)}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                     <Typography variant="body1">Gesamt</Typography>
