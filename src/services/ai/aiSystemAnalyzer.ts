@@ -65,7 +65,7 @@ ${recentErrors}
     try {
       const customers = await firebaseService.getCustomers();
       const activeCustomers = customers.filter(c => {
-        const lastContact = new Date(c.updatedAt || c.createdAt || 0);
+        const lastContact = new Date(c.createdAt || 0);
         const daysSinceContact = (Date.now() - lastContact.getTime()) / (1000 * 60 * 60 * 24);
         return daysSinceContact < 90;
       });
