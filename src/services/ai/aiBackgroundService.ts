@@ -174,17 +174,6 @@ export class AIBackgroundService {
     if (data.sendEmail && customer.email) {
       // Generiere PDF
       const pdfBlob = await pdfService.generatePDF(customer, savedQuote);
-      
-      // Konvertiere Blob zu Base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
-        reader.onloadend = () => {
-          const base64 = reader.result as string;
-          resolve(base64.split(',')[1]);
-        };
-      });
-      reader.readAsDataURL(pdfBlob);
-      const pdfBase64 = await base64Promise;
 
       // Sende E-Mail
       await sendEmail({
@@ -200,8 +189,7 @@ export class AIBackgroundService {
         `,
         attachments: [{
           filename: `Angebot_${customer.name}_${new Date().toISOString().split('T')[0]}.pdf`,
-          content: pdfBase64,
-          encoding: 'base64'
+          content: pdfBlob
         }]
       });
     }
