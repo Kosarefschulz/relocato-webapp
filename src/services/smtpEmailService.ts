@@ -59,7 +59,6 @@ class SMTPEmailService {
     // Für die Entwicklung simulieren wir den E-Mail-Versand
     
     // Backend ist verfügbar - direkt zur E-Mail senden
-    console.log('🚀 Backend erkannt - sende echte E-Mail...');
 
     try {
       // Für Production: Backend-API Endpunkt aufrufen
@@ -77,11 +76,6 @@ class SMTPEmailService {
         }
       }
 
-      console.log('📮 Sende E-Mail via IONOS SMTP...');
-      console.log('Von:', this.config.from);
-      console.log('An:', emailData.to);
-      console.log('Betreff:', emailData.subject);
-      
       // API-URL für Vercel Hosting
       const API_URL = process.env.REACT_APP_API_URL || 'https://api.ruempel-schmiede.com';
       
@@ -104,9 +98,6 @@ class SMTPEmailService {
       const result = await response.json();
       
       if (result.success) {
-        console.log('✅ E-Mail erfolgreich gesendet via IONOS SMTP');
-        console.log('Message ID:', result.messageId);
-        
         // E-Mail in Historie speichern
         if (emailData.customerId) {
           emailHistoryService.saveEmailRecord({
@@ -170,7 +161,6 @@ class SMTPEmailService {
         
         // Schedule follow-ups
         await followUpService.scheduleFollowUp('quote_sent', customer, quote);
-        console.log('Follow-ups geplant für Kunde:', customer.name);
       }
     } catch (error) {
       console.error('Fehler beim Planen der Follow-ups:', error);

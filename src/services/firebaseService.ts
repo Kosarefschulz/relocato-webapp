@@ -754,6 +754,121 @@ class FirebaseService {
       throw error;
     }
   }
+
+  // ==================== INVOICE RECOGNITION ====================
+
+  async getRecognitionRules(): Promise<any[]> {
+    try {
+      if (!db) return [];
+      const rulesCollection = collection(db, 'recognitionRules');
+      const querySnapshot = await getDocs(rulesCollection);
+      
+      const rules: any[] = [];
+      querySnapshot.forEach((doc) => {
+        rules.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      return rules;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden der Recognition Rules:', error);
+      return [];
+    }
+  }
+
+  async saveRecognitionRule(rule: any): Promise<void> {
+    try {
+      if (!db) throw new Error('Firebase not initialized');
+      const rulesCollection = collection(db, 'recognitionRules');
+      await setDoc(doc(rulesCollection, rule.id), rule);
+      console.log('✅ Recognition Rule gespeichert:', rule.id);
+    } catch (error) {
+      console.error('❌ Fehler beim Speichern der Recognition Rule:', error);
+      throw error;
+    }
+  }
+
+  async updateRecognitionRule(id: string, rule: any): Promise<void> {
+    try {
+      if (!db) throw new Error('Firebase not initialized');
+      const rulesCollection = collection(db, 'recognitionRules');
+      await updateDoc(doc(rulesCollection, id), rule);
+      console.log('✅ Recognition Rule aktualisiert:', id);
+    } catch (error) {
+      console.error('❌ Fehler beim Aktualisieren der Recognition Rule:', error);
+      throw error;
+    }
+  }
+
+  async deleteRecognitionRule(id: string): Promise<void> {
+    try {
+      if (!db) throw new Error('Firebase not initialized');
+      const rulesCollection = collection(db, 'recognitionRules');
+      await deleteDoc(doc(rulesCollection, id));
+      console.log('✅ Recognition Rule gelöscht:', id);
+    } catch (error) {
+      console.error('❌ Fehler beim Löschen der Recognition Rule:', error);
+      throw error;
+    }
+  }
+
+  async getEmailInvoices(): Promise<any[]> {
+    try {
+      if (!db) return [];
+      const emailInvoicesCollection = collection(db, 'emailInvoices');
+      const querySnapshot = await getDocs(emailInvoicesCollection);
+      
+      const invoices: any[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        invoices.push({
+          id: doc.id,
+          ...data,
+          receivedDate: data.receivedDate?.toDate() || new Date(),
+          processedDate: data.processedDate?.toDate()
+        });
+      });
+      
+      return invoices;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden der Email Invoices:', error);
+      return [];
+    }
+  }
+
+  async saveEmailInvoice(invoice: any): Promise<void> {
+    try {
+      if (!db) throw new Error('Firebase not initialized');
+      const emailInvoicesCollection = collection(db, 'emailInvoices');
+      await setDoc(doc(emailInvoicesCollection, invoice.id), {
+        ...invoice,
+        receivedDate: Timestamp.fromDate(invoice.receivedDate),
+        processedDate: invoice.processedDate ? Timestamp.fromDate(invoice.processedDate) : null
+      });
+      console.log('✅ Email Invoice gespeichert:', invoice.id);
+    } catch (error) {
+      console.error('❌ Fehler beim Speichern der Email Invoice:', error);
+      throw error;
+    }
+  }
+
+  async updateEmailInvoice(id: string, invoice: any): Promise<void> {
+    try {
+      if (!db) throw new Error('Firebase not initialized');
+      const emailInvoicesCollection = collection(db, 'emailInvoices');
+      await updateDoc(doc(emailInvoicesCollection, id), {
+        ...invoice,
+        receivedDate: Timestamp.fromDate(invoice.receivedDate),
+        processedDate: invoice.processedDate ? Timestamp.fromDate(invoice.processedDate) : null
+      });
+      console.log('✅ Email Invoice aktualisiert:', id);
+    } catch (error) {
+      console.error('❌ Fehler beim Aktualisieren der Email Invoice:', error);
+      throw error;
+    }
+  }
 }
 
 export const firebaseService = new FirebaseService();

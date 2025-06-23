@@ -445,6 +445,77 @@ class UnifiedDatabaseServiceOptimized {
     }
   }
 
+  /**
+   * Invoice Recognition Operations
+   */
+  async getRecognitionRules(): Promise<any[]> {
+    try {
+      return await firebaseService.getRecognitionRules();
+    } catch (error) {
+      console.error('Error fetching recognition rules:', error);
+      return [];
+    }
+  }
+
+  async saveRecognitionRule(rule: any): Promise<boolean> {
+    try {
+      await firebaseService.saveRecognitionRule(rule);
+      return true;
+    } catch (error) {
+      console.error('Error saving recognition rule:', error);
+      return false;
+    }
+  }
+
+  async updateRecognitionRule(id: string, rule: any): Promise<boolean> {
+    try {
+      await firebaseService.updateRecognitionRule(id, rule);
+      return true;
+    } catch (error) {
+      console.error('Error updating recognition rule:', error);
+      return false;
+    }
+  }
+
+  async deleteRecognitionRule(id: string): Promise<boolean> {
+    try {
+      await firebaseService.deleteRecognitionRule(id);
+      return true;
+    } catch (error) {
+      console.error('Error deleting recognition rule:', error);
+      return false;
+    }
+  }
+
+  async getEmailInvoices(): Promise<any[]> {
+    try {
+      return await firebaseService.getEmailInvoices();
+    } catch (error) {
+      console.error('Error fetching email invoices:', error);
+      return [];
+    }
+  }
+
+  async saveEmailInvoice(invoice: any): Promise<boolean> {
+    try {
+      await firebaseService.saveEmailInvoice(invoice);
+      return true;
+    } catch (error) {
+      console.error('Error saving email invoice:', error);
+      return false;
+    }
+  }
+
+  async updateEmailInvoice(id: string, invoice: any): Promise<boolean> {
+    try {
+      await firebaseService.updateEmailInvoice(id, invoice);
+      return true;
+    } catch (error) {
+      console.error('Error updating email invoice:', error);
+      return false;
+    }
+  }
+
   async testConnection(): Promise<void> {
     console.log('🧪 Testing database connection...');
     try {

@@ -98,7 +98,6 @@ class InvoiceRecognitionService {
     receivedDate: Date;
     attachments: EmailAttachment[];
   }): Promise<EmailInvoice> {
-    console.log('📧 Processing email for invoice recognition:', email.subject);
 
     // Recognize company based on rules
     const recognizedCompany = this.recognizeCompany(email);
@@ -156,7 +155,6 @@ class InvoiceRecognitionService {
       }
 
       if (matches) {
-        console.log(`✅ Matched rule: ${rule.name} -> ${rule.targetAccount}`);
         return rule.targetAccount;
       }
     }

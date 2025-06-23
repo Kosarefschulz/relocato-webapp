@@ -197,6 +197,49 @@ class FirebaseServiceWrapper {
   async getInvoiceById(invoiceId: string): Promise<Invoice | null> {
     return this.getInvoice(invoiceId);
   }
+
+  // Invoice Recognition Methods
+  async getRecognitionRules(): Promise<any[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getRecognitionRules?.() || [];
+  }
+
+  async saveRecognitionRule(rule: any): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.saveRecognitionRule?.(rule);
+  }
+
+  async updateRecognitionRule(id: string, rule: any): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.updateRecognitionRule?.(id, rule);
+  }
+
+  async deleteRecognitionRule(id: string): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.deleteRecognitionRule?.(id);
+  }
+
+  async getEmailInvoices(): Promise<any[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getEmailInvoices?.() || [];
+  }
+
+  async saveEmailInvoice(invoice: any): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.saveEmailInvoice?.(invoice);
+  }
+
+  async updateEmailInvoice(id: string, invoice: any): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.updateEmailInvoice?.(id, invoice);
+  }
 }
 
 export const firebaseService = new FirebaseServiceWrapper();
