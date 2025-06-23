@@ -44,6 +44,8 @@ import { useNavigate } from 'react-router-dom';
 import { Invoice, Quote, Customer } from '../types';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { motion } from 'framer-motion';
+import InvoiceEmailImportConfig from '../components/InvoiceEmailImportConfig';
+import UnprocessedEmailInvoices from '../components/UnprocessedEmailInvoices';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -450,46 +452,11 @@ const AccountingDashboard: React.FC = () => {
           </TabPanel>
           
           <TabPanel value={tabValue} index={3}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                      <BankIcon color="primary" />
-                      <Typography variant="h6">Steinpfleger Konto</Typography>
-                    </Stack>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Email-basierte Rechnungserkennung für Steinpfleger-bezogene Belege
-                    </Typography>
-                    <Button variant="outlined" fullWidth startIcon={<EmailIcon />}>
-                      Email-Import konfigurieren
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                      <BankIcon color="secondary" />
-                      <Typography variant="h6">Wertvoll Konto</Typography>
-                    </Stack>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Email-basierte Rechnungserkennung für Wertvoll-bezogene Belege
-                    </Typography>
-                    <Button variant="outlined" fullWidth startIcon={<EmailIcon />}>
-                      Email-Import konfigurieren
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-            
-            <Alert severity="info" sx={{ mt: 3 }}>
-              Die automatische Email-Rechnungserkennung sortiert eingehende Rechnungen nach Absender-Email 
-              und prüft auf das Vorhandensein einer PDF-Rechnung im Anhang.
-            </Alert>
+            <Stack spacing={3}>
+              <InvoiceEmailImportConfig />
+              <Divider />
+              <UnprocessedEmailInvoices />
+            </Stack>
           </TabPanel>
         </Box>
       </Paper>
