@@ -39,140 +39,119 @@ export const generateWertvollProfessionalPDF = async (
     const company = COMPANY_CONFIGS.wertvoll;
     const pageWidth = 210;
     const pageHeight = 297;
-    const margin = 20;
+    const margin = 15; // 15mm margins like HTML
     const rightMargin = pageWidth - margin;
-    let yPosition = 20;
+    let yPosition = margin;
 
-    // Farbschema
-    const primaryColor = { r: 18, g: 86, b: 136 }; // #125688
-    const accentColor = { r: 255, g: 152, b: 0 }; // #FF9800
-    const grayLight = { r: 245, g: 245, b: 245 };
-    const grayDark = { r: 100, g: 100, b: 100 };
+    // Font sizes from HTML
+    const fontSizes = {
+      companyName: 16,
+      services: 8,
+      contact: 8,
+      addressLine: 7,
+      recipient: 9,
+      reference: 11,
+      date: 9,
+      body: 10,
+      table: 9,
+      serviceDesc: 8,
+      info: 9,
+      footer: 7
+    };
+
+    // Colors
+    const colors = {
+      primary: { r: 0, g: 0, b: 0 },
+      gray: { r: 102, g: 102, b: 102 },
+      lightGray: { r: 245, g: 245, b: 245 },
+      borderGray: { r: 221, g: 221, b: 221 }
+    };
 
     // Helper function für neue Seite
     const checkNewPage = (requiredSpace: number) => {
-      if (yPosition + requiredSpace > pageHeight - 40) {
+      if (yPosition + requiredSpace > pageHeight - 30) {
         doc.addPage();
-        yPosition = 20;
+        yPosition = margin;
         return true;
       }
       return false;
     };
 
-    // Header mit professionellem Design
-    const addHeader = () => {
-      // Farbiger Header-Bereich
-      doc.setFillColor(primaryColor.r, primaryColor.g, primaryColor.b);
-      doc.rect(0, 0, pageWidth, 45, 'F');
-      
-      // Firmenname und Logo-Bereich
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(24);
-      doc.text('WERTVOLL', margin, 20);
-      
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'normal');
-      doc.text('DIENSTLEISTUNGEN GMBH', margin, 28);
-      
-      doc.setFontSize(8);
-      doc.text(company.services, margin, 35);
-      
-      // Kontaktdaten rechts
-      doc.setFontSize(9);
-      const contactY = 15;
-      doc.text(company.address.street, rightMargin, contactY, { align: 'right' });
-      doc.text(`${company.address.zip} ${company.address.city}`, rightMargin, contactY + 5, { align: 'right' });
-      doc.text(`Tel: ${company.contact.phone}`, rightMargin, contactY + 10, { align: 'right' });
-      doc.text(`Mobil: ${company.contact.mobile}`, rightMargin, contactY + 15, { align: 'right' });
-      doc.text(company.contact.email, rightMargin, contactY + 20, { align: 'right' });
-      
-      yPosition = 55;
-    };
-
-    // Footer
-    const addFooter = () => {
-      const footerY = pageHeight - 20;
-      
-      // Footer-Linie
-      doc.setDrawColor(primaryColor.r, primaryColor.g, primaryColor.b);
-      doc.setLineWidth(0.5);
-      doc.line(margin, footerY - 15, rightMargin, footerY - 15);
-      
-      // Footer-Text
-      doc.setFontSize(8);
-      doc.setTextColor(grayDark.r, grayDark.g, grayDark.b);
-      doc.setFont('helvetica', 'normal');
-      
-      const footerLines = [
-        `${company.legalName} | Geschäftsführer: ${company.ceo.join(', ')}`,
-        `${company.legal.court} ${company.legal.hrb} | Steuernummer: ${company.legal.taxNumber}`,
-        `${company.bank.name} | IBAN: ${company.bank.iban}`
-      ];
-      
-      footerLines.forEach((line, index) => {
-        doc.text(line, pageWidth / 2, footerY - 10 + (index * 4), { align: 'center' });
-      });
-    };
-
-    // Erste Seite
-    addHeader();
+    // HEADER - Kompakt wie im HTML
+    // Firmenname links
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(fontSizes.companyName);
+    doc.text('Wertvoll Dienstleistungen GmbH', margin, yPosition);
     
-    // Empfängeradresse
-    doc.setTextColor(0, 0, 0);
+    // Services darunter
+    yPosition += 6;
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
+    doc.setFontSize(fontSizes.services);
+    doc.setTextColor(colors.gray.r, colors.gray.g, colors.gray.b);
+    doc.text('Rückbau • Umzüge • Entrümpelungen • Entkernung • Renovierungsarbeiten • Gewerbeauflösungen', margin, yPosition);
     
-    // Absenderzeile
-    doc.setFontSize(8);
-    doc.text(`${company.legalName} • ${company.address.street} • ${company.address.zip} ${company.address.city}`, margin, yPosition);
+    // Kontakt rechts
+    const contactY = margin;
+    doc.setFontSize(fontSizes.contact);
+    doc.setTextColor(colors.primary.r, colors.primary.g, colors.primary.b);
+    doc.text(company.address.street, rightMargin, contactY, { align: 'right' });
+    doc.text(`${company.address.zip} ${company.address.city}`, rightMargin, contactY + 3.5, { align: 'right' });
+    doc.text(`Tel: ${company.contact.phone}`, rightMargin, contactY + 7, { align: 'right' });
+    doc.text(`Mobil: ${company.contact.mobile}`, rightMargin, contactY + 10.5, { align: 'right' });
+    doc.text(company.contact.email, rightMargin, contactY + 14, { align: 'right' });
+    
+    yPosition += 12;
+    
+    // Absenderzeile mit Unterstrich
+    doc.setFontSize(fontSizes.addressLine);
+    const addressLineText = `${company.legalName} • ${company.address.street} • ${company.address.zip} ${company.address.city}`;
+    doc.text(addressLineText, margin, yPosition);
+    
+    // Unterstrich für Absenderzeile
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.1);
+    doc.line(margin, yPosition + 1, rightMargin, yPosition + 1);
     
     yPosition += 10;
     
-    // Empfänger-Box
-    doc.setFillColor(grayLight.r, grayLight.g, grayLight.b);
-    doc.rect(margin - 2, yPosition - 2, 85, 35, 'F');
-    
-    doc.setFontSize(11);
+    // Empfängeradresse
     doc.setFont('helvetica', 'normal');
-    doc.text(customer.name || 'Kunde', margin, yPosition + 5);
+    doc.setFontSize(fontSizes.recipient);
+    doc.text(customer.name || 'Kunde', margin, yPosition);
     if (customer.address) {
-      doc.text(customer.address, margin, yPosition + 11);
+      doc.text(customer.address, margin, yPosition + 4);
     }
     if (customer.city && customer.zip) {
-      doc.text(`${customer.zip} ${customer.city}`, margin, yPosition + 17);
+      doc.text(`${customer.zip} ${customer.city}`, margin, yPosition + 8);
     }
-    
-    // Datum rechts
-    const currentDate = new Date();
-    doc.setFontSize(10);
-    doc.text(currentDate.toLocaleDateString('de-DE', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }), rightMargin, yPosition + 5, { align: 'right' });
-    
-    yPosition += 45;
-    
-    // Dokumenttitel
-    const docType = isInvoice ? 'RECHNUNG' : 'ANGEBOT';
-    const docNumber = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}-${customer.name ? customer.name.substring(0, 3).toUpperCase() : 'XXX'}`;
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.setTextColor(primaryColor.r, primaryColor.g, primaryColor.b);
-    doc.text(docType, margin, yPosition);
-    
-    doc.setFontSize(12);
-    doc.setTextColor(grayDark.r, grayDark.g, grayDark.b);
-    doc.text(`Nr. ${docNumber}`, margin, yPosition + 8);
     
     yPosition += 20;
     
-    // Anrede
-    doc.setTextColor(0, 0, 0);
+    // Datum und Referenz
+    const currentDate = new Date();
+    const docNumber = isInvoice 
+      ? `Rechnung Nr. ${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}-001`
+      : `Angebot Nr. ${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}-001`;
+    
+    // Referenznummer links
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(fontSizes.reference);
+    doc.text(docNumber, margin, yPosition);
+    
+    // Datum rechts
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
+    doc.setFontSize(fontSizes.date);
+    doc.text(`${company.address.city}, ${currentDate.toLocaleDateString('de-DE', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}`, rightMargin, yPosition, { align: 'right' });
+    
+    yPosition += 10;
+    
+    // Anrede und Einleitung
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(fontSizes.body);
     
     const greeting = customer.salutation === 'Herr' 
       ? `Sehr geehrter Herr ${customer.name?.split(' ').pop()},`
@@ -181,213 +160,248 @@ export const generateWertvollProfessionalPDF = async (
       : `Sehr geehrte Damen und Herren,`;
     
     doc.text(greeting, margin, yPosition);
-    yPosition += 8;
+    yPosition += 5;
     
     const introText = isInvoice
-      ? 'vielen Dank für Ihren Auftrag. Hiermit stellen wir Ihnen folgende Leistungen in Rechnung:'
+      ? 'vielen Dank für Ihren Auftrag. Wir berechnen Ihnen folgende Leistungen:'
       : 'vielen Dank für Ihre Anfrage. Gerne unterbreiten wir Ihnen folgendes Angebot:';
     
     doc.text(introText, margin, yPosition);
-    yPosition += 15;
+    yPosition += 10;
     
-    // Leistungstabelle
-    const tableHeaders = ['Pos.', 'Leistungsbeschreibung', 'Menge', 'Einzelpreis', 'Gesamtpreis'];
-    const colWidths = [15, 95, 25, 25, 30];
-    const colX = [margin, margin + 15, margin + 110, margin + 135, margin + 160];
+    // TABELLE - Exakt wie im HTML
+    doc.setFontSize(fontSizes.table);
     
-    // Tabellen-Header
-    doc.setFillColor(primaryColor.r, primaryColor.g, primaryColor.b);
-    doc.rect(margin, yPosition, rightMargin - margin, 10, 'F');
+    // Tabellenkopf
+    doc.setFillColor(colors.lightGray.r, colors.lightGray.g, colors.lightGray.b);
+    doc.setDrawColor(colors.borderGray.r, colors.borderGray.g, colors.borderGray.b);
+    doc.setLineWidth(0.1);
     
-    doc.setTextColor(255, 255, 255);
+    // Header-Zeile
+    const tableX = margin;
+    const tableWidth = rightMargin - margin;
+    const colWidths = {
+      pos: tableWidth * 0.08,
+      desc: tableWidth * 0.62,
+      qty: tableWidth * 0.15,
+      price: tableWidth * 0.15
+    };
+    
+    // Header-Hintergrund
+    doc.rect(tableX, yPosition, tableWidth, 8, 'FD');
+    
+    // Vertikale Linien
+    let currentX = tableX;
+    doc.line(currentX, yPosition, currentX, yPosition + 8); // Links
+    currentX += colWidths.pos;
+    doc.line(currentX, yPosition, currentX, yPosition + 8);
+    currentX += colWidths.desc;
+    doc.line(currentX, yPosition, currentX, yPosition + 8);
+    currentX += colWidths.qty;
+    doc.line(currentX, yPosition, currentX, yPosition + 8);
+    doc.line(tableX + tableWidth, yPosition, tableX + tableWidth, yPosition + 8); // Rechts
+    
+    // Header-Text
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
+    doc.text('Pos.', tableX + colWidths.pos / 2, yPosition + 5, { align: 'center' });
+    doc.text('Leistungsbeschreibung', tableX + colWidths.pos + 3, yPosition + 5);
+    doc.text('Menge', tableX + colWidths.pos + colWidths.desc + colWidths.qty / 2, yPosition + 5, { align: 'center' });
+    doc.text('Preis', tableX + colWidths.pos + colWidths.desc + colWidths.qty + colWidths.price - 3, yPosition + 5, { align: 'right' });
     
-    tableHeaders.forEach((header, i) => {
-      const align = i >= 2 ? 'right' : 'left';
-      const xPos = i >= 2 ? colX[i] + colWidths[i] - 3 : colX[i] + 3;
-      doc.text(header, xPos, yPosition + 6, { align });
-    });
+    yPosition += 8;
     
-    yPosition += 12;
-    
-    // Tabellen-Inhalt
-    doc.setTextColor(0, 0, 0);
+    // Tabellendaten
     doc.setFont('helvetica', 'normal');
     
-    const items = quote.items || [{
-      position: 1,
-      name: 'Dienstleistungspaket',
-      description: 'Professionelle Ausführung aller vereinbarten Leistungen durch qualifiziertes Fachpersonal',
-      quantity: '1',
-      price: quote.price || 0
-    }];
+    // Default items wenn keine vorhanden
+    const items = quote.items || [
+      {
+        position: 1,
+        name: 'Dienstleistungspaket',
+        description: 'Professionelle Ausführung aller vereinbarten Leistungen',
+        quantity: 'pauschal',
+        price: quote.price || 0
+      }
+    ];
     
     let subtotal = 0;
     
-    items.forEach((item, index) => {
-      checkNewPage(25);
+    items.forEach((item) => {
+      checkNewPage(15);
       
-      // Alternierende Zeilenfarben
-      if (index % 2 === 0) {
-        doc.setFillColor(grayLight.r, grayLight.g, grayLight.b);
-        doc.rect(margin, yPosition - 2, rightMargin - margin, 20, 'F');
-      }
+      const rowHeight = 15;
+      
+      // Zeilen-Hintergrund (weiß)
+      doc.setFillColor(255, 255, 255);
+      doc.rect(tableX, yPosition, tableWidth, rowHeight, 'FD');
+      
+      // Rahmen für jede Zelle
+      currentX = tableX;
+      doc.rect(currentX, yPosition, colWidths.pos, rowHeight); // Pos
+      currentX += colWidths.pos;
+      doc.rect(currentX, yPosition, colWidths.desc, rowHeight); // Beschreibung
+      currentX += colWidths.desc;
+      doc.rect(currentX, yPosition, colWidths.qty, rowHeight); // Menge
+      currentX += colWidths.qty;
+      doc.rect(currentX, yPosition, colWidths.price, rowHeight); // Preis
       
       // Position
-      doc.text(item.position.toString(), colX[0] + 3, yPosition + 3);
+      doc.text(item.position.toString(), tableX + colWidths.pos / 2, yPosition + 5, { align: 'center' });
       
-      // Leistung
+      // Leistungsbeschreibung
+      const descX = tableX + colWidths.pos + 3;
       doc.setFont('helvetica', 'bold');
-      doc.text(item.name, colX[1] + 3, yPosition + 3);
+      doc.text(item.name, descX, yPosition + 5);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      const descLines = doc.splitTextToSize(item.description, colWidths[1] - 6);
-      descLines.forEach((line: string, lineIndex: number) => {
-        if (lineIndex < 2) { // Max 2 Zeilen
-          doc.text(line, colX[1] + 3, yPosition + 8 + (lineIndex * 4));
-        }
-      });
-      doc.setFontSize(10);
+      doc.setFontSize(fontSizes.serviceDesc);
+      doc.setTextColor(colors.gray.r, colors.gray.g, colors.gray.b);
+      doc.text(item.description, descX, yPosition + 9);
+      doc.setTextColor(colors.primary.r, colors.primary.g, colors.primary.b);
+      doc.setFontSize(fontSizes.table);
       
       // Menge
-      doc.text(item.quantity, colX[2] + colWidths[2] - 3, yPosition + 3, { align: 'right' });
+      doc.text(item.quantity, tableX + colWidths.pos + colWidths.desc + colWidths.qty / 2, yPosition + 5, { align: 'center' });
       
-      // Einzelpreis
-      const unitPrice = item.price / parseFloat(item.quantity) || item.price;
-      doc.text(`${unitPrice.toFixed(2).replace('.', ',')} €`, colX[3] + colWidths[3] - 3, yPosition + 3, { align: 'right' });
-      
-      // Gesamtpreis
-      doc.text(`${item.price.toFixed(2).replace('.', ',')} €`, colX[4] + colWidths[4] - 3, yPosition + 3, { align: 'right' });
+      // Preis
+      doc.text(`${item.price.toFixed(2).replace('.', ',')} €`, tableX + tableWidth - 3, yPosition + 5, { align: 'right' });
       
       subtotal += item.price;
-      yPosition += 22;
+      yPosition += rowHeight;
     });
     
-    // Zusammenfassung
-    yPosition += 10;
-    
-    // Trennlinie
-    doc.setDrawColor(primaryColor.r, primaryColor.g, primaryColor.b);
-    doc.setLineWidth(0.5);
-    doc.line(colX[3], yPosition, rightMargin, yPosition);
-    
-    yPosition += 8;
+    // Summenbereich
+    yPosition += 5;
     
     // Zwischensumme
-    doc.setFont('helvetica', 'normal');
-    doc.text('Zwischensumme netto:', colX[3], yPosition);
+    const sumX = tableX + colWidths.pos + colWidths.desc;
+    doc.text('Zwischensumme netto', sumX, yPosition);
     doc.text(`${subtotal.toFixed(2).replace('.', ',')} €`, rightMargin, yPosition, { align: 'right' });
     
-    yPosition += 6;
+    yPosition += 5;
     
     // MwSt
     const vat = subtotal * 0.19;
-    doc.text('zzgl. 19% MwSt.:', colX[3], yPosition);
+    doc.text('zzgl. 19% MwSt.', sumX, yPosition);
     doc.text(`${vat.toFixed(2).replace('.', ',')} €`, rightMargin, yPosition, { align: 'right' });
     
-    yPosition += 8;
+    yPosition += 5;
+    
+    // Trennlinie über Gesamtsumme
+    doc.setLineWidth(0.5);
+    doc.line(sumX, yPosition, rightMargin, yPosition);
+    
+    yPosition += 5;
     
     // Gesamtsumme
-    doc.setLineWidth(1);
-    doc.line(colX[3], yPosition - 2, rightMargin, yPosition - 2);
-    
     const total = subtotal + vat;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('Gesamtbetrag:', colX[3], yPosition + 5);
-    doc.setTextColor(primaryColor.r, primaryColor.g, primaryColor.b);
-    doc.text(`${total.toFixed(2).replace('.', ',')} €`, rightMargin, yPosition + 5, { align: 'right' });
+    doc.text('Gesamtbetrag brutto', sumX, yPosition);
+    doc.text(`${total.toFixed(2).replace('.', ',')} €`, rightMargin, yPosition, { align: 'right' });
     
-    doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
+    yPosition += 10;
     
-    yPosition += 20;
-    
-    // Zusatzinformationen
-    checkNewPage(80);
-    
+    // Info-Blöcke
     if (!isInvoice) {
-      // Angebotsbedingungen
-      doc.setFillColor(grayLight.r, grayLight.g, grayLight.b);
-      doc.rect(margin, yPosition, rightMargin - margin, 8, 'F');
+      // Leistungsumfang
+      doc.setFontSize(fontSizes.info);
       doc.setFont('helvetica', 'bold');
-      doc.text('ANGEBOTSBEDINGUNGEN', margin + 3, yPosition + 5);
-      
-      yPosition += 12;
+      doc.text('Leistungsumfang:', margin, yPosition);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
       
-      const conditions = [
-        { title: 'Leistungsumfang:', text: 'Alle Arbeiten werden fachgerecht durch qualifiziertes Personal ausgeführt.' },
-        { title: 'Zahlungsbedingungen:', text: '50% Anzahlung bei Auftragserteilung, Restzahlung nach Fertigstellung.' },
-        { title: 'Ausführungszeitraum:', text: 'Nach Vereinbarung, voraussichtliche Dauer: 3-5 Werktage.' },
-        { title: 'Gültigkeit:', text: `Dieses Angebot ist gültig bis zum ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('de-DE')}.` }
+      yPosition += 5;
+      const leistungen = [
+        '• Ausführung durch qualifiziertes Fachpersonal',
+        '• Ordnungsgemäße Entsorgung gemäß Vorschriften',
+        '• Verwendung hochwertiger Materialien',
+        '• Besenreine Übergabe'
       ];
       
-      conditions.forEach(condition => {
-        doc.setFont('helvetica', 'bold');
-        doc.text(condition.title, margin, yPosition);
-        doc.setFont('helvetica', 'normal');
-        const textX = margin + doc.getTextWidth(condition.title) + 2;
-        doc.text(condition.text, textX, yPosition);
-        yPosition += 6;
+      leistungen.forEach(punkt => {
+        doc.text(punkt, margin + 3, yPosition);
+        yPosition += 4;
       });
+      
+      yPosition += 5;
+      
+      // Zahlungsbedingungen etc.
+      doc.setFont('helvetica', 'bold');
+      doc.text('Zahlungsbedingungen:', margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(' 50% Anzahlung, Rest nach Fertigstellung', margin + 35, yPosition);
+      
+      yPosition += 5;
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('Ausführungszeitraum:', margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(' Nach Absprache, ca. 3-5 Werktage', margin + 35, yPosition);
+      
+      yPosition += 5;
+      
+      const validUntil = new Date();
+      validUntil.setDate(validUntil.getDate() + 30);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Angebotsgültigkeit:', margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(` Bis ${validUntil.toLocaleDateString('de-DE')}`, margin + 32, yPosition);
+      
+      yPosition += 10;
     } else {
-      // Rechnungsbedingungen
+      // Rechnungsspezifische Infos
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 14);
-      
-      doc.setFillColor(accentColor.r, accentColor.g, accentColor.b);
-      doc.rect(margin, yPosition, rightMargin - margin, 25, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.text('ZAHLUNGSINFORMATIONEN', margin + 3, yPosition + 6);
-      
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Zahlungsziel: ${dueDate.toLocaleDateString('de-DE')}`, margin + 3, yPosition + 12);
-      doc.text('Bitte überweisen Sie den Betrag unter Angabe der Rechnungsnummer.', margin + 3, yPosition + 18);
-      
-      doc.setTextColor(0, 0, 0);
-      yPosition += 30;
+      doc.text(`Zahlungsziel: ${dueDate.toLocaleDateString('de-DE')}`, margin, yPosition);
+      yPosition += 5;
+      doc.text('Bitte überweisen Sie den Betrag unter Angabe der Rechnungsnummer.', margin, yPosition);
+      yPosition += 10;
     }
     
     // Abschlusstext
+    doc.text('Für Rückfragen stehen wir Ihnen jederzeit zur Verfügung.', margin, yPosition);
+    
     yPosition += 10;
-    doc.setFontSize(11);
-    doc.text('Wir freuen uns auf eine erfolgreiche Zusammenarbeit!', margin, yPosition);
     
-    yPosition += 8;
-    doc.text('Für Rückfragen stehen wir Ihnen jederzeit gerne zur Verfügung.', margin, yPosition);
-    
-    yPosition += 15;
+    // Grußformel
     doc.text('Mit freundlichen Grüßen', margin, yPosition);
+    yPosition += 3;
+    doc.text('Wertvoll Dienstleistungen GmbH', margin, yPosition);
     
-    // Unterschrift
+    // Unterschriftslinie
     yPosition += 25;
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
-    doc.line(margin, yPosition, margin + 70, yPosition);
+    doc.setLineWidth(0.1);
+    doc.line(margin, yPosition, margin + 40, yPosition);
     
-    yPosition += 5;
-    doc.setFontSize(10);
-    company.ceo.forEach((ceo, index) => {
-      doc.text(ceo, margin, yPosition + (index * 5));
-    });
-    doc.text('Geschäftsführung', margin, yPosition + 12);
+    yPosition += 3;
+    doc.text('Michael Michailowski', margin, yPosition);
+    yPosition += 3;
+    doc.text('Geschäftsführer', margin, yPosition);
     
-    // Footer auf jeder Seite
+    // Footer - auf jeder Seite
+    const addFooter = () => {
+      const footerY = pageHeight - 15;
+      
+      // Footer-Linie
+      doc.setDrawColor(colors.borderGray.r, colors.borderGray.g, colors.borderGray.b);
+      doc.setLineWidth(0.1);
+      doc.line(margin, footerY - 5, rightMargin, footerY - 5);
+      
+      // Footer-Text
+      doc.setFontSize(fontSizes.footer);
+      doc.setTextColor(colors.gray.r, colors.gray.g, colors.gray.b);
+      
+      const footerLine1 = `${company.legalName} | Geschäftsführer: ${company.ceo.join(', ')}`;
+      const footerLine2 = `Bank: ${company.bank.name} | IBAN: ${company.bank.iban} | Amtsgericht: ${company.legal.court} ${company.legal.hrb} | StNr: ${company.legal.taxNumber}`;
+      
+      doc.text(footerLine1, pageWidth / 2, footerY - 2, { align: 'center' });
+      doc.text(footerLine2, pageWidth / 2, footerY + 1, { align: 'center' });
+    };
+    
+    // Footer auf jeder Seite hinzufügen
     const pageCount = doc.internal.pages.length - 1;
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       addFooter();
-      
-      // Seitenzahl
-      doc.setFontSize(8);
-      doc.setTextColor(grayDark.r, grayDark.g, grayDark.b);
-      doc.text(`Seite ${i} von ${pageCount}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
     }
     
     return doc.output('blob');

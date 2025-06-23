@@ -62,7 +62,6 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
   const downloadPDF = async (quote: Quote, signatureData?: SignatureData) => {
     try {
       setLoadingPdf(quote.id);
-      console.log('📄 Erstelle PDF für Angebot:', quote.id);
       
       // Erstelle QuoteData aus dem Quote-Objekt
       const quoteData = {
@@ -87,8 +86,6 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
           ? await generateWertvollProfessionalPDF(customer, quoteData)
           : await generatePDF(customer, quoteData);
         
-      console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
-      
       // Analytics: PDF Export
       analytics.trackPDFExport('quote', quote.id);
       
@@ -114,7 +111,7 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       
     } catch (error) {
-      console.error('❌ PDF Download Error:', error);
+      console.error('PDF Download Error:', error);
       alert('Fehler beim Erstellen der PDF. Bitte versuchen Sie es erneut.');
     } finally {
       setLoadingPdf(null);
@@ -136,11 +133,91 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
       await downloadPDF(quoteForSignature, signatureData);
     } else if (signatureAction === 'email') {
       // Email mit digitaler Unterschrift wird später implementiert
-      console.log('Email mit digitaler Unterschrift noch nicht implementiert');
     }
     
     setQuoteForSignature(null);
     setSignatureAction(null);
+  };
+
+  const handleSendQuoteEmail = async (quote: Quote) => {
+    try {
+      setUpdatingStatus(quote.id);
+      
+      // Generiere Bestätigungs-Token
+      const token = tokenService.generateQuoteToken(quote);
+      const confirmationUrl = tokenService.generateConfirmationUrl(token);
+      
+      // Generiere PDF
+      const pdfBlob = await generatePDF(customer, quote);
+      
+      // E-Mail-Inhalt
+      const emailContent = `
+Sehr geehrte/r ${customer.name},
+
+vielen Dank für Ihre Anfrage. Anbei erhalten Sie Ihr persönliches Umzugsangebot.
+
+**Online-Bestätigung:**
+Sie können Ihr Angebot bequem online einsehen und bestätigen:
+${confirmationUrl}
+
+**Ihre Vorteile:**
+- Transparente Preisgestaltung
+- Professionelles Team
+- Versicherungsschutz inklusive
+- Flexible Terminvereinbarung
+
+Bei Fragen stehen wir Ihnen gerne zur Verfügung.
+
+Mit freundlichen Grüßen
+Ihr Relocato Team
+
+---
+Relocato Umzüge
+Tel: +49 123 456789
+E-Mail: info@relocato.de
+Web: www.relocato.de
+      `.trim();
+      
+      // E-Mail-Daten
+      const emailData = {
+        to: customer.email,
+        subject: `Ihr Umzugsangebot von Relocato`,
+        content: emailContent,
+        attachments: [{
+          filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
+          content: pdfBlob
+        }],
+        customerId: customer.id,
+        customerName: customer.name,
+        templateType: 'quote_sent' as const,
+        quoteId: quote.id
+      };
+      
+      // Sende E-Mail via SMTP
+      const emailSent = await sendEmailViaSMTP(emailData);
+      
+      if (emailSent) {
+        // Update quote mit Token und Status
+        await googleSheetsService.updateQuote(quote.id, {
+          status: 'sent',
+          confirmationToken: token
+        });
+        
+        // Analytics tracking
+        analytics.trackQuoteSent(quote.id, quote.price);
+        analytics.trackEmailSent('quote', customer.id);
+        
+        alert('Angebot wurde erfolgreich per E-Mail versendet!');
+        window.location.reload();
+      } else {
+        alert('Fehler beim Versenden der E-Mail. Bitte versuchen Sie es erneut.');
+      }
+    } catch (error) {
+      console.error('Error sending quote email:', error);
+      alert('Fehler beim Versenden des Angebots.');
+    } finally {
+      setUpdatingStatus(null);
+    }
   };
 
   if (quotes.length === 0) {
@@ -178,10 +255,6 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
     <>
       <Grid container spacing={2}>
       {quotes.map((quote, index) => {
-        // Debug: Log quote status
-        console.log(`Quote ${quote.id} status:`, quote.status, 'Type:', typeof quote.status);
-        console.log(`Quote ${quote.id} full data:`, quote);
-        
         return (
         <Grid item xs={12} md={6} key={quote.id}>
           <motion.div
@@ -200,7 +273,6 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                 }
               }}
               onClick={() => {
-                console.log('Angebot anklicken:', quote.id);
               }}
             >
               <CardContent>
@@ -316,10 +388,9 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                     size="small"
                     variant="outlined"
                     startIcon={<EmailIcon />}
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      setQuoteForEmail(quote);
-                      setEmailComposerOpen(true);
+                      await handleSendQuoteEmail(quote);
                     }}
                   >
                     Email
@@ -338,7 +409,6 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                   </Button>
                   
                   {/* Status ändern Buttons */}
-                  {console.log(`Checking quote status "${quote.status}"`)}
                   {quote.status === 'draft' && (
                     <Button
                       size="small"

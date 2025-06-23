@@ -82,7 +82,10 @@ const DEFAULT_RULES: RecognitionRule[] = [
 ];
 
 class InvoiceRecognitionService {
-  private rules: RecognitionRule[] = [...DEFAULT_RULES];
+  private rules: RecognitionRule[] = [];
+  private rulesLoaded = false;
+  private emailInvoicesCache: EmailInvoice[] = [];
+  private cacheLoaded = false;
 
   /**
    * Process an incoming email and recognize invoice details
@@ -206,20 +209,55 @@ class InvoiceRecognitionService {
   }
 
   /**
+   * Load rules from Google Sheets on first access
+   */
+  private async ensureRulesLoaded(): Promise<void> {
+    if (this.rulesLoaded) return;
+    
+    try {
+      // Try to load from Google Sheets
+      const savedRules = await googleSheetsService.getRecognitionRules();
+      if (savedRules && savedRules.length > 0) {
+        this.rules = savedRules;
+      } else {
+        // Initialize with default rules
+        this.rules = [...DEFAULT_RULES];
+        // Save default rules to Google Sheets
+        for (const rule of this.rules) {
+          await googleSheetsService.saveRecognitionRule(rule);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading recognition rules:', error);
+      // Fallback to default rules
+      this.rules = [...DEFAULT_RULES];
+    }
+    
+    this.rulesLoaded = true;
+  }
+
+  /**
    * Get all recognition rules
    */
-  getRules(): RecognitionRule[] {
+  async getRules(): Promise<RecognitionRule[]> {
+    await this.ensureRulesLoaded();
     return [...this.rules];
   }
 
   /**
    * Add a new recognition rule
    */
-  addRule(rule: Omit<RecognitionRule, 'id'>): RecognitionRule {
+  async addRule(rule: Omit<RecognitionRule, 'id'>): Promise<RecognitionRule> {
+    await this.ensureRulesLoaded();
+    
     const newRule: RecognitionRule = {
       ...rule,
       id: `rule-${Date.now()}`
     };
+    
+    // Save to Google Sheets
+    await googleSheetsService.saveRecognitionRule(newRule);
+    
     this.rules.push(newRule);
     return newRule;
   }
@@ -227,21 +265,32 @@ class InvoiceRecognitionService {
   /**
    * Update an existing rule
    */
-  updateRule(id: string, updates: Partial<RecognitionRule>): RecognitionRule | null {
+  async updateRule(id: string, updates: Partial<RecognitionRule>): Promise<RecognitionRule | null> {
+    await this.ensureRulesLoaded();
+    
     const index = this.rules.findIndex(r => r.id === id);
     if (index === -1) return null;
 
     this.rules[index] = { ...this.rules[index], ...updates };
+    
+    // Update in Google Sheets
+    await googleSheetsService.updateRecognitionRule(id, this.rules[index]);
+    
     return this.rules[index];
   }
 
   /**
    * Delete a rule
    */
-  deleteRule(id: string): boolean {
+  async deleteRule(id: string): Promise<boolean> {
+    await this.ensureRulesLoaded();
+    
     const index = this.rules.findIndex(r => r.id === id);
     if (index === -1) return false;
 
+    // Delete from Google Sheets
+    await googleSheetsService.deleteRecognitionRule(id);
+    
     this.rules.splice(index, 1);
     return true;
   }
@@ -250,25 +299,44 @@ class InvoiceRecognitionService {
    * Get unprocessed email invoices
    */
   async getUnprocessedInvoices(): Promise<EmailInvoice[]> {
-    // In a real implementation, this would fetch from a database
-    // For now, return empty array
-    return [];
+    if (!this.cacheLoaded) {
+      try {
+        const allInvoices = await googleSheetsService.getEmailInvoices();
+        this.emailInvoicesCache = allInvoices || [];
+        this.cacheLoaded = true;
+      } catch (error) {
+        console.error('Error loading email invoices:', error);
+        return [];
+      }
+    }
+    
+    return this.emailInvoicesCache.filter(inv => !inv.processed);
   }
 
   /**
    * Mark an email invoice as processed
    */
   async markAsProcessed(emailInvoiceId: string, notes?: string): Promise<void> {
-    // In a real implementation, this would update the database
-    console.log(`📋 Marking email invoice ${emailInvoiceId} as processed`);
+    const invoice = this.emailInvoicesCache.find(inv => inv.id === emailInvoiceId);
+    if (!invoice) return;
+    
+    invoice.processed = true;
+    invoice.processedDate = new Date();
+    if (notes) invoice.notes = notes;
+    
+    // Update in Google Sheets
+    await googleSheetsService.updateEmailInvoice(emailInvoiceId, invoice);
   }
 
   /**
    * Save email invoice to database
    */
   private async saveEmailInvoice(emailInvoice: EmailInvoice): Promise<void> {
-    // In a real implementation, this would save to database
-    console.log('💾 Saving email invoice:', emailInvoice);
+    // Save to Google Sheets
+    await googleSheetsService.saveEmailInvoice(emailInvoice);
+    
+    // Add to cache
+    this.emailInvoicesCache.push(emailInvoice);
   }
 
   /**
@@ -284,9 +352,12 @@ class InvoiceRecognitionService {
       unknown: number;
     };
   }> {
-    // In a real implementation, this would query the database
-    return {
-      total: 0,
+    if (!this.cacheLoaded) {
+      await this.getUnprocessedInvoices(); // This loads the cache
+    }
+    
+    const stats = {
+      total: this.emailInvoicesCache.length,
       processed: 0,
       unprocessed: 0,
       byAccount: {
@@ -295,6 +366,19 @@ class InvoiceRecognitionService {
         unknown: 0
       }
     };
+    
+    for (const invoice of this.emailInvoicesCache) {
+      if (invoice.processed) {
+        stats.processed++;
+      } else {
+        stats.unprocessed++;
+      }
+      
+      const company = invoice.recognizedCompany || 'unknown';
+      stats.byAccount[company]++;
+    }
+    
+    return stats;
   }
 }
 
