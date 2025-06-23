@@ -1,6 +1,8 @@
-// Default AI Configuration - API Key wird über Environment Variable geladen
+import { getOpenAIKey } from './getAPIKey';
+
+// Default AI Configuration
 export const DEFAULT_AI_CONFIG = {
-  apiKey: process.env.REACT_APP_OPENAI_API_KEY || "",
+  apiKey: getOpenAIKey(),
   model: 'gpt-4o',
   enabled: true,
   maxTokens: 3000,
