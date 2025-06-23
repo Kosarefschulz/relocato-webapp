@@ -63,6 +63,22 @@ export class OpenAIService {
     }
   }
 
+  async generateTextWithHistory(messages: OpenAI.Chat.ChatCompletionMessageParam[]): Promise<string> {
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: this.model,
+        messages,
+        max_tokens: this.maxTokens,
+        temperature: this.temperature,
+      });
+
+      return completion.choices[0]?.message?.content || '';
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(`Failed to generate text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   async generateStructuredOutput<T>(
     prompt: string,
     systemPrompt: string,

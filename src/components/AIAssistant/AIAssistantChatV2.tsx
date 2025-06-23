@@ -122,7 +122,7 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
       try {
         const config = await aiConfigService.getConfig();
         if (config && config.apiKey) {
-          const service = new AIAssistantServiceV2({ 
+          const service = AIAssistantServiceV2.getInstance({ 
             apiKey: config.apiKey,
             model: config.model 
           });

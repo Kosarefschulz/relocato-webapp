@@ -25,6 +25,7 @@ export interface AIResponse {
 }
 
 export class AIAssistantServiceV2 {
+  private static instance: AIAssistantServiceV2 | null = null;
   private openai: OpenAIService;
   private contextManager: AIContextManager;
   private visionService: AIVisionService;
@@ -47,6 +48,17 @@ export class AIAssistantServiceV2 {
     this.backgroundService = new AIBackgroundService();
     this.systemAnalyzer = new AISystemAnalyzer();
     this.voiceService = new AIVoiceService();
+  }
+
+  static getInstance(config: AIAssistantConfig): AIAssistantServiceV2 {
+    if (!AIAssistantServiceV2.instance || AIAssistantServiceV2.instance.apiKey !== config.apiKey) {
+      AIAssistantServiceV2.instance = new AIAssistantServiceV2(config);
+    }
+    return AIAssistantServiceV2.instance;
+  }
+
+  clearHistory(): void {
+    this.conversationHistory = [];
   }
 
   async processMessage(userMessage: string, context?: any, images?: string[]): Promise<AIResponse> {
@@ -126,11 +138,8 @@ ANTWORTFORMAT:
         ...this.conversationHistory.slice(-10) // Letzte 10 Nachrichten für Kontext
       ];
 
-      // Generiere Antwort
-      const response = await this.openai.generateText(
-        messages[messages.length - 1].content,
-        systemPrompt
-      );
+      // Generiere Antwort mit vollständiger Historie
+      const response = await this.openai.generateTextWithHistory(messages);
 
       // Füge Antwort zur Historie hinzu
       this.conversationHistory.push({ role: 'assistant', content: response });
