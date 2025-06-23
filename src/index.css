@@ -22,3 +22,51 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Dark mode text visibility fixes */
+/* Override VisibilityFix component's hardcoded black text */
+body.mui-dark-mode .MuiListItemText-secondary,
+body.mui-dark-mode .MuiListItemText-secondary *,
+body[data-theme="dark"] .MuiListItemText-secondary,
+body[data-theme="dark"] .MuiListItemText-secondary * {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+body.mui-dark-mode .MuiListItemText-primary,
+body.mui-dark-mode .MuiTypography-root,
+body[data-theme="dark"] .MuiListItemText-primary,
+body[data-theme="dark"] .MuiTypography-root {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/* Fix links in dark mode */
+body.mui-dark-mode a,
+body[data-theme="dark"] a {
+  color: #64b5f6 !important;
+}
+
+/* Ensure proper text colors for stats cards */
+body.mui-dark-mode .MuiCard-root .MuiTypography-h4,
+body[data-theme="dark"] .MuiCard-root .MuiTypography-h4 {
+  opacity: 1 !important;
+}
+
+/* Override any hardcoded black colors in dark mode */
+body.mui-dark-mode [style*="color: #000"],
+body.mui-dark-mode [style*="color: black"],
+body[data-theme="dark"] [style*="color: #000"],
+body[data-theme="dark"] [style*="color: black"] {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/* Specific fix for Typography with color prop */
+body.mui-dark-mode .MuiTypography-colorTextSecondary,
+body[data-theme="dark"] .MuiTypography-colorTextSecondary {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Ensure all text in dark mode is visible */
+body.mui-dark-mode *,
+body[data-theme="dark"] * {
+  color: inherit;
+}

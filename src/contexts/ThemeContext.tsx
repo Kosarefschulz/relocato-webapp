@@ -51,6 +51,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('darkMode', darkMode.toString());
+    // Apply dark mode class to body for CSS targeting
+    if (darkMode) {
+      document.body.classList.add('mui-dark-mode');
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.body.classList.remove('mui-dark-mode');
+      document.body.setAttribute('data-theme', 'light');
+    }
   }, [darkMode]);
 
   useEffect(() => {

@@ -8,11 +8,15 @@ import {
   CloudUpload as CloudUploadIcon,
   Error as ErrorIcon,
   ManageSearch as ManageSearchIcon,
+  SmartToy as AIIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import DuplicateCustomerManager from '../components/DuplicateCustomerManager';
 import EmlFileUpload from '../components/EmlFileUpload';
 import FailedEmailRecovery from '../components/FailedEmailRecovery';
+import { AISettingsDialog } from '../components/AIAssistant';
+import { aiConfigService } from '../services/ai/aiConfigService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,6 +43,8 @@ function TabPanel(props: TabPanelProps) {
 const AdminToolsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  const { user } = useAuth();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -102,6 +108,20 @@ const AdminToolsPage: React.FC = () => {
             </Grid>
           </CardContent>
         </Card>
+
+        {/* AI Configuration Button */}
+        <Box sx={{ mb: 3 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AIIcon />}
+            onClick={() => setAiSettingsOpen(true)}
+            sx={{ width: { xs: '100%', sm: 'auto' } }}
+          >
+            KI-Assistent konfigurieren
+          </Button>
+        </Box>
       </Box>
 
       {/* Tabs */}
@@ -128,6 +148,11 @@ const AdminToolsPage: React.FC = () => {
             icon={<ErrorIcon />}
             iconPosition="start"
           />
+          <Tab 
+            label="KI-Einstellungen" 
+            icon={<AIIcon />}
+            iconPosition="start"
+          />
         </Tabs>
 
         {/* Tab Panels */}
@@ -142,7 +167,36 @@ const AdminToolsPage: React.FC = () => {
         <TabPanel value={activeTab} index={2}>
           <FailedEmailRecovery />
         </TabPanel>
+        
+        <TabPanel value={activeTab} index={3}>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              KI-Assistent Konfiguration
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              Konfigurieren Sie den OpenAI-basierten KI-Assistenten für Ihre Umzugsapp.
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AIIcon />}
+              onClick={() => setAiSettingsOpen(true)}
+              size="large"
+            >
+              KI-Einstellungen öffnen
+            </Button>
+          </Box>
+        </TabPanel>
       </Paper>
+
+      {/* AI Settings Dialog */}
+      <AISettingsDialog
+        open={aiSettingsOpen}
+        onClose={() => setAiSettingsOpen(false)}
+        onSave={async (config) => {
+          // Reload the page to apply AI settings
+          window.location.reload();
+        }}
+      />
 
       {/* Quick Actions */}
       <Box sx={{ mt: 4 }}>

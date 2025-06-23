@@ -27,6 +27,9 @@ export interface Customer {
   company?: string; // Firmenname (optional)
   status?: string; // Kundenstatus
   address?: string; // Zusätzliche Adresse
+  city?: string; // Stadt
+  zip?: string; // PLZ
+  salutation?: string; // Anrede
 }
 
 export interface CustomerNote {
@@ -48,6 +51,7 @@ export interface Quote {
   createdBy: string;
   status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'invoiced';
   volume?: number;
+  company?: 'relocato' | 'wertvoll'; // Firma für das Angebot
   distance?: number;
   // Versionierung
   version?: number;
@@ -70,26 +74,31 @@ export interface QuoteVersion {
 }
 
 export interface Invoice {
-  id: string;
-  quoteId: string;
+  id?: string;
+  quoteId?: string;
   customerId: string;
   customerName: string;
   invoiceNumber: string;
-  price: number;
-  taxAmount: number;
+  price?: number;
+  taxAmount?: number;
   totalPrice: number;
-  items: InvoiceItem[];
-  createdAt: Date;
-  dueDate: Date;
-  paidDate?: Date;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  items?: InvoiceItem[];
+  createdAt: string;
+  createdBy?: string;
+  dueDate: string;
+  paidDate?: string;
+  status: string;
+  notes?: string;
+  company?: 'relocato' | 'wertvoll'; // Firma für die Rechnung
 }
 
 export interface InvoiceItem {
+  name?: string;
   description: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
+  quantity: string | number;
+  price?: number;
+  unitPrice?: number;
+  totalPrice?: number;
 }
 
 export interface Consultant {

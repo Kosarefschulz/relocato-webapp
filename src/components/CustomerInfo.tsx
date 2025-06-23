@@ -246,7 +246,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
             <Grid container spacing={2}>
               <Grid xs={6} sm={3}>
                 <Box sx={{ textAlign: 'center', p: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Zimmer</Typography>
+                  <Typography variant="body2" sx={{ ...textStyle, color: theme.palette.text.secondary }}>Zimmer</Typography>
                   {editMode ? (
                     <TextField
                       value={editedCustomer.apartment?.rooms || ''}
@@ -265,7 +265,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
               </Grid>
               <Grid xs={6} sm={3}>
                 <Box sx={{ textAlign: 'center', p: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Fläche</Typography>
+                  <Typography variant="body2" sx={{ ...textStyle, color: theme.palette.text.secondary }}>Fläche</Typography>
                   {editMode ? (
                     <TextField
                       value={editedCustomer.apartment?.area || ''}
@@ -284,7 +284,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
               </Grid>
               <Grid xs={6} sm={3}>
                 <Box sx={{ textAlign: 'center', p: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Etage</Typography>
+                  <Typography variant="body2" sx={{ ...textStyle, color: theme.palette.text.secondary }}>Etage</Typography>
                   {editMode ? (
                     <TextField
                       value={editedCustomer.apartment?.floor || ''}
@@ -303,7 +303,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
               </Grid>
               <Grid xs={6} sm={3}>
                 <Box sx={{ textAlign: 'center', p: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={textStyle}>Aufzug</Typography>
+                  <Typography variant="body2" sx={{ ...textStyle, color: theme.palette.text.secondary }}>Aufzug</Typography>
                   {editMode ? (
                     <FormControlLabel
                       control={

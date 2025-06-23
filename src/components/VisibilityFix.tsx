@@ -67,11 +67,9 @@ export const VisibilityFix: React.FC = () => {
         filter: none !important;
       }
       
-      /* EXTREME FIX: Force all text to be black on white in customer details */
+      /* Fix text visibility without forcing colors */
       .MuiListItemText-secondary,
       .MuiListItemText-secondary * {
-        color: #000000 !important;
-        background-color: transparent !important;
         opacity: 1 !important;
         visibility: visible !important;
         display: inline-block !important;
@@ -79,9 +77,9 @@ export const VisibilityFix: React.FC = () => {
         z-index: 999 !important;
       }
       
-      /* Force links to be visible */
+      /* Force links to be visible with theme-aware colors */
       .MuiListItemText-secondary a {
-        color: #1976d2 !important;
+        color: ${theme.palette.mode === 'dark' ? '#64b5f6' : '#1976d2'} !important;
         text-decoration: none !important;
         display: inline-block !important;
         opacity: 1 !important;
@@ -95,16 +93,14 @@ export const VisibilityFix: React.FC = () => {
         visibility: visible !important;
       }
       
-      /* Dark mode override */
-      .MuiPaper-root[class*="dark"] .MuiTypography-root,
-      [data-theme="dark"] .MuiTypography-root {
-        color: #ffffff !important;
+      /* Theme-aware text colors */
+      .MuiTypography-root {
+        color: ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.87)' : 'rgba(0, 0, 0, 0.87)'} !important;
       }
       
-      /* Light mode override */
-      .MuiPaper-root:not([class*="dark"]) .MuiTypography-root,
-      [data-theme="light"] .MuiTypography-root {
-        color: #000000 !important;
+      .MuiTypography-body2,
+      .MuiListItemText-secondary {
+        color: ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)'} !important;
       }
     `;
     

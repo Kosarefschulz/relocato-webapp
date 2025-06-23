@@ -12,6 +12,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import CustomerSearch from './components/CustomerSearch';
 import CreateQuote from './components/CreateQuote';
+import CreateQuoteMultiCompany from './components/CreateQuote.multicompany';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
@@ -40,6 +41,8 @@ import { EmailTestDashboard } from './components/EmailTestDashboard';
 import VisibilityFix from './components/VisibilityFix';
 import EmailDebugger from './components/EmailDebugger';
 import EmailTestIONOS from './components/EmailTestIONOS';
+import { AIAssistantChat } from './components/AIAssistant';
+import { aiConfigService } from './services/ai/aiConfigService';
 
 
 export const AuthContext = React.createContext<{
@@ -77,11 +80,11 @@ function AppRoutes({ user }: { user: User | null }) {
       {/* Create Quote */}
       <Route 
         path="/create-quote" 
-        element={<CreateQuote />} 
+        element={<CreateQuoteMultiCompany />} 
       />
       <Route 
         path="/create-quote/:customerId" 
-        element={<CreateQuote />} 
+        element={<CreateQuoteMultiCompany />} 
       />
       
       {/* Create New Customer */}
@@ -252,6 +255,7 @@ function AppRoutes({ user }: { user: User | null }) {
 function App() {
   // Dummy user - immer eingeloggt
   const user = { uid: 'dummy-user', email: 'user@example.com', displayName: 'User' } as User;
+  const [aiEnabled, setAiEnabled] = useState(false);
 
   // Automatische Synchronisation beim App-Start
   useEffect(() => {
@@ -263,11 +267,25 @@ function App() {
       autoSyncService.startAutoSync(5); // Alle 5 Minuten
     }
     
+    // Prüfe AI Config
+    checkAIConfig();
+    
     // Cleanup bei Unmount
     return () => {
       autoSyncService.stopAutoSync();
     };
   }, []);
+
+  const checkAIConfig = async () => {
+    try {
+      const config = await aiConfigService.getConfig();
+      if (config && config.enabled) {
+        setAiEnabled(true);
+      }
+    } catch (error) {
+      console.error('Error checking AI config:', error);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     // Dummy login
@@ -301,6 +319,14 @@ function App() {
             
             {/* PWA Install Prompt - Only show when user is logged in */}
             {/* {user && <PWAInstallPrompt />} */}
+            
+            {/* AI Assistant Chat - nur wenn aktiviert */}
+            {aiEnabled && (
+              <AIAssistantChat 
+                apiKey={process.env.OPENAI_API_KEY}
+                initialExpanded={false}
+              />
+            )}
           </Router>
         </AuthContext.Provider>
       </SimpleAuth>

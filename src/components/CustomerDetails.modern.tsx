@@ -58,7 +58,7 @@ import CustomerInfo from './CustomerInfo';
 import CustomerPhotos from './CustomerPhotos';
 import CustomerCommunication from './CustomerCommunication';
 import CustomerQuotes from './CustomerQuotes';
-import CustomerInvoices from './CustomerInvoices';
+import CustomerInvoicesMultiCompany from './CustomerInvoices.multicompany';
 import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
@@ -645,7 +645,7 @@ const CustomerDetails: React.FC = () => {
 
           <TabPanel value={tabValue} index={4}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
-              <CustomerInvoices 
+              <CustomerInvoicesMultiCompany 
                 invoices={invoices} 
                 customer={customer} 
               />
