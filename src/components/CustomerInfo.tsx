@@ -9,7 +9,8 @@ import {
   LocationOn as LocationIcon,
   CheckCircle as CheckIcon,
   Cancel as CrossIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  Business as BusinessIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { Customer } from '../types';
@@ -71,6 +72,23 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
               <PhoneIcon /> Kontakt
             </Typography>
             <List sx={{ pt: 0 }}>
+              {customer.customerNumber && (
+                <ListItem sx={{ px: 0 }}>
+                  <ListItemAvatar>
+                    <Avatar sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>
+                      <BusinessIcon color="primary" />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText 
+                    primary={<Typography sx={textStyle}>Kundennummer</Typography>}
+                    secondary={
+                      <Typography sx={{ ...textStyle, fontWeight: 600 }}>
+                        {customer.customerNumber}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              )}
               <ListItem sx={{ px: 0 }}>
                 <ListItemAvatar>
                   <Avatar sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>

@@ -100,19 +100,33 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, index = 
               {customer.name}
             </Typography>
             
-            {customer.company && (
-              <Typography 
-                variant="body2" 
-                color="text.secondary"
-                sx={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {customer.company}
-              </Typography>
-            )}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              {customer.customerNumber && (
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500
+                  }}
+                >
+                  {customer.customerNumber}
+                </Typography>
+              )}
+              {customer.company && (
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {customer.company}
+                </Typography>
+              )}
+            </Box>
           </Box>
           
           <IconButton 

@@ -124,7 +124,7 @@ class FirebaseService {
       
       const docRef = await addDoc(this.customersCollection, customerData);
       
-      console.log('✅ Kunde in Firestore erstellt:', docRef.id);
+      console.log('✅ Kunde in Firestore erstellt:', docRef.id, 'mit Kundennummer:', customerNumber);
       return docRef.id;
     } catch (error) {
       console.error('❌ Fehler beim Erstellen des Kunden:', error);
@@ -584,22 +584,29 @@ class FirebaseService {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     
-    // Zähle bestehende Kunden für diesen Monat
-    const startOfMonth = new Date(year, date.getMonth(), 1);
-    const endOfMonth = new Date(year, date.getMonth() + 1, 0);
-    
     if (!this.customersCollection) throw new Error('Customers collection not initialized');
     
+    // Query for customers with customer numbers starting with the current year and month
+    const prefix = `K${year}${month}`;
     const q = query(
       this.customersCollection,
-      where('createdAt', '>=', startOfMonth),
-      where('createdAt', '<=', endOfMonth)
+      where('customerNumber', '>=', prefix),
+      where('customerNumber', '<', prefix + '\uf8ff'),
+      orderBy('customerNumber', 'desc'),
+      limit(1)
     );
     
     const snapshot = await getDocs(q);
-    const count = snapshot.size + 1;
     
-    return `K${year}${month}${String(count).padStart(3, '0')}`;
+    let nextNumber = 1;
+    if (!snapshot.empty) {
+      const lastCustomerNumber = snapshot.docs[0].data().customerNumber;
+      // Extract the number part (last 3 digits)
+      const lastNumber = parseInt(lastCustomerNumber.slice(-3));
+      nextNumber = lastNumber + 1;
+    }
+    
+    return `${prefix}${String(nextNumber).padStart(3, '0')}`;
   }
 
   // ==================== MIGRATION HELPERS ====================
