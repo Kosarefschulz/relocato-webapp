@@ -212,7 +212,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
       const emailData = {
         to: customer.email,
         subject: `Ihr Angebot von ${companyConfig.name}`,
-        content: generateEmailHTML(customer, quoteData, finalPrice),
+        content: generateEmailHTML(customer, calculation || {} as QuoteCalculation, quoteDetails),
         attachments: [{
           filename: `Angebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('de-DE').replace(/\./g, '-')}.pdf`,
           content: pdfBlob
@@ -229,7 +229,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
           comment: quoteDetails.notes,
           createdAt: new Date(),
           createdBy: 'user',
-          status: 'Angebot versendet' as const,
+          status: 'sent' as const,
           company: selectedCompany as 'relocato' | 'wertvoll',
           volume: quoteDetails.volume || 0,
           distance: quoteDetails.distance || 0
@@ -613,18 +613,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
                   <Typography>€{calculation.basePrice.toFixed(2)}</Typography>
                 </Box>
               )}
-              {calculation.packingCost > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography>Verpackungsservice</Typography>
-                  <Typography>€{calculation.packingCost.toFixed(2)}</Typography>
-                </Box>
-              )}
-              {calculation.additionalServicesCost > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography>Zusatzleistungen</Typography>
-                  <Typography>€{calculation.additionalServicesCost.toFixed(2)}</Typography>
-                </Box>
-              )}
+              {/* Additional cost breakdowns can be added here */}
             </Box>
             
             <Divider sx={{ my: 2 }} />
@@ -709,7 +698,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
   );
   
   return isMobile ? (
-    <MobileLayout title="Neues Angebot" onBack={() => navigate(-1)}>
+    <MobileLayout title="Neues Angebot">
       {content}
     </MobileLayout>
   ) : (

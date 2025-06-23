@@ -147,7 +147,7 @@ const CustomerInvoicesMultiCompany: React.FC<CustomerInvoicesProps> = ({ invoice
   const markAsPaid = async (invoice: Invoice) => {
     try {
       setUpdatingStatus(invoice.id || invoice.invoiceNumber);
-      await googleSheetsService.updateInvoiceStatus(invoice.id!, 'bezahlt');
+      await googleSheetsService.updateInvoice(invoice.id!, { status: 'bezahlt' });
       window.location.reload();
     } catch (error) {
       console.error('Update status error:', error);
@@ -170,7 +170,7 @@ const CustomerInvoicesMultiCompany: React.FC<CustomerInvoicesProps> = ({ invoice
         company: selectedCompany
       };
 
-      await googleSheetsService.createInvoice(invoiceData);
+      await googleSheetsService.addInvoice(invoiceData);
       setCreateDialogOpen(false);
       window.location.reload();
     } catch (error) {
