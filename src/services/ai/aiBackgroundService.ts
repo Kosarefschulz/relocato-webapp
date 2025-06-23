@@ -116,13 +116,14 @@ export class AIBackgroundService {
         fromAddress: '',
         toAddress: '',
         movingDate: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         apartment: {
           rooms: 0,
           area: 0,
           floor: 0,
           hasElevator: false
-        }
+        },
+        services: []
       };
       
       const customerId = await firebaseService.addCustomer(newCustomer);
