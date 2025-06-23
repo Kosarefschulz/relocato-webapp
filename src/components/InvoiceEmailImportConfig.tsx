@@ -90,17 +90,34 @@ const InvoiceEmailImportConfig: React.FC = () => {
   }, []);
 
   const loadData = async () => {
-    // Load rules
-    const loadedRules = await invoiceRecognitionService.getRules();
-    setRules(loadedRules);
+    try {
+      // Load rules
+      const loadedRules = await invoiceRecognitionService.getRules();
+      setRules(loadedRules);
 
-    // Load unprocessed invoices
-    const invoices = await invoiceRecognitionService.getUnprocessedInvoices();
-    setUnprocessedInvoices(invoices);
+      // Load unprocessed invoices
+      const invoices = await invoiceRecognitionService.getUnprocessedInvoices();
+      setUnprocessedInvoices(invoices);
 
-    // Load statistics
-    const stats = await invoiceRecognitionService.getStatistics();
-    setStatistics(stats);
+      // Load statistics
+      const stats = await invoiceRecognitionService.getStatistics();
+      setStatistics(stats);
+    } catch (error) {
+      console.error('Error loading invoice recognition data:', error);
+      // Set default empty values on error
+      setRules([]);
+      setUnprocessedInvoices([]);
+      setStatistics({
+        total: 0,
+        processed: 0,
+        unprocessed: 0,
+        byAccount: {
+          steinpfleger: 0,
+          wertvoll: 0,
+          unknown: 0
+        }
+      });
+    }
   };
 
   const handleAddRule = () => {
@@ -129,37 +146,55 @@ const InvoiceEmailImportConfig: React.FC = () => {
     setEditDialog(true);
   };
 
-  const handleSaveRule = () => {
-    if (editingRule) {
-      // Update existing rule
-      invoiceRecognitionService.updateRule(editingRule.id, formData);
-    } else {
-      // Add new rule
-      invoiceRecognitionService.addRule(formData);
+  const handleSaveRule = async () => {
+    try {
+      if (editingRule) {
+        // Update existing rule
+        await invoiceRecognitionService.updateRule(editingRule.id, formData);
+      } else {
+        // Add new rule
+        await invoiceRecognitionService.addRule(formData);
+      }
+      
+      setEditDialog(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error saving rule:', error);
+      alert('Fehler beim Speichern der Regel');
     }
-    
-    setEditDialog(false);
-    loadData();
   };
 
-  const handleDeleteRule = (id: string) => {
+  const handleDeleteRule = async (id: string) => {
     if (window.confirm('Möchten Sie diese Regel wirklich löschen?')) {
-      invoiceRecognitionService.deleteRule(id);
-      loadData();
+      try {
+        await invoiceRecognitionService.deleteRule(id);
+        await loadData();
+      } catch (error) {
+        console.error('Error deleting rule:', error);
+        alert('Fehler beim Löschen der Regel');
+      }
     }
   };
 
-  const handleTestEmail = () => {
+  const handleTestEmail = async () => {
     const testEmailData = {
+      id: 'test-' + Date.now(),
       from: testEmail.from,
       subject: testEmail.subject,
+      body: '',
+      receivedDate: new Date(),
       attachments: testEmail.hasAttachment ? [
-        { filename: 'rechnung.pdf', contentType: 'application/pdf', size: 1024 }
+        { filename: 'rechnung.pdf', contentType: 'application/pdf', size: 1024, content: '' }
       ] : []
     };
 
-    const result = invoiceRecognitionService['recognizeCompany'](testEmailData);
-    setTestResult(result);
+    try {
+      const result = await invoiceRecognitionService.processEmail(testEmailData);
+      setTestResult(result.recognizedCompany || 'unknown');
+    } catch (error) {
+      console.error('Error testing email:', error);
+      setTestResult('unknown');
+    }
   };
 
   const getRuleTypeLabel = (type: string) => {
