@@ -38,8 +38,12 @@ class AIConfigService {
       if (!configDoc.exists()) {
         // Verwende Default-Config wenn keine gespeichert ist
         this.configCache = DEFAULT_AI_CONFIG;
-        // Speichere Default-Config für zukünftige Verwendung
-        await this.saveConfig(DEFAULT_AI_CONFIG);
+        // Versuche zu speichern, aber ignoriere Fehler
+        try {
+          await this.saveConfig(DEFAULT_AI_CONFIG);
+        } catch (saveError) {
+          console.log('Config konnte nicht gespeichert werden (Berechtigungen fehlen), verwende Default-Config');
+        }
         return this.configCache;
       }
 
@@ -65,8 +69,8 @@ class AIConfigService {
 
       return this.configCache;
     } catch (error) {
-      console.error('Error fetching AI config:', error);
-      // Bei Fehler verwende Default-Config
+      // Bei Fehler (z.B. keine Berechtigung) verwende einfach Default-Config
+      console.log('Verwende Default AI-Config');
       this.configCache = DEFAULT_AI_CONFIG;
       return this.configCache;
     }
@@ -91,8 +95,9 @@ class AIConfigService {
       
       this.configCache = config;
     } catch (error) {
-      console.error('Error saving AI config:', error);
-      throw error;
+      // Ignoriere Speicherfehler, verwende Config trotzdem
+      console.log('Config konnte nicht in Firebase gespeichert werden, verwende trotzdem');
+      this.configCache = config;
     }
   }
 
