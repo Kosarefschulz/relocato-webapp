@@ -41,7 +41,7 @@ import { EmailTestDashboard } from './components/EmailTestDashboard';
 import VisibilityFix from './components/VisibilityFix';
 import EmailDebugger from './components/EmailDebugger';
 import EmailTestIONOS from './components/EmailTestIONOS';
-import { AIAssistantChat } from './components/AIAssistant';
+import { AIAssistantChatV2 } from './components/AIAssistant';
 import { aiConfigService } from './services/ai/aiConfigService';
 
 
@@ -322,7 +322,7 @@ function App() {
             
             {/* AI Assistant Chat - nur wenn aktiviert */}
             {aiEnabled && (
-              <AIAssistantChat 
+              <AIAssistantChatV2 
                 apiKey={process.env.OPENAI_API_KEY}
                 initialExpanded={false}
               />

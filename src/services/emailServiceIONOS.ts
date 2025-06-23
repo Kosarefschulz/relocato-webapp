@@ -153,50 +153,8 @@ class IONOSEmailService {
         attachments: email.attachments || []
       };
     } catch (error) {
-      console.error('Error getting email, returning mock data:', error);
-      
-      // Return mock email data with full content
-      return {
-        id: uid,
-        uid: uid,
-        folder: folder,
-        from: { address: 'noreply@clockin.de', name: 'Neue Korrektur' },
-        to: [{ address: 'bielefeld@relocato.de', name: 'Relocato Bielefeld' }],
-        cc: [],
-        subject: 'Neue Korrektur',
-        date: new Date().toISOString(),
-        text: `Dies ist eine Demo-E-Mail.
-        
-Der E-Mail-Server ist derzeit nicht erreichbar, daher wird dieser Beispielinhalt angezeigt.
-
-Um die vollständige E-Mail-Funktionalität zu nutzen, stellen Sie sicher, dass:
-1. Der E-Mail-Server läuft (npm run start:email)
-2. Die API-Endpunkte korrekt konfiguriert sind
-3. Die IONOS-Zugangsdaten in der .env Datei hinterlegt sind
-
-Mit freundlichen Grüßen
-Ihr Relocato Team`,
-        html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>Dies ist eine Demo-E-Mail</h2>
-          <p>Der E-Mail-Server ist derzeit nicht erreichbar, daher wird dieser Beispielinhalt angezeigt.</p>
-          <p>Um die vollständige E-Mail-Funktionalität zu nutzen, stellen Sie sicher, dass:</p>
-          <ol>
-            <li>Der E-Mail-Server läuft (npm run start:email)</li>
-            <li>Die API-Endpunkte korrekt konfiguriert sind</li>
-            <li>Die IONOS-Zugangsdaten in der .env Datei hinterlegt sind</li>
-          </ol>
-          <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
-        </div>`,
-        snippet: 'Dies ist eine Demo-E-Mail...',
-        flags: ['SEEN'],
-        attachments: [
-          {
-            filename: 'beispiel.pdf',
-            size: 1024,
-            contentType: 'application/pdf'
-          }
-        ]
-      };
+      console.error('Error getting email:', error);
+      return null;
     }
   }
 

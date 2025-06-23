@@ -4,7 +4,7 @@ import { Customer, Quote, Invoice } from '../../types';
 import { firebaseService } from '../firebaseService';
 import { emailService } from '../emailService';
 import { pdfService } from '../pdfService';
-import { quoteCalculation } from '../quoteCalculation';
+import { quoteCalculationService } from '../quoteCalculation';
 
 export interface AIAssistantConfig {
   apiKey: string;
@@ -127,7 +127,7 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
       throw new Error('Kunde nicht gefunden');
     }
 
-    const calculation = quoteCalculation.calculateQuote({
+    const calculation = quoteCalculationService.calculateQuote(customer, {
       volume: data.volume || 30,
       distance: data.distance || 50,
       floors: data.floors || { pickup: 0, delivery: 0 },
@@ -203,7 +203,7 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
   }
 
   private async calculatePrice(data: any): Promise<any> {
-    return quoteCalculation.calculateQuote(data);
+    return quoteCalculationService.calculateQuote({} as Customer, data);
   }
 
   private async getInfo(data: any): Promise<any> {

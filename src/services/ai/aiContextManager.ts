@@ -1,7 +1,7 @@
 import { Customer, Quote, Invoice, Consultant, CustomerNote } from '../../types';
 import { firebaseService } from '../firebaseService';
 import { paginationService } from '../paginationService';
-import { quoteCalculation } from '../quoteCalculation';
+import { quoteCalculationService } from '../quoteCalculation';
 import { emailService } from '../emailService';
 import { emailTemplateService } from '../emailTemplateService';
 import { pdfService } from '../pdfService';
@@ -13,7 +13,7 @@ export interface AIContext {
   consultants: Consultant[];
   customerNotes: CustomerNote[];
   emailTemplates: any[];
-  priceCalculations: typeof quoteCalculation;
+  priceCalculations: typeof quoteCalculationService;
 }
 
 export class AIContextManager {
@@ -83,9 +83,9 @@ export class AIContextManager {
     calculateQuote: (params: any) => any;
   }> {
     return {
-      priceTable: quoteCalculation.priceTable,
-      additionalServices: quoteCalculation.additionalServices,
-      calculateQuote: (params) => quoteCalculation.calculateQuote(params)
+      priceTable: (quoteCalculationService as any).priceTable,
+      additionalServices: quoteCalculationService.getAvailableServices(),
+      calculateQuote: (params) => quoteCalculationService.calculateQuote(params.customer, params)
     };
   }
 
@@ -127,7 +127,7 @@ export class AIContextManager {
         invoices,
         consultants,
         emailTemplates,
-        priceCalculations: quoteCalculation
+        priceCalculations: quoteCalculationService
       };
 
       this.lastUpdate = new Date();
