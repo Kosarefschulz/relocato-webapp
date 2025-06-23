@@ -17,6 +17,7 @@ import { databaseService as googleSheetsService } from '../config/database.confi
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import { generatePDF } from '../services/pdfService';
+import { generateWertvollProfessionalPDF } from '../services/pdfServiceWertvollProfessional';
 
 const CreateQuote: React.FC = () => {
   const location = useLocation();
@@ -175,8 +176,12 @@ const CreateQuote: React.FC = () => {
         return;
       }
       
-      // PDF generieren
-      const pdfBlob = await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));
+      // PDF generieren - verwende professionelles Template für Wertvoll
+      const isWertvoll = customer.company?.toLowerCase().includes('wertvoll') || false;
+      
+      const pdfBlob = isWertvoll 
+        ? await generateWertvollProfessionalPDF(customer, quote)
+        : await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));
       
       // E-Mail senden
       const emailData = {
@@ -234,7 +239,12 @@ const CreateQuote: React.FC = () => {
         details: quoteDetails
       };
       
-      const pdfBlob = await generatePDF(customer, quoteData);
+      // Verwende professionelles Template für Wertvoll
+      const isWertvoll = customer.company?.toLowerCase().includes('wertvoll') || false;
+      
+      const pdfBlob = isWertvoll 
+        ? await generateWertvollProfessionalPDF(customer, quoteData)
+        : await generatePDF(customer, quoteData);
       console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
       
       const url = URL.createObjectURL(pdfBlob);

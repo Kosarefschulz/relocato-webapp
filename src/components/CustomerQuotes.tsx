@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Quote, Customer, Invoice } from '../types';
 import { generatePDF, generateInvoicePDF, generatePDFWithSignature } from '../services/pdfService';
+import { generateWertvollProfessionalPDF } from '../services/pdfServiceWertvollProfessional';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -77,9 +78,14 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
       };
       
       // Generiere PDF mit oder ohne digitale Unterschrift
+      // Verwende das neue professionelle Template für Wertvoll
+      const isWertvoll = customer.company?.toLowerCase().includes('wertvoll') || false;
+      
       const pdfBlob = signatureData 
         ? await generatePDFWithSignature(customer, quoteData, signatureData)
-        : await generatePDF(customer, quoteData);
+        : isWertvoll 
+          ? await generateWertvollProfessionalPDF(customer, quoteData)
+          : await generatePDF(customer, quoteData);
         
       console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
       
