@@ -2,8 +2,8 @@ import { OpenAIService } from './openaiService';
 import { AIContextManager } from './aiContextManager';
 import { Customer, Quote, Invoice } from '../../types';
 import { firebaseService } from '../firebaseService';
-import { emailService } from '../emailService';
-import { pdfService } from '../pdfService';
+import { sendEmail } from '../emailService';
+import { pdfService } from '../pdfServiceWrapper';
 import { quoteCalculationService } from '../quoteCalculation';
 
 export interface AIAssistantConfig {

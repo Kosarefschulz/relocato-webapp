@@ -2,9 +2,9 @@ import { Customer, Quote, Invoice, Consultant, CustomerNote } from '../../types'
 import { firebaseService } from '../firebaseService';
 import { paginationService } from '../paginationService';
 import { quoteCalculationService } from '../quoteCalculation';
-import { emailService } from '../emailService';
+import { sendEmail } from '../emailService';
 import { emailTemplateService } from '../emailTemplateService';
-import { pdfService } from '../pdfService';
+import { pdfService } from '../pdfServiceWrapper';
 
 export interface AIContext {
   customers: Customer[];
