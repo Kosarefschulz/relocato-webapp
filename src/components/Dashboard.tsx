@@ -51,10 +51,10 @@ const Dashboard: React.FC = () => {
       gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
     },
     {
-      title: 'Rechnungen',
-      description: 'Rechnungen',
+      title: 'Buchhaltung',
+      description: 'Rechnungen & Zahlungen',
       icon: <ReceiptIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
-      path: '/invoices',
+      path: '/accounting',
       color: 'error.main',
       gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
     },

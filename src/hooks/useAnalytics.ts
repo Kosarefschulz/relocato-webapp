@@ -85,6 +85,16 @@ export const useAnalytics = () => {
       analyticsService.trackPDFExport(documentType, documentId);
     },
 
+    // Payment Event
+    trackPaymentReceived: (quoteId: string, amount: number, method: string) => {
+      analyticsService.trackEvent('payment_received', {
+        quoteId,
+        amount,
+        method,
+        timestamp: new Date().toISOString()
+      });
+    },
+
     // Import Events
     trackImportStarted: (itemCount?: number) => {
       analyticsService.trackImport('started', itemCount);

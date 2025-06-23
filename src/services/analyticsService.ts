@@ -29,7 +29,8 @@ export type AnalyticsEvent =
   | 'search_performed'
   | 'export_pdf'
   | 'import_started'
-  | 'import_completed';
+  | 'import_completed'
+  | 'payment_received';
 
 interface EventParameters {
   category?: string;

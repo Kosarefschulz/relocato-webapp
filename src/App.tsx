@@ -44,6 +44,7 @@ import EmailTestIONOS from './components/EmailTestIONOS';
 import { AIAssistantChatV2 } from './components/AIAssistant';
 import { aiConfigService } from './services/ai/aiConfigService';
 import QuoteConfirmationPage from './pages/QuoteConfirmationPage';
+import AccountingDashboard from './pages/AccountingDashboard';
 
 
 export const AuthContext = React.createContext<{
@@ -136,10 +137,16 @@ function AppRoutes({ user }: { user: User | null }) {
         element={<QuotesList />} 
       />
       
-      {/* Invoices List */}
+      {/* Invoices List - redirect to accounting */}
       <Route 
         path="/invoices" 
-        element={<InvoicesList />} 
+        element={<Navigate to="/accounting" />} 
+      />
+      
+      {/* Accounting Dashboard */}
+      <Route 
+        path="/accounting" 
+        element={<AccountingDashboard />} 
       />
       
       {/* Sales Page */}

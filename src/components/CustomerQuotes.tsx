@@ -29,6 +29,7 @@ import SignatureModal from './SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
 import EmailComposer from './EmailComposer';
 import { tokenService } from '../services/tokenService';
+import PaymentDialog from './PaymentDialog';
 
 interface CustomerQuotesProps {
   quotes: Quote[];
@@ -54,6 +55,8 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
   const [signatureAction, setSignatureAction] = useState<'download' | 'email' | null>(null);
   const [emailComposerOpen, setEmailComposerOpen] = useState(false);
   const [quoteForEmail, setQuoteForEmail] = useState<Quote | null>(null);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [quoteForPayment, setQuoteForPayment] = useState<Quote | null>(null);
 
   const downloadPDF = async (quote: Quote, signatureData?: SignatureData) => {
     try {
@@ -463,8 +466,8 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                         startIcon={<PaymentIcon />}
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: Open Payment Dialog
-                          alert('Zahlungsdialog wird implementiert');
+                          setQuoteForPayment(quote);
+                          setPaymentDialogOpen(true);
                         }}
                       >
                         Zahlung erfassen
@@ -760,6 +763,42 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
             analytics.trackEmailSent('quote', customer.id);
             
             window.location.reload();
+          }}
+        />
+      )}
+
+      {/* Payment Dialog */}
+      {quoteForPayment && (
+        <PaymentDialog
+          open={paymentDialogOpen}
+          onClose={() => {
+            setPaymentDialogOpen(false);
+            setQuoteForPayment(null);
+          }}
+          quote={quoteForPayment}
+          onSave={async (paymentInfo) => {
+            try {
+              // Update quote with payment info
+              await googleSheetsService.updateQuote(quoteForPayment.id, {
+                ...quoteForPayment,
+                paymentInfo
+              });
+              
+              // Analytics tracking
+              if (paymentInfo.status === 'paid' || paymentInfo.status === 'paid_on_site') {
+                analytics.trackPaymentReceived(
+                  quoteForPayment.id, 
+                  paymentInfo.paidAmount || quoteForPayment.price,
+                  paymentInfo.method
+                );
+              }
+              
+              alert('Zahlungsinformationen gespeichert!');
+              window.location.reload();
+            } catch (error) {
+              console.error('Error saving payment info:', error);
+              throw error;
+            }
           }}
         />
       )}
