@@ -43,6 +43,7 @@ import EmailDebugger from './components/EmailDebugger';
 import EmailTestIONOS from './components/EmailTestIONOS';
 import { AIAssistantChatV2 } from './components/AIAssistant';
 import { aiConfigService } from './services/ai/aiConfigService';
+import QuoteConfirmationPage from './pages/QuoteConfirmationPage';
 
 
 export const AuthContext = React.createContext<{
@@ -70,6 +71,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route path="/login" element={<Navigate to="/dashboard" />} />
       <Route path="/share/:shareId" element={<SharePage />} />
       <Route path="/share/:token" element={<SharePage />} />
+      
+      {/* Quote Confirmation Page - Public Route */}
+      <Route 
+        path="/quote-confirmation/:token" 
+        element={<QuoteConfirmationPage />} 
+      />
       
       {/* Search Customer for Quote Creation */}
       <Route 

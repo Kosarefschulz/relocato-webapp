@@ -28,6 +28,7 @@ import QuoteVersionManager from './QuoteVersionManager';
 import SignatureModal from './SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
 import EmailComposer from './EmailComposer';
+import { tokenService } from '../services/tokenService';
 
 interface CustomerQuotesProps {
   quotes: Quote[];
@@ -339,6 +340,10 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                         e.stopPropagation();
                         setUpdatingStatus(quote.id);
                         try {
+                          // Generiere Bestätigungs-Token
+                          const token = tokenService.generateQuoteToken(quote);
+                          const confirmationUrl = tokenService.generateConfirmationUrl(token);
+                          
                           const pdfBlob = await generatePDF(customer, quote);
                           const emailData = {
                             to: customer.email,
@@ -348,6 +353,16 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                               <p>vielen Dank für Ihre Anfrage. Anbei finden Sie Ihr persönliches Umzugsangebot.</p>
                               <p><strong>Angebotsnummer:</strong> ${quote.id}</p>
                               <p><strong>Gesamtpreis:</strong> €${quote.price.toFixed(2)}</p>
+                              
+                              <div style="margin: 30px 0; padding: 20px; background-color: #f5f5f5; border-radius: 8px;">
+                                <h3 style="color: #1976d2;">Angebot online bestätigen</h3>
+                                <p>Sie können Ihr Angebot bequem online einsehen und bestätigen:</p>
+                                <a href="${confirmationUrl}" style="display: inline-block; margin: 10px 0; padding: 12px 24px; background-color: #1976d2; color: white; text-decoration: none; border-radius: 4px;">
+                                  Angebot ansehen und bestätigen
+                                </a>
+                                <p style="font-size: 12px; color: #666;">Dieser Link ist 30 Tage gültig.</p>
+                              </div>
+                              
                               <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
                               <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
                             `,
@@ -362,8 +377,12 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                           
                           const sent = await sendEmailViaSMTP(emailData);
                           if (sent) {
-                            // Update quote status to sent
-                            await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
+                            // Update quote with token and status
+                            await googleSheetsService.updateQuote(quote.id, { 
+                              ...quote,
+                              status: 'sent',
+                              confirmationToken: token
+                            });
                             alert('Angebot erfolgreich versendet!');
                             window.location.reload();
                           } else {
