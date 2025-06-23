@@ -1,5 +1,5 @@
 import { firebaseService } from '../firebaseService';
-import { analyticsService } from '../analyticsService';
+import analyticsService from '../analyticsService';
 
 export class AISystemAnalyzer {
   async getCompleteSystemState(): Promise<string> {
