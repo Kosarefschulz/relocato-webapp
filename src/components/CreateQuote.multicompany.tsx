@@ -162,7 +162,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
         company: selectedCompany // Save company type
       };
       
-      const savedQuote = await googleSheetsService.createQuote(quote);
+      const savedQuote = await googleSheetsService.addQuote(quote);
       if (savedQuote) {
         setSuccess(true);
         setTimeout(() => {
