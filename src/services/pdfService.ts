@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { Customer, Invoice } from '../types';
+import { Customer, Invoice, PaymentInfo } from '../types';
 import pdfSignatureService, { SignatureData } from './pdfSignatureService';
 import { generateArbeitsschein } from './arbeitsscheinService';
 
@@ -496,7 +496,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
   }
 };
 
-export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): Promise<Blob> => {
+export const generateInvoicePDF = async (customer: Customer, invoice: Invoice, paymentInfo?: PaymentInfo): Promise<Blob> => {
   try {
     console.log('🔄 Starte Rechnungs-PDF-Generierung...', { customer, invoice });
     
@@ -593,6 +593,31 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     doc.text(`Rechnung für Umzugsdienstleistung`, margin, yPosition);
     yPosition += 10;
     
+    // Zahlungsstatus-Banner (wenn bezahlt)
+    if (paymentInfo && (paymentInfo.status === 'paid' || paymentInfo.status === 'paid_on_site')) {
+      doc.setFillColor(46, 125, 50); // Grün
+      doc.setDrawColor(46, 125, 50);
+      doc.setLineWidth(2);
+      doc.roundedRect(margin, yPosition - 2, rightMargin - margin, 16, 3, 3, 'FD');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('✓ BEZAHLT', pageWidth / 2, yPosition + 8, { align: 'center' });
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      const paymentDate = paymentInfo.paidDate ? new Date(paymentInfo.paidDate).toLocaleDateString('de-DE') : '';
+      const paymentMethod = paymentInfo.method === 'ec_card' ? 'EC-Karte' : 
+                           paymentInfo.method === 'cash' ? 'Bargeld' : 
+                           paymentInfo.method === 'bank_transfer' ? 'Überweisung' : 
+                           'PayPal';
+      doc.text(`am ${paymentDate} per ${paymentMethod}`, pageWidth / 2, yPosition + 12, { align: 'center' });
+      
+      yPosition += 20;
+      doc.setTextColor(0);
+    }
+    
     // Anrede
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
@@ -683,42 +708,68 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice): 
     // Zahlungsinformationen
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('Zahlungsinformationen:', margin, yPosition);
-    yPosition += 6;
     
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    const zahlungshinweis = `Bitte überweisen Sie den Gesamtbetrag von € ${invoice.totalPrice.toFixed(2)} bis zum ${new Date(invoice.dueDate).toLocaleDateString('de-DE')} auf folgendes Konto:`;
-    const zahlungsLines = doc.splitTextToSize(zahlungshinweis, rightMargin - margin);
-    doc.text(zahlungsLines, margin, yPosition);
-    yPosition += zahlungsLines.length * 4 + 5;
-    
-    // Bankverbindung
-    doc.setFillColor(245, 245, 245);
-    doc.setDrawColor(221, 221, 221);
-    doc.setLineWidth(0.5);
-    doc.rect(margin, yPosition, rightMargin - margin, 32, 'FD');
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(85, 85, 85);
-    let bankY = yPosition + 6;
-    doc.text('Kontoinhaber:', margin + 5, bankY);
-    doc.text('Bank:', margin + 5, bankY + 6);
-    doc.text('IBAN:', margin + 5, bankY + 12);
-    doc.text('BIC:', margin + 5, bankY + 18);
-    doc.text('Verwendungszweck:', margin + 5, bankY + 24);
-    
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(0);
-    doc.text('Wertvoll Dienstleistungen GmbH', margin + 45, bankY);
-    doc.text('Commerzbank', margin + 45, bankY + 6);
-    doc.text('DE89 3704 0044 0532 0130 00', margin + 45, bankY + 12);
-    doc.text('COBADEFFXXX', margin + 45, bankY + 18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(invoice.invoiceNumber, margin + 45, bankY + 24);
-    
-    yPosition += 37;
+    if (paymentInfo && (paymentInfo.status === 'paid' || paymentInfo.status === 'paid_on_site')) {
+      // Bezahlte Rechnung - Zahlungsbestätigung
+      doc.text('Zahlungsbestätigung:', margin, yPosition);
+      yPosition += 6;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text('Vielen Dank für Ihre Zahlung! Der Rechnungsbetrag wurde vollständig beglichen.', margin, yPosition);
+      yPosition += 6;
+      
+      if (paymentInfo.receiptNumber) {
+        doc.text(`Belegnummer: ${paymentInfo.receiptNumber}`, margin, yPosition);
+        yPosition += 4;
+      }
+      
+      if (paymentInfo.confirmedBy) {
+        doc.text(`Zahlung bestätigt von: ${paymentInfo.confirmedBy}`, margin, yPosition);
+        yPosition += 4;
+      }
+      
+      yPosition += 10;
+      
+    } else {
+      // Unbezahlte Rechnung - normale Zahlungsinformationen
+      doc.text('Zahlungsinformationen:', margin, yPosition);
+      yPosition += 6;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const zahlungshinweis = `Bitte überweisen Sie den Gesamtbetrag von € ${invoice.totalPrice.toFixed(2)} bis zum ${new Date(invoice.dueDate).toLocaleDateString('de-DE')} auf folgendes Konto:`;
+      const zahlungsLines = doc.splitTextToSize(zahlungshinweis, rightMargin - margin);
+      doc.text(zahlungsLines, margin, yPosition);
+      yPosition += zahlungsLines.length * 4 + 5;
+      
+      // Bankverbindung
+      doc.setFillColor(245, 245, 245);
+      doc.setDrawColor(221, 221, 221);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, yPosition, rightMargin - margin, 32, 'FD');
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(85, 85, 85);
+      let bankY = yPosition + 6;
+      doc.text('Kontoinhaber:', margin + 5, bankY);
+      doc.text('Bank:', margin + 5, bankY + 6);
+      doc.text('IBAN:', margin + 5, bankY + 12);
+      doc.text('BIC:', margin + 5, bankY + 18);
+      doc.text('Verwendungszweck:', margin + 5, bankY + 24);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
+      doc.text('Wertvoll Dienstleistungen GmbH', margin + 45, bankY);
+      doc.text('Commerzbank', margin + 45, bankY + 6);
+      doc.text('DE89 3704 0044 0532 0130 00', margin + 45, bankY + 12);
+      doc.text('COBADEFFXXX', margin + 45, bankY + 18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(invoice.invoiceNumber, margin + 45, bankY + 24);
+      
+      yPosition += 37;
+    }
     
     // Hinweise
     doc.setFontSize(8);

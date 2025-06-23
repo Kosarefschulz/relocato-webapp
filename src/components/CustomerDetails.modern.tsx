@@ -648,6 +648,7 @@ const CustomerDetails: React.FC = () => {
               <CustomerInvoicesMultiCompany 
                 invoices={invoices} 
                 customer={customer} 
+                quotes={quotes}
               />
             </Box>
           </TabPanel>

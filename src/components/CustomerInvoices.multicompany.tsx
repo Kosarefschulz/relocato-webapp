@@ -33,7 +33,7 @@ import {
   Add as AddIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { Invoice, Customer } from '../types';
+import { Invoice, Customer, Quote } from '../types';
 import { CompanyType, COMPANY_CONFIGS } from '../types/company';
 import { generateInvoicePDF } from '../services/pdfService';
 import { generateWertvollInvoicePDF } from '../services/pdfServiceWertvoll';
@@ -43,9 +43,10 @@ import { databaseService as googleSheetsService } from '../config/database.confi
 interface CustomerInvoicesProps {
   invoices: Invoice[];
   customer: Customer;
+  quotes?: Quote[];
 }
 
-const CustomerInvoicesMultiCompany: React.FC<CustomerInvoicesProps> = ({ invoices, customer }) => {
+const CustomerInvoicesMultiCompany: React.FC<CustomerInvoicesProps> = ({ invoices, customer, quotes = [] }) => {
   const [loadingPdf, setLoadingPdf] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -65,14 +66,20 @@ const CustomerInvoicesMultiCompany: React.FC<CustomerInvoicesProps> = ({ invoice
     }
   };
 
+  const getPaymentInfo = (invoice: Invoice) => {
+    const quote = quotes.find(q => q.id === invoice.quoteId);
+    return quote?.paymentInfo;
+  };
+
   const downloadPDF = async (invoice: Invoice, companyType?: CompanyType) => {
     try {
       setLoadingPdf(invoice.id || invoice.invoiceNumber);
       
       const company = companyType || invoice.company || 'relocato';
+      const paymentInfo = getPaymentInfo(invoice);
       const pdfBlob = company === 'wertvoll'
         ? await generateWertvollInvoicePDF(customer, invoice)
-        : await generateInvoicePDF(customer, invoice);
+        : await generateInvoicePDF(customer, invoice, paymentInfo);
       
       const url = URL.createObjectURL(pdfBlob);
       const fileName = `Rechnung_${invoice.invoiceNumber}_${customer.name.replace(/\s+/g, '_')}.pdf`;
@@ -104,9 +111,10 @@ const CustomerInvoicesMultiCompany: React.FC<CustomerInvoicesProps> = ({ invoice
       
       const company = companyType || invoice.company || 'relocato';
       const companyConfig = COMPANY_CONFIGS[company];
+      const paymentInfo = getPaymentInfo(invoice);
       const pdfBlob = company === 'wertvoll'
         ? await generateWertvollInvoicePDF(customer, invoice)
-        : await generateInvoicePDF(customer, invoice);
+        : await generateInvoicePDF(customer, invoice, paymentInfo);
       
       const emailData = {
         to: customer.email,
@@ -255,6 +263,26 @@ const CustomerInvoicesMultiCompany: React.FC<CustomerInvoicesProps> = ({ invoice
                           color={getStatusColor(invoice.status)}
                         />
                         {getCompanyChip(invoice.company)}
+                        {(() => {
+                          const paymentInfo = getPaymentInfo(invoice);
+                          if (paymentInfo && (paymentInfo.status === 'paid' || paymentInfo.status === 'paid_on_site')) {
+                            return (
+                              <Chip
+                                size="small"
+                                icon={<EuroIcon />}
+                                label={
+                                  paymentInfo.method === 'ec_card' ? 'EC-Karte' :
+                                  paymentInfo.method === 'cash' ? 'Bargeld' :
+                                  paymentInfo.method === 'bank_transfer' ? 'Überweisung' :
+                                  'PayPal'
+                                }
+                                color="success"
+                                variant="outlined"
+                              />
+                            );
+                          }
+                          return null;
+                        })()}
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>

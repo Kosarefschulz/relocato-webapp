@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { PaymentInfo } from '../types';
 
 export interface ArbeitsscheinData {
   auftragsnummer: string;
@@ -23,6 +24,7 @@ export interface ArbeitsscheinData {
   };
   leistungen: string[];
   preis: number;
+  paymentInfo?: PaymentInfo;
 }
 
 export const generateArbeitsschein = (data: ArbeitsscheinData): Blob => {
@@ -198,7 +200,7 @@ export const generateArbeitsschein = (data: ArbeitsscheinData): Blob => {
   // Confirmation section
   doc.setFillColor(249, 249, 249);
   doc.setDrawColor(51, 51, 51);
-  doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 40, 'FD');
+  doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 45, 'FD');
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
@@ -210,14 +212,37 @@ export const generateArbeitsschein = (data: ArbeitsscheinData): Blob => {
   const confirmations = [
     'Die Umzugsleistungen wurden vollständig und ordnungsgemäß erbracht',
     'Das Umzugsgut wurde unbeschädigt transportiert',
-    'Alle vereinbarten Leistungen wurden durchgeführt',
-    'Zahlung erfolgt per EC-Karte'
+    'Alle vereinbarten Leistungen wurden durchgeführt'
   ];
   
+  // Add dynamic payment confirmation based on payment info
+  if (data.paymentInfo && data.paymentInfo.status === 'paid_on_site') {
+    const paymentMethod = data.paymentInfo.method === 'ec_card' ? 'EC-Karte' :
+                         data.paymentInfo.method === 'cash' ? 'Bargeld' : 
+                         'andere Zahlungsart';
+    confirmations.push(`✓ Zahlung wurde vor Ort per ${paymentMethod} erhalten`);
+    
+    // Add payment amount confirmation
+    if (data.paymentInfo.paidAmount) {
+      confirmations.push(`✓ Betrag: €${data.paymentInfo.paidAmount.toFixed(2)} - Belegnr.: ${data.paymentInfo.receiptNumber || 'N/A'}`);
+    }
+  } else if (data.paymentInfo && data.paymentInfo.status === 'pending') {
+    confirmations.push('Zahlung erfolgt per Rechnung');
+  } else {
+    confirmations.push('Zahlungsart: ________________________');
+  }
+  
   confirmations.forEach(text => {
-    // Checkbox
-    doc.rect(margin + 5, yPos - 3, 4, 4);
-    doc.text(text, margin + 12, yPos);
+    // Checkbox (only for non-payment lines)
+    if (!text.startsWith('✓')) {
+      doc.rect(margin + 5, yPos - 3, 4, 4);
+      doc.text(text, margin + 12, yPos);
+    } else {
+      // Payment confirmation with checkmark
+      doc.setFont('helvetica', 'bold');
+      doc.text(text, margin + 5, yPos);
+      doc.setFont('helvetica', 'normal');
+    }
     yPos += 7;
   });
   
