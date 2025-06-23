@@ -3,7 +3,7 @@ import { firebaseService } from '../firebaseService';
 import { paginationService } from '../paginationService';
 import { quoteCalculationService } from '../quoteCalculation';
 import { sendEmail } from '../emailService';
-import emailTemplateService from '../emailTemplateService';
+import { emailTemplateService } from '../emailTemplateService';
 import { pdfService } from '../pdfServiceWrapper';
 
 export interface AIContext {
@@ -109,7 +109,7 @@ export class AIContextManager {
     if (type === 'quote') {
       return await pdfService.generatePDF(data.customer, data.quote);
     } else {
-      return await pdfService.generateInvoicePDF(data.invoice, data.customer);
+      return await pdfService.generateInvoicePDF(data.customer, data.invoice);
     }
   }
 

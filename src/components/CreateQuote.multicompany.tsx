@@ -158,8 +158,8 @@ const CreateQuoteMultiCompany: React.FC = () => {
         createdBy: 'user',
         status: 'draft' as const,
         company: selectedCompany as 'relocato' | 'wertvoll',
-        volume: parseFloat(volume) || 0,
-        distance: parseFloat(distance) || 0
+        volume: quoteDetails.volume || 0,
+        distance: quoteDetails.distance || 0
       };
       
       const savedQuote = await googleSheetsService.addQuote(quote);
@@ -187,7 +187,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
       setLoading(true);
       const finalPrice = useManualPrice ? manualTotalPrice : (calculation?.totalPrice || 0);
       
-      const quote = {
+      const quoteData = {
         customerId: customer.id,
         customerName: customer.name,
         price: finalPrice,
@@ -195,6 +195,8 @@ const CreateQuoteMultiCompany: React.FC = () => {
         createdAt: new Date(),
         createdBy: 'user',
         status: 'Angebot versendet',
+        volume: quoteDetails.volume,
+        distance: quoteDetails.distance,
         details: quoteDetails,
         calculation: calculation,
         company: selectedCompany
@@ -202,14 +204,14 @@ const CreateQuoteMultiCompany: React.FC = () => {
       
       // Generate PDF based on selected company
       const pdfBlob = selectedCompany === 'wertvoll' 
-        ? await generateWertvollPDF(customer, quote)
-        : await generatePDF(customer, quote);
+        ? await generateWertvollPDF(customer, quoteData)
+        : await generatePDF(customer, quoteData);
       
       const companyConfig = COMPANY_CONFIGS[selectedCompany];
       const emailData = {
         to: customer.email,
         subject: `Ihr Angebot von ${companyConfig.name}`,
-        content: generateEmailHTML(customer, quote, finalPrice),
+        content: generateEmailHTML(customer, quoteData, finalPrice),
         attachments: [{
           filename: `Angebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('de-DE').replace(/\./g, '-')}.pdf`,
           content: pdfBlob
@@ -218,7 +220,18 @@ const CreateQuoteMultiCompany: React.FC = () => {
       
       const sent = await sendEmail(emailData);
       if (sent) {
-        await googleSheetsService.createQuote(quote);
+        await googleSheetsService.addQuote({
+          customerId: customer.id,
+          customerName: customer.name,
+          price: finalPrice,
+          comment: quoteDetails.notes,
+          createdAt: new Date(),
+          createdBy: 'user',
+          status: 'Angebot versendet' as const,
+          company: selectedCompany as 'relocato' | 'wertvoll',
+          volume: quoteDetails.volume || 0,
+          distance: quoteDetails.distance || 0
+        });
         setSuccess(true);
         setTimeout(() => {
           navigate(`/customer-details/${customer.id}`);
@@ -239,7 +252,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
       setLoading(true);
       const finalPrice = useManualPrice ? manualTotalPrice : (calculation?.totalPrice || 0);
       
-      const quote = {
+      const quoteData = {
         customerId: customer.id,
         customerName: customer.name,
         price: finalPrice,
@@ -247,6 +260,8 @@ const CreateQuoteMultiCompany: React.FC = () => {
         createdAt: new Date(),
         createdBy: 'user',
         status: 'Entwurf',
+        volume: quoteDetails.volume,
+        distance: quoteDetails.distance,
         details: quoteDetails,
         calculation: calculation,
         company: selectedCompany
@@ -254,8 +269,8 @@ const CreateQuoteMultiCompany: React.FC = () => {
       
       // Generate PDF based on selected company
       const pdfBlob = selectedCompany === 'wertvoll' 
-        ? await generateWertvollPDF(customer, quote)
-        : await generatePDF(customer, quote);
+        ? await generateWertvollPDF(customer, quoteData)
+        : await generatePDF(customer, quoteData);
       
       const url = URL.createObjectURL(pdfBlob);
       const fileName = `Angebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('de-DE').replace(/\./g, '-')}.pdf`;
