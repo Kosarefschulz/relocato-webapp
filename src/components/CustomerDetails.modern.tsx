@@ -183,14 +183,27 @@ const CustomerDetails: React.FC = () => {
     try {
       setLoading(true);
       
-      // Lade Kundendaten
-      const customersData = await googleSheetsService.getCustomers();
+      // Import cache service
+      const { customerCacheService } = await import('../services/customerCacheService');
       
-      // Try to find by ID first, then by customerNumber
-      let foundCustomer = customersData.find(c => c.id === customerId);
+      // Try to get from cache first
+      let foundCustomer: Customer | null = customerCacheService.getCachedCustomer(customerId) || null;
       
       if (!foundCustomer) {
-        foundCustomer = customersData.find(c => c.customerNumber === customerId);
+        // Load from database if not in cache
+        const customersData = await googleSheetsService.getCustomers();
+        
+        // Try to find by ID first, then by customerNumber
+        foundCustomer = customersData.find(c => c.id === customerId) || null;
+        
+        if (!foundCustomer) {
+          foundCustomer = customersData.find(c => c.customerNumber === customerId) || null;
+        }
+        
+        // Cache the customer if found
+        if (foundCustomer) {
+          customerCacheService.cacheCustomer(foundCustomer);
+        }
       }
       
       if (foundCustomer) {

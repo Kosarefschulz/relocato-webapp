@@ -33,22 +33,26 @@ class PaginationService {
   private cache = new Map<string, any[]>();
   private lastDocs = new Map<string, QueryDocumentSnapshot<DocumentData>>();
   private listeners = new Map<string, () => void>();
+  private cacheTimestamps = new Map<string, number>();
 
   /**
    * Load initial batch of customers (most recent ones)
    */
   async loadInitialCustomers(options: PaginationOptions = { pageSize: 500 }): Promise<PaginatedResult<Customer>> {
-    const cacheKey = 'customers_initial';
+    const cacheKey = `customers_initial_${options.pageSize}_${options.orderByField}_${options.orderDirection}`;
     
-    // Return cached data if available
+    // Return cached data if available and fresh (less than 2 minutes old)
     if (this.cache.has(cacheKey)) {
       const cachedData = this.cache.get(cacheKey)!;
-      return {
-        data: cachedData,
-        lastDoc: this.lastDocs.get(cacheKey) || null,
-        hasMore: cachedData.length >= options.pageSize,
-        totalLoaded: cachedData.length
-      };
+      const cacheAge = Date.now() - (this.cacheTimestamps.get(cacheKey) || 0);
+      if (cacheAge < 2 * 60 * 1000) { // 2 minutes
+        return {
+          data: cachedData,
+          lastDoc: this.lastDocs.get(cacheKey) || null,
+          hasMore: cachedData.length >= options.pageSize,
+          totalLoaded: cachedData.length
+        };
+      }
     }
 
     try {
@@ -80,8 +84,9 @@ class PaginationService {
 
       const lastDoc = snapshot.docs[snapshot.docs.length - 1];
       
-      // Cache the results
+      // Cache the results with timestamp
       this.cache.set(cacheKey, customers);
+      this.cacheTimestamps.set(cacheKey, Date.now());
       if (lastDoc) {
         this.lastDocs.set(cacheKey, lastDoc);
       }
@@ -355,9 +360,11 @@ class PaginationService {
     if (key) {
       this.cache.delete(key);
       this.lastDocs.delete(key);
+      this.cacheTimestamps.delete(key);
     } else {
       this.cache.clear();
       this.lastDocs.clear();
+      this.cacheTimestamps.clear();
     }
   }
 

@@ -1,3 +1,3 @@
-// Re-export the optimized version as the default
-export { default } from './CustomersList.optimized';
-export * from './CustomersList.optimized';
+// Re-export the performance-optimized version as the default
+export { default } from './CustomersList.performance';
+export * from './CustomersList.performance';

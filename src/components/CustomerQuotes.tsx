@@ -458,7 +458,6 @@ Web: www.relocato.de
                           if (sent) {
                             // Update quote with token and status
                             await googleSheetsService.updateQuote(quote.id, { 
-                              ...quote,
                               status: 'sent',
                               confirmationToken: token
                             });
@@ -491,7 +490,6 @@ Web: www.relocato.de
                           setUpdatingStatus(quote.id);
                           try {
                             await googleSheetsService.updateQuote(quote.id, { 
-                              ...quote, 
                               status: 'confirmed',
                               confirmedAt: new Date(),
                               confirmedBy: 'Intern bestätigt'
@@ -517,7 +515,7 @@ Web: www.relocato.de
                           e.stopPropagation();
                           setUpdatingStatus(quote.id);
                           try {
-                            await googleSheetsService.updateQuote(quote.id, { ...quote, status: 'rejected' });
+                            await googleSheetsService.updateQuote(quote.id, { status: 'rejected' });
                             window.location.reload(); // Reload to refresh data
                           } catch (error) {
                             console.error('Error updating quote status:', error);
@@ -856,7 +854,6 @@ Web: www.relocato.de
             try {
               // Update quote with payment info
               await googleSheetsService.updateQuote(quoteForPayment.id, {
-                ...quoteForPayment,
                 paymentInfo
               });
               
