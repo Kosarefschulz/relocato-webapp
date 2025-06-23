@@ -32,7 +32,7 @@ import {
   Business as BusinessIcon,
   Home as HomeIcon
 } from '@mui/icons-material';
-import { Customer } from '../types';
+import { Customer, Quote } from '../types';
 import { CompanyType, COMPANY_CONFIGS } from '../types/company';
 import { sendEmail } from '../services/emailService';
 import { databaseService as googleSheetsService } from '../config/database.config';
@@ -149,17 +149,17 @@ const CreateQuoteMultiCompany: React.FC = () => {
       
       const finalPrice = useManualPrice ? manualTotalPrice : (calculation?.totalPrice || 0);
       
-      const quote = {
+      const quote: Omit<Quote, 'id'> = {
         customerId: customer.id,
         customerName: customer.name,
         price: finalPrice,
         comment: quoteDetails.notes,
         createdAt: new Date(),
         createdBy: 'user',
-        status: 'Angebot erstellt',
-        details: quoteDetails,
-        calculation: calculation,
-        company: selectedCompany // Save company type
+        status: 'draft' as const,
+        company: selectedCompany as 'relocato' | 'wertvoll',
+        volume: parseFloat(volume) || 0,
+        distance: parseFloat(distance) || 0
       };
       
       const savedQuote = await googleSheetsService.addQuote(quote);
