@@ -11,7 +11,7 @@ import { unifiedDatabaseService } from '../services/unifiedDatabaseService.optim
  * Set to true to use Firebase as primary database
  * Set to false to use Google Sheets + localStorage
  */
-export const USE_FIREBASE_PRIMARY = false;
+export const USE_FIREBASE_PRIMARY = true;
 
 /**
  * Export the service to use based on configuration
