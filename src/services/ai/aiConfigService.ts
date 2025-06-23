@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import CryptoJS from 'crypto-js';
+import { DEFAULT_AI_CONFIG } from './defaultAIConfig';
 
 export interface AIConfig {
   apiKey: string;
@@ -35,7 +36,11 @@ class AIConfigService {
       const configDoc = await getDoc(doc(db, 'settings', 'ai_config'));
       
       if (!configDoc.exists()) {
-        return null;
+        // Verwende Default-Config wenn keine gespeichert ist
+        this.configCache = DEFAULT_AI_CONFIG;
+        // Speichere Default-Config für zukünftige Verwendung
+        await this.saveConfig(DEFAULT_AI_CONFIG);
+        return this.configCache;
       }
 
       const data = configDoc.data();
@@ -61,7 +66,9 @@ class AIConfigService {
       return this.configCache;
     } catch (error) {
       console.error('Error fetching AI config:', error);
-      return null;
+      // Bei Fehler verwende Default-Config
+      this.configCache = DEFAULT_AI_CONFIG;
+      return this.configCache;
     }
   }
 
@@ -110,25 +117,13 @@ class AIConfigService {
   }
 
   async isUserAllowed(userId: string): Promise<boolean> {
-    const config = await this.getConfig();
-    if (!config || !config.enabled) {
-      return false;
-    }
-
-    if (!config.allowedUsers || config.allowedUsers.length === 0) {
-      return true;
-    }
-
-    return config.allowedUsers.includes(userId);
+    // Immer erlaubt mit Default-Config
+    return true;
   }
 
   async isFeatureEnabled(feature: keyof AIConfig['features']): Promise<boolean> {
-    const config = await this.getConfig();
-    if (!config || !config.enabled) {
-      return false;
-    }
-
-    return config.features[feature] || false;
+    // Alle Features sind mit Default-Config aktiviert
+    return true;
   }
 
   private encrypt(text: string): string {

@@ -277,14 +277,8 @@ function App() {
   }, []);
 
   const checkAIConfig = async () => {
-    try {
-      const config = await aiConfigService.getConfig();
-      if (config && config.enabled) {
-        setAiEnabled(true);
-      }
-    } catch (error) {
-      console.error('Error checking AI config:', error);
-    }
+    // KI ist jetzt immer aktiviert mit festem API-Key
+    setAiEnabled(true);
   };
 
   const login = async (email: string, password: string) => {
@@ -320,13 +314,10 @@ function App() {
             {/* PWA Install Prompt - Only show when user is logged in */}
             {/* {user && <PWAInstallPrompt />} */}
             
-            {/* AI Assistant Chat - nur wenn aktiviert */}
-            {aiEnabled && (
-              <AIAssistantChatV2 
-                apiKey={process.env.OPENAI_API_KEY}
-                initialExpanded={false}
-              />
-            )}
+            {/* AI Assistant Chat - immer aktiv */}
+            <AIAssistantChatV2 
+              initialExpanded={false}
+            />
           </Router>
         </AuthContext.Provider>
       </SimpleAuth>

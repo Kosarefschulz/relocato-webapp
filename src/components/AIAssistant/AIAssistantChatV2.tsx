@@ -40,6 +40,7 @@ import {
 } from '@mui/icons-material';
 import { AIAssistantServiceV2, AIResponse } from '../../services/ai/aiAssistantServiceV2';
 import { useAuth } from '../../contexts/AuthContext';
+import { aiConfigService } from '../../services/ai/aiConfigService';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -101,11 +102,23 @@ Fragen Sie mich einfach irgendetwas! Ich denke mit und gebe Ihnen proaktive Vors
   const { user } = useAuth();
 
   useEffect(() => {
-    const key = apiKey || process.env.OPENAI_API_KEY;
-    if (key) {
-      setAiService(new AIAssistantServiceV2({ apiKey: key }));
-    }
-  }, [apiKey]);
+    // Initialisiere AI Service mit Default Config
+    const initAIService = async () => {
+      try {
+        const config = await aiConfigService.getConfig();
+        if (config && config.apiKey) {
+          setAiService(new AIAssistantServiceV2({ 
+            apiKey: config.apiKey,
+            model: config.model 
+          }));
+        }
+      } catch (error) {
+        console.error('Error initializing AI service:', error);
+      }
+    };
+    
+    initAIService();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
