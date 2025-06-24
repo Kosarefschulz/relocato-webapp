@@ -61,11 +61,40 @@ class FirebaseService {
       const customers: Customer[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        customers.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as Customer);
+        try {
+          const customerData: any = {
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' 
+              ? data.createdAt.toDate() 
+              : data.createdAt || new Date(),
+          };
+          
+          // Convert salesNotes dates
+          if (customerData.salesNotes && Array.isArray(customerData.salesNotes)) {
+            customerData.salesNotes = customerData.salesNotes.map((note: any) => ({
+              ...note,
+              createdAt: note.createdAt && typeof note.createdAt.toDate === 'function'
+                ? note.createdAt.toDate()
+                : note.createdAt || new Date()
+            }));
+          }
+          
+          // Convert cancelledAt if exists
+          if (customerData.cancelledAt && typeof customerData.cancelledAt.toDate === 'function') {
+            customerData.cancelledAt = customerData.cancelledAt.toDate();
+          }
+          
+          customers.push(customerData as Customer);
+        } catch (error) {
+          console.warn(`⚠️ Fehler beim Verarbeiten von Kunde ${doc.id}:`, error);
+          // Füge Kunde trotzdem hinzu, nur mit Name
+          customers.push({
+            id: doc.id,
+            ...data,
+            createdAt: new Date(),
+          } as Customer);
+        }
       });
       
       console.log(`✅ ${customers.length} Kunden aus Firestore geladen`);
@@ -87,11 +116,30 @@ class FirebaseService {
       
       if (docSnap.exists()) {
         const data = docSnap.data();
-        return {
+        const customerData: any = {
           id: docSnap.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as Customer;
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' 
+            ? data.createdAt.toDate() 
+            : data.createdAt || new Date(),
+        };
+        
+        // Convert salesNotes dates
+        if (customerData.salesNotes && Array.isArray(customerData.salesNotes)) {
+          customerData.salesNotes = customerData.salesNotes.map((note: any) => ({
+            ...note,
+            createdAt: note.createdAt && typeof note.createdAt.toDate === 'function'
+              ? note.createdAt.toDate()
+              : note.createdAt || new Date()
+          }));
+        }
+        
+        // Convert cancelledAt if exists
+        if (customerData.cancelledAt && typeof customerData.cancelledAt.toDate === 'function') {
+          customerData.cancelledAt = customerData.cancelledAt.toDate();
+        }
+        
+        return customerData as Customer;
       }
       return null;
     } catch (error) {
@@ -137,11 +185,26 @@ class FirebaseService {
       if (!this.customersCollection) throw new Error('Customers collection not initialized');
       const docRef = doc(this.customersCollection, customerId);
       
-      // Filter out undefined values
+      // Filter out undefined values and convert dates
       const updateData: any = {
         ...updates,
         updatedAt: serverTimestamp(),
       };
+      
+      // Convert salesNotes dates to Timestamps
+      if (updateData.salesNotes && Array.isArray(updateData.salesNotes)) {
+        updateData.salesNotes = updateData.salesNotes.map((note: any) => ({
+          ...note,
+          createdAt: note.createdAt instanceof Date 
+            ? Timestamp.fromDate(note.createdAt)
+            : note.createdAt
+        }));
+      }
+      
+      // Convert other date fields
+      if (updateData.cancelledAt && updateData.cancelledAt instanceof Date) {
+        updateData.cancelledAt = Timestamp.fromDate(updateData.cancelledAt);
+      }
       
       // Remove undefined fields
       Object.keys(updateData).forEach(key => {
@@ -183,7 +246,9 @@ class FirebaseService {
         quotes.push({
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
         } as Quote);
       });
       
@@ -208,7 +273,9 @@ class FirebaseService {
         return {
           id: docSnap.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
         } as Quote;
       }
       return null;
@@ -235,7 +302,9 @@ class FirebaseService {
         quotes.push({
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
         } as Quote);
       });
       
@@ -322,13 +391,23 @@ class FirebaseService {
       const invoices: Invoice[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        invoices.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate() || new Date(),
-          paidDate: data.paidDate?.toDate(),
-        } as Invoice);
+        try {
+          invoices.push({
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+              ? data.createdAt.toDate()
+              : data.createdAt || new Date(),
+            dueDate: data.dueDate && typeof data.dueDate.toDate === 'function'
+              ? data.dueDate.toDate()
+              : data.dueDate || new Date(),
+            paidDate: data.paidDate && typeof data.paidDate.toDate === 'function'
+              ? data.paidDate.toDate()
+              : data.paidDate,
+          } as Invoice);
+        } catch (error) {
+          console.warn(`⚠️ Fehler beim Verarbeiten von Rechnung ${doc.id}:`, error);
+        }
       });
       
       return invoices;
@@ -352,9 +431,15 @@ class FirebaseService {
         return {
           id: docSnap.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate() || new Date(),
-          paidDate: data.paidDate?.toDate(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
+          dueDate: data.dueDate && typeof data.dueDate.toDate === 'function'
+            ? data.dueDate.toDate()
+            : data.dueDate || new Date(),
+          paidDate: data.paidDate && typeof data.paidDate.toDate === 'function'
+            ? data.paidDate.toDate()
+            : data.paidDate,
         } as Invoice;
       }
       return null;
@@ -381,9 +466,15 @@ class FirebaseService {
         invoices.push({
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate() || new Date(),
-          paidDate: data.paidDate?.toDate(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
+          dueDate: data.dueDate && typeof data.dueDate.toDate === 'function'
+            ? data.dueDate.toDate()
+            : data.dueDate || new Date(),
+          paidDate: data.paidDate && typeof data.paidDate.toDate === 'function'
+            ? data.paidDate.toDate()
+            : data.paidDate,
         } as Invoice);
       });
       
@@ -483,7 +574,9 @@ class FirebaseService {
         emails.push({
           id: doc.id,
           ...data,
-          sentAt: data.sentAt?.toDate() || new Date(),
+          sentAt: data.sentAt && typeof data.sentAt.toDate === 'function'
+            ? data.sentAt.toDate()
+            : data.sentAt || new Date(),
         } as EmailHistory);
       });
       
@@ -521,11 +614,30 @@ class FirebaseService {
       const customers: Customer[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        customers.push({
+        const customerData: any = {
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as Customer);
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
+        };
+        
+        // Convert salesNotes dates
+        if (customerData.salesNotes && Array.isArray(customerData.salesNotes)) {
+          customerData.salesNotes = customerData.salesNotes.map((note: any) => ({
+            ...note,
+            createdAt: note.createdAt && typeof note.createdAt.toDate === 'function'
+              ? note.createdAt.toDate()
+              : note.createdAt || new Date()
+          }));
+        }
+        
+        // Convert cancelledAt if exists
+        if (customerData.cancelledAt && typeof customerData.cancelledAt.toDate === 'function') {
+          customerData.cancelledAt = customerData.cancelledAt.toDate();
+        }
+        
+        customers.push(customerData as Customer);
       });
       callback(customers);
     });
@@ -545,7 +657,9 @@ class FirebaseService {
         quotes.push({
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
         } as Quote);
       });
       callback(quotes);
@@ -566,9 +680,15 @@ class FirebaseService {
         invoices.push({
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate() || new Date(),
-          paidDate: data.paidDate?.toDate(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : data.createdAt || new Date(),
+          dueDate: data.dueDate && typeof data.dueDate.toDate === 'function'
+            ? data.dueDate.toDate()
+            : data.dueDate || new Date(),
+          paidDate: data.paidDate && typeof data.paidDate.toDate === 'function'
+            ? data.paidDate.toDate()
+            : data.paidDate,
         } as Invoice);
       });
       callback(invoices);
@@ -717,10 +837,16 @@ class FirebaseService {
         customerId: data.customerId,
         quoteId: data.quoteId,
         token: data.token,
-        expiresAt: data.expiresAt?.toDate() || new Date(),
-        createdAt: data.createdAt?.toDate() || new Date(),
+        expiresAt: data.expiresAt && typeof data.expiresAt.toDate === 'function'
+          ? data.expiresAt.toDate()
+          : data.expiresAt || new Date(),
+        createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
+          ? data.createdAt.toDate()
+          : data.createdAt || new Date(),
         createdBy: data.createdBy,
-        usedAt: data.usedAt?.toDate(),
+        usedAt: data.usedAt && typeof data.usedAt.toDate === 'function'
+          ? data.usedAt.toDate()
+          : data.usedAt,
       };
     } catch (error) {
       console.error('❌ Fehler beim Abrufen des Share Links:', error);
@@ -833,8 +959,12 @@ class FirebaseService {
         invoices.push({
           id: doc.id,
           ...data,
-          receivedDate: data.receivedDate?.toDate() || new Date(),
-          processedDate: data.processedDate?.toDate()
+          receivedDate: data.receivedDate && typeof data.receivedDate.toDate === 'function'
+            ? data.receivedDate.toDate()
+            : data.receivedDate || new Date(),
+          processedDate: data.processedDate && typeof data.processedDate.toDate === 'function'
+            ? data.processedDate.toDate()
+            : data.processedDate
         });
       });
       
