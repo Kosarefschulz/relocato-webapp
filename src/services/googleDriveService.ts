@@ -229,8 +229,8 @@ class GoogleDriveServiceEnhanced {
             return;
           }
 
-          // Thumbnail-Größe
-          const maxSize = 400;
+          // Thumbnail-Größe erhöht für bessere Qualität
+          const maxSize = 1200;
           const scale = Math.min(maxSize / img.width, maxSize / img.height);
           
           canvas.width = img.width * scale;
@@ -238,7 +238,7 @@ class GoogleDriveServiceEnhanced {
           
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           
-          resolve(canvas.toDataURL('image/jpeg', 0.95));
+          resolve(canvas.toDataURL('image/jpeg', 0.98));
         };
         img.src = e.target?.result as string;
       };
@@ -268,7 +268,8 @@ class GoogleDriveServiceEnhanced {
           uploadDate: new Date().toISOString(),
           fileSize: file.size,
           mimeType: file.type,
-          base64Thumbnail: thumbnail
+          base64Thumbnail: thumbnail,
+          webViewLink: base64  // Vollauflösendes Bild auch speichern
         };
         
         photos.push(photo);

@@ -264,10 +264,18 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                 <Card sx={{ height: '100%' }}>
                   <CardMedia
                     component="img"
-                    height="300"
-                    image={photo.base64Thumbnail}
+                    height="400"
+                    image={photo.webViewLink || photo.webContentLink || photo.thumbnailLink || photo.base64Thumbnail}
                     alt={photo.fileName}
-                    sx={{ cursor: 'pointer', objectFit: 'cover' }}
+                    loading="lazy"
+                    sx={{ 
+                      cursor: 'pointer', 
+                      objectFit: 'cover',
+                      imageRendering: '-webkit-optimize-contrast',
+                      WebkitBackfaceVisibility: 'hidden',
+                      backfaceVisibility: 'hidden',
+                      backgroundColor: '#f5f5f5'
+                    }}
                     onClick={() => setSelectedPhoto(photo)}
                   />
                   <CardContent>
@@ -282,7 +290,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                           size="small"
                           onClick={() => {
                             const link = document.createElement('a');
-                            link.href = photo.webContentLink || photo.base64Thumbnail || '';
+                            link.href = photo.webContentLink || photo.webViewLink || photo.thumbnailLink || photo.base64Thumbnail || '';
                             link.download = photo.fileName;
                             link.click();
                           }}
@@ -459,13 +467,16 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           {selectedPhoto && (
             <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
               <img
-                src={selectedPhoto.webViewLink || selectedPhoto.base64Thumbnail}
+                src={selectedPhoto.webContentLink || selectedPhoto.webViewLink || selectedPhoto.thumbnailLink || selectedPhoto.base64Thumbnail}
                 alt={selectedPhoto.fileName}
                 style={{ 
                   maxWidth: '100%', 
                   maxHeight: '90vh', 
                   height: 'auto',
-                  objectFit: 'contain'
+                  objectFit: 'contain',
+                  imageRendering: '-webkit-optimize-contrast',
+                  WebkitBackfaceVisibility: 'hidden',
+                  backfaceVisibility: 'hidden'
                 }}
               />
               {/* Foto-Informationen */}
