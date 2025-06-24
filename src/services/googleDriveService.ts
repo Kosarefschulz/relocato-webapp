@@ -196,24 +196,58 @@ class GoogleDriveServiceEnhanced {
 
   private savePhotosToStorage(photos: StoredPhoto[]) {
     try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(photos));
-    } catch (error) {
-      console.error('Fehler beim Speichern:', error);
-      // Bei Speicherplatzproblemen alte Fotos entfernen
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        const sorted = photos.sort((a, b) => 
+      // Limitiere auf maximal 50 Fotos pro Kunde
+      const photosByCustomer = photos.reduce((acc, photo) => {
+        if (!acc[photo.customerId]) acc[photo.customerId] = [];
+        acc[photo.customerId].push(photo);
+        return acc;
+      }, {} as Record<string, StoredPhoto[]>);
+      
+      // Behalte nur die neuesten 50 Fotos pro Kunde
+      const limitedPhotos: StoredPhoto[] = [];
+      Object.entries(photosByCustomer).forEach(([customerId, customerPhotos]) => {
+        const sorted = customerPhotos.sort((a, b) => 
           new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
         );
-        const reduced = sorted.slice(0, 100);
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(reduced));
+        limitedPhotos.push(...sorted.slice(0, 50));
+      });
+      
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(limitedPhotos));
+    } catch (error) {
+      console.error('Fehler beim Speichern:', error);
+      // Bei Speicherplatzproblemen alle Fotos löschen und neu beginnen
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn('LocalStorage voll - lösche alte Fotos');
+        try {
+          localStorage.removeItem(this.STORAGE_KEY);
+          // Versuche nur die neuesten 20 Fotos zu speichern
+          const sorted = photos.sort((a, b) => 
+            new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
+          );
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(sorted.slice(0, 20)));
+        } catch (e) {
+          console.error('Kritischer Speicherfehler:', e);
+          localStorage.removeItem(this.STORAGE_KEY);
+          throw new Error('Speicher voll - bitte Browser-Cache leeren');
+        }
       }
     }
   }
 
   private addPhotosToLocalStorage(newPhotos: StoredPhoto[]) {
-    const existing = this.loadPhotosFromStorage();
-    const combined = [...existing, ...newPhotos];
-    this.savePhotosToStorage(combined);
+    try {
+      const existing = this.loadPhotosFromStorage();
+      const combined = [...existing, ...newPhotos];
+      this.savePhotosToStorage(combined);
+    } catch (error) {
+      console.error('Fehler beim Hinzufügen der Fotos:', error);
+      // Bei Fehler versuche nur die neuen Fotos zu speichern
+      try {
+        this.savePhotosToStorage(newPhotos);
+      } catch (e) {
+        throw new Error('Speicherplatz voll - bitte löschen Sie alte Fotos');
+      }
+    }
   }
 
   private async createThumbnail(file: File): Promise<string> {

@@ -400,7 +400,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
               value={uploadCategory}
               onChange={(e) => setUploadCategory(e.target.value)}
               margin="normal"
-              required
+              // required - Kategorie ist jetzt optional
             >
               {PHOTO_CATEGORIES.map((category) => (
                 <MenuItem key={category} value={category}>
@@ -443,7 +443,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           <Button
             onClick={handleUpload}
             variant="contained"
-            disabled={uploadFiles.length === 0 || !uploadCategory || uploading}
+            disabled={uploadFiles.length === 0 || uploading}
           >
             Hochladen
           </Button>
