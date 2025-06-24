@@ -32,11 +32,11 @@ export interface Customer {
   salutation?: string; // Anrede
   // Vertriebsstatus-Felder
   salesStatus?: 'reached' | 'not_reached' | 'cancelled'; // Vertriebsstatus
-  cancelledAt?: Date; // Wann wurde storniert
+  cancelledAt?: Date | string; // Wann wurde storniert
   cancelledReason?: string; // Grund für Stornierung
   salesNotes?: SalesNote[]; // Vertriebsnotizen
   notReachedCount?: number; // Anzahl der erfolglosen Kontaktversuche
-  lastNotReachedAt?: Date; // Zeitpunkt des letzten erfolglosen Versuchs
+  lastNotReachedAt?: Date | string; // Zeitpunkt des letzten erfolglosen Versuchs
 }
 
 export interface SalesNote {

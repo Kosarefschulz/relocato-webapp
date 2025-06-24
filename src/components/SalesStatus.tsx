@@ -70,7 +70,7 @@ const SalesStatus: React.FC<SalesStatusProps> = ({ customer, onUpdate }) => {
         salesStatus: 'not_reached' as const,
         contacted: false,
         notReachedCount: newCount,
-        lastNotReachedAt: new Date()
+        lastNotReachedAt: new Date().toISOString()
       };
       
       setLocalCustomer(prev => ({ ...prev, ...updatedFields }));
@@ -88,11 +88,9 @@ const SalesStatus: React.FC<SalesStatusProps> = ({ customer, onUpdate }) => {
   const handleCancel = async () => {
     try {
       setLoading(true);
-      const cancelledAt = new Date();
-      
       const updatedFields = {
         salesStatus: 'cancelled' as const,
-        cancelledAt,
+        cancelledAt: new Date().toISOString(),
         cancelledReason: 'Vom Vertrieb storniert'
       };
       
@@ -192,7 +190,7 @@ const SalesStatus: React.FC<SalesStatusProps> = ({ customer, onUpdate }) => {
             </Typography>
             {localCustomer.lastNotReachedAt && (
               <Typography variant="body2">
-                Zuletzt versucht: {format(new Date(localCustomer.lastNotReachedAt), 'dd.MM.yyyy HH:mm', { locale: de })}
+                Zuletzt versucht: {format(new Date(localCustomer.lastNotReachedAt as string), 'dd.MM.yyyy HH:mm', { locale: de })}
               </Typography>
             )}
           </Alert>
@@ -202,7 +200,7 @@ const SalesStatus: React.FC<SalesStatusProps> = ({ customer, onUpdate }) => {
         {localCustomer.salesStatus === 'cancelled' && (
           <Alert severity="error">
             <Typography variant="subtitle2">
-              Storniert am {localCustomer.cancelledAt ? format(new Date(localCustomer.cancelledAt), 'dd.MM.yyyy', { locale: de }) : ''}
+              Storniert am {localCustomer.cancelledAt ? format(new Date(localCustomer.cancelledAt as string), 'dd.MM.yyyy', { locale: de }) : ''}
             </Typography>
             {localCustomer.cancelledReason && (
               <Typography variant="body2">Grund: {localCustomer.cancelledReason}</Typography>
