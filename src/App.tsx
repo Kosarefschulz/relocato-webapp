@@ -6,6 +6,8 @@ import { User } from './services/authService';
 import { authService } from './services/authService';
 import { usePageTracking } from './hooks/useAnalytics';
 import { autoSyncService } from './services/autoSyncService';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import SimpleAuth from './components/SimpleAuth';
 
 import Login from './components/Login';
@@ -273,6 +275,17 @@ function App() {
 
   // Automatische Synchronisation beim App-Start
   useEffect(() => {
+    // iOS-spezifische Anpassungen
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') {
+      // Status Bar konfigurieren
+      StatusBar.setStyle({ style: Style.Light }).catch(console.error);
+      StatusBar.setBackgroundColor({ color: '#3b82f6' }).catch(console.error);
+      
+      // Safe Area Insets für iOS
+      document.documentElement.style.setProperty('--safe-area-inset-top', 'env(safe-area-inset-top)');
+      document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
+    }
+    
     // Prüfe ob Auto-Sync aktiviert ist
     const autoSyncEnabled = localStorage.getItem('autoSyncEnabled') === 'true';
     
