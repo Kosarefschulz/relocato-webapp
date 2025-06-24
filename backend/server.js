@@ -587,6 +587,362 @@ app.post('/api/generate-pdf', async (req, res) => {
   }
 });
 
+// E-Mail-Liste abrufen
+app.post('/api/email/list', async (req, res) => {
+  const Imap = require('imap');
+  
+  try {
+    const { folder = 'INBOX', page = 1, limit = 50 } = req.body;
+    
+    console.log(`📧 Lade E-Mail-Liste: Folder=${folder}, Page=${page}, Limit=${limit}`);
+    
+    const imap = new Imap({
+      user: SMTP_CONFIG.auth.user,
+      password: SMTP_CONFIG.auth.pass,
+      host: 'imap.ionos.de',
+      port: 993,
+      tls: true,
+      tlsOptions: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
+      },
+      connTimeout: 10000,
+      authTimeout: 10000
+    });
+    
+    let emails = [];
+    let totalCount = 0;
+    let connectionClosed = false;
+    
+    imap.once('ready', () => {
+      imap.openBox(folder, false, (err, box) => {
+        if (err) {
+          console.error('❌ Fehler beim Öffnen der Mailbox:', err);
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            return res.status(500).json({ success: false, error: err.message });
+          }
+          return;
+        }
+        
+        totalCount = box.messages.total;
+        
+        if (totalCount === 0) {
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            return res.json({ success: true, emails: [], total: 0 });
+          }
+          return;
+        }
+        
+        // Berechne den Bereich für die Pagination
+        const start = Math.max(1, totalCount - (page * limit) + 1);
+        const end = Math.max(1, totalCount - ((page - 1) * limit));
+        
+        const fetch = imap.seq.fetch(`${start}:${end}`, {
+          bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
+          struct: false
+        });
+        
+        fetch.on('message', (msg, seqno) => {
+          let header = '';
+          let uid = null;
+          let flags = [];
+          
+          msg.on('body', (stream, info) => {
+            stream.on('data', (chunk) => {
+              header += chunk.toString('utf8');
+            });
+          });
+          
+          msg.once('attributes', (attrs) => {
+            uid = attrs.uid;
+            flags = attrs.flags || [];
+          });
+          
+          msg.once('end', () => {
+            const lines = header.split('\r\n');
+            const emailInfo = {
+              id: uid || seqno,
+              seqno: seqno,
+              flags: flags
+            };
+            
+            lines.forEach(line => {
+              if (line.startsWith('From: ')) {
+                emailInfo.from = line.substring(6);
+              } else if (line.startsWith('To: ')) {
+                emailInfo.to = line.substring(4);
+              } else if (line.startsWith('Subject: ')) {
+                emailInfo.subject = line.substring(9);
+              } else if (line.startsWith('Date: ')) {
+                emailInfo.date = line.substring(6);
+              }
+            });
+            
+            emails.push(emailInfo);
+          });
+        });
+        
+        fetch.once('error', (err) => {
+          console.error('❌ Fetch-Fehler:', err);
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            res.status(500).json({ success: false, error: err.message });
+          }
+        });
+        
+        fetch.once('end', () => {
+          console.log(`✅ ${emails.length} E-Mails geladen`);
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            res.json({ 
+              success: true, 
+              emails: emails.reverse(), // Neueste zuerst
+              total: totalCount 
+            });
+          }
+        });
+      });
+    });
+    
+    imap.once('error', (err) => {
+      console.error('❌ IMAP-Fehler:', err);
+      if (!connectionClosed) {
+        connectionClosed = true;
+        res.status(500).json({ success: false, error: err.message });
+      }
+    });
+    
+    imap.connect();
+    
+  } catch (error) {
+    console.error('❌ Fehler beim E-Mail-Liste abrufen:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// E-Mail-Ordner abrufen
+app.post('/api/email/folders', async (req, res) => {
+  const Imap = require('imap');
+  
+  try {
+    console.log('📁 Lade E-Mail-Ordner...');
+    
+    const imap = new Imap({
+      user: SMTP_CONFIG.auth.user,
+      password: SMTP_CONFIG.auth.pass,
+      host: 'imap.ionos.de',
+      port: 993,
+      tls: true,
+      tlsOptions: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
+      },
+      connTimeout: 10000,
+      authTimeout: 10000
+    });
+    
+    let connectionClosed = false;
+    
+    imap.once('ready', () => {
+      imap.getBoxes((err, boxes) => {
+        if (err) {
+          console.error('❌ Fehler beim Abrufen der Ordner:', err);
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            return res.status(500).json({ success: false, error: err.message });
+          }
+          return;
+        }
+        
+        const folders = [];
+        
+        function parseBoxes(boxes, parent = '') {
+          for (const [name, box] of Object.entries(boxes)) {
+            const fullPath = parent ? `${parent}${box.delimiter}${name}` : name;
+            folders.push({
+              name: name,
+              path: fullPath,
+              delimiter: box.delimiter,
+              flags: box.attribs || [],
+              hasChildren: box.children ? Object.keys(box.children).length > 0 : false
+            });
+            
+            if (box.children) {
+              parseBoxes(box.children, fullPath);
+            }
+          }
+        }
+        
+        parseBoxes(boxes);
+        
+        console.log(`✅ ${folders.length} Ordner gefunden`);
+        if (!connectionClosed) {
+          connectionClosed = true;
+          imap.end();
+          res.json({ 
+            success: true, 
+            folders: folders 
+          });
+        }
+      });
+    });
+    
+    imap.once('error', (err) => {
+      console.error('❌ IMAP-Fehler:', err);
+      if (!connectionClosed) {
+        connectionClosed = true;
+        res.status(500).json({ success: false, error: err.message });
+      }
+    });
+    
+    imap.connect();
+    
+  } catch (error) {
+    console.error('❌ Fehler beim Ordner abrufen:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// E-Mail lesen Endpoint
+app.post('/api/email/read', async (req, res) => {
+  const Imap = require('imap');
+  const { simpleParser } = require('mailparser');
+  
+  try {
+    const { uid, folder = 'INBOX' } = req.body;
+    
+    if (!uid) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'E-Mail UID ist erforderlich' 
+      });
+    }
+    
+    console.log(`📧 Lade E-Mail: UID=${uid}, Folder=${folder}`);
+    
+    const imap = new Imap({
+      user: SMTP_CONFIG.auth.user,
+      password: SMTP_CONFIG.auth.pass,
+      host: 'imap.ionos.de',
+      port: 993,
+      tls: true,
+      tlsOptions: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
+      },
+      connTimeout: 10000,
+      authTimeout: 10000
+    });
+    
+    let emailData = null;
+    let connectionClosed = false;
+    
+    imap.once('ready', () => {
+      imap.openBox(folder, false, (err, box) => {
+        if (err) {
+          console.error('❌ Fehler beim Öffnen der Mailbox:', err);
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            return res.status(500).json({ success: false, error: err.message });
+          }
+          return;
+        }
+        
+        const fetch = imap.fetch([uid], { 
+          bodies: '',
+          struct: true
+        });
+        
+        fetch.on('message', (msg, seqno) => {
+          msg.on('body', (stream, info) => {
+            simpleParser(stream, async (err, parsed) => {
+              if (err) {
+                console.error('❌ Parse-Fehler:', err);
+                return;
+              }
+              
+              emailData = {
+                id: uid,
+                from: parsed.from?.text || '',
+                to: parsed.to?.text || '',
+                subject: parsed.subject || '',
+                date: parsed.date?.toISOString() || new Date().toISOString(),
+                text: parsed.text || '',
+                html: parsed.html || parsed.textAsHtml || '',
+                attachments: parsed.attachments?.map(att => ({
+                  filename: att.filename,
+                  contentType: att.contentType,
+                  size: att.size
+                })) || []
+              };
+            });
+          });
+        });
+        
+        fetch.once('error', (err) => {
+          console.error('❌ Fetch-Fehler:', err);
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            res.status(500).json({ success: false, error: err.message });
+          }
+        });
+        
+        fetch.once('end', () => {
+          console.log('✅ E-Mail geladen');
+          if (!connectionClosed) {
+            connectionClosed = true;
+            imap.end();
+            
+            if (emailData) {
+              res.json({ 
+                success: true, 
+                email: emailData 
+              });
+            } else {
+              res.status(404).json({ 
+                success: false, 
+                error: 'E-Mail nicht gefunden' 
+              });
+            }
+          }
+        });
+      });
+    });
+    
+    imap.once('error', (err) => {
+      console.error('❌ IMAP-Fehler:', err);
+      if (!connectionClosed) {
+        connectionClosed = true;
+        res.status(500).json({ success: false, error: err.message });
+      }
+    });
+    
+    imap.connect();
+    
+  } catch (error) {
+    console.error('❌ Fehler beim E-Mail abrufen:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // Test-E-Mail Endpoint
 app.post('/api/test-email', async (req, res) => {
   try {
