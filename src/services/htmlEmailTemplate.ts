@@ -486,6 +486,25 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
         <p>Der ausgewiesene Angebotspreis ist ein Festpreis inklusive Mehrwertsteuer.</p>
     </div>
     
+    <div class="section-header">Online-Bestätigung</div>
+    
+    <div class="info-section" style="background-color: #E8F5E9; padding: 20px; border-radius: 8px; border: 2px solid #8BC34A;">
+        <h3 style="color: #8BC34A; margin-top: 0;">Angebot online bestätigen</h3>
+        <p><strong>Sie können dieses Angebot bequem online einsehen und bestätigen!</strong></p>
+        <p>Scannen Sie den QR-Code oder besuchen Sie den Link in Ihrer E-Mail:</p>
+        <ul>
+            <li>✓ Angebot digital unterschreiben</li>
+            <li>✓ Verbindliche Auftragserteilung</li>
+            <li>✓ Sofortige Bestätigung erhalten</li>
+            <li>✓ Zahlungsmodalitäten festlegen</li>
+        </ul>
+        <p style="text-align: center; margin-top: 20px;">
+            <span style="background-color: #8BC34A; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold;">
+                → Link zur Online-Bestätigung in Ihrer E-Mail
+            </span>
+        </p>
+    </div>
+    
     <div class="signature-section">
         <p><strong>Hinweis:</strong> Dieses Angebot ist unverbindlich und freibleibend. Alle Preise verstehen sich inkl. 19% MwSt.</p>
         <p>Mit meiner Unterschrift beauftrage ich wertvoll mit der Durchführung des Umzugs zu den genannten Konditionen.</p>

@@ -39,8 +39,9 @@ export const generateWertvollProfessionalPDF = async (
     const company = COMPANY_CONFIGS.wertvoll;
     const pageWidth = 210;
     const pageHeight = 297;
-    const margin = 15; // 15mm margins like HTML
+    const margin = 20; // Increased from 15mm to 20mm
     const rightMargin = pageWidth - margin;
+    const contentWidth = rightMargin - margin;
     let yPosition = margin;
 
     // Font sizes from HTML
@@ -67,9 +68,38 @@ export const generateWertvollProfessionalPDF = async (
       borderGray: { r: 221, g: 221, b: 221 }
     };
 
-    // Helper function für neue Seite
+    // Helper function for text wrapping
+    const splitTextToLines = (text: string, maxWidth: number, fontSize: number): string[] => {
+      doc.setFontSize(fontSize);
+      const words = text.split(' ');
+      const lines: string[] = [];
+      let currentLine = '';
+
+      words.forEach(word => {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const testWidth = doc.getTextWidth(testLine);
+        
+        if (testWidth > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      });
+      
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      
+      return lines;
+    };
+
+    // Helper function für neue Seite with better space calculation
     const checkNewPage = (requiredSpace: number) => {
-      if (yPosition + requiredSpace > pageHeight - 30) {
+      const footerHeight = 25; // Space needed for footer
+      const bottomMargin = pageHeight - footerHeight - margin;
+      
+      if (yPosition + requiredSpace > bottomMargin) {
         doc.addPage();
         yPosition = margin;
         return true;
@@ -83,12 +113,17 @@ export const generateWertvollProfessionalPDF = async (
     doc.setFontSize(fontSizes.companyName);
     doc.text('Wertvoll Dienstleistungen GmbH', margin, yPosition);
     
-    // Services darunter
+    // Services darunter with text wrapping
     yPosition += 6;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(fontSizes.services);
     doc.setTextColor(colors.gray.r, colors.gray.g, colors.gray.b);
-    doc.text('Rückbau • Umzüge • Entrümpelungen • Entkernung • Renovierungsarbeiten • Gewerbeauflösungen', margin, yPosition);
+    const servicesText = 'Rückbau • Umzüge • Entrümpelungen • Entkernung • Renovierungsarbeiten • Gewerbeauflösungen';
+    const servicesLines = splitTextToLines(servicesText, contentWidth * 0.7, fontSizes.services);
+    servicesLines.forEach((line, index) => {
+      doc.text(line, margin, yPosition + (index * 3));
+    });
+    yPosition += servicesLines.length * 3;
     
     // Kontakt rechts
     const contactY = margin;
@@ -100,7 +135,7 @@ export const generateWertvollProfessionalPDF = async (
     doc.text(`Mobil: ${company.contact.mobile}`, rightMargin, contactY + 10.5, { align: 'right' });
     doc.text(company.contact.email, rightMargin, contactY + 14, { align: 'right' });
     
-    yPosition += 12;
+    yPosition += 8;
     
     // Absenderzeile mit Unterstrich
     doc.setFontSize(fontSizes.addressLine);
@@ -169,7 +204,7 @@ export const generateWertvollProfessionalPDF = async (
     doc.text(introText, margin, yPosition);
     yPosition += 10;
     
-    // TABELLE - Exakt wie im HTML
+    // TABELLE - Mit dynamischen Zeilenhöhen
     doc.setFontSize(fontSizes.table);
     
     // Tabellenkopf
@@ -182,9 +217,9 @@ export const generateWertvollProfessionalPDF = async (
     const tableWidth = rightMargin - margin;
     const colWidths = {
       pos: tableWidth * 0.08,
-      desc: tableWidth * 0.62,
-      qty: tableWidth * 0.15,
-      price: tableWidth * 0.15
+      desc: tableWidth * 0.67, // Increased from 0.62
+      qty: tableWidth * 0.12, // Reduced from 0.15
+      price: tableWidth * 0.13 // Reduced from 0.15
     };
     
     // Header-Hintergrund
@@ -227,9 +262,18 @@ export const generateWertvollProfessionalPDF = async (
     let subtotal = 0;
     
     items.forEach((item) => {
-      checkNewPage(15);
+      // Calculate dynamic row height based on content
+      const descMaxWidth = colWidths.desc - 6; // 3mm padding on each side
+      const nameLines = splitTextToLines(item.name, descMaxWidth, fontSizes.table);
+      const descLines = splitTextToLines(item.description, descMaxWidth, fontSizes.serviceDesc);
       
-      const rowHeight = 15;
+      // Calculate required height
+      const nameHeight = nameLines.length * 4;
+      const descHeight = descLines.length * 3;
+      const contentHeight = nameHeight + descHeight + 2; // Add spacing
+      const rowHeight = Math.max(15, contentHeight + 6); // Minimum 15mm, or content + padding
+      
+      checkNewPage(rowHeight);
       
       // Zeilen-Hintergrund (weiß)
       doc.setFillColor(255, 255, 255);
@@ -245,25 +289,38 @@ export const generateWertvollProfessionalPDF = async (
       currentX += colWidths.qty;
       doc.rect(currentX, yPosition, colWidths.price, rowHeight); // Preis
       
-      // Position
-      doc.text(item.position.toString(), tableX + colWidths.pos / 2, yPosition + 5, { align: 'center' });
+      // Position (vertically centered)
+      doc.setFontSize(fontSizes.table);
+      doc.text(item.position.toString(), tableX + colWidths.pos / 2, yPosition + rowHeight / 2 + 2, { align: 'center' });
       
-      // Leistungsbeschreibung
+      // Leistungsbeschreibung with wrapping
       const descX = tableX + colWidths.pos + 3;
+      let descY = yPosition + 5;
+      
+      // Name
       doc.setFont('helvetica', 'bold');
-      doc.text(item.name, descX, yPosition + 5);
+      doc.setFontSize(fontSizes.table);
+      nameLines.forEach(line => {
+        doc.text(line, descX, descY);
+        descY += 4;
+      });
+      
+      // Description
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(fontSizes.serviceDesc);
       doc.setTextColor(colors.gray.r, colors.gray.g, colors.gray.b);
-      doc.text(item.description, descX, yPosition + 9);
+      descLines.forEach(line => {
+        doc.text(line, descX, descY);
+        descY += 3;
+      });
       doc.setTextColor(colors.primary.r, colors.primary.g, colors.primary.b);
       doc.setFontSize(fontSizes.table);
       
-      // Menge
-      doc.text(item.quantity, tableX + colWidths.pos + colWidths.desc + colWidths.qty / 2, yPosition + 5, { align: 'center' });
+      // Menge (vertically centered)
+      doc.text(item.quantity, tableX + colWidths.pos + colWidths.desc + colWidths.qty / 2, yPosition + rowHeight / 2 + 2, { align: 'center' });
       
-      // Preis
-      doc.text(`${item.price.toFixed(2).replace('.', ',')} €`, tableX + tableWidth - 3, yPosition + 5, { align: 'right' });
+      // Preis (vertically centered)
+      doc.text(`${item.price.toFixed(2).replace('.', ',')} €`, tableX + tableWidth - 3, yPosition + rowHeight / 2 + 2, { align: 'right' });
       
       subtotal += item.price;
       yPosition += rowHeight;
@@ -271,6 +328,7 @@ export const generateWertvollProfessionalPDF = async (
     
     // Summenbereich
     yPosition += 5;
+    checkNewPage(30); // Space for summary
     
     // Zwischensumme
     const sumX = tableX + colWidths.pos + colWidths.desc;
@@ -303,6 +361,8 @@ export const generateWertvollProfessionalPDF = async (
     
     // Info-Blöcke
     if (!isInvoice) {
+      checkNewPage(50); // Space for info blocks
+      
       // Leistungsumfang
       doc.setFontSize(fontSizes.info);
       doc.setFont('helvetica', 'bold');
@@ -318,6 +378,7 @@ export const generateWertvollProfessionalPDF = async (
       ];
       
       leistungen.forEach(punkt => {
+        checkNewPage(5);
         doc.text(punkt, margin + 3, yPosition);
         yPosition += 4;
       });
@@ -325,6 +386,7 @@ export const generateWertvollProfessionalPDF = async (
       yPosition += 5;
       
       // Zahlungsbedingungen etc.
+      checkNewPage(20);
       doc.setFont('helvetica', 'bold');
       doc.text('Zahlungsbedingungen:', margin, yPosition);
       doc.setFont('helvetica', 'normal');
@@ -349,6 +411,7 @@ export const generateWertvollProfessionalPDF = async (
       yPosition += 10;
     } else {
       // Rechnungsspezifische Infos
+      checkNewPage(15);
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 14);
       doc.text(`Zahlungsziel: ${dueDate.toLocaleDateString('de-DE')}`, margin, yPosition);
@@ -358,6 +421,7 @@ export const generateWertvollProfessionalPDF = async (
     }
     
     // Abschlusstext
+    checkNewPage(40); // Space for closing
     doc.text('Für Rückfragen stehen wir Ihnen jederzeit zur Verfügung.', margin, yPosition);
     
     yPosition += 10;
@@ -379,7 +443,7 @@ export const generateWertvollProfessionalPDF = async (
     
     // Footer - auf jeder Seite
     const addFooter = () => {
-      const footerY = pageHeight - 15;
+      const footerY = pageHeight - 20; // More space from bottom
       
       // Footer-Linie
       doc.setDrawColor(colors.borderGray.r, colors.borderGray.g, colors.borderGray.b);
@@ -391,10 +455,20 @@ export const generateWertvollProfessionalPDF = async (
       doc.setTextColor(colors.gray.r, colors.gray.g, colors.gray.b);
       
       const footerLine1 = `${company.legalName} | Geschäftsführer: ${company.ceo.join(', ')}`;
-      const footerLine2 = `Bank: ${company.bank.name} | IBAN: ${company.bank.iban} | Amtsgericht: ${company.legal.court} ${company.legal.hrb} | StNr: ${company.legal.taxNumber}`;
+      const footerLine2 = `Bank: ${company.bank.name} | IBAN: ${company.bank.iban}`;
+      const footerLine3 = `Amtsgericht: ${company.legal.court} ${company.legal.hrb} | StNr: ${company.legal.taxNumber}`;
       
-      doc.text(footerLine1, pageWidth / 2, footerY - 2, { align: 'center' });
-      doc.text(footerLine2, pageWidth / 2, footerY + 1, { align: 'center' });
+      // Split footer into multiple lines if too long
+      const maxFooterWidth = contentWidth - 10;
+      const footerLines1 = splitTextToLines(footerLine1, maxFooterWidth, fontSizes.footer);
+      const footerLines2 = splitTextToLines(footerLine2, maxFooterWidth, fontSizes.footer);
+      const footerLines3 = splitTextToLines(footerLine3, maxFooterWidth, fontSizes.footer);
+      
+      let footerTextY = footerY - 2;
+      [...footerLines1, ...footerLines2, ...footerLines3].forEach(line => {
+        doc.text(line, pageWidth / 2, footerTextY, { align: 'center' });
+        footerTextY += 2.5;
+      });
     };
     
     // Footer auf jeder Seite hinzufügen

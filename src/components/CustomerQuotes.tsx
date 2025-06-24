@@ -150,32 +150,89 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
       // Generiere PDF
       const pdfBlob = await generatePDF(customer, quote);
       
-      // E-Mail-Inhalt
+      // E-Mail-Inhalt (HTML Format für bessere Darstellung)
       const emailContent = `
-Sehr geehrte/r ${customer.name},
-
-vielen Dank für Ihre Anfrage. Anbei erhalten Sie Ihr persönliches Umzugsangebot.
-
-**Online-Bestätigung:**
-Sie können Ihr Angebot bequem online einsehen und bestätigen:
-${confirmationUrl}
-
-**Ihre Vorteile:**
-- Transparente Preisgestaltung
-- Professionelles Team
-- Versicherungsschutz inklusive
-- Flexible Terminvereinbarung
-
-Bei Fragen stehen wir Ihnen gerne zur Verfügung.
-
-Mit freundlichen Grüßen
-Ihr Relocato Team
-
----
-Relocato Umzüge
-Tel: +49 123 456789
-E-Mail: info@relocato.de
-Web: www.relocato.de
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .button-container { text-align: center; margin: 30px 0; }
+        .confirm-button {
+            display: inline-block;
+            background-color: #8BC34A;
+            color: white !important;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .confirm-button:hover { background-color: #7CB342; }
+        .benefits { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .benefits ul { list-style-type: none; padding: 0; }
+        .benefits li { padding: 5px 0; }
+        .benefits li:before { content: "✓ "; color: #8BC34A; font-weight: bold; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 14px; }
+        .url-fallback { font-size: 12px; color: #666; margin-top: 10px; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="color: #8BC34A;">Ihr persönliches Umzugsangebot</h2>
+        </div>
+        
+        <p>Sehr geehrte/r ${customer.name},</p>
+        
+        <p>vielen Dank für Ihre Anfrage! Anbei erhalten Sie Ihr persönliches Umzugsangebot als PDF-Anhang.</p>
+        
+        <div class="button-container">
+            <a href="${confirmationUrl}" class="confirm-button" style="color: white !important; text-decoration: none;">
+                Angebot online ansehen & bestätigen
+            </a>
+            <p class="url-fallback">Falls der Button nicht funktioniert, kopieren Sie bitte diesen Link:<br>${confirmationUrl}</p>
+        </div>
+        
+        <div class="benefits">
+            <h3 style="margin-top: 0;">Ihre Vorteile bei uns:</h3>
+            <ul>
+                <li>Transparente Preisgestaltung ohne versteckte Kosten</li>
+                <li>Professionelles und erfahrenes Umzugsteam</li>
+                <li>Umfassender Versicherungsschutz inklusive</li>
+                <li>Flexible Terminvereinbarung nach Ihren Wünschen</li>
+                <li>Digitale Auftragsbestätigung - schnell und einfach</li>
+            </ul>
+        </div>
+        
+        <p><strong>Was können Sie online tun?</strong></p>
+        <ul>
+            <li>Ihr Angebot im Detail einsehen</li>
+            <li>Das Angebot direkt online bestätigen</li>
+            <li>Eine digitale Unterschrift hinzufügen</li>
+            <li>Das Angebot als PDF herunterladen</li>
+        </ul>
+        
+        <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung. Zögern Sie nicht, uns zu kontaktieren!</p>
+        
+        <p>Mit freundlichen Grüßen<br>
+        Ihr Relocato Team</p>
+        
+        <div class="footer">
+            <strong>Relocato Umzüge</strong><br>
+            Tel: (0521) 1200551-0<br>
+            E-Mail: bielefeld@relocato.de<br>
+            Web: www.relocato.de<br><br>
+            <small>Diese E-Mail wurde automatisch generiert. Der Bestätigungslink ist 30 Tage gültig.</small>
+        </div>
+    </div>
+</body>
+</html>
       `.trim();
       
       // E-Mail-Daten

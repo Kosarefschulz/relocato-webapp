@@ -1,6 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+require('dotenv').config();
 const app = express();
 
 app.use(cors());
@@ -8,12 +9,12 @@ app.use(express.json());
 
 // Email transporter
 const transporter = nodemailer.createTransporter({
-  host: 'smtp.ionos.de',
-  port: 587,
+  host: process.env.SMTP_HOST || 'smtp.ionos.de',
+  port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
   auth: {
-    user: 'bielefeld@relocato.de',
-    pass: 'Bicm1308'
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   },
   tls: {
     ciphers: 'SSLv3',
@@ -32,8 +33,8 @@ app.post('/send-email', async (req, res) => {
     const { to, subject, html } = req.body;
     
     const info = await transporter.sendMail({
-      from: 'RELOCATO® <bielefeld@relocato.de>',
-      to: to || 'bielefeld@relocato.de',
+      from: `RELOCATO® <${process.env.SMTP_USER}>`,
+      to: to || process.env.SMTP_USER,
       subject: subject || 'Test Email',
       html: html || '<h2>Test Email</h2>'
     });
@@ -49,8 +50,8 @@ app.get('/test-imap', async (req, res) => {
   const Imap = require('imap');
   
   const imap = new Imap({
-    user: 'bielefeld@relocato.de',
-    password: 'Bicm1308',
+    user: process.env.SMTP_USER,
+    password: process.env.SMTP_PASS,
     host: 'imap.ionos.de',
     port: 993,
     tls: true,

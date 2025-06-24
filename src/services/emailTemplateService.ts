@@ -143,6 +143,13 @@ export const AVAILABLE_VARIABLES: EmailVariable[] = [
     description: 'Das Ablaufdatum des Angebots',
     example: '30.01.2025',
     required: false
+  },
+  {
+    key: '{{confirmationUrl}}',
+    label: 'Bestätigungs-URL',
+    description: 'Der Link zur Online-Angebotsbestätigung',
+    example: 'https://app.relocato.de/quote-confirmation/abc123',
+    required: false
   }
 ];
 
@@ -161,6 +168,10 @@ vielen Dank für Ihre Anfrage. Anbei erhalten Sie Ihr persönliches Umzugsangebo
 - Nach: {{toAddress}}
 - Gesamtpreis: {{quotePrice}}
 
+**Online-Bestätigung:**
+Sie können Ihr Angebot bequem online einsehen und bestätigen:
+{{confirmationUrl}}
+
 Ihr Angebot ist gültig bis: {{quoteValidUntil}}
 
 Bei Fragen stehen wir Ihnen gerne zur Verfügung.
@@ -172,7 +183,7 @@ Mit freundlichen Grüßen
 Tel: {{companyPhone}}
 E-Mail: {{companyEmail}}`,
     category: 'quote',
-    variables: ['customerName', 'moveDate', 'fromAddress', 'toAddress', 'quotePrice', 'quoteValidUntil', 'employeeName', 'companyName', 'companyPhone', 'companyEmail'],
+    variables: ['customerName', 'moveDate', 'fromAddress', 'toAddress', 'quotePrice', 'confirmationUrl', 'quoteValidUntil', 'employeeName', 'companyName', 'companyPhone', 'companyEmail'],
     isActive: true,
     isSystem: true,
     createdBy: 'system',
