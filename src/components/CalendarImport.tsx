@@ -22,7 +22,9 @@ import {
 
 const CalendarImport: React.FC = () => {
   const [importing, setImporting] = useState(false);
-  const [csvData, setCsvData] = useState('');
+  const [fileData, setFileData] = useState('');
+  const [fileType, setFileType] = useState<'csv' | 'ics' | null>(null);
+  const [fileName, setFileName] = useState('');
   const [startDate, setStartDate] = useState('2025-06-01');
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
@@ -30,17 +32,24 @@ const CalendarImport: React.FC = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCsvData(e.target?.result as string);
-      };
-      reader.readAsText(file);
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      if (extension === 'csv' || extension === 'ics') {
+        setFileType(extension as 'csv' | 'ics');
+        setFileName(file.name);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setFileData(e.target?.result as string);
+        };
+        reader.readAsText(file);
+      } else {
+        setError('Bitte wählen Sie eine CSV- oder ICS-Datei aus');
+      }
     }
   };
 
   const handleImport = async () => {
-    if (!csvData) {
-      setError('Bitte wählen Sie eine CSV-Datei aus');
+    if (!fileData) {
+      setError('Bitte wählen Sie eine Datei aus');
       return;
     }
 
@@ -49,15 +58,20 @@ const CalendarImport: React.FC = () => {
     setResult(null);
 
     try {
-      const response = await fetch('https://europe-west1-umzugsapp.cloudfunctions.net/importFromCalendarCSV', {
+      const endpoint = fileType === 'ics' 
+        ? 'https://europe-west1-umzugsapp.cloudfunctions.net/importFromICS'
+        : 'https://europe-west1-umzugsapp.cloudfunctions.net/importFromCalendarCSV';
+
+      const body = fileType === 'ics'
+        ? { icsData: fileData, startDate }
+        : { csvData: fileData, startDate };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          csvData,
-          startDate
-        })
+        body: JSON.stringify(body)
       });
 
       const data = await response.json();
@@ -82,7 +96,7 @@ const CalendarImport: React.FC = () => {
           Kalender Import
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Importieren Sie Kundentermine aus Ihrem Kalender (CSV-Export)
+          Importieren Sie Kundentermine aus Ihrem Kalender (CSV oder ICS/iCal Format)
         </Typography>
       </Paper>
 
@@ -107,7 +121,7 @@ const CalendarImport: React.FC = () => {
             <ListItem>
               <ListItemText 
                 primary="3. Apple Kalender"
-                secondary="Ablage → Exportieren → Exportieren → CSV wählen"
+                secondary="Ablage → Exportieren → Exportieren (ICS-Format)"
               />
             </ListItem>
           </List>
@@ -129,13 +143,13 @@ const CalendarImport: React.FC = () => {
             />
 
             <input
-              accept=".csv"
+              accept=".csv,.ics"
               style={{ display: 'none' }}
-              id="csv-file-upload"
+              id="calendar-file-upload"
               type="file"
               onChange={handleFileUpload}
             />
-            <label htmlFor="csv-file-upload">
+            <label htmlFor="calendar-file-upload">
               <Button
                 variant="outlined"
                 component="span"
@@ -143,13 +157,13 @@ const CalendarImport: React.FC = () => {
                 fullWidth
                 sx={{ mb: 2 }}
               >
-                CSV-Datei auswählen
+                Kalender-Datei auswählen (CSV oder ICS)
               </Button>
             </label>
 
-            {csvData && (
+            {fileData && (
               <Alert severity="success" sx={{ mb: 2 }}>
-                CSV-Datei geladen - bereit zum Import
+                {fileName} geladen - {fileType?.toUpperCase()}-Format erkannt
               </Alert>
             )}
 
@@ -159,7 +173,7 @@ const CalendarImport: React.FC = () => {
               size="large"
               startIcon={importing ? <CircularProgress size={20} /> : <CalendarIcon />}
               onClick={handleImport}
-              disabled={importing || !csvData}
+              disabled={importing || !fileData}
             >
               {importing ? 'Importiere...' : 'Kalender importieren'}
             </Button>
