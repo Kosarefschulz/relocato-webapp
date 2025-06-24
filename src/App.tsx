@@ -36,6 +36,7 @@ import EmailImportMonitor from './components/EmailImportMonitor';
 import './utils/emailTestUtils';
 import './utils/addCustomersFromScreenshots';
 import './utils/debugEnv';
+import './utils/testGoogleSheets';
 import EmailImportSettings from './components/EmailImportSettings';
 import FailedEmailRecovery from './components/FailedEmailRecovery';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
