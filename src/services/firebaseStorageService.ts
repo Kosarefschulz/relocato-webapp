@@ -47,7 +47,8 @@ class FirebaseStorageService {
         category,
         description,
         uploadDate: new Date().toISOString(),
-        size: file.size,
+        fileSize: file.size,
+        mimeType: file.type,
         webContentLink: downloadURL,
         thumbnailLink: downloadURL // Firebase hat keine separaten Thumbnails
       };
@@ -82,7 +83,8 @@ class FirebaseStorageService {
             category: customMetadata.category || 'Sonstiges',
             description: customMetadata.description,
             uploadDate: customMetadata.uploadDate || metadata.timeCreated,
-            size: metadata.size,
+            fileSize: metadata.size,
+            mimeType: metadata.contentType || 'image/jpeg',
             webContentLink: url,
             thumbnailLink: url
           });

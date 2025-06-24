@@ -31,6 +31,8 @@ lerna-debug.log*
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+serviceAccountKey.json
+**/serviceAccountKey.json
 
 # Backup files
 *.backup.tsx
