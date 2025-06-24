@@ -993,16 +993,21 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Server starten
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 RELOCATO® E-Mail-Server läuft auf Port ${PORT}`);
-  console.log(`📧 SMTP-Host: ${SMTP_CONFIG.host}`);
-  console.log(`👤 SMTP-User: ${SMTP_CONFIG.auth.user || 'NICHT KONFIGURIERT'}`);
-});
+// Server starten - nur wenn nicht in Vercel
+if (process.env.VERCEL !== '1') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`🚀 RELOCATO® E-Mail-Server läuft auf Port ${PORT}`);
+    console.log(`📧 SMTP-Host: ${SMTP_CONFIG.host}`);
+    console.log(`👤 SMTP-User: ${SMTP_CONFIG.auth.user || 'NICHT KONFIGURIERT'}`);
+  });
 
-// Graceful Shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM empfangen, Server wird heruntergefahren...');
-  process.exit(0);
-});
+  // Graceful Shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM empfangen, Server wird heruntergefahren...');
+    process.exit(0);
+  });
+}
+
+// Export für Vercel
+module.exports = app;

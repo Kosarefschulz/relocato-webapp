@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+
+# Test files
+test-*.js
+*.test.js
+*.spec.js
+
+# Development files
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!VERCEL-DEPLOYMENT.md
+
+# Deployment scripts (executed locally)
+deploy.sh
+
+# Temporary files
+tmp/
+temp/

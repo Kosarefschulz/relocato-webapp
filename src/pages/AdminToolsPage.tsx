@@ -17,6 +17,7 @@ import FailedEmailRecovery from '../components/FailedEmailRecovery';
 import { AISettingsDialog } from '../components/AIAssistant';
 import { aiConfigService } from '../services/ai/aiConfigService';
 import { useAuth } from '../contexts/AuthContext';
+import AddCustomersFromScreenshots from '../components/AddCustomersFromScreenshots';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -131,7 +132,8 @@ const AdminToolsPage: React.FC = () => {
           onChange={handleTabChange}
           indicatorColor="primary"
           textColor="primary"
-          variant="fullWidth"
+          variant="scrollable"
+          scrollButtons="auto"
         >
           <Tab 
             label="Duplikate-Verwaltung" 
@@ -151,6 +153,11 @@ const AdminToolsPage: React.FC = () => {
           <Tab 
             label="KI-Einstellungen" 
             icon={<AIIcon />}
+            iconPosition="start"
+          />
+          <Tab 
+            label="Kunden hinzufügen" 
+            icon={<ManageSearchIcon />}
             iconPosition="start"
           />
         </Tabs>
@@ -185,6 +192,10 @@ const AdminToolsPage: React.FC = () => {
               KI-Einstellungen öffnen
             </Button>
           </Box>
+        </TabPanel>
+        
+        <TabPanel value={activeTab} index={4}>
+          <AddCustomersFromScreenshots />
         </TabPanel>
       </Paper>
 

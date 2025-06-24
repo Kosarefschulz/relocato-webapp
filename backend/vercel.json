@@ -3,10 +3,22 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/server.js"
+    },
     {
       "source": "/(.*)",
       "destination": "/server.js"
@@ -27,16 +39,13 @@
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type, Authorization, Origin, X-Requested-With, Accept"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
         }
       ]
     }
   ],
-  "env": {
-    "SMTP_HOST": "smtp.ionos.de",
-    "SMTP_PORT": "587",
-    "SMTP_USER": "bielefeld@relocato.de",
-    "SMTP_PASS": "Bicm1308",
-    "SMTP_FROM": "bielefeld@relocato.de",
-    "NODE_ENV": "production"
-  }
+  "regions": ["fra1"]
 }

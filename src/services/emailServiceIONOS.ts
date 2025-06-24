@@ -42,6 +42,26 @@ function mapSpecialUse(name: string, specialUse?: string): 'inbox' | 'sent' | 'd
 
 class IONOSEmailService {
   private baseUrl: string = '/api/email';
+  private backendUrl: string;
+
+  constructor() {
+    // Use environment variable or detect based on hostname
+    this.backendUrl = process.env.REACT_APP_BACKEND_URL || this.detectBackendUrl();
+    this.baseUrl = `${this.backendUrl}/api/email`;
+  }
+
+  private detectBackendUrl(): string {
+    const hostname = window.location.hostname;
+    
+    // Local development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return ''; // Use proxy in development
+    }
+    
+    // Production - you'll need to update this with your Vercel URL
+    // For now, return empty string to use relative URLs
+    return '';
+  }
 
   // Get folders
   async getFolders(): Promise<Folder[]> {
@@ -161,7 +181,7 @@ class IONOSEmailService {
   // Send email
   async sendEmail(to: string, subject: string, content: string, attachments?: any[]): Promise<boolean> {
     try {
-      const response = await fetch('/api/send-email', {
+      const response = await fetch(`${this.backendUrl}/api/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

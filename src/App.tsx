@@ -34,6 +34,7 @@ import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
 // Import test utils for development
 import './utils/emailTestUtils';
+import './utils/addCustomersFromScreenshots';
 import EmailImportSettings from './components/EmailImportSettings';
 import FailedEmailRecovery from './components/FailedEmailRecovery';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -47,6 +48,7 @@ import { AIAssistantChatV2 } from './components/AIAssistant';
 import { aiConfigService } from './services/ai/aiConfigService';
 import QuoteConfirmationPage from './pages/QuoteConfirmationPage';
 import AccountingDashboard from './pages/AccountingDashboard';
+import CustomerImportPage from './pages/CustomerImportPage';
 
 
 export const AuthContext = React.createContext<{
@@ -257,6 +259,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/email-test-ionos" 
         element={<EmailTestIONOS />} 
+      />
+      
+      {/* Customer Import Page */}
+      <Route 
+        path="/customer-import" 
+        element={<CustomerImportPage />} 
       />
       
       {/* Default Route */}
