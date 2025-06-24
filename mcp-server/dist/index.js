@@ -12,10 +12,27 @@ dotenv.config();
 let db;
 async function initializeFirebase() {
     try {
-        // Try to load service account from environment or file
-        const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH ||
-            path.join(process.cwd(), '..', 'serviceAccountKey.json');
-        const serviceAccount = JSON.parse(await fs.readFile(serviceAccountPath, 'utf8'));
+        // Try multiple paths for service account
+        let serviceAccount;
+        const possiblePaths = [
+            process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
+            path.join(process.cwd(), '..', 'serviceAccountKey.json'),
+            path.join(process.cwd(), 'serviceAccountKey.json'),
+            '/Users/sergejschulz/Desktop/main/umzugs-webapp/serviceAccountKey.json'
+        ].filter(Boolean);
+        for (const accountPath of possiblePaths) {
+            try {
+                serviceAccount = JSON.parse(await fs.readFile(accountPath, 'utf8'));
+                console.error(`Found service account at: ${accountPath}`);
+                break;
+            }
+            catch (e) {
+                continue;
+            }
+        }
+        if (!serviceAccount) {
+            throw new Error('Service account not found in any of the expected locations');
+        }
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
@@ -690,7 +707,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                         .get();
                     nameQuery.docs.forEach(doc => {
                         const customer = { id: doc.id, ...doc.data() };
-                        const similarity = customer.name.toLowerCase().includes(identifiers.name.toLowerCase()) ? 70 : 50;
+                        const similarity = customer.name?.toLowerCase().includes(identifiers.name.toLowerCase()) ? 70 : 50;
                         matches.push({
                             confidence: similarity,
                             matchType: 'name',

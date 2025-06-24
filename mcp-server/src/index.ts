@@ -21,11 +21,28 @@ let db: admin.firestore.Firestore;
 
 async function initializeFirebase() {
   try {
-    // Try to load service account from environment or file
-    const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || 
-                              path.join(process.cwd(), '..', 'serviceAccountKey.json');
+    // Try multiple paths for service account
+    let serviceAccount;
+    const possiblePaths = [
+      process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
+      path.join(process.cwd(), '..', 'serviceAccountKey.json'),
+      path.join(process.cwd(), 'serviceAccountKey.json'),
+      '/Users/sergejschulz/Desktop/main/umzugs-webapp/serviceAccountKey.json'
+    ].filter(Boolean);
     
-    const serviceAccount = JSON.parse(await fs.readFile(serviceAccountPath, 'utf8'));
+    for (const accountPath of possiblePaths) {
+      try {
+        serviceAccount = JSON.parse(await fs.readFile(accountPath!, 'utf8'));
+        console.error(`Found service account at: ${accountPath}`);
+        break;
+      } catch (e) {
+        continue;
+      }
+    }
+    
+    if (!serviceAccount) {
+      throw new Error('Service account not found in any of the expected locations');
+    }
     
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
@@ -780,8 +797,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             .get();
           
           nameQuery.docs.forEach(doc => {
-            const customer = { id: doc.id, ...doc.data() };
-            const similarity = customer.name.toLowerCase().includes(identifiers.name.toLowerCase()) ? 70 : 50;
+            const customer = { id: doc.id, ...doc.data() } as any;
+            const similarity = customer.name?.toLowerCase().includes(identifiers.name.toLowerCase()) ? 70 : 50;
             matches.push({ 
               confidence: similarity, 
               matchType: 'name',
@@ -803,10 +820,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   matchType: m.matchType,
                   customer: {
                     id: m.customer.id,
-                    customerNumber: m.customer.customerNumber,
-                    name: m.customer.name,
-                    phone: m.customer.phone,
-                    email: m.customer.email
+                    customerNumber: (m.customer as any).customerNumber,
+                    name: (m.customer as any).name,
+                    phone: (m.customer as any).phone,
+                    email: (m.customer as any).email
                   }
                 }))
               }, null, 2)
@@ -1013,21 +1030,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             let matchType = '';
             
             if (checkBy === 'all' || checkBy === 'name') {
-              if (customer.name && customer.name === otherCustomer.name) {
+              if ((customer as any).name && (customer as any).name === (otherCustomer as any).name) {
                 isDuplicate = true;
                 matchType = 'name';
               }
             }
             
             if (!isDuplicate && (checkBy === 'all' || checkBy === 'email')) {
-              if (customer.email && customer.email === otherCustomer.email) {
+              if ((customer as any).email && (customer as any).email === (otherCustomer as any).email) {
                 isDuplicate = true;
                 matchType = 'email';
               }
             }
             
             if (!isDuplicate && (checkBy === 'all' || checkBy === 'phone')) {
-              if (customer.phone && customer.phone === otherCustomer.phone) {
+              if ((customer as any).phone && (customer as any).phone === (otherCustomer as any).phone) {
                 isDuplicate = true;
                 matchType = 'phone';
               }
@@ -1036,10 +1053,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             if (isDuplicate) {
               matches.push({
                 id: otherCustomer.id,
-                customerNumber: otherCustomer.customerNumber,
-                name: otherCustomer.name,
+                customerNumber: (otherCustomer as any).customerNumber,
+                name: (otherCustomer as any).name,
                 matchType: matchType,
-                createdAt: otherCustomer.createdAt
+                createdAt: (otherCustomer as any).createdAt
               });
               processed.add(otherCustomer.id);
             }
@@ -1049,11 +1066,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             duplicates.push({
               primary: {
                 id: customer.id,
-                customerNumber: customer.customerNumber,
-                name: customer.name,
-                email: customer.email,
-                phone: customer.phone,
-                createdAt: customer.createdAt
+                customerNumber: (customer as any).customerNumber,
+                name: (customer as any).name,
+                email: (customer as any).email,
+                phone: (customer as any).phone,
+                createdAt: (customer as any).createdAt
               },
               duplicates: matches
             });
@@ -1144,7 +1161,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             
             // Delete duplicate customer
             transaction.delete(db.collection('customers').doc(duplicateId));
-            mergedData.customersDeleted.push(duplicateId);
+            (mergedData.customersDeleted as string[]).push(duplicateId);
           }
           
           // Update primary customer with merge info

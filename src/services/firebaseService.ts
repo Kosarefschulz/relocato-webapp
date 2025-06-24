@@ -70,14 +70,9 @@ class FirebaseService {
               : data.createdAt || new Date(),
           };
           
-          // Convert salesNotes dates
-          if (customerData.salesNotes && Array.isArray(customerData.salesNotes)) {
-            customerData.salesNotes = customerData.salesNotes.map((note: any) => ({
-              ...note,
-              createdAt: note.createdAt && typeof note.createdAt.toDate === 'function'
-                ? note.createdAt.toDate()
-                : note.createdAt || new Date()
-            }));
+          // Skip salesNotes for now to avoid errors
+          if (customerData.salesNotes) {
+            delete customerData.salesNotes;
           }
           
           // Convert cancelledAt if exists
@@ -124,14 +119,9 @@ class FirebaseService {
             : data.createdAt || new Date(),
         };
         
-        // Convert salesNotes dates
-        if (customerData.salesNotes && Array.isArray(customerData.salesNotes)) {
-          customerData.salesNotes = customerData.salesNotes.map((note: any) => ({
-            ...note,
-            createdAt: note.createdAt && typeof note.createdAt.toDate === 'function'
-              ? note.createdAt.toDate()
-              : note.createdAt || new Date()
-          }));
+        // Skip salesNotes for now to avoid errors
+        if (customerData.salesNotes) {
+          delete customerData.salesNotes;
         }
         
         // Convert cancelledAt if exists
@@ -191,14 +181,9 @@ class FirebaseService {
         updatedAt: serverTimestamp(),
       };
       
-      // Convert salesNotes dates to Timestamps
-      if (updateData.salesNotes && Array.isArray(updateData.salesNotes)) {
-        updateData.salesNotes = updateData.salesNotes.map((note: any) => ({
-          ...note,
-          createdAt: note.createdAt instanceof Date 
-            ? Timestamp.fromDate(note.createdAt)
-            : note.createdAt
-        }));
+      // Skip salesNotes updates for now
+      if (updateData.salesNotes) {
+        delete updateData.salesNotes;
       }
       
       // Convert other date fields
@@ -622,14 +607,9 @@ class FirebaseService {
             : data.createdAt || new Date(),
         };
         
-        // Convert salesNotes dates
-        if (customerData.salesNotes && Array.isArray(customerData.salesNotes)) {
-          customerData.salesNotes = customerData.salesNotes.map((note: any) => ({
-            ...note,
-            createdAt: note.createdAt && typeof note.createdAt.toDate === 'function'
-              ? note.createdAt.toDate()
-              : note.createdAt || new Date()
-          }));
+        // Skip salesNotes for now to avoid errors
+        if (customerData.salesNotes) {
+          delete customerData.salesNotes;
         }
         
         // Convert cancelledAt if exists

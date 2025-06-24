@@ -190,7 +190,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify({
-                success: result.success,
+                success: (result as any).success,
                 message: `Customer created from text`,
                 customer: customer,
                 importResult: result
@@ -225,7 +225,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify({
-                success: result.success,
+                success: (result as any).success,
                 message: `Customer created from image`,
                 extractedText: text.substring(0, 200) + '...',
                 customer: customer,
@@ -267,10 +267,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify({
-                success: result.success,
-                message: result.message,
-                fixed: result.fixed,
-                total: result.totalCustomers
+                success: (result as any).success,
+                message: (result as any).message,
+                fixed: (result as any).fixed,
+                total: (result as any).totalCustomers
               }, null, 2)
             }
           ]
