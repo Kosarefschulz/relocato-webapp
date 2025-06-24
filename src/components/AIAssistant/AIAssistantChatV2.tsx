@@ -388,12 +388,12 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
     <Box
       sx={{
         position: 'fixed',
-        bottom: 20,
-        right: 20,
-        width: expanded ? { xs: '95%', sm: 450, md: 500 } : 60,
-        height: expanded ? { xs: '80vh', sm: 650 } : 60,
+        bottom: { xs: 80, sm: 20 }, // Höher auf Mobile wegen Bottom Navigation (56px + Abstand)
+        right: { xs: 15, sm: 20 },
+        width: expanded ? { xs: 'calc(100% - 30px)', sm: 450, md: 500 } : { xs: 50, sm: 60 },
+        height: expanded ? { xs: 'calc(100vh - 140px)', sm: 650 } : { xs: 50, sm: 60 }, // Auf Mobile: Vollhöhe minus Navigation und Abstände
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: 1300
+        zIndex: 1200 // Reduziert, um andere wichtige UI-Elemente nicht zu blockieren
       }}
     >
       {!expanded ? (
@@ -401,8 +401,8 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
           <IconButton
             color="primary"
             sx={{
-              width: 60,
-              height: 60,
+              width: { xs: 50, sm: 60 },
+              height: { xs: 50, sm: 60 },
               backgroundColor: 'primary.main',
               color: 'white',
               boxShadow: 3,
@@ -429,7 +429,12 @@ Was kann ich für Sie tun? Hier einige Möglichkeiten:`,
             borderRadius: 3,
             overflow: 'hidden',
             border: '1px solid',
-            borderColor: 'divider'
+            borderColor: 'divider',
+            position: { xs: 'fixed', sm: 'relative' },
+            bottom: { xs: 80, sm: 'auto' },
+            left: { xs: 15, sm: 'auto' },
+            right: { xs: 15, sm: 'auto' },
+            maxHeight: { xs: 'calc(100vh - 140px)', sm: '100%' }
           }}
         >
           {/* Header */}

@@ -865,3 +865,9 @@ exports.importFromICS = importFromICS;
 
 const { importICSToCalendar } = require('./importICSToCalendar');
 exports.importICSToCalendar = importICSToCalendar;
+
+const { fixPhoneNumbers } = require('./fixPhoneNumbers');
+exports.fixPhoneNumbers = fixPhoneNumbers;
+
+const { findAndDeleteDuplicates } = require('./findAndDeleteDuplicates');
+exports.findAndDeleteDuplicates = findAndDeleteDuplicates;
