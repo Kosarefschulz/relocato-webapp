@@ -42,7 +42,7 @@ import { de } from 'date-fns/locale';
 
 interface SalesActionsProps {
   customer: Customer;
-  onUpdate: () => void;
+  onUpdate: (updatedFields?: Partial<Customer>) => void;
 }
 
 const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
@@ -66,11 +66,12 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
       // Update local state immediately for instant feedback
       setLocalCustomer(prev => ({ ...prev, salesStatus: 'reached', contacted: true }));
       
-      await googleSheetsService.updateCustomer(customer.id, {
-        salesStatus: 'reached',
+      const updatedFields = {
+        salesStatus: 'reached' as const,
         contacted: true
-      });
-      onUpdate();
+      };
+      await googleSheetsService.updateCustomer(customer.id, updatedFields);
+      onUpdate(updatedFields);
     } catch (error) {
       console.error('Error updating customer:', error);
       alert('Fehler beim Aktualisieren des Status');
@@ -87,11 +88,12 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
       // Update local state immediately for instant feedback
       setLocalCustomer(prev => ({ ...prev, salesStatus: 'not_reached', contacted: false }));
       
-      await googleSheetsService.updateCustomer(customer.id, {
-        salesStatus: 'not_reached',
+      const updatedFields = {
+        salesStatus: 'not_reached' as const,
         contacted: false
-      });
-      onUpdate();
+      };
+      await googleSheetsService.updateCustomer(customer.id, updatedFields);
+      onUpdate(updatedFields);
     } catch (error) {
       console.error('Error updating customer:', error);
       alert('Fehler beim Aktualisieren des Status');
@@ -120,14 +122,15 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
         cancelledReason: cancelReason
       }));
       
-      await googleSheetsService.updateCustomer(customer.id, {
-        salesStatus: 'cancelled',
+      const updatedFields = {
+        salesStatus: 'cancelled' as const,
         cancelledAt,
         cancelledReason: cancelReason
-      });
+      };
+      await googleSheetsService.updateCustomer(customer.id, updatedFields);
       setCancelDialog(false);
       setCancelReason('');
-      onUpdate();
+      onUpdate(updatedFields);
     } catch (error) {
       console.error('Error cancelling customer:', error);
       alert('Fehler beim Stornieren');
@@ -160,14 +163,15 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
       // Update local state immediately
       setLocalCustomer(prev => ({ ...prev, salesNotes: updatedNotes }));
       
-      await googleSheetsService.updateCustomer(customer.id, {
+      const updatedFields = {
         salesNotes: updatedNotes
-      });
+      };
+      await googleSheetsService.updateCustomer(customer.id, updatedFields);
       
       setNoteDialog(false);
       setNoteContent('');
       setNoteType('call');
-      onUpdate();
+      onUpdate(updatedFields);
     } catch (error) {
       console.error('Error adding note:', error);
       alert('Fehler beim Hinzufügen der Notiz');

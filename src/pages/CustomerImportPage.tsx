@@ -12,8 +12,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Chip,
-  Grid
+  Chip
 } from '@mui/material';
 import { UploadFile as UploadIcon, Check as CheckIcon } from '@mui/icons-material';
 import { googleSheetsService } from '../services/googleSheetsService';
@@ -185,8 +184,8 @@ const CustomerImportPage: React.FC = () => {
         Diese Seite importiert die 4 Kunden aus den bereitgestellten Screenshots direkt in das System.
       </Alert>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+        <Box sx={{ flex: 1 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -226,9 +225,9 @@ const CustomerImportPage: React.FC = () => {
               </List>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={6}>
+        <Box sx={{ flex: 1 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -290,8 +289,8 @@ const CustomerImportPage: React.FC = () => {
               )}
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 };

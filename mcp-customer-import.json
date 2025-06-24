@@ -1,0 +1,71 @@
+{
+  "customers": [
+    {
+      "name": "Carolina Klein",
+      "phone": "0177 5305094",
+      "email": "",
+      "moveDate": "2025-07-17",
+      "moveFrom": "Viktoriastraße 27, Bielefeld (3. OG ohne Fahrstuhl)",
+      "moveTo": "Obernstraße 1, Bielefeld (4. OG mit Fahrstuhl)",
+      "details": {
+        "volume": "17 Kubik",
+        "services": ["Möbelmontage", "3 Lampen", "Einpackservice Küche & Arbeitszimmer"],
+        "items": ["50 Kartons", "USM Haller Möbel", "hochwertige Kaffeemaschine"]
+      },
+      "quote": {
+        "price": 1900,
+        "currency": "EUR"
+      }
+    },
+    {
+      "name": "Doris Mattson",
+      "phone": "0170 1120639",
+      "email": "",
+      "moveDate": "2025-07-18",
+      "moveFrom": "Alte Verler Straße 22, Sennestadt, Bielefeld",
+      "moveTo": "Solmser Weg 13, 61169 Friedberg (Hessen), EG",
+      "details": {
+        "services": ["Möbelmontage"],
+        "items": ["Gartentisch", "Box", "Waschmaschine", "Trockner", "Holzregale mit Lebensmitteln", "30 Kartons"],
+        "notes": "Juli (in den Ferien), Tochter krank"
+      },
+      "quote": {
+        "price": 2897,
+        "currency": "EUR"
+      }
+    },
+    {
+      "name": "Lars Schuerstedt",
+      "phone": "0157 39103228",
+      "email": "",
+      "moveDate": "2025-07-18",
+      "moveFrom": "An der Else 11, Kirchlengern",
+      "moveTo": "An der Else 11, Kirchlengern",
+      "details": {
+        "materials": ["5m Sockelleiste", "Arbeitsplatte 3,50m"],
+        "notes": "Material muss besorgt werden"
+      },
+      "quote": {
+        "price": 5498.10,
+        "currency": "EUR"
+      }
+    },
+    {
+      "name": "André Fischer",
+      "phone": "",
+      "email": "Mdivani.irma@gmail.com",
+      "moveDate": "2025-07-19",
+      "moveFrom": "Landerweg 23, Oerlinghausen (EG, 86 qm)",
+      "moveTo": "Stukenbrocker Weg 7, 33813 Oerlinghausen (1. OG)",
+      "details": {
+        "volume": "15 Kubik",
+        "services": ["nur Möbelmontage"],
+        "budget": "800 EUR"
+      },
+      "quote": {
+        "price": 980,
+        "currency": "EUR"
+      }
+    }
+  ]
+}

@@ -17,6 +17,7 @@ const { previewEmailData } = require('./previewEmailData');
 const { importSingleEmail } = require('./importSingleEmail');
 const { syncEmailsForClient, getEmailFolders, sendEmailFromClient } = require('./emailClientSync');
 const { addTestEmails, clearTestEmails } = require('./addTestEmails');
+const emailBackend = require('./emailBackend');
 
 // Firebase Admin initialisieren - nur wenn noch nicht initialisiert
 if (!admin.apps.length) {
@@ -47,6 +48,13 @@ exports.importSingleEmail = importSingleEmail;
 // exports.sendEmailFromClient = sendEmailFromClient;
 exports.addTestEmails = addTestEmails;
 exports.clearTestEmails = clearTestEmails;
+
+// Email Backend Functions
+exports.listEmails = emailBackend.listEmails;
+exports.readEmail = emailBackend.readEmail;
+exports.getEmailFolders = emailBackend.getEmailFolders;
+exports.sendEmail = emailBackend.sendEmail;
+exports.emailHealthCheck = emailBackend.healthCheck;
 
 /**
  * Firebase Auth Trigger: Creates user document when new user signs up

@@ -622,7 +622,16 @@ const CustomerDetails: React.FC = () => {
             <Box sx={{ p: { xs: 2, md: 3 } }}>
               <SalesActions
                 customer={customer}
-                onUpdate={loadCustomerData}
+                onUpdate={(updatedFields) => {
+                  // Update local state immediately
+                  if (updatedFields) {
+                    const updatedCustomer = { ...customer, ...updatedFields };
+                    setCustomer(updatedCustomer);
+                    setEditedCustomer(updatedCustomer);
+                  }
+                  // Then reload data from server in background
+                  loadCustomerData();
+                }}
               />
               <CustomerInfo
                 customer={customer}
