@@ -45,29 +45,31 @@ class IONOSEmailService {
   private backendUrl: string;
 
   constructor() {
-    // Use environment variable or detect based on hostname
-    this.backendUrl = process.env.REACT_APP_BACKEND_URL || this.detectBackendUrl();
-    this.baseUrl = `${this.backendUrl}/api/email`;
-  }
-
-  private detectBackendUrl(): string {
+    // Use Firebase Functions in production
     const hostname = window.location.hostname;
     
-    // Local development
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return ''; // Use proxy in development
+      // Local development - use proxy
+      this.backendUrl = '';
+      this.baseUrl = '/api/email';
+    } else {
+      // Production - use Firebase Functions
+      // Some functions are in us-central1, others in europe-west3
+      this.backendUrl = 'mixed'; // Flag for mixed regions
+      this.baseUrl = this.backendUrl;
     }
-    
-    // Production - you'll need to update this with your Vercel URL
-    // For now, return empty string to use relative URLs
-    return '';
   }
 
   // Get folders
   async getFolders(): Promise<Folder[]> {
     try {
       console.log('📁 Fetching folders...');
-      const response = await fetch(`${this.baseUrl}/folders`, {
+      const url = this.backendUrl === 'mixed' 
+        ? 'https://europe-west3-umzugsapp.cloudfunctions.net/getEmailFolders'
+        : this.backendUrl 
+        ? `${this.backendUrl}/getEmailFolders` 
+        : `${this.baseUrl}/folders`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -101,7 +103,12 @@ class IONOSEmailService {
   async getEmails(folder: string = 'INBOX', page: number = 1, limit: number = 50): Promise<{ emails: EmailType[], total: number }> {
     try {
       console.log('📧 Fetching emails:', { folder, page, limit });
-      const response = await fetch(`${this.baseUrl}/list`, {
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/listEmails'
+        : this.backendUrl 
+        ? `${this.backendUrl}/listEmails` 
+        : `${this.baseUrl}/list`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ folder, page, limit })
@@ -144,7 +151,12 @@ class IONOSEmailService {
   // Get single email
   async getEmail(uid: string, folder: string = 'INBOX'): Promise<EmailType | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/read`, {
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/readEmail'
+        : this.backendUrl 
+        ? `${this.backendUrl}/readEmail` 
+        : `${this.baseUrl}/read`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uid, folder })
@@ -181,7 +193,12 @@ class IONOSEmailService {
   // Send email
   async sendEmail(to: string, subject: string, content: string, attachments?: any[]): Promise<boolean> {
     try {
-      const response = await fetch(`${this.backendUrl}/api/send-email`, {
+      const url = this.backendUrl === 'mixed'
+        ? 'https://europe-west3-umzugsapp.cloudfunctions.net/sendEmail'
+        : this.backendUrl 
+        ? `${this.backendUrl}/sendEmail` 
+        : '/api/send-email';
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
