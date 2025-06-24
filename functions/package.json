@@ -18,6 +18,7 @@
     "firebase-admin": "^11.8.0",
     "firebase-functions": "^4.9.0",
     "googleapis": "^150.0.1",
+    "ical": "^0.8.0",
     "imap": "^0.8.19",
     "mailparser": "^3.7.3",
     "multer": "^1.4.5-lts.1",

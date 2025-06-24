@@ -49,7 +49,7 @@ const CalendarImport: React.FC = () => {
     setResult(null);
 
     try {
-      const response = await fetch('https://europe-west1-umzugsapp.cloudfunctions.net/importCalendarCSV', {
+      const response = await fetch('https://europe-west1-umzugsapp.cloudfunctions.net/importFromCalendarCSV', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

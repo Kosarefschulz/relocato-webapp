@@ -330,8 +330,13 @@ function normalizePhone(phone) {
   
   // Füge deutsche Vorwahl hinzu wenn nötig
   if (normalized.startsWith('0')) {
+    // Deutsche Nummer mit führender 0
     normalized = '+49' + normalized.substring(1);
-  } else if (normalized.length > 0 && !normalized.startsWith('+')) {
+  } else if (normalized.startsWith('49')) {
+    // Hat schon deutsche Ländervorwahl, nur + hinzufügen
+    normalized = '+' + normalized;
+  } else if (normalized.length >= 10 && !normalized.startsWith('+')) {
+    // Andere Nummer ohne Ländervorwahl
     normalized = '+49' + normalized;
   }
   

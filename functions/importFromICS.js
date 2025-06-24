@@ -1,15 +1,15 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const ical = require('ical');
 
 /**
- * Import customers from calendar CSV export
- * Expects CSV with columns: Subject, Start Date, Start Time, End Date, End Time, Location, Description
+ * Import customers from ICS file (Apple Calendar export)
  */
-exports.importCalendarCSV = functions
+exports.importFromICS = functions
   .region('europe-west1')
   .runWith({
-    timeoutSeconds: 300,
-    memory: '1GB'
+    timeoutSeconds: 540,
+    memory: '2GB'
   })
   .https.onRequest(async (req, res) => {
     // CORS headers
@@ -27,22 +27,21 @@ exports.importCalendarCSV = functions
       return;
     }
     
-    console.log('📅 Starting Calendar CSV import...');
+    console.log('📅 Starting ICS (Apple Calendar) import...');
     
     try {
       const db = admin.firestore();
-      const csvData = req.body.csvData || '';
-      const startDate = req.body.startDate || '2025-06-01';
+      const icsData = req.body.icsData || '';
       
-      if (!csvData) {
-        throw new Error('No CSV data provided');
+      if (!icsData) {
+        throw new Error('No ICS data provided');
       }
       
-      const result = await importCalendarData(db, csvData, startDate);
+      const result = await importICSData(db, icsData);
       
       res.json({
         success: true,
-        message: 'Calendar import completed',
+        message: 'ICS import completed',
         ...result
       });
     } catch (error) {
@@ -54,7 +53,7 @@ exports.importCalendarCSV = functions
     }
   });
 
-async function importCalendarData(db, csvData, startDateFilter) {
+async function importICSData(db, icsData) {
   const stats = {
     totalEvents: 0,
     imported: 0,
@@ -65,55 +64,22 @@ async function importCalendarData(db, csvData, startDateFilter) {
   };
   
   try {
-    // Parse CSV
-    const lines = csvData.split('\n');
-    const headers = parseCSVLine(lines[0]);
+    // Parse ICS data
+    const events = ical.parseICS(icsData);
+    const eventsList = Object.values(events).filter(event => event.type === 'VEVENT');
     
-    // Find column indices
-    const indices = {
-      subject: headers.findIndex(h => h.toLowerCase().includes('subject') || h.toLowerCase().includes('betreff')),
-      startDate: headers.findIndex(h => h.toLowerCase().includes('start date') || h.toLowerCase().includes('startdatum')),
-      location: headers.findIndex(h => h.toLowerCase().includes('location') || h.toLowerCase().includes('ort')),
-      description: headers.findIndex(h => h.toLowerCase().includes('description') || h.toLowerCase().includes('beschreibung'))
-    };
-    
-    // If standard columns not found, try alternative formats
-    if (indices.subject === -1) {
-      indices.subject = 0; // Assume first column is subject
-    }
-    
-    const events = lines.slice(1)
-      .filter(line => line.trim())
-      .map(line => {
-        const cols = parseCSVLine(line);
-        return {
-          subject: cols[indices.subject] || cols[0] || '',
-          startDate: cols[indices.startDate] || cols[1] || '',
-          location: cols[indices.location] || cols[indices.location !== -1 ? indices.location : 5] || '',
-          description: cols[indices.description] || cols[indices.description !== -1 ? indices.description : 6] || ''
-        };
-      });
-    
-    // Filter by date
-    const filteredEvents = events.filter(event => {
-      if (!event.startDate) return false;
-      const eventDate = parseDate(event.startDate);
-      const filterDate = new Date(startDateFilter);
-      return eventDate >= filterDate;
-    });
-    
-    stats.totalEvents = filteredEvents.length;
-    console.log(`📅 Found ${filteredEvents.length} events since ${startDateFilter}`);
+    stats.totalEvents = eventsList.length;
+    console.log(`📅 Found ${eventsList.length} events in ICS file`);
     
     // Process each event
-    for (const event of filteredEvents) {
+    for (const event of eventsList) {
       try {
-        // Extract customer data
-        const customer = extractCustomerFromCalendarEvent(event);
+        // Extract customer data from event
+        const customer = extractCustomerFromICSEvent(event);
         
-        // Skip if no name
+        // Skip if no name found
         if (!customer.name || customer.name === 'Unbekannt') {
-          console.log(`⏭️ Skipping event: No customer name found - ${event.subject}`);
+          console.log(`⏭️ Skipping event: No customer name found - ${event.summary}`);
           stats.skipped++;
           continue;
         }
@@ -136,8 +102,9 @@ async function importCalendarData(db, csvData, startDateFilter) {
           ...customer,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          importedFrom: 'calendar-csv',
-          importDate: new Date()
+          importedFrom: 'apple-calendar-ics',
+          importDate: new Date(),
+          icsEventId: event.uid
         });
         
         // Create automatic quote
@@ -172,7 +139,7 @@ async function importCalendarData(db, csvData, startDateFilter) {
   }
 }
 
-function extractCustomerFromCalendarEvent(event) {
+function extractCustomerFromICSEvent(event) {
   const customer = {
     name: '',
     phone: '',
@@ -188,15 +155,20 @@ function extractCustomerFromCalendarEvent(event) {
       hasElevator: false
     },
     services: ['Umzug'],
-    source: 'Kalender',
+    source: 'Apple Kalender',
     notes: ''
   };
   
-  // Extract name from subject
-  customer.name = extractNameFromText(event.subject);
+  // Extract name from summary/title
+  const summary = event.summary || '';
+  customer.name = extractNameFromText(summary);
   
-  // Parse description for details
-  const allText = `${event.subject}\n${event.description}\n${event.location}`;
+  // Combine all text fields for parsing
+  const description = event.description || '';
+  const location = event.location || '';
+  const attendees = event.attendee ? (Array.isArray(event.attendee) ? event.attendee : [event.attendee]) : [];
+  
+  const allText = `${summary}\n${description}\n${location}\n${attendees.join('\n')}`;
   const lines = allText.split('\n');
   
   for (const line of lines) {
@@ -204,11 +176,12 @@ function extractCustomerFromCalendarEvent(event) {
     
     // Phone patterns
     if (lowerLine.includes('tel:') || lowerLine.includes('telefon:') || 
-        lowerLine.includes('handy:') || lowerLine.includes('mobil:')) {
+        lowerLine.includes('handy:') || lowerLine.includes('mobil:') || 
+        lowerLine.includes('phone:')) {
       const phone = extractPhone(line);
       if (phone) customer.phone = phone;
     } else if (!customer.phone) {
-      // Look for phone pattern anywhere
+      // Look for phone pattern anywhere in line
       const phoneInLine = extractPhone(line);
       if (phoneInLine) customer.phone = phoneInLine;
     }
@@ -221,50 +194,84 @@ function extractCustomerFromCalendarEvent(event) {
     
     // Addresses
     if (lowerLine.includes('von:') || lowerLine.includes('from:') || 
-        lowerLine.includes('auszug:') || lowerLine.includes('alte adresse:')) {
-      customer.fromAddress = line.split(/:|=/)[1]?.trim() || '';
+        lowerLine.includes('auszug:') || lowerLine.includes('alte adresse:') ||
+        lowerLine.includes('abholadresse:')) {
+      customer.fromAddress = line.split(/[:=]/)[1]?.trim() || '';
     }
     
     if (lowerLine.includes('nach:') || lowerLine.includes('to:') || 
-        lowerLine.includes('einzug:') || lowerLine.includes('neue adresse:')) {
-      customer.toAddress = line.split(/:|=/)[1]?.trim() || '';
+        lowerLine.includes('einzug:') || lowerLine.includes('neue adresse:') ||
+        lowerLine.includes('lieferadresse:')) {
+      customer.toAddress = line.split(/[:=]/)[1]?.trim() || '';
     }
     
     // Area
-    const areaMatch = line.match(/(\d+)\s*(?:m²|qm|m2)/i);
+    const areaMatch = line.match(/(\d+)\s*(?:m²|qm|m2|quadratmeter)/i);
     if (areaMatch) {
       customer.apartment.area = parseInt(areaMatch[1]);
     }
     
     // Rooms
-    const roomMatch = line.match(/(\d+)\s*(?:zimmer|zi\.|raum|räume)/i);
+    const roomMatch = line.match(/(\d+)\s*(?:zimmer|zi\.|raum|räume|zkb|zkdb)/i);
     if (roomMatch) {
       customer.apartment.rooms = parseInt(roomMatch[1]);
     }
     
     // Floor
-    const floorMatch = line.match(/(\d+)\.\s*(?:etage|stock|og|obergeschoss)/i);
+    const floorMatch = line.match(/(\d+)\.\s*(?:etage|stock|og|obergeschoss|eg|erdgeschoss)/i);
     if (floorMatch) {
       customer.apartment.floor = parseInt(floorMatch[1]);
+    } else if (lowerLine.includes('erdgeschoss') || lowerLine.includes('eg')) {
+      customer.apartment.floor = 0;
+    }
+    
+    // Elevator
+    if (lowerLine.includes('aufzug') || lowerLine.includes('fahrstuhl') || lowerLine.includes('lift')) {
+      customer.apartment.hasElevator = true;
     }
   }
   
-  // Use location as address if available
-  if (!customer.fromAddress && event.location) {
+  // Use location as address if no from address found
+  if (!customer.fromAddress && location) {
     // Check if location looks like an address
-    if (event.location.match(/\d/) || event.location.includes(',')) {
-      customer.fromAddress = event.location;
+    if (location.match(/\d/) || location.includes(',') || location.includes('straße') || location.includes('str.')) {
+      customer.fromAddress = location;
     }
   }
   
-  // Parse and format move date
-  const eventDate = parseDate(event.startDate);
-  customer.moveDate = eventDate.toLocaleDateString('de-DE');
-  customer.movingDate = customer.moveDate;
+  // Extract attendee info if no email/phone found
+  if (!customer.email || !customer.phone) {
+    for (const attendee of attendees) {
+      const attendeeStr = typeof attendee === 'string' ? attendee : attendee.val || '';
+      
+      // Extract email from attendee
+      if (!customer.email && attendeeStr.includes('@')) {
+        const emailMatch = attendeeStr.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+        if (emailMatch) customer.email = emailMatch[0].toLowerCase();
+      }
+      
+      // Extract name from attendee if better than current
+      if (attendeeStr.includes('CN=')) {
+        const cnMatch = attendeeStr.match(/CN=([^;,]+)/);
+        if (cnMatch && cnMatch[1] && (!customer.name || customer.name === 'Unbekannt')) {
+          customer.name = cnMatch[1].trim();
+        }
+      }
+    }
+  }
   
-  // Build notes
-  const noteParts = [`Kalender-Import: ${event.subject}`];
-  if (event.description) noteParts.push(event.description);
+  // Use event date as move date
+  if (event.start) {
+    const eventDate = new Date(event.start);
+    customer.moveDate = eventDate.toLocaleDateString('de-DE');
+    customer.movingDate = customer.moveDate;
+  }
+  
+  // Build comprehensive notes
+  const noteParts = [`Apple Kalender Import: ${summary}`];
+  if (description) noteParts.push(`Beschreibung: ${description}`);
+  if (location && customer.fromAddress !== location) noteParts.push(`Ort: ${location}`);
+  if (event.uid) noteParts.push(`Event-ID: ${event.uid}`);
   customer.notes = noteParts.join('\n').trim();
   
   return customer;
@@ -275,7 +282,8 @@ function extractNameFromText(text) {
   
   // Remove common prefixes
   let cleaned = text
-    .replace(/^(umzug|move|termin|appointment|kunde|customer)[\s:]+/i, '')
+    .replace(/^(umzug|move|termin|appointment|kunde|customer|auftrag)[\s:]+/i, '')
+    .replace(/^(UT|UC|UK|UM)[\s\-:]+/i, '') // Common abbreviations
     .trim();
   
   // Patterns to extract names
@@ -283,11 +291,13 @@ function extractNameFromText(text) {
     // "Name: XYZ" pattern
     /(?:name|kunde|customer)[\s:]+([^\n,;]+)/i,
     // Name at beginning (Capital letters)
-    /^([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß]+)*)/,
+    /^([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß\-]+)*)/,
     // "Herr/Frau Name" pattern
-    /(?:herr|frau|mr|mrs|ms)\s+([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß]+)*)/i,
+    /(?:herr|frau|mr|mrs|ms|dr|prof)\s+([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß\-]+)*)/i,
     // Family name pattern
-    /(?:familie|family|fam\.)\s+([A-ZÄÖÜ][a-zäöüß]+)/i
+    /(?:familie|family|fam\.)\s+([A-ZÄÖÜ][a-zäöüß]+)/i,
+    // Company pattern
+    /(?:firma|company|gmbh|ag|kg|ohg|gbr)\s*:?\s*([^,;\n]+)/i
   ];
   
   for (const pattern of patterns) {
@@ -297,9 +307,15 @@ function extractNameFromText(text) {
     }
   }
   
+  // Try to extract from common formats like "Müller, 15.6"
+  const commaMatch = cleaned.match(/^([A-ZÄÖÜ][a-zäöüß\-]+(?:\s+[A-ZÄÖÜ][a-zäöüß\-]+)*)\s*,/);
+  if (commaMatch) {
+    return commaMatch[1].trim();
+  }
+  
   // If no pattern matches, try to use first part if it looks like a name
-  const firstPart = cleaned.split(/[,;\-–]/)[0].trim();
-  if (firstPart && firstPart.length < 40 && /^[A-ZÄÖÜ]/.test(firstPart)) {
+  const firstPart = cleaned.split(/[,;\-–\|]/)[0].trim();
+  if (firstPart && firstPart.length < 50 && /^[A-ZÄÖÜ]/.test(firstPart) && !firstPart.match(/\d{2}/)) {
     return firstPart;
   }
   
@@ -307,23 +323,31 @@ function extractNameFromText(text) {
 }
 
 function extractPhone(text) {
+  // Remove common prefixes
+  const cleanText = text.replace(/tel[\.:]\s*/i, '').replace(/telefon[\.:]\s*/i, '');
+  
   // Various phone patterns
   const patterns = [
-    /(\+49[\s\-]?[\d\s\-]+)/,
-    /(0[\d\s\-\/]{10,})/,
-    /(\d{3,}[\s\-]?\d{3,}[\s\-]?\d{2,})/
+    /(\+49[\s\-]?[\d\s\-\/\(\)]+)/,
+    /(0[\d\s\-\/\(\)]{10,})/,
+    /(\d{3,}[\s\-\/]?\d{3,}[\s\-\/]?\d{2,})/
   ];
   
   for (const pattern of patterns) {
-    const match = text.match(pattern);
+    const match = cleanText.match(pattern);
     if (match) {
-      let phone = match[1].replace(/[\s\-\/]/g, '');
+      let phone = match[1].replace(/[\s\-\/\(\)]/g, '');
       
       // Ensure proper formatting
       if (!phone.startsWith('+')) {
         if (phone.startsWith('0')) {
+          // German number starting with 0
           phone = '+49' + phone.substring(1);
+        } else if (phone.startsWith('49')) {
+          // Already has German country code, just add +
+          phone = '+' + phone;
         } else if (phone.length >= 10) {
+          // Other number without country code
           phone = '+49' + phone;
         }
       }
@@ -336,66 +360,6 @@ function extractPhone(text) {
   }
   
   return '';
-}
-
-function parseDate(dateStr) {
-  if (!dateStr) return new Date();
-  
-  // Try different date formats
-  const formats = [
-    // ISO format
-    /(\d{4})-(\d{2})-(\d{2})/,
-    // German format
-    /(\d{1,2})\.(\d{1,2})\.(\d{2,4})/,
-    // US format
-    /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/
-  ];
-  
-  for (const format of formats) {
-    const match = dateStr.match(format);
-    if (match) {
-      if (format === formats[0]) {
-        // ISO format
-        return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
-      } else if (format === formats[1]) {
-        // German format
-        const year = match[3].length === 2 ? 2000 + parseInt(match[3]) : parseInt(match[3]);
-        return new Date(year, parseInt(match[2]) - 1, parseInt(match[1]));
-      } else {
-        // US format
-        const year = match[3].length === 2 ? 2000 + parseInt(match[3]) : parseInt(match[3]);
-        return new Date(year, parseInt(match[1]) - 1, parseInt(match[2]));
-      }
-    }
-  }
-  
-  // Fallback to Date constructor
-  const parsed = new Date(dateStr);
-  return isNaN(parsed.getTime()) ? new Date() : parsed;
-}
-
-function parseCSVLine(line) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-  
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    
-    if (char === '"' && (i === 0 || line[i-1] === ',')) {
-      inQuotes = true;
-    } else if (char === '"' && inQuotes && (i === line.length - 1 || line[i+1] === ',')) {
-      inQuotes = false;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  
-  result.push(current.trim());
-  return result;
 }
 
 async function checkDuplicateCustomer(db, customer) {
@@ -420,7 +384,7 @@ async function checkDuplicateCustomer(db, customer) {
   }
   
   // Check by name and move date
-  if (customer.name && customer.moveDate) {
+  if (customer.name && customer.name !== 'Unbekannt' && customer.moveDate) {
     const nameCheck = await db.collection('customers')
       .where('name', '==', customer.name)
       .where('moveDate', '==', customer.moveDate)
@@ -483,9 +447,9 @@ async function createAutomaticQuote(customer, db) {
     customerName: customer.name,
     price: Math.round(price),
     status: 'draft',
-    comment: `Automatisch erstelltes Angebot basierend auf Kalender-Import.\n\nUmzugstermin: ${customer.moveDate}`,
+    comment: `Automatisch erstelltes Angebot basierend auf Apple Kalender Import.\n\nUmzugstermin: ${customer.moveDate}`,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    createdBy: 'calendar-import',
+    createdBy: 'apple-calendar-import',
     volume: volume,
     distance: 25,
     moveDate: customer.moveDate,

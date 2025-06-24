@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useMediaQuery, useTheme } from '@mui/material';
 import {
   Box,
   Card,
@@ -45,16 +46,26 @@ interface SalesActionsProps {
 }
 
 const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [cancelDialog, setCancelDialog] = useState(false);
   const [noteDialog, setNoteDialog] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [noteContent, setNoteContent] = useState('');
   const [noteType, setNoteType] = useState<'call' | 'email' | 'meeting' | 'other'>('call');
   const [loading, setLoading] = useState(false);
+  const [localCustomer, setLocalCustomer] = useState(customer);
+
+  useEffect(() => {
+    setLocalCustomer(customer);
+  }, [customer]);
 
   const handleReached = async () => {
     try {
       setLoading(true);
+      // Update local state immediately for instant feedback
+      setLocalCustomer(prev => ({ ...prev, salesStatus: 'reached', contacted: true }));
+      
       await googleSheetsService.updateCustomer(customer.id, {
         salesStatus: 'reached',
         contacted: true
@@ -63,6 +74,8 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
     } catch (error) {
       console.error('Error updating customer:', error);
       alert('Fehler beim Aktualisieren des Status');
+      // Revert on error
+      setLocalCustomer(customer);
     } finally {
       setLoading(false);
     }
@@ -71,6 +84,9 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
   const handleNotReached = async () => {
     try {
       setLoading(true);
+      // Update local state immediately for instant feedback
+      setLocalCustomer(prev => ({ ...prev, salesStatus: 'not_reached', contacted: false }));
+      
       await googleSheetsService.updateCustomer(customer.id, {
         salesStatus: 'not_reached',
         contacted: false
@@ -79,6 +95,8 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
     } catch (error) {
       console.error('Error updating customer:', error);
       alert('Fehler beim Aktualisieren des Status');
+      // Revert on error
+      setLocalCustomer(customer);
     } finally {
       setLoading(false);
     }
@@ -92,9 +110,19 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
 
     try {
       setLoading(true);
+      const cancelledAt = new Date();
+      
+      // Update local state immediately for instant feedback
+      setLocalCustomer(prev => ({ 
+        ...prev, 
+        salesStatus: 'cancelled',
+        cancelledAt,
+        cancelledReason: cancelReason
+      }));
+      
       await googleSheetsService.updateCustomer(customer.id, {
         salesStatus: 'cancelled',
-        cancelledAt: new Date(),
+        cancelledAt,
         cancelledReason: cancelReason
       });
       setCancelDialog(false);
@@ -103,6 +131,8 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
     } catch (error) {
       console.error('Error cancelling customer:', error);
       alert('Fehler beim Stornieren');
+      // Revert on error
+      setLocalCustomer(customer);
     } finally {
       setLoading(false);
     }
@@ -124,9 +154,14 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
         type: noteType
       };
 
-      const currentNotes = customer.salesNotes || [];
+      const currentNotes = localCustomer.salesNotes || [];
+      const updatedNotes = [...currentNotes, newNote];
+      
+      // Update local state immediately
+      setLocalCustomer(prev => ({ ...prev, salesNotes: updatedNotes }));
+      
       await googleSheetsService.updateCustomer(customer.id, {
-        salesNotes: [...currentNotes, newNote]
+        salesNotes: updatedNotes
       });
       
       setNoteDialog(false);
@@ -142,12 +177,12 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
   };
 
   const getStatusChip = () => {
-    if (customer.salesStatus === 'reached') {
-      return <Chip label="Erreicht" color="success" icon={<CheckIcon />} />;
-    } else if (customer.salesStatus === 'not_reached') {
-      return <Chip label="Nicht erreicht" color="warning" icon={<PhoneDisabledIcon />} />;
-    } else if (customer.salesStatus === 'cancelled') {
-      return <Chip label="Storniert" color="error" icon={<CancelIcon />} />;
+    if (localCustomer.salesStatus === 'reached') {
+      return <Chip label="Erreicht" color="success" icon={<CheckIcon />} size={isMobile ? "small" : "medium"} />;
+    } else if (localCustomer.salesStatus === 'not_reached') {
+      return <Chip label="Nicht erreicht" color="warning" icon={<PhoneDisabledIcon />} size={isMobile ? "small" : "medium"} />;
+    } else if (localCustomer.salesStatus === 'cancelled') {
+      return <Chip label="Storniert" color="error" icon={<CancelIcon />} size={isMobile ? "small" : "medium"} />;
     }
     return null;
   };
@@ -165,64 +200,96 @@ const SalesActions: React.FC<SalesActionsProps> = ({ customer, onUpdate }) => {
     <Card sx={{ mb: 3 }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">Vertriebsaktionen</Typography>
+          <Typography variant={isMobile ? "subtitle1" : "h6"}>Vertriebsaktionen</Typography>
           {getStatusChip()}
         </Box>
 
         {/* Action Buttons */}
-        <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-          <Button
-            variant="contained"
-            color="success"
-            startIcon={<PhoneIcon />}
-            onClick={handleReached}
-            disabled={loading || customer.salesStatus === 'reached'}
-          >
-            Erreicht
-          </Button>
-          <Button
-            variant="outlined"
-            color="warning"
-            startIcon={<PhoneDisabledIcon />}
-            onClick={handleNotReached}
-            disabled={loading || customer.salesStatus === 'not_reached'}
-          >
-            Nicht erreicht
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<CancelIcon />}
-            onClick={() => setCancelDialog(true)}
-            disabled={loading || customer.salesStatus === 'cancelled'}
-          >
-            Storno
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<NoteIcon />}
-            onClick={() => setNoteDialog(true)}
-            disabled={loading}
-          >
-            Notiz
-          </Button>
+        <Stack 
+          direction={isMobile ? "column" : "row"} 
+          spacing={isMobile ? 1 : 2} 
+          sx={{ mb: 3 }}
+        >
+          <Stack direction="row" spacing={1} sx={{ width: isMobile ? '100%' : 'auto' }}>
+            <Button
+              variant="contained"
+              color="success"
+              size={isMobile ? "small" : "medium"}
+              startIcon={!isMobile && <PhoneIcon />}
+              onClick={handleReached}
+              disabled={loading || localCustomer.salesStatus === 'reached'}
+              fullWidth={isMobile}
+              sx={{ 
+                minWidth: isMobile ? 0 : 'auto',
+                px: isMobile ? 1 : 2
+              }}
+            >
+              {isMobile ? <PhoneIcon fontSize="small" /> : 'Erreicht'}
+            </Button>
+            <Button
+              variant="outlined"
+              color="warning"
+              size={isMobile ? "small" : "medium"}
+              startIcon={!isMobile && <PhoneDisabledIcon />}
+              onClick={handleNotReached}
+              disabled={loading || localCustomer.salesStatus === 'not_reached'}
+              fullWidth={isMobile}
+              sx={{ 
+                minWidth: isMobile ? 0 : 'auto',
+                px: isMobile ? 1 : 2
+              }}
+            >
+              {isMobile ? <PhoneDisabledIcon fontSize="small" /> : 'Nicht erreicht'}
+            </Button>
+          </Stack>
+          <Stack direction="row" spacing={1} sx={{ width: isMobile ? '100%' : 'auto' }}>
+            <Button
+              variant="outlined"
+              color="error"
+              size={isMobile ? "small" : "medium"}
+              startIcon={!isMobile && <CancelIcon />}
+              onClick={() => setCancelDialog(true)}
+              disabled={loading || localCustomer.salesStatus === 'cancelled'}
+              fullWidth={isMobile}
+              sx={{ 
+                minWidth: isMobile ? 0 : 'auto',
+                px: isMobile ? 1 : 2
+              }}
+            >
+              {isMobile ? <CancelIcon fontSize="small" /> : 'Storno'}
+            </Button>
+            <Button
+              variant="outlined"
+              size={isMobile ? "small" : "medium"}
+              startIcon={!isMobile && <NoteIcon />}
+              onClick={() => setNoteDialog(true)}
+              disabled={loading}
+              fullWidth={isMobile}
+              sx={{ 
+                minWidth: isMobile ? 0 : 'auto',
+                px: isMobile ? 1 : 2
+              }}
+            >
+              {isMobile ? <NoteIcon fontSize="small" /> : 'Notiz'}
+            </Button>
+          </Stack>
         </Stack>
 
         {/* Cancel Info */}
-        {customer.salesStatus === 'cancelled' && customer.cancelledReason && (
+        {localCustomer.salesStatus === 'cancelled' && localCustomer.cancelledReason && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            <Typography variant="subtitle2">Storniert am {customer.cancelledAt ? format(new Date(customer.cancelledAt), 'dd.MM.yyyy', { locale: de }) : ''}</Typography>
-            <Typography variant="body2">Grund: {customer.cancelledReason}</Typography>
+            <Typography variant="subtitle2">Storniert am {localCustomer.cancelledAt ? format(new Date(localCustomer.cancelledAt), 'dd.MM.yyyy', { locale: de }) : ''}</Typography>
+            <Typography variant="body2">Grund: {localCustomer.cancelledReason}</Typography>
           </Alert>
         )}
 
         {/* Sales Notes */}
-        {customer.salesNotes && customer.salesNotes.length > 0 && (
+        {localCustomer.salesNotes && localCustomer.salesNotes.length > 0 && (
           <>
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1" gutterBottom>Vertriebsnotizen</Typography>
             <List dense>
-              {customer.salesNotes.map((note) => (
+              {localCustomer.salesNotes.map((note) => (
                 <ListItem key={note.id}>
                   <ListItemText
                     primary={

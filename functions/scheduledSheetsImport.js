@@ -356,8 +356,13 @@ function cleanPhoneNumber(phone) {
   // Ensure it starts with country code
   if (cleaned && !cleaned.startsWith('+')) {
     if (cleaned.startsWith('0')) {
+      // German number starting with 0
       cleaned = '+49' + cleaned.substring(1);
-    } else {
+    } else if (cleaned.startsWith('49')) {
+      // Already has German country code, just add +
+      cleaned = '+' + cleaned;
+    } else if (cleaned.length >= 10) {
+      // Other number without country code
       cleaned = '+49' + cleaned;
     }
   }

@@ -857,5 +857,11 @@ exports.scheduledSheetsImport = scheduledSheetsImport;
 exports.triggerSheetsImport = triggerSheetsImport;
 
 // Calendar Import Functions
-const { importCalendarCSV } = require('./importCalendarCSV');
-exports.importCalendarCSV = importCalendarCSV;
+const { importFromCalendarCSV } = require('./importFromCalendarCSV');
+exports.importFromCalendarCSV = importFromCalendarCSV;
+
+const { importFromICS } = require('./importFromICS');
+exports.importFromICS = importFromICS;
+
+const { importICSToCalendar } = require('./importICSToCalendar');
+exports.importICSToCalendar = importICSToCalendar;
