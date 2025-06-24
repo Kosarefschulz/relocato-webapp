@@ -63,6 +63,7 @@ import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
 // import SalesActions from './SalesActions'; // Temporarily disabled
+import SalesStatus from './SalesStatus';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import MobileLayout from './MobileLayout';
 import { useMobileLayout } from '../hooks/useMobileLayout';
@@ -620,7 +621,7 @@ const CustomerDetails: React.FC = () => {
           {/* Tab Panels */}
           <TabPanel value={tabValue} index={0}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
-              {/* <SalesActions
+              <SalesStatus
                 customer={customer}
                 onUpdate={(updatedFields) => {
                   // Update local state immediately
@@ -632,7 +633,7 @@ const CustomerDetails: React.FC = () => {
                   // Then reload data from server in background
                   loadCustomerData();
                 }}
-              /> */}
+              />
               <CustomerInfo
                 customer={customer}
                 editedCustomer={editedCustomer}

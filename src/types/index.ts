@@ -35,6 +35,8 @@ export interface Customer {
   cancelledAt?: Date; // Wann wurde storniert
   cancelledReason?: string; // Grund für Stornierung
   salesNotes?: SalesNote[]; // Vertriebsnotizen
+  notReachedCount?: number; // Anzahl der erfolglosen Kontaktversuche
+  lastNotReachedAt?: Date; // Zeitpunkt des letzten erfolglosen Versuchs
 }
 
 export interface SalesNote {
