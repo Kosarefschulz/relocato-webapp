@@ -142,5 +142,25 @@ service cloud.firestore {
       allow read: if true; // Temporär: Öffentlicher Lesezugriff
       allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
+    
+    // Share Tokens for temporary customer access
+    match /shareTokens/{tokenId} {
+      allow read: if true; // Tokens müssen öffentlich lesbar sein für Validierung
+      allow create: if true; // Temporär: Jeder kann Tokens erstellen
+      allow update: if true; // Für Zugriffszähler Updates
+      allow delete: if true; // Temporär: Jeder kann löschen
+    }
+    
+    // Recognition Rules (for email parsing)
+    match /recognitionRules/{ruleId} {
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
+    }
+    
+    // Email Invoices
+    match /emailInvoices/{invoiceId} {
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow write: if true; // Temporär: Öffentlicher Schreibzugriff
+    }
   }
 }
