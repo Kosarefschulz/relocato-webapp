@@ -194,14 +194,25 @@ const SharedCustomerView: React.FC = () => {
                 <ListItemText primary={customer.email} />
               </ListItem>
             )}
-            {customer.apartment?.address && (
+            {customer.fromAddress && (
               <ListItem>
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Aktuelle Adresse"
-                  secondary={`${customer.apartment.address.street}, ${customer.apartment.address.zip} ${customer.apartment.address.city}`}
+                  primary="Von"
+                  secondary={customer.fromAddress}
+                />
+              </ListItem>
+            )}
+            {customer.toAddress && (
+              <ListItem>
+                <ListItemIcon>
+                  <BusinessIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Nach"
+                  secondary={customer.toAddress}
                 />
               </ListItem>
             )}
