@@ -29,7 +29,7 @@ import {
   AddAPhoto as AddAPhotoIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import googleDriveService, { StoredPhoto } from '../services/googleDriveService';
+import { StoredPhoto } from '../services/googleDriveService';
 import { firebaseStorageService } from '../services/firebaseStorageService';
 import { useAnalytics } from '../hooks/useAnalytics';
 
@@ -89,32 +89,13 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   const loadPhotos = async () => {
     try {
       setLoading(true);
-      const allPhotos: StoredPhoto[] = [];
-      
-      // Lade Fotos aus beiden Quellen
-      try {
-        // Firebase Storage Fotos
-        const firebasePhotos = await firebaseStorageService.loadPhotos(customer.id);
-        allPhotos.push(...firebasePhotos);
-        console.log(`📸 ${firebasePhotos.length} Fotos aus Firebase geladen`);
-      } catch (firebaseError) {
-        console.warn('Firebase Storage nicht verfügbar:', firebaseError);
-      }
-      
-      try {
-        // localStorage Fotos
-        const localPhotos = await googleDriveService.getCustomerPhotos(customer.id);
-        allPhotos.push(...localPhotos);
-        console.log(`📸 ${localPhotos.length} Fotos aus localStorage geladen`);
-      } catch (localError) {
-        console.warn('localStorage Fehler:', localError);
-      }
-      
-      // Sortiere nach Upload-Datum (neueste zuerst)
-      allPhotos.sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
-      setPhotos(allPhotos);
+      // Nur Firebase Storage verwenden
+      const firebasePhotos = await firebaseStorageService.loadPhotos(customer.id);
+      console.log(`📸 ${firebasePhotos.length} Fotos aus Firebase Storage geladen`);
+      setPhotos(firebasePhotos);
     } catch (error) {
       console.error('Fehler beim Laden der Fotos:', error);
+      setError('Fehler beim Laden der Fotos. Bitte versuchen Sie es später erneut.');
     } finally {
       setLoading(false);
     }
@@ -137,9 +118,6 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
       let errorCount = 0;
       
       for (const file of uploadFiles) {
-        let uploaded = false;
-        
-        // Versuche zuerst Firebase Storage
         try {
           console.log(`📤 Uploade ${file.name} zu Firebase Storage...`);
           const result = await firebaseStorageService.uploadPhoto(
@@ -151,38 +129,23 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           
           if (result) {
             uploadedCount++;
-            uploaded = true;
-            console.log(`✅ ${file.name} erfolgreich zu Firebase hochgeladen`);
+            console.log(`✅ ${file.name} erfolgreich hochgeladen`);
+          } else {
+            errorCount++;
           }
-        } catch (firebaseError) {
-          console.error('Firebase Upload fehlgeschlagen:', firebaseError);
+        } catch (error) {
+          console.error('Upload fehlgeschlagen:', error);
+          errorCount++;
           
-          // Fallback zu localStorage
-          try {
-            console.log(`📤 Fallback: Uploade ${file.name} zu localStorage...`);
-            const localResult = await googleDriveService.uploadPhotoDirect(
-              customer.id,
-              file,
-              uploadCategory || 'Sonstiges',
-              uploadDescription
-            );
-            
-            if (localResult) {
-              uploadedCount++;
-              uploaded = true;
-              console.log(`✅ ${file.name} erfolgreich zu localStorage hochgeladen`);
-            }
-          } catch (localError) {
-            console.error('localStorage Upload auch fehlgeschlagen:', localError);
-            if (localError instanceof Error && localError.message.includes('Speicher voll')) {
-              setError('Lokaler Speicher voll. Firebase Storage ist möglicherweise nicht konfiguriert.');
+          if (error instanceof Error) {
+            if (error.message.includes('storage/unauthorized')) {
+              setError('Keine Berechtigung zum Hochladen. Bitte wenden Sie sich an den Administrator.');
+              break;
+            } else if (error.message.includes('storage/quota-exceeded')) {
+              setError('Speicherplatz-Limit erreicht. Bitte wenden Sie sich an den Administrator.');
               break;
             }
           }
-        }
-        
-        if (!uploaded) {
-          errorCount++;
         }
         
         setUploadProgress(((uploadedCount + errorCount) / uploadFiles.length) * 100);
@@ -225,35 +188,18 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     if (window.confirm('Möchten Sie dieses Foto wirklich löschen?')) {
       try {
         setLoading(true);
-        let success = false;
-        
-        if (photoId.startsWith('firebase_')) {
-          // Firebase Storage Foto
-          try {
-            success = await firebaseStorageService.deletePhoto(customer.id, photoId);
-            console.log('🗑️ Firebase Foto gelöscht');
-          } catch (error) {
-            console.error('Firebase Löschung fehlgeschlagen:', error);
-          }
-        } else {
-          // localStorage Foto
-          try {
-            success = await googleDriveService.deletePhoto(photoId);
-            console.log('🗑️ localStorage Foto gelöscht');
-          } catch (error) {
-            console.error('localStorage Löschung fehlgeschlagen:', error);
-          }
-        }
+        const success = await firebaseStorageService.deletePhoto(customer.id, photoId);
         
         if (success) {
           await loadPhotos();
           console.log('✅ Foto erfolgreich gelöscht');
           analytics.trackPhotoDeleted(customer.id);
         } else {
-          console.error('❌ Fehler beim Löschen des Fotos');
+          setError('Fehler beim Löschen des Fotos');
         }
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
+        setError('Fehler beim Löschen des Fotos');
       } finally {
         setLoading(false);
       }
