@@ -258,8 +258,8 @@ const SharedCustomerView: React.FC = () => {
           <Box>
             <CustomerTagsAndNotes 
               customer={customer} 
-              editMode={false}
-              onFieldChange={() => {}}
+              onUpdate={() => {}}
+              readOnly={true}
             />
           </Box>
         )}
