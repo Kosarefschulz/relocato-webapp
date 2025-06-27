@@ -74,8 +74,15 @@ class FirebaseStorageService {
   }
 
   async loadPhotos(customerId: string): Promise<StoredPhoto[]> {
+    if (!storage) {
+      console.warn('Firebase Storage nicht initialisiert');
+      return [];
+    }
+    
     try {
-      const folderRef = ref(storage, `${this.PHOTOS_FOLDER}/${customerId}`);
+      // Stelle sicher dass customerId keine Zeilenumbrüche enthält
+      const cleanCustomerId = customerId.trim();
+      const folderRef = ref(storage, `${this.PHOTOS_FOLDER}/${cleanCustomerId}`);
       const result = await listAll(folderRef);
       
       const photos: StoredPhoto[] = [];

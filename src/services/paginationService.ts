@@ -273,9 +273,15 @@ class PaginationService {
         invoices.push({
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate() || new Date(),
-          paidDate: data.paidDate?.toDate(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' 
+            ? data.createdAt.toDate() 
+            : data.createdAt || new Date(),
+          dueDate: data.dueDate && typeof data.dueDate.toDate === 'function'
+            ? data.dueDate.toDate()
+            : data.dueDate || new Date(),
+          paidDate: data.paidDate && typeof data.paidDate.toDate === 'function'
+            ? data.paidDate.toDate()
+            : data.paidDate,
         } as Invoice);
       });
 
