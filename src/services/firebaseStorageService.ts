@@ -11,6 +11,15 @@ import { StoredPhoto } from './googleDriveService';
 
 class FirebaseStorageService {
   private readonly PHOTOS_FOLDER = 'customer-photos';
+  
+  constructor() {
+    // Prüfe ob Storage initialisiert ist
+    if (!storage) {
+      console.error('⚠️ Firebase Storage nicht initialisiert!');
+    } else {
+      console.log('✅ Firebase Storage Service bereit');
+    }
+  }
 
   async uploadPhoto(
     customerId: string, 
@@ -18,6 +27,10 @@ class FirebaseStorageService {
     category: string = 'Sonstiges',
     description?: string
   ): Promise<StoredPhoto> {
+    if (!storage) {
+      throw new Error('Firebase Storage nicht initialisiert');
+    }
+    
     try {
       // Erstelle einen eindeutigen Dateinamen
       const timestamp = Date.now();

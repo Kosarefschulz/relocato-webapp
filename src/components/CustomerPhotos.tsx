@@ -89,9 +89,30 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   const loadPhotos = async () => {
     try {
       setLoading(true);
-      // Erstmal nur localStorage verwenden bis Firebase korrekt konfiguriert ist
-      const customerPhotos = await googleDriveService.getCustomerPhotos(customer.id);
-      setPhotos(customerPhotos);
+      const allPhotos: StoredPhoto[] = [];
+      
+      // Lade Fotos aus beiden Quellen
+      try {
+        // Firebase Storage Fotos
+        const firebasePhotos = await firebaseStorageService.loadPhotos(customer.id);
+        allPhotos.push(...firebasePhotos);
+        console.log(`📸 ${firebasePhotos.length} Fotos aus Firebase geladen`);
+      } catch (firebaseError) {
+        console.warn('Firebase Storage nicht verfügbar:', firebaseError);
+      }
+      
+      try {
+        // localStorage Fotos
+        const localPhotos = await googleDriveService.getCustomerPhotos(customer.id);
+        allPhotos.push(...localPhotos);
+        console.log(`📸 ${localPhotos.length} Fotos aus localStorage geladen`);
+      } catch (localError) {
+        console.warn('localStorage Fehler:', localError);
+      }
+      
+      // Sortiere nach Upload-Datum (neueste zuerst)
+      allPhotos.sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
+      setPhotos(allPhotos);
     } catch (error) {
       console.error('Fehler beim Laden der Fotos:', error);
     } finally {
@@ -116,9 +137,12 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
       let errorCount = 0;
       
       for (const file of uploadFiles) {
+        let uploaded = false;
+        
+        // Versuche zuerst Firebase Storage
         try {
-          // Erstmal nur localStorage verwenden
-          const result = await googleDriveService.uploadPhotoDirect(
+          console.log(`📤 Uploade ${file.name} zu Firebase Storage...`);
+          const result = await firebaseStorageService.uploadPhoto(
             customer.id,
             file,
             uploadCategory || 'Sonstiges',
@@ -127,17 +151,40 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           
           if (result) {
             uploadedCount++;
-          } else {
-            errorCount++;
+            uploaded = true;
+            console.log(`✅ ${file.name} erfolgreich zu Firebase hochgeladen`);
           }
-        } catch (error) {
-          console.error('Upload-Fehler für Datei:', file.name, error);
-          errorCount++;
-          if (error instanceof Error && error.message.includes('Speicher voll')) {
-            setError(error.message);
-            break; // Abbrechen wenn localStorage voll ist
+        } catch (firebaseError) {
+          console.error('Firebase Upload fehlgeschlagen:', firebaseError);
+          
+          // Fallback zu localStorage
+          try {
+            console.log(`📤 Fallback: Uploade ${file.name} zu localStorage...`);
+            const localResult = await googleDriveService.uploadPhotoDirect(
+              customer.id,
+              file,
+              uploadCategory || 'Sonstiges',
+              uploadDescription
+            );
+            
+            if (localResult) {
+              uploadedCount++;
+              uploaded = true;
+              console.log(`✅ ${file.name} erfolgreich zu localStorage hochgeladen`);
+            }
+          } catch (localError) {
+            console.error('localStorage Upload auch fehlgeschlagen:', localError);
+            if (localError instanceof Error && localError.message.includes('Speicher voll')) {
+              setError('Lokaler Speicher voll. Firebase Storage ist möglicherweise nicht konfiguriert.');
+              break;
+            }
           }
         }
+        
+        if (!uploaded) {
+          errorCount++;
+        }
+        
         setUploadProgress(((uploadedCount + errorCount) / uploadFiles.length) * 100);
       }
 
@@ -178,11 +225,29 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     if (window.confirm('Möchten Sie dieses Foto wirklich löschen?')) {
       try {
         setLoading(true);
-        const success = await googleDriveService.deletePhoto(photoId);
+        let success = false;
+        
+        if (photoId.startsWith('firebase_')) {
+          // Firebase Storage Foto
+          try {
+            success = await firebaseStorageService.deletePhoto(customer.id, photoId);
+            console.log('🗑️ Firebase Foto gelöscht');
+          } catch (error) {
+            console.error('Firebase Löschung fehlgeschlagen:', error);
+          }
+        } else {
+          // localStorage Foto
+          try {
+            success = await googleDriveService.deletePhoto(photoId);
+            console.log('🗑️ localStorage Foto gelöscht');
+          } catch (error) {
+            console.error('localStorage Löschung fehlgeschlagen:', error);
+          }
+        }
+        
         if (success) {
           await loadPhotos();
           console.log('✅ Foto erfolgreich gelöscht');
-          // Analytics: Track photo deletion
           analytics.trackPhotoDeleted(customer.id);
         } else {
           console.error('❌ Fehler beim Löschen des Fotos');
