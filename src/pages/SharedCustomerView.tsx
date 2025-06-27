@@ -238,7 +238,13 @@ const SharedCustomerView: React.FC = () => {
       <Paper sx={{ p: 3 }}>
         {activeTab === 0 && (
           <Box>
-            <CustomerInfo customer={customer} editMode={false} onChange={() => {}} />
+            <CustomerInfo 
+              customer={customer} 
+              editedCustomer={customer}
+              editMode={false} 
+              onFieldChange={() => {}}
+              isMobile={false}
+            />
           </Box>
         )}
         
@@ -253,7 +259,7 @@ const SharedCustomerView: React.FC = () => {
             <CustomerTagsAndNotes 
               customer={customer} 
               editMode={false}
-              onChange={() => {}}
+              onFieldChange={() => {}}
             />
           </Box>
         )}
