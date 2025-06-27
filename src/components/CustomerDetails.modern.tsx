@@ -62,6 +62,7 @@ import CustomerInvoicesMultiCompany from './CustomerInvoices.multicompany';
 import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
+import ShareCustomerButton from './ShareCustomerButton';
 // import SalesActions from './SalesActions'; // Temporarily disabled
 // import SalesStatus from './SalesStatus'; // Temporarily disabled
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
@@ -409,13 +410,16 @@ const CustomerDetails: React.FC = () => {
                 </Button>
               </Box>
             ) : (
-              <Button
-                variant="outlined"
-                startIcon={<EditIcon />}
-                onClick={handleEditToggle}
-              >
-                Bearbeiten
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<EditIcon />}
+                  onClick={handleEditToggle}
+                >
+                  Bearbeiten
+                </Button>
+                <ShareCustomerButton customer={customer} />
+              </Box>
             )}
           </Box>
         </Box>

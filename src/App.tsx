@@ -51,6 +51,7 @@ import { aiConfigService } from './services/ai/aiConfigService';
 import QuoteConfirmationPage from './pages/QuoteConfirmationPage';
 import AccountingDashboard from './pages/AccountingDashboard';
 import CustomerImportPage from './pages/CustomerImportPage';
+import SharedCustomerView from './pages/SharedCustomerView';
 
 
 export const AuthContext = React.createContext<{
@@ -83,6 +84,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/quote-confirmation/:token" 
         element={<QuoteConfirmationPage />} 
+      />
+      
+      {/* Shared Customer View - Public Route */}
+      <Route 
+        path="/shared/customer/:tokenId" 
+        element={<SharedCustomerView />} 
       />
       
       {/* Search Customer for Quote Creation */}
