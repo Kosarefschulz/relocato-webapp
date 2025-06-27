@@ -68,7 +68,9 @@ const SharedCustomerView: React.FC = () => {
       setToken(validToken);
       
       // Kundendaten laden
-      const customerData = await databaseService.getCustomer(validToken.customerId);
+      const customersData = await databaseService.getCustomers();
+      const customerData = customersData.find(c => c.id === validToken.customerId);
+      
       if (!customerData) {
         setError('Kunde nicht gefunden.');
         return;
