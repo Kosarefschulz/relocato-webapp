@@ -24,7 +24,8 @@ import {
   ContentCopy as CopyIcon,
   Delete as DeleteIcon,
   AccessTime as AccessTimeIcon,
-  Visibility as VisibilityIcon
+  Visibility as VisibilityIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { shareTokenService, ShareToken } from '../services/shareTokenService';
 import { Customer } from '../types';
@@ -133,12 +134,29 @@ const ShareCustomerButton: React.FC<ShareCustomerButtonProps> = ({ customer, cur
         </Button>
       </Tooltip>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>
-          Kundendaten teilen
-          <Typography variant="body2" color="text.secondary">
-            Erstellen Sie einen temporären Link für Mitarbeiter (7 Tage gültig)
-          </Typography>
+      <Dialog 
+        open={open} 
+        onClose={() => setOpen(false)} 
+        maxWidth="md" 
+        fullWidth
+        fullScreen={window.innerWidth < 600}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              Kundendaten teilen
+              <Typography variant="body2" color="text.secondary">
+                Temporärer Link (7 Tage gültig)
+              </Typography>
+            </Box>
+            <IconButton
+              edge="end"
+              onClick={() => setOpen(false)}
+              sx={{ display: { sm: 'none' } }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         
         <DialogContent>
@@ -201,57 +219,103 @@ const ShareCustomerButton: React.FC<ShareCustomerButtonProps> = ({ customer, cur
                 const url = shareTokenService.generateShareUrl(token.id);
                 
                 return (
-                  <ListItem key={token.id} divider>
+                  <ListItem 
+                    key={token.id} 
+                    divider
+                    sx={{
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      alignItems: { xs: 'flex-start', sm: 'center' },
+                      py: 2
+                    }}
+                  >
                     <ListItemText
+                      sx={{ width: '100%', pr: { xs: 0, sm: 2 } }}
                       primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' }, 
+                          gap: 1 
+                        }}>
                           <Typography variant="body2">
                             Erstellt von {token.createdBy}
                           </Typography>
-                          <Chip
-                            label={`${daysRemaining} Tage`}
-                            size="small"
-                            color={daysRemaining <= 2 ? 'warning' : 'success'}
-                            icon={<AccessTimeIcon />}
-                          />
-                          {token.accessCount > 0 && (
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                             <Chip
-                              label={`${token.accessCount}x geöffnet`}
+                              label={`${daysRemaining} Tage`}
                               size="small"
-                              variant="outlined"
-                              icon={<VisibilityIcon />}
+                              color={daysRemaining <= 2 ? 'warning' : 'success'}
+                              icon={<AccessTimeIcon />}
                             />
-                          )}
+                            {token.accessCount > 0 && (
+                              <Chip
+                                label={`${token.accessCount}x geöffnet`}
+                                size="small"
+                                variant="outlined"
+                                icon={<VisibilityIcon />}
+                              />
+                            )}
+                          </Box>
                         </Box>
                       }
                       secondary={
                         <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Erstellt: {formatDate(token.createdAt)} • 
+                          <Typography 
+                            variant="caption" 
+                            color="text.secondary"
+                            sx={{ 
+                              display: 'block',
+                              wordBreak: 'break-word'
+                            }}
+                          >
+                            Erstellt: {formatDate(token.createdAt)}<br />
                             Gültig bis: {formatDate(token.expiresAt)}
                             {token.lastAccessedAt && (
-                              <> • Zuletzt geöffnet: {formatDate(token.lastAccessedAt)}</>
+                              <><br />Zuletzt: {formatDate(token.lastAccessedAt)}</>
                             )}
                           </Typography>
                         </Box>
                       }
                     />
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        edge="end"
-                        onClick={() => handleCopyUrl(url)}
-                        sx={{ mr: 1 }}
-                      >
-                        <CopyIcon />
-                      </IconButton>
-                      <IconButton
-                        edge="end"
-                        onClick={() => handleDeleteToken(token.id)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: 1,
+                      mt: { xs: 2, sm: 0 },
+                      width: { xs: '100%', sm: 'auto' },
+                      justifyContent: { xs: 'flex-end', sm: 'flex-start' }
+                    }}>
+                      <Tooltip title="Link kopieren">
+                        <IconButton
+                          onClick={() => handleCopyUrl(url)}
+                          size="small"
+                          sx={{ 
+                            border: 1, 
+                            borderColor: 'divider',
+                            '&:hover': {
+                              bgcolor: 'action.hover'
+                            }
+                          }}
+                        >
+                          <CopyIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Link löschen">
+                        <IconButton
+                          onClick={() => handleDeleteToken(token.id)}
+                          color="error"
+                          size="small"
+                          sx={{ 
+                            border: 1, 
+                            borderColor: 'error.main',
+                            '&:hover': {
+                              bgcolor: 'error.light'
+                            }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </ListItem>
                 );
               })}
