@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,17 @@ const SimpleAuth: React.FC<SimpleAuthProps> = ({ children }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  
+  // Liste der öffentlichen Routen
+  const publicRoutes = [
+    '/quote-confirmation/',
+    '/share/',
+    '/shared-customer/'
+  ];
+  
+  // Prüfe ob aktuelle Route öffentlich ist
+  const isPublicRoute = publicRoutes.some(route => location.pathname.includes(route));
 
   useEffect(() => {
     checkAuth();
@@ -88,6 +100,11 @@ const SimpleAuth: React.FC<SimpleAuthProps> = ({ children }) => {
         <Typography>Lade...</Typography>
       </Box>
     );
+  }
+
+  // Wenn es eine öffentliche Route ist, zeige den Inhalt ohne Auth
+  if (isPublicRoute) {
+    return <>{children}</>;
   }
 
   if (!isAuthenticated) {
