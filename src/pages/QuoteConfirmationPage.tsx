@@ -35,7 +35,7 @@ import {
   Draw as DrawIcon
 } from '@mui/icons-material';
 import { Quote, Customer } from '../types';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { generatePDF } from '../services/pdfService';
 import { tokenService } from '../services/tokenService';
 import { motion } from 'framer-motion';
@@ -75,7 +75,17 @@ const QuoteConfirmationPage: React.FC = () => {
 
     try {
       // Lade alle Angebote und finde das mit dem Token
-      const quotes = await googleSheetsService.getQuotes();
+      console.log('🔍 Suche Angebot mit Token:', token);
+      const quotes = await databaseService.getQuotes();
+      console.log(`📊 ${quotes.length} Angebote gefunden`);
+      
+      // Debug: Zeige alle Tokens
+      quotes.forEach(q => {
+        if (q.confirmationToken) {
+          console.log(`Angebot ${q.id}: Token = ${q.confirmationToken}`);
+        }
+      });
+      
       const foundQuote = quotes.find(q => q.confirmationToken === token);
       
       if (!foundQuote) {
@@ -93,7 +103,7 @@ const QuoteConfirmationPage: React.FC = () => {
       setQuote(foundQuote);
 
       // Lade Kundendaten
-      const customers = await googleSheetsService.getCustomers();
+      const customers = await databaseService.getCustomers();
       const foundCustomer = customers.find(c => c.id === foundQuote.customerId);
       
       if (foundCustomer) {
@@ -115,7 +125,7 @@ const QuoteConfirmationPage: React.FC = () => {
     setConfirming(true);
     try {
       // Update quote status
-      await googleSheetsService.updateQuote(quote.id, {
+      await databaseService.updateQuote(quote.id, {
         ...quote,
         status: 'confirmed',
         confirmedAt: new Date(),
