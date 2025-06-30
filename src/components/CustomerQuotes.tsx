@@ -31,6 +31,7 @@ import { SignatureData } from '../services/pdfSignatureService';
 import EmailComposer from './EmailComposer';
 import { tokenService } from '../services/tokenService';
 import PaymentDialog from './PaymentDialog';
+import { generateQRCodeHTML } from '../services/qrCodeService';
 
 interface CustomerQuotesProps {
   quotes: Quote[];
@@ -147,6 +148,9 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
       const token = tokenService.generateQuoteToken(quote);
       const confirmationUrl = tokenService.generateConfirmationUrl(token);
       
+      // Generiere QR Code für die Bestätigungs-URL
+      const qrCodeHtml = await generateQRCodeHTML(confirmationUrl);
+      
       // Generiere PDF
       const pdfBlob = await generatePDF(customer, quote);
       
@@ -196,7 +200,14 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
             <a href="${confirmationUrl}" class="confirm-button" style="color: white !important; text-decoration: none;">
                 Angebot online ansehen & bestätigen
             </a>
-            <p class="url-fallback">Falls der Button nicht funktioniert, kopieren Sie bitte diesen Link:<br>${confirmationUrl}</p>
+            <p class="url-fallback">Falls der Button nicht funktioniert, kopieren Sie bitte diesen Link:<br>
+            <a href="${confirmationUrl}" style="color: #1976d2; word-break: break-all;">${confirmationUrl}</a></p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+            <h3 style="color: #8BC34A; margin-bottom: 15px;">QR-Code für schnellen Zugriff</h3>
+            <p style="margin-bottom: 15px;">Scannen Sie diesen Code mit Ihrem Smartphone:</p>
+            ${qrCodeHtml}
         </div>
         
         <div class="benefits">
@@ -480,6 +491,9 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                           const token = tokenService.generateQuoteToken(quote);
                           const confirmationUrl = tokenService.generateConfirmationUrl(token);
                           
+                          // Generiere QR Code
+                          const qrCodeHtml = await generateQRCodeHTML(confirmationUrl);
+                          
                           const pdfBlob = await generatePDF(customer, quote);
                           const emailData = {
                             to: customer.email,
@@ -496,7 +510,17 @@ const CustomerQuotes: React.FC<CustomerQuotesProps> = ({ quotes, customer, onTab
                                 <a href="${confirmationUrl}" style="display: inline-block; margin: 10px 0; padding: 12px 24px; background-color: #1976d2; color: white; text-decoration: none; border-radius: 4px;">
                                   Angebot ansehen und bestätigen
                                 </a>
+                                <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                                  Falls der Button nicht funktioniert, nutzen Sie bitte diesen Link:<br>
+                                  <a href="${confirmationUrl}" style="color: #1976d2; word-break: break-all;">${confirmationUrl}</a>
+                                </p>
                                 <p style="font-size: 12px; color: #666;">Dieser Link ist 30 Tage gültig.</p>
+                              </div>
+                              
+                              <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+                                <h3 style="color: #8BC34A; margin-bottom: 15px;">QR-Code für schnellen Zugriff</h3>
+                                <p style="margin-bottom: 15px;">Scannen Sie diesen Code mit Ihrem Smartphone:</p>
+                                ${qrCodeHtml}
                               </div>
                               
                               <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>

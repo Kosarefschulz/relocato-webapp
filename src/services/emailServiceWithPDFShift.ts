@@ -2,6 +2,8 @@ import { Customer } from '../types';
 import { QuoteCalculation } from './quoteCalculation';
 import { generateEmailHTML } from './htmlEmailTemplate';
 import { generatePDFWithPDFShift } from './pdfshiftService';
+import { generateQRCode } from './qrCodeService';
+import { tokenService } from './tokenService';
 
 interface EmailData {
   to: string;
@@ -16,7 +18,8 @@ interface EmailData {
 export const sendQuoteEmailWithPDFShift = async (
   customer: Customer,
   calculation: QuoteCalculation,
-  quoteDetails: any
+  quoteDetails: any,
+  confirmationToken?: string
 ): Promise<boolean> => {
   try {
     console.log('📧 Erstelle E-Mail mit PDFShift PDF...');
@@ -56,6 +59,40 @@ export const sendQuoteEmailWithPDFShift = async (
             <h2 style="margin: 0; font-size: 36px;">Gesamtpreis: ${calculation.finalPrice.toFixed(2).replace('.', ',')} €</h2>
             <p style="margin: 5px 0; opacity: 0.9;">inkl. 19% MwSt.</p>
           </div>
+          
+          ${confirmationToken ? `
+          <div style="background-color: #E8F5E9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #8BC34A;">
+            <h3 style="color: #8BC34A; margin-top: 0; text-align: center;">Angebot online bestätigen</h3>
+            
+            <p style="text-align: center; margin: 20px 0;">
+              <a href="${tokenService.generateConfirmationUrl(confirmationToken)}" 
+                 style="display: inline-block; background-color: #8BC34A; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                ✓ Angebot online bestätigen
+              </a>
+            </p>
+            
+            <p style="text-align: center; font-size: 14px; color: #666; margin: 10px 0;">
+              Falls der Button nicht funktioniert, kopieren Sie diesen Link:<br>
+              <a href="${tokenService.generateConfirmationUrl(confirmationToken)}" 
+                 style="color: #1976d2; word-break: break-all;">
+                ${tokenService.generateConfirmationUrl(confirmationToken)}
+              </a>
+            </p>
+            
+            <div style="text-align: center; margin: 20px 0;">
+              <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Oder scannen Sie diesen QR-Code:</p>
+              <img src="${await generateQRCode(tokenService.generateConfirmationUrl(confirmationToken))}" 
+                   alt="QR Code" 
+                   style="width: 200px; height: 200px; border: 2px solid #8BC34A; padding: 10px; background: white;">
+            </div>
+            
+            <ul style="list-style: none; padding: 0; margin: 15px 0; font-size: 14px;">
+              <li style="margin: 5px 0;">✓ Angebot digital unterschreiben</li>
+              <li style="margin: 5px 0;">✓ Verbindliche Auftragserteilung</li>
+              <li style="margin: 5px 0;">✓ Sofortige Bestätigung erhalten</li>
+            </ul>
+          </div>
+          ` : ''}
           
           <p>Das detaillierte Angebot finden Sie im PDF-Anhang.</p>
           

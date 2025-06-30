@@ -33,6 +33,7 @@ import { sendEmail } from '../services/emailService';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
+import { tokenService } from '../services/tokenService';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -209,19 +210,23 @@ const CreateQuote: React.FC = () => {
     setError('');
 
     try {
+      const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const token = tokenService.generateQuoteToken({ id: quoteId } as any);
+      
       const quoteData = {
-        id: `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: quoteId,
         customerId: customer.id,
         customerName: customer.name,
         price: calculation.finalPrice,
         comment: quoteDetails.notes,
         createdAt: new Date(),
         createdBy: 'current-user-id',
-        status: 'sent' as const
+        status: 'sent' as const,
+        confirmationToken: token
       };
 
       // Email mit verbessertem Fallback-System versenden
-      await sendEmailWithFallback(customer, calculation, quoteDetails);
+      await sendEmailWithFallback(customer, calculation, quoteDetails, token);
 
       // In Google Sheets speichern
       await googleSheetsService.addQuote(quoteData);
@@ -241,13 +246,13 @@ const CreateQuote: React.FC = () => {
   };
 
   // Verbessertes E-Mail-System mit Fallback
-  const sendEmailWithFallback = async (customer: Customer, calculation: QuoteCalculation, quoteDetails: any): Promise<boolean> => {
+  const sendEmailWithFallback = async (customer: Customer, calculation: QuoteCalculation, quoteDetails: any, confirmationToken: string): Promise<boolean> => {
     try {
       console.log('📧 Versuche E-Mail-Versendung mit PDFShift...');
       
       // Versuche zuerst PDFShift
       try {
-        const success = await sendQuoteEmailWithPDFShift(customer, calculation, quoteDetails);
+        const success = await sendQuoteEmailWithPDFShift(customer, calculation, quoteDetails, confirmationToken);
         if (success) {
           console.log('✅ E-Mail mit PDFShift erfolgreich gesendet');
           return true;
