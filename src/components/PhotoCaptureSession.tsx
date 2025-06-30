@@ -1,0 +1,319 @@
+import React, { useState, useRef, useCallback } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
+  IconButton,
+  Chip,
+  Alert,
+  CircularProgress,
+  Card,
+  CardMedia,
+  CardActions,
+  TextField,
+  MenuItem,
+  Badge,
+  Fab,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import {
+  Close as CloseIcon,
+  CameraAlt as CameraIcon,
+  PhotoCamera as PhotoCameraIcon,
+  Check as CheckIcon,
+  Delete as DeleteIcon,
+  Save as SaveIcon
+} from '@mui/icons-material';
+import { firebaseStorageService } from '../services/firebaseStorageService';
+
+interface PhotoCaptureSessionProps {
+  open: boolean;
+  onClose: () => void;
+  customerId: string;
+  customerName: string;
+  onPhotosUploaded: () => void;
+}
+
+interface CapturedPhoto {
+  id: string;
+  file: File;
+  preview: string;
+  category: string;
+}
+
+const PHOTO_CATEGORIES = [
+  'Eingang',
+  'Wohnzimmer',
+  'Schlafzimmer',
+  'Küche',
+  'Bad',
+  'Flur',
+  'Keller',
+  'Dachboden',
+  'Garage',
+  'Außenbereich',
+  'Sonstiges'
+];
+
+const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
+  open,
+  onClose,
+  customerId,
+  customerName,
+  onPhotosUploaded
+}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('Wohnzimmer');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState('');
+
+  const handleCapture = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newPhotos: CapturedPhoto[] = [];
+    
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const newPhoto: CapturedPhoto = {
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview: reader.result as string,
+          category: selectedCategory
+        };
+        setCapturedPhotos(prev => [...prev, newPhoto]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset input für nächste Aufnahme
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, [selectedCategory]);
+
+  const handleDeletePhoto = (photoId: string) => {
+    setCapturedPhotos(prev => prev.filter(p => p.id !== photoId));
+  };
+
+  const handleCategoryChange = (photoId: string, newCategory: string) => {
+    setCapturedPhotos(prev => 
+      prev.map(p => p.id === photoId ? { ...p, category: newCategory } : p)
+    );
+  };
+
+  const handleUploadAll = async () => {
+    if (capturedPhotos.length === 0) return;
+
+    setUploading(true);
+    setError('');
+    
+    try {
+      let uploaded = 0;
+      
+      for (const photo of capturedPhotos) {
+        await firebaseStorageService.uploadPhoto(
+          customerId,
+          photo.file,
+          photo.category,
+          ''
+        );
+        uploaded++;
+        setUploadProgress((uploaded / capturedPhotos.length) * 100);
+      }
+
+      console.log(`✅ ${capturedPhotos.length} Fotos erfolgreich hochgeladen`);
+      onPhotosUploaded();
+      handleClose();
+    } catch (error) {
+      console.error('Fehler beim Upload:', error);
+      setError('Fehler beim Hochladen der Fotos. Bitte versuchen Sie es erneut.');
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const handleClose = () => {
+    if (capturedPhotos.length > 0 && !uploading) {
+      if (!window.confirm('Es gibt noch nicht hochgeladene Fotos. Möchten Sie wirklich schließen?')) {
+        return;
+      }
+    }
+    setCapturedPhotos([]);
+    setSelectedCategory('Wohnzimmer');
+    setError('');
+    onClose();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="lg"
+      fullWidth
+      fullScreen={isMobile}
+    >
+      <DialogTitle>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography variant="h6">
+            Fotos aufnehmen - {customerName}
+          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Badge badgeContent={capturedPhotos.length} color="primary">
+              <PhotoCameraIcon />
+            </Badge>
+            <IconButton onClick={handleClose} disabled={uploading}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </Box>
+      </DialogTitle>
+
+      <DialogContent dividers>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Kategorie-Auswahl für neue Fotos */}
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            select
+            fullWidth
+            label="Standard-Kategorie für neue Fotos"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            variant="outlined"
+          >
+            {PHOTO_CATEGORIES.map(category => (
+              <MenuItem key={category} value={category}>
+                {category}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>
+
+        {/* Kamera-Button */}
+        <Box sx={{ textAlign: 'center', mb: 3 }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            onChange={handleCapture}
+            style={{ display: 'none' }}
+            id="camera-input"
+          />
+          <label htmlFor="camera-input">
+            <Fab
+              color="primary"
+              component="span"
+              size="large"
+              disabled={uploading}
+            >
+              <CameraIcon />
+            </Fab>
+          </label>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Tippen Sie zum Fotografieren
+          </Typography>
+        </Box>
+
+        {/* Aufgenommene Fotos */}
+        {capturedPhotos.length > 0 && (
+          <>
+            <Typography variant="h6" gutterBottom>
+              Aufgenommene Fotos ({capturedPhotos.length})
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {capturedPhotos.map((photo) => (
+                <Box 
+                  key={photo.id}
+                  sx={{ 
+                    width: { xs: '100%', sm: 'calc(50% - 8px)', md: 'calc(33.333% - 11px)' },
+                    minWidth: 0
+                  }}
+                >
+                  <Card>
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={photo.preview}
+                      alt="Aufgenommenes Foto"
+                      sx={{ objectFit: 'cover' }}
+                    />
+                    <CardActions sx={{ justifyContent: 'space-between' }}>
+                      <TextField
+                        select
+                        size="small"
+                        value={photo.category}
+                        onChange={(e) => handleCategoryChange(photo.id, e.target.value)}
+                        sx={{ minWidth: 120 }}
+                      >
+                        {PHOTO_CATEGORIES.map(category => (
+                          <MenuItem key={category} value={category}>
+                            {category}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDeletePhoto(photo.id)}
+                        disabled={uploading}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </CardActions>
+                  </Card>
+                </Box>
+              ))}
+            </Box>
+          </>
+        )}
+
+        {uploading && (
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="body2" gutterBottom>
+              Lade Fotos hoch... {Math.round(uploadProgress)}%
+            </Typography>
+            <CircularProgress variant="determinate" value={uploadProgress} />
+          </Box>
+        )}
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={handleClose} disabled={uploading}>
+          Abbrechen
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleUploadAll}
+          disabled={capturedPhotos.length === 0 || uploading}
+          startIcon={uploading ? <CircularProgress size={20} /> : <SaveIcon />}
+        >
+          {uploading 
+            ? `Lade hoch... (${Math.round(uploadProgress)}%)`
+            : `${capturedPhotos.length} Fotos speichern`
+          }
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export default PhotoCaptureSession;

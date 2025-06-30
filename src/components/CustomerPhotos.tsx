@@ -19,19 +19,23 @@ import {
   Tab,
   TextField,
   MenuItem,
-  LinearProgress
+  LinearProgress,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import {
   Close as CloseIcon,
   Download as DownloadIcon,
   Upload as UploadIcon,
   Delete as DeleteIcon,
-  AddAPhoto as AddAPhotoIcon
+  AddAPhoto as AddAPhotoIcon,
+  CameraAlt as CameraIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { StoredPhoto } from '../services/googleDriveService';
 import { firebaseStorageService } from '../services/firebaseStorageService';
 import { useAnalytics } from '../hooks/useAnalytics';
+import PhotoCaptureSession from './PhotoCaptureSession';
 
 const PHOTO_CATEGORIES = [
   'Eingang',
@@ -70,11 +74,14 @@ interface CustomerPhotosProps {
 
 const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   const analytics = useAnalytics();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [photos, setPhotos] = useState<StoredPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('alle');
   const [selectedPhoto, setSelectedPhoto] = useState<StoredPhoto | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showCaptureSession, setShowCaptureSession] = useState(false);
   const [uploadCategory, setUploadCategory] = useState('');
   const [uploadDescription, setUploadDescription] = useState('');
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
@@ -237,17 +244,29 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   return (
     <Box>
       {/* Header mit Upload-Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h6">
           Fotos ({photos.length})
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddAPhotoIcon />}
-          onClick={() => setShowUploadDialog(true)}
-        >
-          Fotos hochladen
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {isMobile && (
+            <Button
+              variant="contained"
+              startIcon={<CameraIcon />}
+              onClick={() => setShowCaptureSession(true)}
+              color="primary"
+            >
+              Fotografieren
+            </Button>
+          )}
+          <Button
+            variant={isMobile ? "outlined" : "contained"}
+            startIcon={<AddAPhotoIcon />}
+            onClick={() => setShowUploadDialog(true)}
+          >
+            Hochladen
+          </Button>
+        </Box>
       </Box>
 
       {photos.length === 0 ? (
@@ -351,6 +370,18 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           </Box>
         </>
       )}
+
+      {/* Photo Capture Session */}
+      <PhotoCaptureSession
+        open={showCaptureSession}
+        onClose={() => setShowCaptureSession(false)}
+        customerId={customer.id}
+        customerName={customer.name}
+        onPhotosUploaded={() => {
+          setShowCaptureSession(false);
+          loadPhotos();
+        }}
+      />
 
       {/* Upload Dialog */}
       <Dialog

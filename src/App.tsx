@@ -356,10 +356,10 @@ function App() {
 
   return (
     <ThemeProvider>
-      <SimpleAuth>
-        <VisibilityFix />
-        <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
-          <Router>
+      <Router>
+        <SimpleAuth>
+          <VisibilityFix />
+          <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
             <AppRoutes user={user} />
             
             {/* PWA Install Prompt - Only show when user is logged in */}
@@ -369,9 +369,9 @@ function App() {
             <AIAssistantChatV2 
               initialExpanded={false}
             />
-          </Router>
-        </AuthContext.Provider>
-      </SimpleAuth>
+          </AuthContext.Provider>
+        </SimpleAuth>
+      </Router>
     </ThemeProvider>
   );
 }
