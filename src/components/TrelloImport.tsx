@@ -171,10 +171,34 @@ export const TrelloImport: React.FC<TrelloImportProps> = ({ open, onClose }) => 
         {activeStep === 1 && (
           <Box>
             <Typography variant="body1" gutterBottom>
-              Klicken Sie auf "Autorisieren", um der App Zugriff auf Ihre Trello-Boards zu gewähren.
+              Sie benötigen einen Token für den API-Zugriff:
             </Typography>
-            <Alert severity="info" sx={{ mt: 2 }}>
-              Sie werden zu Trello weitergeleitet und danach automatisch hierher zurückgebracht.
+            <Box component="ol" sx={{ pl: 3, mb: 2 }}>
+              <Typography component="li" variant="body2" gutterBottom>
+                Klicken Sie auf "Token generieren"
+              </Typography>
+              <Typography component="li" variant="body2" gutterBottom>
+                Autorisieren Sie den Zugriff in Trello
+              </Typography>
+              <Typography component="li" variant="body2" gutterBottom>
+                Kopieren Sie den generierten Token
+              </Typography>
+              <Typography component="li" variant="body2" gutterBottom>
+                Fügen Sie ihn unten ein
+              </Typography>
+            </Box>
+            <TextField
+              fullWidth
+              label="Trello Token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="Fügen Sie Ihren Token hier ein"
+              sx={{ mt: 2, mb: 2 }}
+              multiline
+              rows={2}
+            />
+            <Alert severity="info">
+              Der Token wird sicher in Ihrem Browser gespeichert und nicht an Dritte weitergegeben.
             </Alert>
           </Box>
         )}
@@ -288,13 +312,22 @@ export const TrelloImport: React.FC<TrelloImportProps> = ({ open, onClose }) => 
         )}
         
         {activeStep === 1 && (
-          <Button
-            variant="contained"
-            onClick={handleAuthorize}
-            startIcon={<ImportIcon />}
-          >
-            Autorisieren
-          </Button>
+          <>
+            <Button
+              variant="outlined"
+              onClick={() => window.open(`https://trello.com/1/authorize?expiration=1day&scope=read&response_type=token&key=${apiKey}`, '_blank')}
+              disabled={!apiKey}
+            >
+              Token generieren
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setActiveStep(2)}
+              disabled={!token}
+            >
+              Weiter
+            </Button>
+          </>
         )}
         
         {activeStep === 2 && (
