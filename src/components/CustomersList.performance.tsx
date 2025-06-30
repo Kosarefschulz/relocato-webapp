@@ -53,6 +53,7 @@ import {
   Sort as SortIcon,
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon,
+  CloudDownload as CloudDownloadIcon,
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -760,6 +761,14 @@ const CustomersListPerformance: React.FC = () => {
               sx={{ mr: 2 }}
             />
             <Button
+              variant="outlined"
+              startIcon={<CloudDownloadIcon />}
+              onClick={() => navigate('/import-trello')}
+              sx={{ mr: 1 }}
+            >
+              Trello Import
+            </Button>
+            <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => navigate('/new-customer')}
@@ -991,6 +1000,9 @@ const CustomersListPerformance: React.FC = () => {
                   <ClearIcon />
                 </IconButton>
               )}
+              <IconButton onClick={() => navigate('/import-trello')}>
+                <CloudDownloadIcon />
+              </IconButton>
               <IconButton onClick={handleExport}>
                 <UploadIcon />
               </IconButton>

@@ -368,8 +368,8 @@ const CustomerDetails: React.FC = () => {
     <>
       <Container maxWidth="xl" sx={{ mt: { xs: 0, md: 3 }, mb: { xs: 10, md: 4 }, px: { xs: 0, sm: 3 } }}>
         {/* Header Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+        <Box sx={{ mb: 3, px: { xs: 2, sm: 0 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
             <IconButton 
               onClick={navigateBack} 
               sx={{ 
@@ -384,20 +384,22 @@ const CustomerDetails: React.FC = () => {
               <ArrowBackIcon />
             </IconButton>
             
-            <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 600 }}>
+            <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 600, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
               Kundendetails
             </Typography>
             
             <DarkModeToggle showTooltip={!isMobile} />
             
             {editMode ? (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, width: { xs: '100%', sm: 'auto' } }}>
                 <Button
                   variant="contained"
                   color="success"
                   startIcon={<SaveIcon />}
                   onClick={handleSave}
                   disabled={saving}
+                  fullWidth={isMobile}
+                  size={isMobile ? 'medium' : 'medium'}
                 >
                   Speichern
                 </Button>
@@ -405,16 +407,20 @@ const CustomerDetails: React.FC = () => {
                   variant="outlined"
                   startIcon={<CancelIcon />}
                   onClick={handleEditToggle}
+                  fullWidth={isMobile}
+                  size={isMobile ? 'medium' : 'medium'}
                 >
                   Abbrechen
                 </Button>
               </Box>
             ) : (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, width: { xs: '100%', sm: 'auto' } }}>
                 <Button
                   variant="outlined"
                   startIcon={<EditIcon />}
                   onClick={handleEditToggle}
+                  fullWidth={isMobile}
+                  size={isMobile ? 'medium' : 'medium'}
                 >
                   Bearbeiten
                 </Button>
@@ -429,20 +435,21 @@ const CustomerDetails: React.FC = () => {
           elevation={0}
           sx={{ 
             mb: 3, 
+            mx: { xs: 2, sm: 0 },
             bgcolor: darkMode ? 'grey.900' : 'grey.50',
             border: `1px solid ${theme.palette.divider}`,
             overflow: 'hidden'
           }}
         >
-          <CardContent sx={{ p: { xs: 2, md: 4 } }}>
-            <Grid container spacing={3} alignItems="center">
-              <Grid item xs={12} md={8}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+            <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="center">
+              <Grid item xs={12} sm={12} md={8}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 3 }, flexDirection: { xs: 'column', sm: 'row' }, textAlign: { xs: 'center', sm: 'left' } }}>
                   <Avatar
                     sx={{
-                      width: { xs: 60, md: 80 },
-                      height: { xs: 60, md: 80 },
-                      fontSize: { xs: '1.5rem', md: '2rem' },
+                      width: { xs: 80, sm: 60, md: 80 },
+                      height: { xs: 80, sm: 60, md: 80 },
+                      fontSize: { xs: '2rem', sm: '1.5rem', md: '2rem' },
                       bgcolor: theme.palette.primary.main,
                       color: 'primary.contrastText'
                     }}
@@ -450,12 +457,12 @@ const CustomerDetails: React.FC = () => {
                     {customer.name.charAt(0).toUpperCase()}
                   </Avatar>
                   
-                  <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}>
                       {customer.name}
                     </Typography>
                     
-                    <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ justifyContent: { xs: 'center', sm: 'flex-start' } }}>
                       {customer.phone && (
                         <Chip
                           icon={<PhoneIcon />}
@@ -486,15 +493,15 @@ const CustomerDetails: React.FC = () => {
                 </Box>
               </Grid>
               
-              <Grid item xs={12} md={4}>
-                <Grid container spacing={2}>
+              <Grid item xs={12} sm={12} md={4}>
+                <Grid container spacing={2} sx={{ mt: { xs: 2, sm: 2, md: 0 } }}>
                   <Grid item xs={6}>
                     <Card sx={{ bgcolor: alpha(theme.palette.success.main, 0.1) }}>
                       <CardContent sx={{ textAlign: 'center', p: 2, '&:last-child': { pb: 2 } }}>
-                        <Typography variant="h4" color="success.main" sx={{ fontWeight: 700 }}>
+                        <Typography variant="h4" color="success.main" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}>
                           €{stats.totalRevenue.toFixed(0)}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Gesamtumsatz
                         </Typography>
                       </CardContent>
@@ -503,10 +510,10 @@ const CustomerDetails: React.FC = () => {
                   <Grid item xs={6}>
                     <Card sx={{ bgcolor: alpha(theme.palette.info.main, 0.1) }}>
                       <CardContent sx={{ textAlign: 'center', p: 2, '&:last-child': { pb: 2 } }}>
-                        <Typography variant="h4" color="info.main" sx={{ fontWeight: 700 }}>
+                        <Typography variant="h4" color="info.main" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}>
                           {stats.conversionRate.toFixed(0)}%
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Erfolgsquote
                         </Typography>
                       </CardContent>
@@ -519,12 +526,14 @@ const CustomerDetails: React.FC = () => {
             {/* Quick Actions */}
             {!editMode && (
               <Box sx={{ mt: 3, pt: 3, borderTop: `1px solid ${theme.palette.divider}` }}>
-                <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2 }} flexWrap="wrap" useFlexGap>
                   <Button
                     variant="contained"
                     startIcon={<DescriptionIcon />}
                     onClick={() => navigate(`/create-quote/${customer.id}`, { state: { customer } })}
                     size="small"
+                    fullWidth={isMobile}
+                    sx={{ minHeight: { xs: 44, sm: 36 } }}
                   >
                     Neues Angebot
                   </Button>
@@ -534,6 +543,8 @@ const CustomerDetails: React.FC = () => {
                     onClick={() => setRoutePlannerOpen(true)}
                     disabled={!customer.fromAddress || !customer.toAddress}
                     size="small"
+                    fullWidth={isMobile}
+                    sx={{ minHeight: { xs: 44, sm: 36 } }}
                   >
                     Route planen
                   </Button>
@@ -542,6 +553,8 @@ const CustomerDetails: React.FC = () => {
                     startIcon={<AddAPhotoIcon />}
                     onClick={() => setTabValue(2)}
                     size="small"
+                    fullWidth={isMobile}
+                    sx={{ minHeight: { xs: 44, sm: 36 } }}
                   >
                     Fotos hinzufügen
                   </Button>
@@ -557,8 +570,9 @@ const CustomerDetails: React.FC = () => {
           sx={{ 
             bgcolor: 'background.paper',
             border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 2,
-            overflow: 'hidden'
+            borderRadius: { xs: 0, sm: 2 },
+            overflow: 'hidden',
+            mx: { xs: 0, sm: 0 }
           }}
         >
           {isMobile ? (
