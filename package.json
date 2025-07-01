@@ -43,7 +43,6 @@
     "firebase-admin": "^13.4.0",
     "framer-motion": "^12.17.0",
     "fuse.js": "^7.1.0",
-    "googleapis": "^150.0.1",
     "html2canvas": "^1.4.1",
     "ical": "^0.8.0",
     "ical.js": "^2.2.0",
