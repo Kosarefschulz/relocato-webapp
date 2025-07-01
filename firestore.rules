@@ -1,3 +1,14 @@
+// ⚠️ WICHTIGER SICHERHEITSHINWEIS ⚠️
+// Diese Firestore Rules sind TEMPORÄR sehr offen konfiguriert!
+// Lösch-Operationen sind derzeit für ALLE aktiviert (allow delete: if true)
+// Dies ist ein SICHERHEITSRISIKO und sollte NUR während der Entwicklung verwendet werden.
+// 
+// TODO: Vor dem Produktiv-Einsatz:
+// 1. Authentifizierung implementieren
+// 2. Alle "allow delete: if true" zu "allow delete: if false" oder mit Auth-Checks ändern
+// 3. Soft-Delete implementieren statt harte Löschung
+// 4. Audit-Logs für alle Lösch-Operationen hinzufügen
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -37,7 +48,7 @@ service cloud.firestore {
       allow read: if true; // Temporär: Öffentlicher Lesezugriff
       allow create: if true; // Temporär: Öffentlicher Schreibzugriff
       allow update: if true; // Temporär: Öffentlicher Update-Zugriff
-      allow delete: if false; // Löschen weiterhin geschützt
+      allow delete: if true; // WARNUNG: Temporär aktiviert! Unbedingt wieder deaktivieren nach Authentifizierung
     }
     
     // Quotes collection
@@ -45,7 +56,7 @@ service cloud.firestore {
       allow read: if true; // Temporär: Öffentlicher Lesezugriff
       allow create: if true; // Temporär: Öffentlicher Schreibzugriff
       allow update: if true; // Temporär: Öffentlicher Update-Zugriff
-      allow delete: if false; // Löschen weiterhin geschützt
+      allow delete: if true; // WARNUNG: Temporär aktiviert! Unbedingt wieder deaktivieren nach Authentifizierung
     }
     
     // Invoices collection
@@ -53,7 +64,7 @@ service cloud.firestore {
       allow read: if true; // Temporär: Öffentlicher Lesezugriff
       allow create: if true; // Temporär: Öffentlicher Schreibzugriff
       allow update: if true; // Temporär: Öffentlicher Update-Zugriff
-      allow delete: if false; // Löschen weiterhin geschützt
+      allow delete: if true; // WARNUNG: Temporär aktiviert! Unbedingt wieder deaktivieren nach Authentifizierung
     }
     
     // Public share links

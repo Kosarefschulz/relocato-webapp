@@ -241,7 +241,9 @@ const CreateQuoteMultiCompany: React.FC = () => {
       // Generate email with QR code and confirmation link
       const emailContent = generateQuoteEmailHTMLSync({
         customer,
-        calculation: calculation || {} as QuoteCalculation,
+        calculation: useManualPrice && manualTotalPrice > 0 
+          ? { ...calculation, finalPrice: manualTotalPrice, totalPrice: manualTotalPrice } as QuoteCalculation
+          : calculation || {} as QuoteCalculation,
         quoteDetails,
         confirmationToken: token,
         companyName: companyConfig.name,
