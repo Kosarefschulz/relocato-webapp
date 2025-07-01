@@ -87,8 +87,10 @@ const QuoteConfirmationPage: React.FC = () => {
       });
       
       const foundQuote = quotes.find(q => q.confirmationToken === token);
+      console.log('🎯 Gefundenes Angebot:', foundQuote);
       
       if (!foundQuote) {
+        console.error('❌ Kein Angebot mit diesem Token gefunden');
         setError('Angebot nicht gefunden oder Link abgelaufen');
         setLoading(false);
         return;
@@ -101,19 +103,33 @@ const QuoteConfirmationPage: React.FC = () => {
       }
 
       setQuote(foundQuote);
+      console.log('✅ Angebot gesetzt, lade Kundendaten...');
 
       // Lade Kundendaten
+      console.log('🔍 Suche Kunde mit ID:', foundQuote.customerId);
       const customers = await databaseService.getCustomers();
+      console.log(`📊 ${customers.length} Kunden gefunden`);
       const foundCustomer = customers.find(c => c.id === foundQuote.customerId);
+      console.log('🎯 Gefundener Kunde:', foundCustomer);
       
       if (foundCustomer) {
         setCustomer(foundCustomer);
         setCustomerName(foundCustomer.name);
         setCustomerEmail(foundCustomer.email);
+      } else {
+        console.warn('⚠️ Kunde nicht gefunden, verwende Angebotsdaten');
+        // Fallback: Verwende Daten aus dem Angebot
+        setCustomerName(foundQuote.customerName || 'Kunde');
+        setCustomerEmail('');
       }
     } catch (err) {
-      console.error('Error loading quote:', err);
-      setError('Fehler beim Laden des Angebots');
+      console.error('❌ Fehler beim Laden des Angebots:', err);
+      if (err instanceof Error) {
+        console.error('Stack trace:', err.stack);
+        setError('Fehler beim Laden des Angebots: ' + err.message);
+      } else {
+        setError('Fehler beim Laden des Angebots');
+      }
     } finally {
       setLoading(false);
     }
@@ -149,8 +165,8 @@ const QuoteConfirmationPage: React.FC = () => {
       setDownloadingPdf(true);
       
       const quoteData = {
-        customerId: customer.id,
-        customerName: customer.name,
+        customerId: customer?.id || quote.customerId,
+        customerName: customer?.name || customerName,
         price: quote.price,
         comment: quote.comment || '',
         createdAt: quote.createdAt,
@@ -166,7 +182,7 @@ const QuoteConfirmationPage: React.FC = () => {
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Angebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.download = `Angebot_${(customer?.name || customerName || 'Kunde').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       
@@ -202,7 +218,7 @@ const QuoteConfirmationPage: React.FC = () => {
     );
   }
 
-  if (!quote || !customer) {
+  if (!quote) {
     return (
       <Container maxWidth="sm" sx={{ mt: 8 }}>
         <Alert severity="error">
@@ -229,9 +245,11 @@ const QuoteConfirmationPage: React.FC = () => {
             <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
               {confirmed ? 'Angebot bestätigt' : 'Ihr Umzugsangebot'}
             </Typography>
-            <Typography variant="h6" color="text.secondary">
-              {customer.name}
-            </Typography>
+            {customer && (
+              <Typography variant="h6" color="text.secondary">
+                {customer.name}
+              </Typography>
+            )}
           </CardContent>
         </MotionCard>
 
@@ -283,12 +301,12 @@ const QuoteConfirmationPage: React.FC = () => {
                     Umzugsdatum
                   </Typography>
                   <Typography variant="body1">
-                    {new Date(customer.movingDate).toLocaleDateString('de-DE', {
+                    {customer?.movingDate ? new Date(customer.movingDate).toLocaleDateString('de-DE', {
                       weekday: 'long',
                       day: '2-digit',
                       month: 'long',
                       year: 'numeric'
-                    })}
+                    }) : 'Noch nicht festgelegt'}
                   </Typography>
                 </Box>
               </Box>
@@ -308,7 +326,7 @@ const QuoteConfirmationPage: React.FC = () => {
                         Von:
                       </Typography>
                       <Typography variant="body2">
-                        {customer.fromAddress}
+                        {customer?.fromAddress || 'Nicht angegeben'}
                       </Typography>
                     </Box>
                     <ArrowIcon color="primary" />
@@ -317,7 +335,7 @@ const QuoteConfirmationPage: React.FC = () => {
                         Nach:
                       </Typography>
                       <Typography variant="body2">
-                        {customer.toAddress}
+                        {customer?.toAddress || 'Nicht angegeben'}
                       </Typography>
                     </Box>
                   </Stack>
