@@ -1,5 +1,5 @@
-// Platzhalter für Logo - ersetzen Sie dies mit Ihrem tatsächlichen Base64-String
-export const RUEMPELSCHMIEDE_LOGO_BASE64 = 'HIER_DEIN_BASE64_STRING';
+import { getEmailLogo } from '../utils/svgUtils';
+import { ruempelSchmiedeLogoSVG } from '../assets/logos/ruempelschmiedeLogo';
 
 export const generateRuempelschmiedeEmailHTML = (
   customerName: string,
@@ -39,10 +39,11 @@ export const generateRuempelschmiedeEmailHTML = (
           padding: 30px;
           text-align: center;
         }
-        .logo {
-          font-size: 32px;
-          font-weight: bold;
-          margin-bottom: 10px;
+        .logo img {
+          max-width: 150px;
+          height: auto;
+          margin: 0 auto;
+          display: block;
         }
         .tagline {
           font-size: 16px;
@@ -110,7 +111,9 @@ export const generateRuempelschmiedeEmailHTML = (
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">RÜMPEL SCHMIEDE</div>
+          <div style="margin-bottom: 20px;">
+            ${getEmailLogo(ruempelSchmiedeLogoSVG, false)}
+          </div>
           <div class="tagline">Ihre Profis für Entrümpelung & Haushaltsauflösung</div>
         </div>
         

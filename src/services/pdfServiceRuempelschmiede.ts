@@ -2,9 +2,8 @@ import jsPDF from 'jspdf';
 import { Customer, Quote } from '../types';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-
-// Platzhalter für Logo - ersetzen Sie dies mit Ihrem tatsächlichen Base64-String
-export const RUEMPELSCHMIEDE_LOGO_BASE64 = 'HIER_DEIN_BASE64_STRING';
+import { preparePdfLogo } from '../utils/svgUtils';
+import { ruempelSchmiedeLogoSVG } from '../assets/logos/ruempelschmiedeLogo';
 
 export const generateRuempelschmiedePDF = async (
   customer: Customer,
@@ -43,25 +42,25 @@ export const generateRuempelschmiedePDF = async (
   const margin = 20;
   let y = 20;
   
-  // Logo einfügen wenn vorhanden
+  // Logo einfügen
   try {
-    if (RUEMPELSCHMIEDE_LOGO_BASE64 && !RUEMPELSCHMIEDE_LOGO_BASE64.includes('HIER_DEIN_BASE64_STRING')) {
-      doc.addImage(RUEMPELSCHMIEDE_LOGO_BASE64, 'PNG', margin, 8, 35, 25);
-    } else {
-      // Fallback: Logo-Platzhalter
-      doc.setDrawColor(primaryColor);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, 8, 35, 25);
-      
-      // RS Text als Logo-Ersatz
-      doc.setTextColor(primaryColor);
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.text('RS', margin + 17.5, 23, { align: 'center' });
-    }
+    // Lade SVG und konvertiere zu PNG für PDF
+    let logoDataUrl: string;
+    
+    // Nutze das importierte SVG Logo
+    logoDataUrl = await preparePdfLogo(ruempelSchmiedeLogoSVG);
+    
+    // Füge Logo zum PDF hinzu
+    doc.addImage(logoDataUrl, 'PNG', margin, 8, 35, 25);
+    
   } catch (error) {
     console.error('Fehler beim Laden des Logos:', error);
-    // Fallback zu RS Text
+    // Fallback: Logo-Platzhalter mit Rahmen
+    doc.setDrawColor(primaryColor);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, 8, 35, 25);
+    
+    // RS Text als Logo-Ersatz
     doc.setTextColor(primaryColor);
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
