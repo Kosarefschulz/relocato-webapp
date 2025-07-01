@@ -9,7 +9,6 @@ import {
   Error as ErrorIcon,
   ManageSearch as ManageSearchIcon,
   SmartToy as AIIcon,
-  CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import DuplicateCustomerManager from '../components/DuplicateCustomerManager';
@@ -161,11 +160,6 @@ const AdminToolsPage: React.FC = () => {
             icon={<ManageSearchIcon />}
             iconPosition="start"
           />
-          <Tab 
-            label="Kalender Import" 
-            icon={<CalendarIcon />}
-            iconPosition="start"
-          />
         </Tabs>
 
         {/* Tab Panels */}
@@ -202,36 +196,6 @@ const AdminToolsPage: React.FC = () => {
         
         <TabPanel value={activeTab} index={4}>
           <AddCustomersFromScreenshots />
-        </TabPanel>
-        
-        <TabPanel value={activeTab} index={5}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              Apple Calendar → Google Calendar Import
-            </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
-              Übertragen Sie Ihre Termine aus Apple Calendar direkt in Google Calendar.
-            </Typography>
-            <Alert severity="info" sx={{ mb: 3 }}>
-              <Typography variant="body2">
-                <strong>So funktioniert's:</strong>
-              </Typography>
-              <ol style={{ marginBottom: 0, paddingLeft: 20 }}>
-                <li>Exportieren Sie Ihren Apple Calendar als .ics Datei</li>
-                <li>Klicken Sie auf den Button unten</li>
-                <li>Wählen Sie die zu importierenden Termine aus</li>
-                <li>Die Termine werden automatisch in Google Calendar übertragen</li>
-              </ol>
-            </Alert>
-            <Button
-              variant="contained"
-              startIcon={<CalendarIcon />}
-              onClick={() => navigate('/apple-to-google-calendar')}
-              size="large"
-            >
-              Zum Kalender-Import
-            </Button>
-          </Box>
         </TabPanel>
       </Paper>
 
