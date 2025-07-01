@@ -101,9 +101,10 @@ const AcceptedQuotesPreview: React.FC = () => {
     setSelectedQuote(null);
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Kein Datum';
-    return new Date(dateString).toLocaleDateString('de-DE', {
+  const formatDate = (date?: string | Date) => {
+    if (!date) return 'Kein Datum';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
