@@ -71,8 +71,7 @@ const CreateQuote: React.FC = () => {
     disassembly: false
   });
   
-  // Manueller Gesamtpreis
-  const [useManualPrice, setUseManualPrice] = useState(false);
+  // Manueller Gesamtpreis - immer aktiv
   const [manualTotalPrice, setManualTotalPrice] = useState(0);
   
   const [loading, setLoading] = useState(false);
@@ -105,14 +104,15 @@ const CreateQuote: React.FC = () => {
       
       const calc = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
       
-      // Manueller Preis überschreibt Berechnung
-      if (useManualPrice && manualTotalPrice > 0) {
+      // Manueller Preis wird immer verwendet
+      if (manualTotalPrice > 0) {
         setCalculation({ ...calc, finalPrice: manualTotalPrice, totalPrice: manualTotalPrice });
       } else {
-        setCalculation({ ...calc, finalPrice: calc.totalPrice });
+        // Wenn kein Preis eingegeben, zeige 0
+        setCalculation({ ...calc, finalPrice: 0, totalPrice: 0 });
       }
     }
-  }, [customer, quoteDetails, selectedServices, useManualPrice, manualTotalPrice]);
+  }, [customer, quoteDetails, selectedServices, manualTotalPrice]);
 
   const saveQuote = async () => {
     if (!calculation) return;
@@ -142,19 +142,19 @@ const CreateQuote: React.FC = () => {
       
       let finalCalculation = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
       
-      // Manueller Preis überschreibt Berechnung
-      if (useManualPrice && manualTotalPrice > 0) {
+      // Manueller Preis wird immer verwendet
+      if (manualTotalPrice > 0) {
         finalCalculation = { ...finalCalculation, finalPrice: manualTotalPrice, totalPrice: manualTotalPrice };
         console.log('🎯 Verwende manuellen Preis:', manualTotalPrice);
       } else {
-        finalCalculation = { ...finalCalculation, finalPrice: finalCalculation.totalPrice };
+        finalCalculation = { ...finalCalculation, finalPrice: 0, totalPrice: 0 };
       }
       
       console.log('📊 Finale Calculation:', {
         basePrice: finalCalculation.basePrice,
         totalPrice: finalCalculation.totalPrice,
         finalPrice: finalCalculation.finalPrice,
-        manualPrice: useManualPrice ? manualTotalPrice : 'nicht verwendet'
+        manualPrice: manualTotalPrice > 0 ? manualTotalPrice : 'nicht eingegeben'
       });
       
       const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -195,8 +195,8 @@ const CreateQuote: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!calculation) {
-      setError('Bitte warten Sie auf die Preisberechnung');
+    if (!calculation || manualTotalPrice <= 0) {
+      setError('Bitte geben Sie einen Preis ein');
       return;
     }
     
@@ -225,7 +225,7 @@ const CreateQuote: React.FC = () => {
       console.log('📄 Generiere PDF mit finalCalculation:', {
         basePrice: quote.calculation.basePrice,
         finalPrice: quote.calculation.finalPrice,
-        manualUsed: useManualPrice
+        manualUsed: manualTotalPrice > 0
       });
       
       const pdfBlob = isWertvoll 
@@ -237,7 +237,7 @@ const CreateQuote: React.FC = () => {
       console.log('📧 Generiere E-Mail mit finalCalculation:', {
         basePrice: quote.calculation.basePrice,
         finalPrice: quote.calculation.finalPrice,
-        manualUsed: useManualPrice
+        manualUsed: manualTotalPrice > 0
       });
       
       const emailContent = generateQuoteEmailHTMLSync({
@@ -310,12 +310,12 @@ const CreateQuote: React.FC = () => {
       
       let finalCalculation = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
       
-      // Manueller Preis überschreibt Berechnung
-      if (useManualPrice && manualTotalPrice > 0) {
+      // Manueller Preis wird immer verwendet
+      if (manualTotalPrice > 0) {
         finalCalculation = { ...finalCalculation, finalPrice: manualTotalPrice, totalPrice: manualTotalPrice };
         console.log('🎯 PDF-Download: Verwende manuellen Preis:', manualTotalPrice);
       } else {
-        finalCalculation = { ...finalCalculation, finalPrice: finalCalculation.totalPrice };
+        finalCalculation = { ...finalCalculation, finalPrice: 0, totalPrice: 0 };
       }
       
       // Verwende lokale jsPDF-Implementierung statt Server
@@ -511,32 +511,19 @@ const CreateQuote: React.FC = () => {
                 💰 Preisgestaltung
               </Typography>
               
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={useManualPrice}
-                    onChange={(e) => setUseManualPrice(e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="Manuellen Gesamtpreis verwenden"
+              <TextField
+                fullWidth
+                label="Gesamtpreis (inkl. MwSt.)"
+                type="number"
+                value={manualTotalPrice}
+                onChange={(e) => setManualTotalPrice(Number(e.target.value))}
+                required
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">€</InputAdornment>
+                }}
+                helperText="Geben Sie den finalen Gesamtpreis inkl. aller Leistungen und MwSt. ein"
                 sx={{ mb: 2 }}
               />
-              
-              {useManualPrice && (
-                <TextField
-                  fullWidth
-                  label="Gesamtpreis (inkl. MwSt.)"
-                  type="number"
-                  value={manualTotalPrice}
-                  onChange={(e) => setManualTotalPrice(Number(e.target.value))}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">€</InputAdornment>
-                  }}
-                  helperText="Geben Sie den finalen Gesamtpreis inkl. aller Leistungen und MwSt. ein"
-                  sx={{ mb: 2 }}
-                />
-              )}
               
               <TextField
                 fullWidth
@@ -779,42 +766,17 @@ const CreateQuote: React.FC = () => {
                 Preisübersicht
               </Typography>
               
-              {calculation && (
-                <Box>
-                  {useManualPrice && manualTotalPrice > 0 ? (
-                    <Box sx={{ textAlign: 'center', py: 3 }}>
-                      <Typography variant="body1" gutterBottom>
-                        Alle ausgewählten Leistungen sind im Gesamtpreis enthalten
-                      </Typography>
-                      <Typography variant="h4" color="primary" sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
-                        €{calculation.finalPrice.toFixed(2)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        inkl. 19% MwSt.
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6} sm={4}>
-                          <Typography variant="body2" color="text.secondary">Basis:</Typography>
-                          <Typography variant="h6">€{calculation.basePrice.toFixed(2)}</Typography>
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <Typography variant="body2" color="text.secondary">Zusatzleistungen:</Typography>
-                          <Typography variant="h6">
-                            €{(calculation.totalPrice - calculation.basePrice).toFixed(2)}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                          <Typography variant="body2" color="text.secondary">Gesamtpreis:</Typography>
-                          <Typography variant="h5" color="primary">
-                            €{calculation.finalPrice.toFixed(2)}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </>
-                  )}
+              {calculation && manualTotalPrice > 0 && (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                  <Typography variant="body1" gutterBottom>
+                    Alle ausgewählten Leistungen sind im Gesamtpreis enthalten
+                  </Typography>
+                  <Typography variant="h4" color="primary" sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
+                    €{calculation.finalPrice.toFixed(2)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    inkl. 19% MwSt.
+                  </Typography>
                 </Box>
               )}
               
@@ -835,7 +797,7 @@ const CreateQuote: React.FC = () => {
                   type="submit"
                   variant="contained"
                   color="primary"
-                  disabled={loading || !calculation || !customer.email}
+                  disabled={loading || !calculation || !customer.email || manualTotalPrice <= 0}
                   startIcon={<SendIcon />}
                   sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
                 >
@@ -845,7 +807,7 @@ const CreateQuote: React.FC = () => {
                 <Button
                   variant="outlined"
                   onClick={downloadPDF}
-                  disabled={loading || !calculation}
+                  disabled={loading || !calculation || manualTotalPrice <= 0}
                   startIcon={<GetAppIcon />}
                   sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
                 >
