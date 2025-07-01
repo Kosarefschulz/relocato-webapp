@@ -68,6 +68,24 @@ export interface Quote {
   volume?: number;
   company?: 'relocato' | 'wertvoll' | 'ruempelschmiede'; // Firma für das Angebot
   distance?: number;
+  // Service-Details
+  packingRequested?: boolean;
+  additionalServices?: string[];
+  boxCount?: number;
+  parkingZonePrice?: number;
+  storagePrice?: number;
+  furnitureAssemblyPrice?: number;
+  furnitureDisassemblyPrice?: number;
+  cleaningService?: boolean;
+  cleaningHours?: number;
+  clearanceService?: boolean;
+  clearanceVolume?: number;
+  renovationService?: boolean;
+  renovationHours?: number;
+  pianoTransport?: boolean;
+  heavyItemsCount?: number;
+  packingMaterials?: boolean;
+  manualBasePrice?: number;
   // Versionierung
   version?: number;
   parentQuoteId?: string; // Verweis auf ursprüngliches Angebot
