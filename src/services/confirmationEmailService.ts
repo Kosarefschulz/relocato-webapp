@@ -241,7 +241,7 @@ export const sendConfirmationEmail = async (
       <p style="font-size: 12px; color: #666;">
         RELOCATO® Bielefeld<br>
         Albrechtstraße 27, 33615 Bielefeld<br>
-        Wertvoll Dienstleistungen GmbH | Geschäftsführer: Sergej Schulz<br>
+        Wertvoll Dienstleistungen GmbH | Geschäftsführer: M. Michailowski & M. Knaub<br>
         Amtsgericht Bielefeld HRB 43574 | USt-IdNr.: DE815143866
       </p>
     </div>

@@ -527,7 +527,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
     <p class="footer-text">
         RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld<br>
         Tel: (0521) 1200551-0 | E-Mail: bielefeld@relocato.de | Web: www.relocato.de<br>
-        Wertvoll Dienstleistungen GmbH | Geschäftsführer: Sergej Schulz<br>
+        Wertvoll Dienstleistungen GmbH | Geschäftsführer: M. Michailowski & M. Knaub<br>
         Amtsgericht Bielefeld HRB 43574 | USt-IdNr.: DE815143866
     </p>
 </body>

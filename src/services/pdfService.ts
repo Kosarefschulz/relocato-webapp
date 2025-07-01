@@ -805,7 +805,7 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice, p
     doc.setFont('helvetica', 'normal');
     doc.text('RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY, { align: 'center' });
     doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de | Wertvoll Dienstleistungen GmbH | HRB 43574', pageWidth / 2, footerY + 4, { align: 'center' });
-    doc.text('Geschäftsführer: Sergej Schulz | USt-IdNr.: DE815143866 | Amtsgericht Bielefeld', pageWidth / 2, footerY + 8, { align: 'center' });
+    doc.text('Geschäftsführer: M. Michailowski & M. Knaub | USt-IdNr.: DE815143866 | Amtsgericht Bielefeld', pageWidth / 2, footerY + 8, { align: 'center' });
     
     console.log('✅ Rechnungs-PDF erfolgreich generiert');
     return doc.output('blob');
