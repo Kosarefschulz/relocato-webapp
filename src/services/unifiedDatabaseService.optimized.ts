@@ -42,11 +42,31 @@ class UnifiedDatabaseServiceOptimized {
       }
 
       // Then check service cache
-      return await cacheService.getOrFetch(
+      const cachedCustomer = await cacheService.getOrFetch(
         CACHE_KEYS.CUSTOMER_DETAILS(customerId),
         () => firebaseService.getCustomerById(customerId),
         { expiresIn: 10 * 60 * 1000 } // 10 minutes
       );
+
+      if (cachedCustomer) {
+        return cachedCustomer;
+      }
+
+      // If not found by ID, try to find by customerNumber
+      console.log(`🔍 Kunde nicht mit ID gefunden, suche nach Kundennummer: ${customerId}`);
+      
+      // This is a workaround - ideally firebaseService should handle this
+      const allCustomers = await this.getCustomers();
+      const customerByNumber = allCustomers.find(c => c.customerNumber === customerId);
+      
+      if (customerByNumber) {
+        // Cache it with both ID and customerNumber
+        this.customerCache.set(customerByNumber.id, customerByNumber);
+        this.customerCache.set(customerId, customerByNumber);
+        return customerByNumber;
+      }
+
+      return null;
     } catch (error) {
       console.error('Error fetching customer:', error);
       return null;
