@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Today as TodayIcon,
+  FileUpload as FileUploadIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -244,6 +245,13 @@ const CalendarView: React.FC = () => {
             </Box>
           </Box>
           <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<FileUploadIcon />}
+              onClick={() => navigate('/calendar-import')}
+            >
+              Kalender importieren
+            </Button>
             <Button
               variant="outlined"
               startIcon={<SyncIcon />}

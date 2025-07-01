@@ -22,6 +22,7 @@ import CustomerDetails from './components/CustomerDetails';
 import InvoicesList from './components/InvoicesList';
 import SalesPage from './pages/SalesPage';
 import CalendarView from './components/CalendarView';
+import CalendarImportEnhanced from './components/CalendarImportEnhanced';
 import DispositionPage from './pages/DispositionPage';
 import SharePage from './pages/SharePage';
 import MigrationTool from './components/MigrationTool';
@@ -173,6 +174,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/calendar" 
         element={<CalendarView />} 
+      />
+      
+      {/* Calendar Import */}
+      <Route 
+        path="/calendar-import" 
+        element={<CalendarImportEnhanced />} 
       />
       
       {/* Disposition */}

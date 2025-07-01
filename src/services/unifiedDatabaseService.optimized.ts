@@ -4,7 +4,7 @@
  */
 
 import { firebaseService } from './firebaseServiceWrapper';
-import { Customer, Quote, Invoice, EmailHistory } from '../types';
+import { Customer, Quote, Invoice, EmailHistory, CalendarEvent } from '../types';
 import { cleanPhoneNumber } from '../utils/phoneUtils';
 import { cacheService, CACHE_KEYS } from './cacheService';
 import { paginationService } from './paginationService';
@@ -53,7 +53,7 @@ class UnifiedDatabaseServiceOptimized {
     }
   }
 
-  async addCustomer(customer: Customer): Promise<boolean> {
+  async addCustomer(customer: Omit<Customer, 'id'>): Promise<string> {
     try {
       // Clean phone numbers before saving
       if (customer.phone) {
@@ -63,21 +63,22 @@ class UnifiedDatabaseServiceOptimized {
 
       // Save to Firebase
       const customerId = await firebaseService.addCustomer(customer);
-      const result = !!customerId;
       
-      if (result) {
+      if (customerId) {
         // Invalidate cache
         cacheService.remove(CACHE_KEYS.CUSTOMERS_INITIAL);
         cacheService.remove(CACHE_KEYS.CUSTOMERS_COUNT);
         
+        // Create full customer object with id for cache
+        const fullCustomer = { ...customer, id: customerId } as Customer;
         // Add to local cache
-        this.customerCache.set(customer.id, customer);
+        this.customerCache.set(customerId, fullCustomer);
       }
       
-      return result;
+      return customerId;
     } catch (error) {
       console.error('Error adding customer:', error);
-      return false;
+      return '';
     }
   }
 
@@ -512,6 +513,88 @@ class UnifiedDatabaseServiceOptimized {
       return true;
     } catch (error) {
       console.error('Error updating email invoice:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Calendar Event Operations
+   */
+  async getCalendarEvents(): Promise<CalendarEvent[]> {
+    try {
+      return await cacheService.getOrFetch(
+        'calendar_events_all',
+        async () => {
+          const events = await firebaseService.getCalendarEvents();
+          return events || [];
+        },
+        { expiresIn: 5 * 60 * 1000 } // 5 minutes
+      );
+    } catch (error) {
+      console.error('Error fetching calendar events:', error);
+      return [];
+    }
+  }
+
+  async getCalendarEventsByCustomer(customerId: string): Promise<CalendarEvent[]> {
+    try {
+      return await cacheService.getOrFetch(
+        `calendar_events_customer_${customerId}`,
+        async () => {
+          const events = await firebaseService.getCalendarEventsByCustomer(customerId);
+          return events || [];
+        },
+        { expiresIn: 5 * 60 * 1000 } // 5 minutes
+      );
+    } catch (error) {
+      console.error('Error fetching customer calendar events:', error);
+      return [];
+    }
+  }
+
+  async addCalendarEvent(event: Omit<CalendarEvent, 'id'>): Promise<string> {
+    try {
+      const id = await firebaseService.addCalendarEvent(event);
+      
+      // Invalidate cache
+      cacheService.remove('calendar_events_all');
+      if (event.customerId) {
+        cacheService.remove(`calendar_events_customer_${event.customerId}`);
+      }
+      
+      return id;
+    } catch (error) {
+      console.error('Error adding calendar event:', error);
+      return '';
+    }
+  }
+
+  async updateCalendarEvent(eventId: string, updates: Partial<CalendarEvent>): Promise<boolean> {
+    try {
+      await firebaseService.updateCalendarEvent(eventId, updates);
+      
+      // Invalidate cache
+      cacheService.remove('calendar_events_all');
+      cacheService.remove(`calendar_event_${eventId}`);
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating calendar event:', error);
+      return false;
+    }
+  }
+
+  async deleteCalendarEvent(eventId: string): Promise<boolean> {
+    try {
+      await firebaseService.deleteCalendarEvent(eventId);
+      
+      // Invalidate cache
+      cacheService.remove('calendar_events_all');
+      cacheService.remove(`calendar_event_${eventId}`);
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting calendar event:', error);
       return false;
     }
   }

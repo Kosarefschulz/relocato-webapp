@@ -1,5 +1,5 @@
 // Wrapper für Firebase Service mit Fallback
-import { Customer, Quote, Invoice, EmailHistory } from '../types';
+import { Customer, Quote, Invoice, EmailHistory, CalendarEvent } from '../types';
 import { db } from '../config/firebase';
 
 class FirebaseServiceWrapper {
@@ -239,6 +239,37 @@ class FirebaseServiceWrapper {
     if (!this.isFirebaseAvailable()) return;
     const { firebaseService } = await import('./firebaseService');
     return firebaseService.updateEmailInvoice?.(id, invoice);
+  }
+
+  // Calendar Event Methods
+  async getCalendarEvents(): Promise<CalendarEvent[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getCalendarEvents?.() || [];
+  }
+
+  async getCalendarEventsByCustomer(customerId: string): Promise<CalendarEvent[]> {
+    if (!this.isFirebaseAvailable()) return [];
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.getCalendarEventsByCustomer?.(customerId) || [];
+  }
+
+  async addCalendarEvent(event: Omit<CalendarEvent, 'id'>): Promise<string> {
+    if (!this.isFirebaseAvailable()) return '';
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.addCalendarEvent?.(event) || '';
+  }
+
+  async updateCalendarEvent(eventId: string, updates: Partial<CalendarEvent>): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.updateCalendarEvent?.(eventId, updates);
+  }
+
+  async deleteCalendarEvent(eventId: string): Promise<void> {
+    if (!this.isFirebaseAvailable()) return;
+    const { firebaseService } = await import('./firebaseService');
+    return firebaseService.deleteCalendarEvent?.(eventId);
   }
 }
 

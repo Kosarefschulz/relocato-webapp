@@ -1,3 +1,20 @@
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  date: Date | string;
+  startTime?: Date | string;
+  endTime?: Date | string;
+  type: 'viewing' | 'moving' | 'quote' | 'imported' | 'other';
+  customerId?: string;
+  customerName?: string;
+  description?: string;
+  location?: string;
+  source?: 'manual' | 'apple-calendar' | 'google-calendar' | 'import';
+  importedAt?: Date | string;
+  originalEventId?: string;
+  metadata?: Record<string, any>;
+}
+
 export interface Customer {
   id: string;
   name: string;

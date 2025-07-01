@@ -16,7 +16,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Customer, Quote, Invoice, EmailHistory } from '../types';
+import { Customer, Quote, Invoice, EmailHistory, CalendarEvent } from '../types';
 
 interface ShareLink {
   id: string;
@@ -37,6 +37,7 @@ class FirebaseService {
   private emailHistoryCollection = db ? collection(db, 'emailHistory') : null;
   private dispositionsCollection = db ? collection(db, 'dispositions') : null;
   private shareLinksCollection = db ? collection(db, 'shareLinks') : null;
+  private calendarEventsCollection = db ? collection(db, 'calendarEvents') : null;
 
   // Prüfe ob Firebase verfügbar ist
   private checkFirebase(): boolean {
@@ -1038,6 +1039,146 @@ class FirebaseService {
       console.log('✅ Email Invoice aktualisiert:', id);
     } catch (error) {
       console.error('❌ Fehler beim Aktualisieren der Email Invoice:', error);
+      throw error;
+    }
+  }
+
+  // ==================== CALENDAR EVENTS ====================
+  async getCalendarEvents(): Promise<CalendarEvent[]> {
+    try {
+      if (!this.checkFirebase() || !this.calendarEventsCollection) return [];
+      
+      const querySnapshot = await getDocs(
+        query(this.calendarEventsCollection, orderBy('date', 'desc'))
+      );
+      
+      const events: CalendarEvent[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        events.push({
+          id: doc.id,
+          ...data,
+          date: data.date && typeof data.date.toDate === 'function' 
+            ? data.date.toDate() 
+            : data.date,
+          startTime: data.startTime && typeof data.startTime.toDate === 'function'
+            ? data.startTime.toDate()
+            : data.startTime,
+          endTime: data.endTime && typeof data.endTime.toDate === 'function'
+            ? data.endTime.toDate()
+            : data.endTime,
+          importedAt: data.importedAt && typeof data.importedAt.toDate === 'function'
+            ? data.importedAt.toDate()
+            : data.importedAt,
+        } as CalendarEvent);
+      });
+      
+      return events;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden der Kalender-Events:', error);
+      return [];
+    }
+  }
+
+  async getCalendarEventsByCustomer(customerId: string): Promise<CalendarEvent[]> {
+    try {
+      if (!this.checkFirebase() || !this.calendarEventsCollection) return [];
+      
+      const q = query(
+        this.calendarEventsCollection,
+        where('customerId', '==', customerId),
+        orderBy('date', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const events: CalendarEvent[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        events.push({
+          id: doc.id,
+          ...data,
+          date: data.date && typeof data.date.toDate === 'function' 
+            ? data.date.toDate() 
+            : data.date,
+          startTime: data.startTime && typeof data.startTime.toDate === 'function'
+            ? data.startTime.toDate()
+            : data.startTime,
+          endTime: data.endTime && typeof data.endTime.toDate === 'function'
+            ? data.endTime.toDate()
+            : data.endTime,
+          importedAt: data.importedAt && typeof data.importedAt.toDate === 'function'
+            ? data.importedAt.toDate()
+            : data.importedAt,
+        } as CalendarEvent);
+      });
+      
+      return events;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden der Kunden-Kalender-Events:', error);
+      return [];
+    }
+  }
+
+  async addCalendarEvent(event: Omit<CalendarEvent, 'id'>): Promise<string> {
+    try {
+      if (!this.checkFirebase() || !this.calendarEventsCollection) {
+        throw new Error('Firebase not available');
+      }
+      
+      const eventData = {
+        ...event,
+        date: event.date instanceof Date ? Timestamp.fromDate(event.date) : event.date,
+        startTime: event.startTime instanceof Date ? Timestamp.fromDate(event.startTime) : event.startTime,
+        endTime: event.endTime instanceof Date ? Timestamp.fromDate(event.endTime) : event.endTime,
+        importedAt: serverTimestamp(),
+      };
+      
+      const docRef = await addDoc(this.calendarEventsCollection, eventData);
+      console.log('✅ Kalender-Event erstellt:', docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error('❌ Fehler beim Erstellen des Kalender-Events:', error);
+      throw error;
+    }
+  }
+
+  async updateCalendarEvent(eventId: string, updates: Partial<CalendarEvent>): Promise<void> {
+    try {
+      if (!this.checkFirebase() || !this.calendarEventsCollection) {
+        throw new Error('Firebase not available');
+      }
+      
+      const updateData: any = { ...updates };
+      
+      if (updates.date instanceof Date) {
+        updateData.date = Timestamp.fromDate(updates.date);
+      }
+      if (updates.startTime instanceof Date) {
+        updateData.startTime = Timestamp.fromDate(updates.startTime);
+      }
+      if (updates.endTime instanceof Date) {
+        updateData.endTime = Timestamp.fromDate(updates.endTime);
+      }
+      
+      await updateDoc(doc(this.calendarEventsCollection, eventId), updateData);
+      console.log('✅ Kalender-Event aktualisiert:', eventId);
+    } catch (error) {
+      console.error('❌ Fehler beim Aktualisieren des Kalender-Events:', error);
+      throw error;
+    }
+  }
+
+  async deleteCalendarEvent(eventId: string): Promise<void> {
+    try {
+      if (!this.checkFirebase() || !this.calendarEventsCollection) {
+        throw new Error('Firebase not available');
+      }
+      
+      await deleteDoc(doc(this.calendarEventsCollection, eventId));
+      console.log('✅ Kalender-Event gelöscht:', eventId);
+    } catch (error) {
+      console.error('❌ Fehler beim Löschen des Kalender-Events:', error);
       throw error;
     }
   }
