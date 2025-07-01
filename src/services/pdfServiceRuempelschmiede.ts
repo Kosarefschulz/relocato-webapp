@@ -7,9 +7,9 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
   const doc = new jsPDF();
   const companyConfig = COMPANY_CONFIGS.ruempelschmiede;
   
-  // Farben
-  const primaryColor = '#FF6B35';  // Orange für Rümpel Schmiede
-  const secondaryColor = '#2E4057'; // Dunkelblau
+  // Farben - Basierend auf dem Logo
+  const primaryColor = '#C73E3A';  // Rot aus dem Logo
+  const secondaryColor = '#2C4A5F'; // Dunkelblau aus dem Logo
   const lightGray = '#F5F5F5';
   const darkGray = '#666666';
   
@@ -21,58 +21,78 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
   
   // Helper Funktionen
   const addHeader = (pageNum: number) => {
-    // Logo Bereich mit Hintergrund
-    doc.setFillColor(primaryColor);
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    // Weißer Hintergrund für Header
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, pageWidth, 40, 'F');
     
-    // Firmenname
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    // Logo würde hier eingefügt werden (links)
+    // Platzhalter für Logo-Bereich: 40x30 bei Position (margin, 5)
+    
+    // Firmenname und Tagline (mittig-rechts vom Logo)
+    doc.setTextColor(primaryColor);
+    doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
-    doc.text('RÜMPEL SCHMIEDE', margin, 20);
+    doc.text('RÜMPEL SCHMIEDE', margin + 50, 18);
     
-    // Tagline
-    doc.setFontSize(10);
+    doc.setTextColor(secondaryColor);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Professionelle Entrümpelungen seit 2015', margin, 27);
+    doc.text('Professionelle Entrümpelungen seit 2015', margin + 50, 26);
     
     // Kontaktinfo rechts
+    doc.setTextColor(darkGray);
     doc.setFontSize(9);
     doc.text([
       companyConfig.contact.phone,
-      companyConfig.contact.email
+      companyConfig.contact.email,
+      companyConfig.website || 'www.ruempelschmiede.de'
     ], rightMargin - 5, 15, { align: 'right' });
+    
+    // Trennlinie unter Header
+    doc.setDrawColor(primaryColor);
+    doc.setLineWidth(1);
+    doc.line(margin, 38, rightMargin, 38);
   };
   
   const addFooter = (pageNum: number) => {
+    // Position anpassen um Überlagerung zu vermeiden
+    const footerY = pageHeight - 25;
+    
     // Footer Linie
     doc.setDrawColor(primaryColor);
     doc.setLineWidth(0.5);
-    doc.line(margin, pageHeight - 30, rightMargin, pageHeight - 30);
+    doc.line(margin, footerY, rightMargin, footerY);
     
     // Footer Text
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setTextColor(darkGray);
     doc.setFont('helvetica', 'normal');
     
-    // Adresse links
-    doc.text([
+    // Adresse links - kompakter
+    doc.text(
       `${companyConfig.legalName} | ${companyConfig.address.street}, ${companyConfig.address.zip} ${companyConfig.address.city}`,
-      `Geschäftsführer: ${companyConfig.ceo.join(' | ')} | ${companyConfig.legal.court} ${companyConfig.legal.hrb}`,
-      `USt-IdNr.: ${companyConfig.legal.taxNumber} | ${companyConfig.bank.name} | IBAN: ${companyConfig.bank.iban}`
-    ], margin, pageHeight - 20);
+      margin, footerY + 5
+    );
+    doc.text(
+      `Geschäftsführer: ${companyConfig.ceo.join(', ')} | ${companyConfig.legal.court} ${companyConfig.legal.hrb}`,
+      margin, footerY + 9
+    );
+    doc.text(
+      `USt-IdNr.: ${companyConfig.legal.taxNumber} | ${companyConfig.bank.name} | IBAN: ${companyConfig.bank.iban}`,
+      margin, footerY + 13
+    );
     
     // Seitenzahl rechts
     doc.setTextColor(primaryColor);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Seite ${pageNum} von 2`, rightMargin, pageHeight - 15, { align: 'right' });
+    doc.text(`Seite ${pageNum} von 2`, rightMargin, footerY + 9, { align: 'right' });
   };
   
   // SEITE 1
   addHeader(1);
   
   // Angebotsnummer und Datum Box
-  let yPos = 50;
+  let yPos = 55;
   doc.setFillColor(lightGray);
   doc.roundedRect(margin, yPos, pageWidth - 2*margin, 25, 3, 3, 'F');
   
@@ -220,8 +240,8 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
     foot: [['GESAMTPREIS (inkl. 19% MwSt.)', `${quote.price.toFixed(2)} €`]],
     theme: 'plain',
     headStyles: {
-      fillColor: '#F5F5F5',
-      textColor: '#2E4057',
+      fillColor: [245, 245, 245],
+      textColor: [44, 74, 95],
       fontSize: 11,
       fontStyle: 'bold',
       halign: 'left'
@@ -231,7 +251,7 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
       textColor: [51, 51, 51]
     },
     footStyles: {
-      fillColor: '#2E4057',
+      fillColor: [44, 74, 95],
       textColor: [255, 255, 255],
       fontSize: 12,
       fontStyle: 'bold'
@@ -298,17 +318,19 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
   doc.setFont('helvetica', 'bold');
   doc.text('Ihr Rümpel Schmiede Team', margin, yPos);
   
-  // Call-to-Action Box
-  yPos += 20;
-  doc.setFillColor(primaryColor);
-  doc.roundedRect(margin, yPos, pageWidth - 2*margin, 25, 3, 3, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('JETZT BEAUFTRAGEN:', pageWidth/2, yPos + 10, { align: 'center' });
-  doc.setFontSize(14);
-  doc.text(`📞 ${companyConfig.contact.phone}`, pageWidth/2, yPos + 18, { align: 'center' });
+  // Call-to-Action Box - nur wenn genug Platz
+  if (yPos + 35 < pageHeight - 30) {
+    yPos += 20;
+    doc.setFillColor(primaryColor);
+    doc.roundedRect(margin, yPos, pageWidth - 2*margin, 25, 3, 3, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('JETZT BEAUFTRAGEN:', pageWidth/2, yPos + 10, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text(`📞 ${companyConfig.contact.phone}`, pageWidth/2, yPos + 18, { align: 'center' });
+  }
   
   // Footer Seite 2
   addFooter(2);

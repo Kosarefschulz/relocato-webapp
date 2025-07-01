@@ -194,6 +194,30 @@ class GoogleSheetsPublicService {
     return isNaN(num) ? 0 : num;
   }
 
+  async getCustomer(customerId: string): Promise<Customer | null> {
+    try {
+      // Lade alle Kunden
+      const customers = await this.getCustomers();
+      
+      // Suche nach ID oder Kundennummer
+      const foundCustomer = customers.find(c => 
+        c.id === customerId || 
+        c.customerNumber === customerId
+      );
+      
+      if (foundCustomer) {
+        console.log('✅ Kunde gefunden:', foundCustomer.name);
+        return foundCustomer;
+      }
+      
+      console.log('❌ Kunde nicht gefunden:', customerId);
+      return null;
+    } catch (error) {
+      console.error('Fehler beim Laden des Kunden:', error);
+      return null;
+    }
+  }
+
   async addCustomer(customer: Omit<Customer, 'id'> | Customer): Promise<boolean> {
     try {
       // Generiere eine eindeutige ID nur wenn keine vorhanden ist
