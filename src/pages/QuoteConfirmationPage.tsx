@@ -561,23 +561,20 @@ const QuoteConfirmationPage: React.FC = () => {
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 2 }}>
             {/* Kundendetails Anzeige */}
-            <Box sx={{ 
-              backgroundColor: 'grey.50', 
-              p: 2, 
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'grey.300'
-            }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Ihre Angaben:
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                Ihre Angaben aus dem Angebot:
               </Typography>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ mt: 1 }}>
                 <strong>Name:</strong> {customerName || customer?.name || 'Nicht angegeben'}
               </Typography>
               <Typography variant="body2">
                 <strong>Adresse:</strong> {confirmedAddress || customer?.fromAddress || 'Nicht angegeben'}
               </Typography>
-            </Box>
+              <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
+                Bitte überprüfen und ggf. korrigieren Sie Ihre Daten unten.
+              </Typography>
+            </Alert>
 
             {/* Name und Email Eingabe */}
             <TextField
@@ -659,20 +656,24 @@ const QuoteConfirmationPage: React.FC = () => {
               />
             </Box>
             
-            <Alert severity="info" sx={{ mt: 2 }}>
+            <Alert severity="warning" sx={{ mt: 2 }}>
               Mit der Bestätigung erteilen Sie uns den verbindlichen Auftrag zur 
               Durchführung des Umzugs zu den genannten Konditionen.
             </Alert>
 
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  checked={agbAccepted} 
-                  onChange={(e) => setAgbAccepted(e.target.checked)}
-                />
-              }
-              label="Ich akzeptiere die AGB und Datenschutzbestimmungen"
-            />
+            {/* Datenschutz-Checkbox immer sichtbar */}
+            <Box sx={{ mt: 2, p: 2, backgroundColor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    checked={agbAccepted} 
+                    onChange={(e) => setAgbAccepted(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label={<Typography variant="body2">Ich akzeptiere die AGB und Datenschutzbestimmungen</Typography>}
+              />
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>

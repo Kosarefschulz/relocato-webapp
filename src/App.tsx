@@ -361,6 +361,9 @@ function App() {
 
   // Loading State entfernt - nicht mehr nötig
 
+  // Check if we're on the quote confirmation page
+  const isQuoteConfirmationPage = window.location.pathname.startsWith('/quote-confirmation/');
+
   return (
     <ThemeProvider>
       <Router>
@@ -372,10 +375,12 @@ function App() {
             {/* PWA Install Prompt - Only show when user is logged in */}
             {/* {user && <PWAInstallPrompt />} */}
             
-            {/* AI Assistant Chat - immer aktiv */}
-            <AIAssistantChatV2 
-              initialExpanded={false}
-            />
+            {/* AI Assistant Chat - nur anzeigen, wenn nicht auf Angebotsbestätigungsseite */}
+            {!isQuoteConfirmationPage && (
+              <AIAssistantChatV2 
+                initialExpanded={false}
+              />
+            )}
           </AuthContext.Provider>
         </SimpleAuth>
       </Router>

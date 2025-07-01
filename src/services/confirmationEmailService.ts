@@ -1,6 +1,7 @@
 import { Customer, Quote } from '../types';
 import { QuoteCalculation, QuoteDetails } from './quoteCalculation';
 import { quoteCalculationService } from './quoteCalculation';
+import { googleCalendarService } from './googleCalendarService';
 
 export const sendConfirmationEmail = async (
   customer: Customer,
@@ -388,8 +389,74 @@ const sendNotificationToRelocato = async (
     }
 
     console.log('✅ Benachrichtigung an bielefeld@relocato.de erfolgreich gesendet');
+    
+    // Erstelle Google Calendar Event wenn Datum vorhanden
+    if (!quote.dateUncertain && (quote.confirmedDate || customer.movingDate)) {
+      try {
+        await createGoogleCalendarEvent(customer, quote, customerEmail);
+      } catch (calendarError) {
+        console.error('⚠️ Fehler beim Erstellen des Google Calendar Events:', calendarError);
+        // Fehler nicht werfen, da dies optional ist
+      }
+    }
   } catch (error) {
     console.error('⚠️ Fehler beim Senden der Benachrichtigung an Relocato:', error);
     // Fehler nicht werfen, da dies optional ist
+  }
+};
+
+// Neue Funktion: Google Calendar Event erstellen
+const createGoogleCalendarEvent = async (
+  customer: Customer,
+  quote: Quote & { 
+    confirmedDate?: string;
+    confirmedAddress?: string;
+    dateUncertain?: boolean;
+  },
+  customerEmail: string
+): Promise<void> => {
+  try {
+    const eventDate = quote.confirmedDate || customer.movingDate;
+    if (!eventDate) return;
+
+    const calendarEvent = {
+      id: `quote-${quote.id}`,
+      title: `Umzug: ${customer.name}`,
+      date: eventDate,
+      startTime: new Date(`${eventDate}T08:00:00`), // Default 8:00 Uhr
+      endTime: new Date(`${eventDate}T16:00:00`), // Default 16:00 Uhr
+      type: 'moving' as const,
+      customerId: customer.id,
+      customerName: customer.name,
+      description: `
+Bestätigtes Angebot #${quote.id}
+Kunde: ${customer.name}
+E-Mail: ${customerEmail || customer.email || 'Nicht angegeben'}
+Telefon: ${customer.phone || 'Nicht angegeben'}
+Preis: ${quote.price.toFixed(2)} €
+Volumen: ${quote.volume || 50} m³
+Entfernung: ${quote.distance || 25} km
+
+Von: ${quote.confirmedAddress || customer.fromAddress || 'Wird noch mitgeteilt'}
+Nach: ${customer.toAddress || 'Wird noch mitgeteilt'}
+      `.trim(),
+      location: `${quote.confirmedAddress || customer.fromAddress || 'TBD'} → ${customer.toAddress || 'TBD'}`,
+      source: 'manual' as const,
+      metadata: {
+        quoteId: quote.id,
+        confirmed: true,
+        price: quote.price,
+        volume: quote.volume || 50,
+        distance: quote.distance || 25
+      }
+    };
+
+    const googleEventId = await googleCalendarService.createEvent(calendarEvent);
+    if (googleEventId) {
+      console.log('✅ Google Calendar Event erstellt:', googleEventId);
+    }
+  } catch (error) {
+    console.error('❌ Fehler beim Erstellen des Google Calendar Events:', error);
+    throw error;
   }
 };
