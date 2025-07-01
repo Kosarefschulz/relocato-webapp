@@ -14,6 +14,9 @@ export const sendConfirmationEmail = async (
   try {
     console.log('📧 Sende Bestätigungsmail an:', customerEmail || customer.email);
     
+    // Sende auch eine Benachrichtigung an bielefeld@relocato.de
+    await sendNotificationToRelocato(customer, quote, customerEmail);
+    
     // Erstelle QuoteDetails aus den verfügbaren Quote-Daten
     const quoteDetails: QuoteDetails = {
       volume: quote.volume || 50,
@@ -274,5 +277,119 @@ export const sendConfirmationEmail = async (
   } catch (error) {
     console.error('❌ Fehler beim Senden der Bestätigungsmail:', error);
     throw error;
+  }
+};
+
+// Neue Funktion: Sende Benachrichtigung an bielefeld@relocato.de
+const sendNotificationToRelocato = async (
+  customer: Customer,
+  quote: Quote & { 
+    confirmedDate?: string;
+    confirmedAddress?: string;
+    dateUncertain?: boolean;
+  },
+  customerEmail: string
+): Promise<void> => {
+  try {
+    const notificationContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #8BC34A; color: white; padding: 20px; text-align: center; margin-bottom: 20px;">
+        <h1 style="margin: 0;">🎉 Neues bestätigtes Angebot</h1>
+      </div>
+      
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2 style="color: #333; margin-top: 0;">Kundendetails:</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 10px 0;"><strong>Name:</strong> ${customer.name}</li>
+          <li style="margin: 10px 0;"><strong>E-Mail:</strong> ${customerEmail || customer.email || 'Nicht angegeben'}</li>
+          <li style="margin: 10px 0;"><strong>Telefon:</strong> ${customer.phone || 'Nicht angegeben'}</li>
+          <li style="margin: 10px 0;"><strong>Bestätigt am:</strong> ${new Date().toLocaleDateString('de-DE', { 
+            weekday: 'long', 
+            day: '2-digit', 
+            month: 'long', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</li>
+        </ul>
+      </div>
+      
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2 style="color: #333; margin-top: 0;">Auftragsdetails:</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 10px 0;"><strong>Angebotsnummer:</strong> ${quote.id}</li>
+          <li style="margin: 10px 0;"><strong>Preis:</strong> ${quote.price.toFixed(2).replace('.', ',')} € (inkl. MwSt.)</li>
+          <li style="margin: 10px 0;"><strong>Volumen:</strong> ${quote.volume || 50} m³</li>
+          <li style="margin: 10px 0;"><strong>Entfernung:</strong> ${quote.distance || 25} km</li>
+          <li style="margin: 10px 0;"><strong>Umzugstermin:</strong> ${
+            quote.dateUncertain ? 
+            '⚠️ NOCH UNKLAR - Kunde muss kontaktiert werden!' : 
+            quote.confirmedDate ? new Date(quote.confirmedDate).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            }) : 
+            customer.movingDate ? new Date(customer.movingDate).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            }) : 'Nach Absprache'
+          }</li>
+          <li style="margin: 10px 0;"><strong>Von:</strong> ${quote.confirmedAddress || customer.fromAddress || 'Wird noch mitgeteilt'}</li>
+          <li style="margin: 10px 0;"><strong>Nach:</strong> ${customer.toAddress || 'Wird noch mitgeteilt'}</li>
+        </ul>
+      </div>
+      
+      ${quote.dateUncertain ? `
+      <div style="background-color: #FFF3E0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #FF9800;">
+        <h3 style="color: #E65100; margin: 0;">⚠️ Aktion erforderlich:</h3>
+        <p style="margin: 10px 0 0 0;">Der Kunde hat angegeben, dass der Umzugstermin noch nicht feststeht. 
+        Bitte kontaktieren Sie den Kunden innerhalb von 24 Stunden zur Terminabstimmung.</p>
+      </div>
+      ` : ''}
+      
+      <div style="background-color: #E8F5E9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #2E7D32; margin-top: 0;">Nächste Schritte:</h3>
+        <ol style="margin: 0; padding-left: 20px;">
+          ${quote.dateUncertain ? '<li>Kunde kontaktieren und Umzugstermin vereinbaren</li>' : ''}
+          <li>Auftrag in der Disposition einplanen</li>
+          <li>Fahrzeug und Team zuweisen</li>
+          <li>Kunde eine Woche vor Umzug kontaktieren</li>
+        </ol>
+      </div>
+      
+      <p style="text-align: center; color: #666; margin-top: 30px;">
+        Diese E-Mail wurde automatisch generiert durch das RELOCATO® Umzugssystem.
+      </p>
+    </div>
+    `;
+
+    const API_URL = process.env.REACT_APP_API_URL || 'https://api.ruempel-schmiede.com';
+    
+    const emailData = {
+      to: 'bielefeld@relocato.de',
+      subject: `✅ Neues bestätigtes Angebot - ${customer.name} ${quote.dateUncertain ? '(TERMIN UNKLAR)' : ''}`,
+      content: notificationContent
+    };
+    
+    const response = await fetch(`${API_URL}/api/send-email`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Origin': window.location.origin
+      },
+      body: JSON.stringify(emailData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Email service responded with status: ${response.status}`);
+    }
+
+    console.log('✅ Benachrichtigung an bielefeld@relocato.de erfolgreich gesendet');
+  } catch (error) {
+    console.error('⚠️ Fehler beim Senden der Benachrichtigung an Relocato:', error);
+    // Fehler nicht werfen, da dies optional ist
   }
 };

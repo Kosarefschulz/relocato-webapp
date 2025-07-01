@@ -113,8 +113,10 @@ const DispositionPage: React.FC = () => {
         googleSheetsService.getCustomers()
       ]);
       
-      // Filter accepted quotes and map to disposition customers
-      const acceptedQuotes = quotes.filter((quote: any) => quote.status === 'accepted');
+      // Filter accepted and confirmed quotes and map to disposition customers
+      const acceptedQuotes = quotes.filter((quote: any) => 
+        quote.status === 'accepted' || quote.status === 'confirmed'
+      );
       
       const dispositionCustomers = acceptedQuotes.map((quote: any) => {
         const customer = allCustomers.find((c: any) => c.id === quote.customerId);

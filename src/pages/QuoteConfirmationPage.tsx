@@ -43,6 +43,7 @@ import SignatureModal from '../components/SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
 import { sendConfirmationEmail } from '../services/confirmationEmailService';
 import { notificationService } from '../services/notificationService';
+import { databaseService as unifiedService } from '../services/unifiedDatabaseService.optimized';
 
 const MotionCard = motion(Card);
 
@@ -220,6 +221,36 @@ const QuoteConfirmationPage: React.FC = () => {
       } catch (notificationError) {
         console.error('⚠️ Fehler beim Erstellen der Benachrichtigung:', notificationError);
         // Don't fail the whole confirmation if notification fails
+      }
+
+      // Create calendar event if date is confirmed
+      if (!dateUncertain && (confirmedDate || customer?.movingDate)) {
+        try {
+          console.log('📅 Erstelle Kalendereintrag...');
+          const eventDate = confirmedDate || customer?.movingDate || '';
+          const calendarEvent = {
+            title: `Umzug: ${customerName || quote.customerName || 'Kunde'}`,
+            date: eventDate,
+            type: 'moving' as const,
+            customerId: quote.customerId,
+            customerName: customerName || quote.customerName || 'Kunde',
+            description: `Bestätigtes Angebot #${quote.id}\nPreis: ${quote.price.toFixed(2)} €\nVolumen: ${quote.volume || 50} m³`,
+            location: `Von: ${confirmedAddress || customer?.fromAddress || 'TBD'} Nach: ${customer?.toAddress || 'TBD'}`,
+            source: 'manual' as const,
+            metadata: {
+              quoteId: quote.id,
+              confirmed: true,
+              price: quote.price,
+              volume: quote.volume || 50
+            }
+          };
+          
+          const eventId = await unifiedService.addCalendarEvent(calendarEvent);
+          console.log('✅ Kalendereintrag erstellt:', eventId);
+        } catch (calendarError) {
+          console.error('⚠️ Fehler beim Erstellen des Kalendereintrags:', calendarError);
+          // Don't fail the whole confirmation if calendar entry fails
+        }
       }
 
       setConfirmed(true);
