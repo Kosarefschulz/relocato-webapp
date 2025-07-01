@@ -170,7 +170,7 @@ const QuotesList: React.FC = () => {
           
           // Lade die Angebote nach 1 Sekunde neu, um sicherzustellen, dass die Änderung persistiert wurde
           setTimeout(() => {
-            loadQuotes();
+            loadData();
           }, 1000);
         } else {
           setSnackbar({ open: true, message: 'Fehler beim Löschen des Angebots', severity: 'error' });
@@ -180,7 +180,7 @@ const QuotesList: React.FC = () => {
         setSnackbar({ open: true, message: 'Fehler beim Löschen des Angebots', severity: 'error' });
         
         // Bei Fehler: Lade die Liste neu, um den korrekten Stand anzuzeigen
-        loadQuotes();
+        loadData();
       }
     }
   };
