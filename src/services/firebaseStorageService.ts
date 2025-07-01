@@ -138,25 +138,43 @@ class FirebaseStorageService {
         return false;
       }
       
-      // Extrahiere den Dateinamen aus der photoId oder verwende fileName
-      let fileName = photo.fileName;
+      // Versuche zuerst den direkten Pfad
+      let fileRef = ref(storage, `${this.PHOTOS_FOLDER}/${customerId}/${photo.fileName}`);
       
-      // Wenn photoId das Format firebase_timestamp hat, versuche den richtigen Pfad zu finden
-      if (photoId.startsWith('firebase_')) {
-        const timestamp = photoId.replace('firebase_', '');
-        // Suche nach Datei die mit diesem Timestamp beginnt
+      try {
+        // Prüfe ob die Datei existiert
+        await getMetadata(fileRef);
+      } catch (error) {
+        // Wenn nicht gefunden, durchsuche alle Dateien
+        console.log('Datei nicht unter erwartetem Namen gefunden, suche...');
         const allFiles = await listAll(ref(storage, `${this.PHOTOS_FOLDER}/${customerId}`));
-        const matchingFile = allFiles.items.find(item => item.name.includes(timestamp));
-        if (matchingFile) {
-          fileName = matchingFile.name;
+        
+        // Finde die Datei mit der passenden Generation ID
+        const generation = photoId.replace('firebase_', '');
+        let found = false;
+        
+        for (const item of allFiles.items) {
+          try {
+            const metadata = await getMetadata(item);
+            if (metadata.generation === generation) {
+              fileRef = item;
+              found = true;
+              console.log('Datei gefunden:', item.name);
+              break;
+            }
+          } catch (err) {
+            console.error('Fehler beim Prüfen der Metadaten:', err);
+          }
+        }
+        
+        if (!found) {
+          console.error('Datei konnte nicht gefunden werden');
+          return false;
         }
       }
       
-      const filePath = `${this.PHOTOS_FOLDER}/${customerId}/${fileName}`;
-      const fileRef = ref(storage, filePath);
-      
       await deleteObject(fileRef);
-      console.log('✅ Foto gelöscht:', filePath);
+      console.log('✅ Foto gelöscht:', fileRef.fullPath);
       return true;
     } catch (error) {
       console.error('Fehler beim Löschen:', error);

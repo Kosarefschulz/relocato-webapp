@@ -179,7 +179,7 @@ service cloud.firestore {
       allow read: if true; // Temporär: Öffentlicher Lesezugriff
       allow create: if true; // Temporär: Öffentlicher Schreibzugriff
       allow update: if true; // Temporär: Öffentlicher Update-Zugriff für Markierung als gelesen
-      allow delete: if false; // Löschen weiterhin geschützt
+      allow delete: if true; // WARNUNG: Temporär aktiviert! Unbedingt wieder deaktivieren nach Authentifizierung
     }
   }
 }
