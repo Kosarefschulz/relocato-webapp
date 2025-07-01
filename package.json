@@ -74,6 +74,7 @@
     "start:email-backend": "cd email-backend && npm start",
     "dev": "concurrently \"npm run start:email-backend\" \"npm start\"",
     "dev:all": "concurrently \"npm run start:email\" \"npm run start:email-backend\" \"npm start\"",
+    "prebuild": "node scripts/optimizeLogo.js",
     "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
@@ -123,6 +124,7 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "imap": "^0.8.19",
-    "mailparser": "^3.7.3"
+    "mailparser": "^3.7.3",
+    "svgo": "^4.0.0"
   }
 }
