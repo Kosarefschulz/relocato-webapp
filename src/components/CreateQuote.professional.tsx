@@ -187,13 +187,14 @@ const CreateQuote: React.FC = () => {
       
       const pdfBlob = isWertvoll 
         ? await generateWertvollProfessionalPDF(customer, quote)
-        : await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));
+        : await generatePDF(customer, quote, generateEmailHTML(customer, quote.calculation || calculation, quote.details || quoteDetails));
       
       // E-Mail senden mit dem neuen Template inkl. QR-Code und Bestätigungslink
+      // WICHTIG: Verwende calculation aus dem quote Objekt, nicht die alte calculation Variable
       const emailContent = generateQuoteEmailHTMLSync({
         customer,
-        calculation,
-        quoteDetails,
+        calculation: quote.calculation || calculation, // Verwende calculation aus quote
+        quoteDetails: quote.details || quoteDetails,
         confirmationToken: quote.confirmationToken,
         companyName: isWertvoll ? 'wertvoll' : 'RELOCATO® Bielefeld'
       });
