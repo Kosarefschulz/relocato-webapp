@@ -120,6 +120,43 @@ const CreateQuote: React.FC = () => {
     try {
       console.log('💰 Speichere Angebot...');
       
+      // Erstelle eine frische calculation mit dem aktuellen manuellen Preis
+      const updatedQuoteDetails = {
+        ...quoteDetails,
+        packingRequested: selectedServices.packing,
+        boxCount: selectedServices.boxes ? quoteDetails.boxCount : 0,
+        cleaningService: selectedServices.cleaning,
+        cleaningHours: selectedServices.cleaning ? quoteDetails.cleaningHours : 0,
+        clearanceService: selectedServices.clearance,
+        clearanceVolume: selectedServices.clearance ? quoteDetails.clearanceVolume : 0,
+        renovationService: selectedServices.renovation,
+        renovationHours: selectedServices.renovation ? quoteDetails.renovationHours : 0,
+        pianoTransport: selectedServices.piano,
+        heavyItemsCount: selectedServices.heavyItems ? quoteDetails.heavyItemsCount : 0,
+        packingMaterials: selectedServices.packingMaterials,
+        parkingZonePrice: selectedServices.parking ? 1 : 0,
+        storagePrice: selectedServices.storage ? 1 : 0,
+        furnitureAssemblyPrice: selectedServices.assembly ? 1 : 0,
+        furnitureDisassemblyPrice: selectedServices.disassembly ? 1 : 0
+      };
+      
+      let finalCalculation = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
+      
+      // Manueller Preis überschreibt Berechnung
+      if (useManualPrice && manualTotalPrice > 0) {
+        finalCalculation = { ...finalCalculation, finalPrice: manualTotalPrice, totalPrice: manualTotalPrice };
+        console.log('🎯 Verwende manuellen Preis:', manualTotalPrice);
+      } else {
+        finalCalculation = { ...finalCalculation, finalPrice: finalCalculation.totalPrice };
+      }
+      
+      console.log('📊 Finale Calculation:', {
+        basePrice: finalCalculation.basePrice,
+        totalPrice: finalCalculation.totalPrice,
+        finalPrice: finalCalculation.finalPrice,
+        manualPrice: useManualPrice ? manualTotalPrice : 'nicht verwendet'
+      });
+      
       const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const token = tokenService.generateQuoteToken({ id: quoteId } as any);
       
@@ -127,15 +164,15 @@ const CreateQuote: React.FC = () => {
         id: quoteId,
         customerId: customer.id,
         customerName: customer.name,
-        price: calculation.finalPrice,
+        price: finalCalculation.finalPrice,
         comment: quoteDetails.notes,
         createdAt: new Date(),
         createdBy: 'current-user-id',
         status: 'draft' as const,
         volume: quoteDetails.volume,
         distance: quoteDetails.distance,
-        calculation: calculation,
-        details: quoteDetails,
+        calculation: finalCalculation,
+        details: updatedQuoteDetails,
         confirmationToken: token
       };
       
@@ -185,16 +222,28 @@ const CreateQuote: React.FC = () => {
       // PDF generieren - verwende professionelles Template für Wertvoll
       const isWertvoll = customer.company?.toLowerCase().includes('wertvoll') || false;
       
+      console.log('📄 Generiere PDF mit finalCalculation:', {
+        basePrice: quote.calculation.basePrice,
+        finalPrice: quote.calculation.finalPrice,
+        manualUsed: useManualPrice
+      });
+      
       const pdfBlob = isWertvoll 
         ? await generateWertvollProfessionalPDF(customer, quote)
-        : await generatePDF(customer, quote, generateEmailHTML(customer, quote.calculation || calculation, quote.details || quoteDetails));
+        : await generatePDF(customer, quote, generateEmailHTML(customer, quote.calculation, quote.details));
       
       // E-Mail senden mit dem neuen Template inkl. QR-Code und Bestätigungslink
       // WICHTIG: Verwende calculation aus dem quote Objekt, nicht die alte calculation Variable
+      console.log('📧 Generiere E-Mail mit finalCalculation:', {
+        basePrice: quote.calculation.basePrice,
+        finalPrice: quote.calculation.finalPrice,
+        manualUsed: useManualPrice
+      });
+      
       const emailContent = generateQuoteEmailHTMLSync({
         customer,
-        calculation: quote.calculation || calculation, // Verwende calculation aus quote
-        quoteDetails: quote.details || quoteDetails,
+        calculation: quote.calculation, // Verwende immer calculation aus quote
+        quoteDetails: quote.details,
         confirmationToken: quote.confirmationToken,
         companyName: isWertvoll ? 'wertvoll' : 'RELOCATO® Bielefeld'
       });
@@ -239,19 +288,49 @@ const CreateQuote: React.FC = () => {
       
       console.log('📄 Erstelle PDF lokal...');
       
+      // Erstelle eine frische calculation mit dem aktuellen manuellen Preis (wie in saveQuote)
+      const updatedQuoteDetails = {
+        ...quoteDetails,
+        packingRequested: selectedServices.packing,
+        boxCount: selectedServices.boxes ? quoteDetails.boxCount : 0,
+        cleaningService: selectedServices.cleaning,
+        cleaningHours: selectedServices.cleaning ? quoteDetails.cleaningHours : 0,
+        clearanceService: selectedServices.clearance,
+        clearanceVolume: selectedServices.clearance ? quoteDetails.clearanceVolume : 0,
+        renovationService: selectedServices.renovation,
+        renovationHours: selectedServices.renovation ? quoteDetails.renovationHours : 0,
+        pianoTransport: selectedServices.piano,
+        heavyItemsCount: selectedServices.heavyItems ? quoteDetails.heavyItemsCount : 0,
+        packingMaterials: selectedServices.packingMaterials,
+        parkingZonePrice: selectedServices.parking ? 1 : 0,
+        storagePrice: selectedServices.storage ? 1 : 0,
+        furnitureAssemblyPrice: selectedServices.assembly ? 1 : 0,
+        furnitureDisassemblyPrice: selectedServices.disassembly ? 1 : 0
+      };
+      
+      let finalCalculation = quoteCalculationService.calculateQuote(customer, updatedQuoteDetails);
+      
+      // Manueller Preis überschreibt Berechnung
+      if (useManualPrice && manualTotalPrice > 0) {
+        finalCalculation = { ...finalCalculation, finalPrice: manualTotalPrice, totalPrice: manualTotalPrice };
+        console.log('🎯 PDF-Download: Verwende manuellen Preis:', manualTotalPrice);
+      } else {
+        finalCalculation = { ...finalCalculation, finalPrice: finalCalculation.totalPrice };
+      }
+      
       // Verwende lokale jsPDF-Implementierung statt Server
       const quoteData = {
         customerId: customer.id || 'temp-id',
         customerName: customer.name || 'Unbekannt',
-        price: calculation.finalPrice || 0,
+        price: finalCalculation.finalPrice || 0,
         comment: quoteDetails.notes || '',
         createdAt: new Date(),
         createdBy: 'current-user-id',
         status: 'draft' as const,
         volume: quoteDetails.volume,
         distance: quoteDetails.distance,
-        calculation: calculation,
-        details: quoteDetails
+        calculation: finalCalculation,
+        details: updatedQuoteDetails
       };
       
       // Verwende professionelles Template für Wertvoll
@@ -259,7 +338,7 @@ const CreateQuote: React.FC = () => {
       
       const pdfBlob = isWertvoll 
         ? await generateWertvollProfessionalPDF(customer, quoteData)
-        : await generatePDF(customer, quoteData, generateEmailHTML(customer, calculation, quoteDetails));
+        : await generatePDF(customer, quoteData, generateEmailHTML(customer, finalCalculation, updatedQuoteDetails));
       console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
       
       const url = URL.createObjectURL(pdfBlob);
