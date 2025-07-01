@@ -3,9 +3,9 @@ import autoTable from 'jspdf-autotable';
 import { Customer, Quote } from '../types';
 import { COMPANY_CONFIGS } from '../types/company';
 
-// Logo als Base64 einbinden ist in der aktuellen Implementierung optional
-// Das Logo kann später über addImage hinzugefügt werden
-// Version: 1.1 - Mit korrigierten Farben und Layout
+// LOGO HIER EINFÜGEN - Ersetze HIER_DEIN_BASE64_STRING mit dem echten Base64-Code
+// Format: 'data:image/png;base64,iVBORw0KGgoAAAANS...'
+export const RUEMPELSCHMIEDE_LOGO_BASE64 = 'data:image/png;base64,HIER_DEIN_BASE64_STRING';
 
 export async function generateRuempelschmiedePDF(customer: Customer, quote: Quote | any): Promise<Blob> {
   const doc = new jsPDF();
@@ -29,17 +29,33 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, pageWidth, 40, 'F');
     
-    // Logo-Platzhalter (würde hier das Logo einfügen)
-    // Logo-Bereich: 35x25 bei Position (margin, 8)
-    doc.setDrawColor(primaryColor);
-    doc.setLineWidth(0.5);
-    doc.rect(margin, 8, 35, 25); // Temporärer Rahmen für Logo-Position
-    
-    // RS Text als Logo-Ersatz
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RS', margin + 17.5, 23, { align: 'center' });
+    // Logo einfügen wenn vorhanden
+    try {
+      if (RUEMPELSCHMIEDE_LOGO_BASE64 && !RUEMPELSCHMIEDE_LOGO_BASE64.includes('HIER_DEIN_BASE64_STRING')) {
+        doc.addImage(RUEMPELSCHMIEDE_LOGO_BASE64, 'PNG', margin, 8, 35, 25);
+      } else {
+        // Fallback: Logo-Platzhalter
+        doc.setDrawColor(primaryColor);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, 8, 35, 25);
+        
+        // RS Text als Logo-Ersatz
+        doc.setTextColor(primaryColor);
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RS', margin + 17.5, 23, { align: 'center' });
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden des Logos:', error);
+      // Fallback zu RS Text
+      doc.setDrawColor(primaryColor);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, 8, 35, 25);
+      doc.setTextColor(primaryColor);
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RS', margin + 17.5, 23, { align: 'center' });
+    }
     
     // Firmenname und Tagline (rechts vom Logo)
     doc.setTextColor(primaryColor);

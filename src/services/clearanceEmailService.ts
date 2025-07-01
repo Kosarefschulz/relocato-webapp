@@ -1,6 +1,7 @@
 import { Customer, Quote } from '../types';
 import { getCompanyConfig } from '../config/companies.config';
 import { databaseService } from '../config/database.config';
+import { generateRuempelschmiedeEmailHTML } from './ruempelschmiedeEmailTemplate';
 
 interface EmailData {
   to: string;
@@ -21,12 +22,15 @@ export const sendClearanceQuoteEmail = async (
 ): Promise<void> => {
   const company = getCompanyConfig('ruempelschmiede');
   
-  // Generiere Bestätigungslink
+  // Verwende das neue Template
+  const emailHtml = generateRuempelschmiedeEmailHTML(customer, quote, recipientEmail);
+
+  // Altes Template wird nicht mehr benötigt, aber für Referenz behalten
+  /*
   const confirmationLink = quote.confirmationToken 
     ? `${window.location.origin}/quote-confirmation/${quote.confirmationToken}`
     : '';
-
-  const emailHtml = `
+  const emailHtmlOld = `
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -349,6 +353,7 @@ export const sendClearanceQuoteEmail = async (
 </body>
 </html>
   `;
+  */
 
   const attachments = [{
     filename: `Entrümpelungsangebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`,
