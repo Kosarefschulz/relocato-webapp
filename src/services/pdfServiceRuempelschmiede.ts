@@ -3,6 +3,9 @@ import autoTable from 'jspdf-autotable';
 import { Customer, Quote } from '../types';
 import { COMPANY_CONFIGS } from '../types/company';
 
+// Logo als Base64 einbinden ist in der aktuellen Implementierung optional
+// Das Logo kann später über addImage hinzugefügt werden
+
 export async function generateRuempelschmiedePDF(customer: Customer, quote: Quote | any): Promise<Blob> {
   const doc = new jsPDF();
   const companyConfig = COMPANY_CONFIGS.ruempelschmiede;
@@ -25,19 +28,28 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, pageWidth, 40, 'F');
     
-    // Logo würde hier eingefügt werden (links)
-    // Platzhalter für Logo-Bereich: 40x30 bei Position (margin, 5)
+    // Logo-Platzhalter (würde hier das Logo einfügen)
+    // Logo-Bereich: 35x25 bei Position (margin, 8)
+    doc.setDrawColor(primaryColor);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, 8, 35, 25); // Temporärer Rahmen für Logo-Position
     
-    // Firmenname und Tagline (mittig-rechts vom Logo)
+    // RS Text als Logo-Ersatz
     doc.setTextColor(primaryColor);
-    doc.setFontSize(22);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('RÜMPEL SCHMIEDE', margin + 50, 18);
+    doc.text('RS', margin + 17.5, 23, { align: 'center' });
+    
+    // Firmenname und Tagline (rechts vom Logo)
+    doc.setTextColor(primaryColor);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RÜMPEL SCHMIEDE', margin + 45, 18);
     
     doc.setTextColor(secondaryColor);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Professionelle Entrümpelungen seit 2015', margin + 50, 26);
+    doc.text('Professionelle Entrümpelungen seit 2015', margin + 45, 26);
     
     // Kontaktinfo rechts
     doc.setTextColor(darkGray);
@@ -45,7 +57,7 @@ export async function generateRuempelschmiedePDF(customer: Customer, quote: Quot
     doc.text([
       companyConfig.contact.phone,
       companyConfig.contact.email,
-      companyConfig.website || 'www.ruempelschmiede.de'
+      'www.ruempelschmiede.de'
     ], rightMargin - 5, 15, { align: 'right' });
     
     // Trennlinie unter Header
