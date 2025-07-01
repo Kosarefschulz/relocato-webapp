@@ -183,6 +183,8 @@ const CustomerDetails: React.FC = () => {
   const loadCustomerData = async () => {
     if (!customerId) return;
     
+    console.log('🔍 Lade Kundendaten für ID/Nummer:', customerId);
+    
     try {
       setLoading(true);
       
@@ -192,20 +194,31 @@ const CustomerDetails: React.FC = () => {
       // Try to get from cache first
       let foundCustomer: Customer | null = customerCacheService.getCachedCustomer(customerId) || null;
       
-      if (!foundCustomer) {
+      if (foundCustomer) {
+        console.log('✅ Kunde aus Cache gefunden:', foundCustomer.name);
+      } else {
+        console.log('🔄 Lade Kunden aus Datenbank...');
+        
         // Load from database if not in cache
         const customersData = await googleSheetsService.getCustomers();
+        console.log(`📊 ${customersData.length} Kunden in Datenbank gefunden`);
         
         // Try to find by ID first, then by customerNumber
         foundCustomer = customersData.find(c => c.id === customerId) || null;
         
         if (!foundCustomer) {
+          console.log('🔍 Suche nach Kundennummer...');
           foundCustomer = customersData.find(c => c.customerNumber === customerId) || null;
         }
         
-        // Cache the customer if found
         if (foundCustomer) {
+          console.log('✅ Kunde gefunden:', foundCustomer.name, 'ID:', foundCustomer.id, 'Nummer:', foundCustomer.customerNumber);
+          // Cache the customer if found
           customerCacheService.cacheCustomer(foundCustomer);
+        } else {
+          console.error('❌ Kunde nicht gefunden für ID/Nummer:', customerId);
+          // Debug: Zeige alle Kundennummern
+          console.log('Vorhandene Kundennummern:', customersData.map(c => c.customerNumber).slice(0, 10));
         }
       }
       
