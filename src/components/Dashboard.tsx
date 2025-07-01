@@ -18,6 +18,7 @@ import {
 import MobileLayout from './MobileLayout';
 import SyncStatus from './SyncStatus';
 import LogoutButton from './LogoutButton';
+import NotificationCenter from './NotificationCenter';
 import { motion } from 'framer-motion';
 
 const Dashboard: React.FC = () => {
@@ -94,6 +95,7 @@ const Dashboard: React.FC = () => {
 
   const rightActions = (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <NotificationCenter />
       <SyncStatus />
       <LogoutButton />
     </Box>

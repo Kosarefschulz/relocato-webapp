@@ -42,6 +42,7 @@ import { motion } from 'framer-motion';
 import SignatureModal from '../components/SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
 import { sendConfirmationEmail } from '../services/confirmationEmailService';
+import { notificationService } from '../services/notificationService';
 
 const MotionCard = motion(Card);
 
@@ -158,6 +159,20 @@ const QuoteConfirmationPage: React.FC = () => {
       
       await databaseService.updateQuote(quote.id, updatedQuote);
       
+      // Update customer status if exists
+      if (customer) {
+        try {
+          console.log('📝 Aktualisiere Kundenstatus...');
+          await databaseService.updateCustomer(customer.id, {
+            salesStatus: 'reached' as const,
+            status: 'Angebot bestätigt'
+          });
+          console.log('✅ Kundenstatus aktualisiert');
+        } catch (customerError) {
+          console.error('⚠️ Fehler beim Aktualisieren des Kundenstatus:', customerError);
+        }
+      }
+      
       // Send confirmation email
       try {
         console.log('📧 Sende Bestätigungsmail...');
@@ -174,6 +189,20 @@ const QuoteConfirmationPage: React.FC = () => {
       } catch (emailError) {
         console.error('⚠️ Fehler beim Senden der Bestätigungsmail:', emailError);
         // Don't fail the whole confirmation if email fails
+      }
+
+      // Create notification for dashboard
+      try {
+        console.log('📢 Erstelle Dashboard-Benachrichtigung...');
+        await notificationService.createQuoteConfirmedNotification(
+          customerName || quote.customerName || 'Kunde',
+          quote.customerId,
+          quote.id
+        );
+        console.log('✅ Benachrichtigung erstellt');
+      } catch (notificationError) {
+        console.error('⚠️ Fehler beim Erstellen der Benachrichtigung:', notificationError);
+        // Don't fail the whole confirmation if notification fails
       }
 
       setConfirmed(true);

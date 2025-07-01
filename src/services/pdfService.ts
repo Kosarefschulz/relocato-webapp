@@ -34,77 +34,77 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
   
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
+    const margin = 25; // Erhöht von 20
     const rightMargin = pageWidth - margin;
-    let yPosition = 20;
+    let yPosition = 30; // Start weiter unten
     let currentPage = 1;
     
     // Helper-Funktion für Footer
     const addFooter = (pageNum: number) => {
-      const footerY = pageHeight - 15;
+      const footerY = pageHeight - 20; // Mehr Platz nach unten
       doc.setDrawColor(221, 221, 221);
       doc.setLineWidth(0.5);
-      doc.line(margin, footerY - 5, rightMargin, footerY - 5);
+      doc.line(margin, footerY - 8, rightMargin, footerY - 8);
       
       doc.setFontSize(8);
       doc.setTextColor(102, 102, 102);
       doc.setFont('helvetica', 'normal');
       doc.text('RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY, { align: 'center' });
-      doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de', pageWidth / 2, footerY + 4, { align: 'center' });
-      doc.text(`Seite ${pageNum} von 2`, pageWidth / 2, footerY + 8, { align: 'center' });
+      doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de', pageWidth / 2, footerY + 5, { align: 'center' });
+      doc.text(`Seite ${pageNum} von 2`, pageWidth / 2, footerY + 10, { align: 'center' });
     };
 
-    // Header - Relocato Logo mit ®
-    doc.setFontSize(28);
-    doc.setTextColor(51, 51, 51); // Dunkelgrau wie in Vorlage
+    // Header - Relocato Logo mit ® - GRÖSSER
+    doc.setFontSize(32); // Größer
+    doc.setTextColor(51, 51, 51);
     doc.setFont('helvetica', 'bold');
-    doc.text('RELOCATO', pageWidth / 2 - 15, yPosition, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text('®', pageWidth / 2 + 25, yPosition - 5);
+    doc.text('RELOCATO', pageWidth / 2 - 18, yPosition, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text('®', pageWidth / 2 + 30, yPosition - 6);
     
     // Unterstrich in Grün
     doc.setDrawColor(139, 195, 74); // #8BC34A
-    doc.setLineWidth(2);
-    doc.line(margin, yPosition + 5, rightMargin, yPosition + 5);
-    yPosition += 12; // Reduziert von 15
+    doc.setLineWidth(3); // Dickere Linie
+    doc.line(margin, yPosition + 8, rightMargin, yPosition + 8);
+    yPosition += 20; // Mehr Abstand
     
-    doc.setFontSize(18);
+    doc.setFontSize(20); // Größer
     doc.setTextColor(139, 195, 74);
     doc.setFont('helvetica', 'bold');
     doc.text('Umzugsangebot', pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 10; // Reduziert von 12
+    yPosition += 18; // Mehr Abstand
     
-    // Angebotsnummer und Gültigkeit Box
+    // Angebotsnummer und Gültigkeit Box mit mehr Padding
     doc.setFillColor(245, 245, 245);
     doc.setDrawColor(221, 221, 221);
     doc.setLineWidth(0.5);
-    doc.rect(margin, yPosition, rightMargin - margin, 10, 'FD');
+    doc.rect(margin, yPosition, rightMargin - margin, 14, 'FD'); // Höher
     
-    doc.setFontSize(10);
+    doc.setFontSize(11); // Größer
     doc.setTextColor(0);
     doc.setFont('helvetica', 'bold');
     const angebotNr = new Date().getTime().toString();
     const gueltigBis = new Date();
     gueltigBis.setDate(gueltigBis.getDate() + 14);
     
-    doc.text(`Angebot Nr.: ${angebotNr}`, margin + 3, yPosition + 6);
-    doc.text(`Gültig bis: ${gueltigBis.toLocaleDateString('de-DE')}`, rightMargin - 3, yPosition + 6, { align: 'right' });
-    yPosition += 12; // Reduziert von 15
+    doc.text(`Angebot Nr.: ${angebotNr}`, margin + 5, yPosition + 8);
+    doc.text(`Gültig bis: ${gueltigBis.toLocaleDateString('de-DE')}`, rightMargin - 5, yPosition + 8, { align: 'right' });
+    yPosition += 22; // Viel mehr Abstand
     
-    // Zwei-Spalten-Layout für Kundendaten und Umzugsdetails
-    const columnWidth = (rightMargin - margin - 10) / 2;
-    const labelOffset = 30; // Einheitlicher Abstand für Labels
-    const lineHeight = 6; // Einheitlicher Zeilenabstand
+    // Zwei-Spalten-Layout für Kundendaten und Umzugsdetails mit mehr Raum
+    const columnWidth = (rightMargin - margin - 20) / 2; // Mehr Abstand zwischen Spalten
+    const labelOffset = 35; // Mehr Abstand für Labels
+    const lineHeight = 8; // Mehr Zeilenabstand
     
     // Kundendaten (linke Spalte)
-    doc.setFontSize(10);
+    doc.setFontSize(12); // Größer
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(139, 195, 74); // #8BC34A
     doc.text('Kundendaten', margin, yPosition);
     
-    doc.setFontSize(9);
+    doc.setFontSize(10); // Größer
     doc.setTextColor(85, 85, 85); // #555
-    let leftY = yPosition + 8;
+    let leftY = yPosition + 12; // Mehr Abstand nach Überschrift
     
     // Name
     doc.setFont('helvetica', 'bold');
@@ -165,17 +165,17 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     doc.text(termin, margin + labelOffset, leftY);
     
     // Umzugsdetails (rechte Spalte)
-    const rightX = margin + columnWidth + 10;
-    const rightLabelOffset = 20; // Kürzerer Offset für rechte Spalte
+    const rightX = margin + columnWidth + 20; // Mehr Abstand zwischen Spalten
+    const rightLabelOffset = 25; // Angepasster Offset
     
-    doc.setFontSize(10);
+    doc.setFontSize(12); // Größer
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(139, 195, 74); // #8BC34A
     doc.text('Umzugsdetails', rightX, yPosition);
     
-    doc.setFontSize(9);
+    doc.setFontSize(10); // Größer
     doc.setTextColor(85, 85, 85);
-    let rightY = yPosition + 8;
+    let rightY = yPosition + 12; // Mehr Abstand
     
     // Von
     doc.setFont('helvetica', 'bold');
@@ -184,7 +184,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     const fromAddr = customer.fromAddress || 'Wird noch mitgeteilt';
     const fromLines = doc.splitTextToSize(fromAddr, columnWidth - rightLabelOffset - 5);
     doc.text(fromLines, rightX + rightLabelOffset, rightY);
-    rightY += Math.max(fromLines.length * 4, lineHeight);
+    rightY += Math.max(fromLines.length * 5 + 3, lineHeight); // Mehr Zeilenabstand
     
     // Nach
     doc.setFont('helvetica', 'bold');
@@ -193,7 +193,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     const toAddr = customer.toAddress || 'Wird noch mitgeteilt';
     const toLines = doc.splitTextToSize(toAddr, columnWidth - rightLabelOffset - 5);
     doc.text(toLines, rightX + rightLabelOffset, rightY);
-    rightY += Math.max(toLines.length * 4, lineHeight);
+    rightY += Math.max(toLines.length * 5 + 3, lineHeight); // Mehr Zeilenabstand
     
     // Wohnungsgröße wenn vorhanden
     if (customer.apartment) {
@@ -204,18 +204,18 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
       rightY += lineHeight;
     }
     
-    yPosition = Math.max(leftY, rightY) + 8; // Reduziert von 10
+    yPosition = Math.max(leftY, rightY) + 15; // Mehr Abstand nach Blöcken
     
-    // Leistungsumfang
+    // Leistungsumfang mit mehr Padding
     doc.setFillColor(224, 224, 224); // #e0e0e0
     doc.setDrawColor(153, 153, 153); // #999
     doc.setLineWidth(1);
-    doc.rect(margin, yPosition, rightMargin - margin, 7, 'FD'); // Reduziert von 8
-    doc.setFontSize(9); // Reduziert von 10
+    doc.rect(margin, yPosition, rightMargin - margin, 10, 'FD'); // Höher
+    doc.setFontSize(11); // Größer
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0);
-    doc.text('Leistungsumfang - Premium-Service', margin + 3, yPosition + 4.5); // Angepasst
-    yPosition += 9; // Reduziert von 12
+    doc.text('Leistungsumfang - Premium-Service', margin + 5, yPosition + 6);
+    yPosition += 15; // Mehr Abstand
     
     // Service Box
     const includedServices = [];
@@ -299,153 +299,150 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     doc.setFillColor(249, 249, 249);
     doc.setDrawColor(221, 221, 221);
     doc.setLineWidth(0.5);
-    const serviceBoxHeight = Math.min(40, 6 + includedServices.length * 3.5); // Kompakter
+    const serviceBoxHeight = 55; // Höher für mehr Platz
     doc.rect(margin, yPosition, rightMargin - margin, serviceBoxHeight, 'FD');
     
-    doc.setFontSize(8); // Kleinere Schrift
+    doc.setFontSize(9); // Normale Schrift
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0);
-    doc.text('Folgende Leistungen sind im Festpreis enthalten:', margin + 3, yPosition + 4);
-    yPosition += 6; // Reduziert
+    doc.text('Folgende Leistungen sind im Festpreis enthalten:', margin + 5, yPosition + 6);
+    yPosition += 10; // Mehr Abstand
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8); // Kleinere Schrift
+    doc.setFontSize(9); // Normale Schrift
     
-    // Leistungen ausgeben (kompakter mit Bullets)
+    // Leistungen ausgeben mit mehr Platz
     let serviceY = yPosition;
-    const maxServicesPerColumn = 10; // Mehr Services pro Spalte
+    const maxServicesPerColumn = 10;
     const servicesInBox = includedServices.slice(0, maxServicesPerColumn * 2);
     
     servicesInBox.forEach((service, index) => {
       if (index < maxServicesPerColumn) {
-        doc.text(service, margin + 3, serviceY);
-        serviceY += 3.5; // Engerer Zeilenabstand
+        doc.text(service, margin + 5, serviceY);
+        serviceY += 4.5; // Mehr Zeilenabstand
       } else {
         // Zweite Spalte
-        const secondColumnY = yPosition + (index - maxServicesPerColumn) * 3.5;
-        doc.text(service, margin + columnWidth + 3, secondColumnY);
+        const secondColumnY = yPosition + (index - maxServicesPerColumn) * 4.5;
+        doc.text(service, margin + columnWidth + 5, secondColumnY);
       }
     });
-    
-    yPosition += serviceBoxHeight - 6;
-    
-    // Kostenübersicht
-    doc.setFillColor(224, 224, 224);
-    doc.setDrawColor(153, 153, 153);
-    doc.setLineWidth(1);
-    doc.rect(margin, yPosition, rightMargin - margin, 7, 'FD'); // Reduziert von 8
-    doc.setFontSize(9); // Reduziert von 10
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0);
-    doc.text('Kostenübersicht', margin + 3, yPosition + 4.5); // Angepasst
-    yPosition += 9; // Reduziert von 12
-    
-    // Preis-Tabelle
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(221, 221, 221);
-    doc.setLineWidth(0.5);
-    
-    // Tabelle mit Rahmen
-    const tableHeight = 22; // Reduziert von 24
-    doc.rect(margin, yPosition, rightMargin - margin, tableHeight, 'D');
-    
-    const nettoPreis = quote.price / 1.19;
-    const mwst = quote.price - nettoPreis;
-    
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Premium-Komplettpaket netto', margin + 3, yPosition + 5);
-    doc.text(nettoPreis.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 5, { align: 'right' });
-    
-    // Trennlinie
-    doc.setDrawColor(238, 238, 238);
-    doc.line(margin, yPosition + 8, rightMargin, yPosition + 8);
-    
-    doc.text('MwSt. 19,00 %', margin + 3, yPosition + 12); // Angepasst
-    doc.text(mwst.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 12, { align: 'right' });
-    
-    // Dicke Linie vor Gesamtsumme
-    doc.setDrawColor(51, 51, 51);
-    doc.setLineWidth(2);
-    doc.line(margin, yPosition + 15, rightMargin, yPosition + 15); // Angepasst
-    
-    // Gesamtsumme hervorgehoben
-    doc.setFillColor(249, 249, 249);
-    doc.rect(margin, yPosition + 15, rightMargin - margin, 7, 'F'); // Angepasst
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('Gesamtsumme Festpreis inkl. MwSt.', margin + 3, yPosition + 19); // Angepasst
-    doc.text(quote.price.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 19, { align: 'right' });
     
     // Footer für Seite 1
     addFooter(1);
     
-    // Neue Seite für den Rest
+    // SEITE 2
     doc.addPage();
     currentPage = 2;
-    yPosition = 20;
+    yPosition = 30; // Start weiter unten
+    
+    // Kostenübersicht auf Seite 2
+    doc.setFillColor(224, 224, 224);
+    doc.setDrawColor(153, 153, 153);
+    doc.setLineWidth(1);
+    doc.rect(margin, yPosition, rightMargin - margin, 10, 'FD'); // Höher
+    doc.setFontSize(11); // Größer
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text('Kostenübersicht', margin + 5, yPosition + 6);
+    yPosition += 15; // Mehr Abstand
+    
+    // Preis-Tabelle mit mehr Raum
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(221, 221, 221);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, yPosition, rightMargin - margin, 30, 'D'); // Höher
+    
+    const nettoPreis = quote.price / 1.19;
+    const mwst = quote.price - nettoPreis;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Premium-Komplettpaket netto', margin + 5, yPosition + 8);
+    doc.text(nettoPreis.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 8, { align: 'right' });
+    
+    // Trennlinie
+    doc.setDrawColor(238, 238, 238);
+    doc.line(margin, yPosition + 12, rightMargin, yPosition + 12);
+    
+    doc.text('MwSt. 19,00 %', margin + 5, yPosition + 18);
+    doc.text(mwst.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 18, { align: 'right' });
+    
+    // Dicke Linie vor Gesamtsumme
+    doc.setDrawColor(51, 51, 51);
+    doc.setLineWidth(2);
+    doc.line(margin, yPosition + 22, rightMargin, yPosition + 22);
+    
+    // Gesamtsumme hervorgehoben
+    doc.setFillColor(249, 249, 249);
+    doc.rect(margin, yPosition + 22, rightMargin - margin, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('Gesamtsumme Festpreis inkl. MwSt.', margin + 5, yPosition + 27);
+    doc.text(quote.price.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 27, { align: 'right' });
+    
+    yPosition += 40; // Viel mehr Abstand
     
     // Bemerkungen (wenn vorhanden)
     if (quote.comment && quote.comment.trim()) {
       doc.setFillColor(255, 250, 240); // Leicht orange
       doc.setDrawColor(255, 152, 0); // Orange
       doc.setLineWidth(0.5);
-      const commentHeight = 20;
+      const commentHeight = 25; // Höher
       doc.rect(margin, yPosition, rightMargin - margin, commentHeight, 'FD');
       
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
+      doc.setFontSize(10); // Größer
       doc.setTextColor(0);
-      doc.text('Ihre Anmerkungen:', margin + 3, yPosition + 5);
+      doc.text('Ihre Anmerkungen:', margin + 5, yPosition + 8);
       
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      const splitComment = doc.splitTextToSize(quote.comment, rightMargin - margin - 6);
-      doc.text(splitComment.slice(0, 3), margin + 3, yPosition + 10); // Max 3 Zeilen
-      yPosition += commentHeight + 5;
+      doc.setFontSize(9); // Größer
+      const splitComment = doc.splitTextToSize(quote.comment, rightMargin - margin - 10);
+      doc.text(splitComment.slice(0, 3), margin + 5, yPosition + 14); // Max 3 Zeilen
+      yPosition += commentHeight + 10; // Mehr Abstand
     }
     
     // Versicherungsschutz Box
     doc.setFillColor(250, 250, 250);
     doc.setDrawColor(221, 221, 221);
     doc.setLineWidth(0.5);
-    doc.rect(margin, yPosition, rightMargin - margin, 20, 'FD');
+    doc.rect(margin, yPosition, rightMargin - margin, 25, 'FD'); // Höher
     
-    doc.setFontSize(9);
+    doc.setFontSize(10); // Größer
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0);
-    doc.text('Versicherungsschutz:', margin + 3, yPosition + 5);
+    doc.text('Versicherungsschutz:', margin + 5, yPosition + 8);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('Grundhaftung: Gesetzliche Haftung nach §451g HGB (620€/m³)', margin + 3, yPosition + 10);
+    doc.setFontSize(9); // Größer
+    doc.text('Grundhaftung: Gesetzliche Haftung nach §451g HGB (620€/m³)', margin + 5, yPosition + 14);
     doc.setFont('helvetica', 'bold');
-    doc.text('Transportversicherung optional:', margin + 3, yPosition + 14);
+    doc.text('Transportversicherung optional:', margin + 5, yPosition + 19);
     doc.setFont('helvetica', 'normal');
-    doc.text('Zum Neuwert oder Zeitwert', margin + 65, yPosition + 14);
-    doc.text('Prämie: 4,60‰ (Neuwert) oder 3,60‰ (Zeitwert) + 19% Versicherungssteuer', margin + 3, yPosition + 18);
-    yPosition += 25;
+    doc.text('Zum Neuwert oder Zeitwert', margin + 70, yPosition + 19);
+    doc.text('Prämie: 4,60‰ (Neuwert) oder 3,60‰ (Zeitwert) + 19% Versicherungssteuer', margin + 5, yPosition + 24);
+    yPosition += 35; // Mehr Abstand
     
     // Zahlungsbedingungen & Info-Box
     doc.setFillColor(240, 248, 255); // Hellblau
     doc.setDrawColor(70, 130, 180); // Stahlblau
     doc.setLineWidth(0.5);
-    doc.rect(margin, yPosition, rightMargin - margin, 15, 'FD');
+    doc.rect(margin, yPosition, rightMargin - margin, 20, 'FD'); // Höher
     
-    doc.setFontSize(9);
+    doc.setFontSize(10); // Größer
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0);
-    doc.text('Zahlungsbedingungen:', margin + 3, yPosition + 5);
+    doc.text('Zahlungsbedingungen:', margin + 5, yPosition + 8);
     doc.setFont('helvetica', 'normal');
-    doc.text('Gemäß BUKG-Vorgaben', margin + 40, yPosition + 5);
+    doc.text('Gemäß BUKG-Vorgaben', margin + 45, yPosition + 8);
     
     doc.setFont('helvetica', 'bold');
-    doc.text('Besichtigung:', margin + 3, yPosition + 10);
+    doc.text('Besichtigung:', margin + 5, yPosition + 14);
     doc.setFont('helvetica', 'normal');
-    doc.text('Gerne vereinbaren wir einen Termin vor Ort', margin + 28, yPosition + 10);
-    yPosition += 20;
+    doc.text('Gerne vereinbaren wir einen Termin vor Ort', margin + 30, yPosition + 14);
+    yPosition += 30; // Mehr Abstand
     
     // Unterschriftsbox
-    const boxHeight = 35;
+    const boxHeight = 40; // Höher
     doc.setDrawColor(153, 153, 153);
     doc.setLineWidth(1);
     doc.rect(margin, yPosition, rightMargin - margin, boxHeight, 'D');
@@ -453,22 +450,22 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     const unterschriftText = 'Mit meiner Unterschrift beauftrage ich RELOCATO® Bielefeld mit der Durchführung des Umzugs zu den genannten Konditionen. Dieses Angebot entspricht den Anforderungen des BUKG.';
-    const unterschriftLines = doc.splitTextToSize(unterschriftText, rightMargin - margin - 6);
-    doc.text(unterschriftLines, margin + 3, yPosition + 5);
+    const unterschriftLines = doc.splitTextToSize(unterschriftText, rightMargin - margin - 10);
+    doc.text(unterschriftLines, margin + 5, yPosition + 8);
     
     // Unterschriftslinien
-    const lineY = yPosition + boxHeight - 8;
-    const lineLength = (rightMargin - margin - 30) / 2;
+    const lineY = yPosition + 30;
+    const lineLength = (rightMargin - margin - 40) / 2; // Mehr Abstand zwischen Linien
     
     doc.setDrawColor(0);
     doc.setLineWidth(0.5);
-    doc.line(margin + 15, lineY, margin + 15 + lineLength, lineY);
-    doc.line(rightMargin - 15 - lineLength, lineY, rightMargin - 15, lineY);
+    doc.line(margin + 20, lineY, margin + 20 + lineLength, lineY);
+    doc.line(rightMargin - 20 - lineLength, lineY, rightMargin - 20, lineY);
     
     doc.setFontSize(8);
     doc.setTextColor(102, 102, 102);
-    doc.text('Ort, Datum', margin + 15 + lineLength/2, lineY + 4, { align: 'center' });
-    doc.text('Unterschrift Auftraggeber', rightMargin - 15 - lineLength/2, lineY + 4, { align: 'center' });
+    doc.text('Ort, Datum', margin + 20 + lineLength/2, lineY + 5, { align: 'center' });
+    doc.text('Unterschrift Auftraggeber', rightMargin - 20 - lineLength/2, lineY + 5, { align: 'center' });
     
     // Footer für Seite 2
     addFooter(2);
@@ -797,7 +794,7 @@ export const generateInvoicePDF = async (customer: Customer, invoice: Invoice, p
     doc.setFontSize(8);
     doc.setTextColor(102, 102, 102);
     doc.setFont('helvetica', 'normal');
-    doc.text('RELOCATO® Bielefeld | Detmolder Str. 234a, 33605 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY, { align: 'center' });
+    doc.text('RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY, { align: 'center' });
     doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de | Wertvoll Dienstleistungen GmbH | HRB 43574', pageWidth / 2, footerY + 4, { align: 'center' });
     doc.text('Geschäftsführer: Sergej Schulz | USt-IdNr.: DE815143866 | Amtsgericht Bielefeld', pageWidth / 2, footerY + 8, { align: 'center' });
     

@@ -162,5 +162,13 @@ service cloud.firestore {
       allow read: if true; // Temporär: Öffentlicher Lesezugriff
       allow write: if true; // Temporär: Öffentlicher Schreibzugriff
     }
+    
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if true; // Temporär: Öffentlicher Lesezugriff
+      allow create: if true; // Temporär: Öffentlicher Schreibzugriff
+      allow update: if true; // Temporär: Öffentlicher Update-Zugriff für Markierung als gelesen
+      allow delete: if false; // Löschen weiterhin geschützt
+    }
   }
 }

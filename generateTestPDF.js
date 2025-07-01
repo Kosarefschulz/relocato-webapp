@@ -64,7 +64,7 @@ function generateTestPDF() {
     doc.setFontSize(8);
     doc.setTextColor(102, 102, 102);
     doc.setFont('helvetica', 'normal');
-    doc.text('RELOCATO® Bielefeld | Detmolder Str. 234a, 33605 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY, { align: 'center' });
+    doc.text('RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageWidth / 2, footerY, { align: 'center' });
     doc.text('E-Mail: bielefeld@relocato.de | Web: www.relocato.de', pageWidth / 2, footerY + 4, { align: 'center' });
     doc.text(`Seite ${pageNum} von 2`, pageWidth / 2, footerY + 8, { align: 'center' });
   };
