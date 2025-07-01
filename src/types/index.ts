@@ -66,7 +66,7 @@ export interface Quote {
   createdBy: string;
   status: 'draft' | 'sent' | 'confirmed' | 'accepted' | 'rejected' | 'invoiced';
   volume?: number;
-  company?: 'relocato' | 'wertvoll'; // Firma für das Angebot
+  company?: 'relocato' | 'wertvoll' | 'ruempelschmiede'; // Firma für das Angebot
   distance?: number;
   // Versionierung
   version?: number;
@@ -121,7 +121,7 @@ export interface Invoice {
   paidDate?: string;
   status: string;
   notes?: string;
-  company?: 'relocato' | 'wertvoll'; // Firma für die Rechnung
+  company?: 'relocato' | 'wertvoll' | 'ruempelschmiede'; // Firma für die Rechnung
 }
 
 export interface InvoiceItem {

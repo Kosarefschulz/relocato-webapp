@@ -2,6 +2,8 @@ import { jsPDF } from 'jspdf';
 import { Customer, Invoice, PaymentInfo } from '../types';
 import pdfSignatureService, { SignatureData } from './pdfSignatureService';
 import { generateArbeitsschein } from './arbeitsscheinService';
+import { generateClearancePDF } from './clearancePdfService';
+import { getCompanyConfig } from '../config/companies.config';
 
 interface QuoteData {
   customerId: string;
@@ -17,7 +19,7 @@ interface QuoteData {
   details?: any;
 }
 
-export const generatePDF = async (customer: Customer, quote: QuoteData & { volume?: number; distance?: number; calculation?: any; details?: any }, htmlContent?: string): Promise<Blob> => {
+export const generatePDF = async (customer: Customer, quote: QuoteData & { volume?: number; distance?: number; calculation?: any; details?: any; company?: string }, htmlContent?: string): Promise<Blob> => {
   try {
     console.log('🔄 Starte PDF-Generierung...', { customer, quote });
     
@@ -27,6 +29,11 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     }
     if (!quote) {
       throw new Error('Angebotsdaten fehlen');
+    }
+    
+    // Wenn es eine Entrümpelung ist, verwende den spezialisierten Service
+    if (quote.company === 'ruempelschmiede') {
+      return generateClearancePDF(customer, quote as any);
     }
     
     // Verwende immer die robuste jsPDF-Implementierung
