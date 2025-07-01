@@ -54,6 +54,7 @@ import AccountingDashboard from './pages/AccountingDashboard';
 import CustomerImportPage from './pages/CustomerImportPage';
 import SharedCustomerView from './pages/SharedCustomerView';
 import TrelloImportPage from './pages/TrelloImportPage';
+import AppleToGoogleCalendarPage from './pages/AppleToGoogleCalendarPage';
 
 
 export const AuthContext = React.createContext<{
@@ -288,6 +289,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/import-trello" 
         element={<TrelloImportPage />} 
+      />
+      
+      {/* Apple to Google Calendar Import */}
+      <Route 
+        path="/apple-to-google-calendar" 
+        element={<AppleToGoogleCalendarPage />} 
       />
       
       {/* Default Route */}
