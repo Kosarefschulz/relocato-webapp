@@ -9,7 +9,7 @@ interface ClearanceQuoteData extends Partial<Quote> {
   comment?: string;
   createdAt: Date;
   createdBy: string;
-  status: string;
+  status: 'draft' | 'sent' | 'confirmed' | 'accepted' | 'rejected' | 'invoiced';
   clearanceType?: 'wohnung' | 'haus' | 'keller' | 'dachboden' | 'garage' | 'gewerbe';
   services?: ClearanceServiceItem[];
   objectAddress?: string;
