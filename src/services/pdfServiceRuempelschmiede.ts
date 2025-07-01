@@ -5,6 +5,7 @@ import { COMPANY_CONFIGS } from '../types/company';
 
 // Logo als Base64 einbinden ist in der aktuellen Implementierung optional
 // Das Logo kann später über addImage hinzugefügt werden
+// Version: 1.1 - Mit korrigierten Farben und Layout
 
 export async function generateRuempelschmiedePDF(customer: Customer, quote: Quote | any): Promise<Blob> {
   const doc = new jsPDF();
