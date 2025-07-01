@@ -19,7 +19,9 @@ import {
   Badge,
   Fab,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -76,6 +78,7 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
+  const [continuousMode, setContinuousMode] = useState(true);
 
   const handleCapture = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -100,8 +103,17 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
     // Reset input für nächste Aufnahme
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+      
+      // Automatisch Kamera wieder öffnen für kontinuierliche Aufnahme
+      if (continuousMode) {
+        setTimeout(() => {
+          if (fileInputRef.current && !uploading) {
+            fileInputRef.current.click();
+          }
+        }, 500); // Kurze Verzögerung für bessere UX
+      }
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, uploading, continuousMode]);
 
   const handleDeletePhoto = (photoId: string) => {
     setCapturedPhotos(prev => prev.filter(p => p.id !== photoId));
@@ -188,7 +200,7 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
           </Alert>
         )}
 
-        {/* Kategorie-Auswahl für neue Fotos */}
+        {/* Kategorie-Auswahl und Einstellungen */}
         <Box sx={{ mb: 3 }}>
           <TextField
             select
@@ -197,6 +209,7 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             variant="outlined"
+            sx={{ mb: 2 }}
           >
             {PHOTO_CATEGORIES.map(category => (
               <MenuItem key={category} value={category}>
@@ -204,32 +217,98 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
               </MenuItem>
             ))}
           </TextField>
+          
+          <FormControlLabel
+            control={
+              <Switch
+                checked={continuousMode}
+                onChange={(e) => setContinuousMode(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Kontinuierliche Aufnahme (Kamera öffnet sich automatisch wieder)"
+          />
         </Box>
 
-        {/* Kamera-Button */}
+        {/* Kamera-Button mit Vorschau */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
             capture="environment"
-            multiple
             onChange={handleCapture}
             style={{ display: 'none' }}
             id="camera-input"
           />
+          
+          {/* Letzte Foto-Vorschau */}
+          {capturedPhotos.length > 0 && (
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{ position: 'relative' }}>
+                <img 
+                  src={capturedPhotos[capturedPhotos.length - 1].preview}
+                  alt="Letztes Foto"
+                  style={{ 
+                    width: 80, 
+                    height: 80, 
+                    objectFit: 'cover',
+                    borderRadius: 8,
+                    border: '2px solid #1976d2'
+                  }}
+                />
+                <Chip
+                  label={capturedPhotos.length}
+                  size="small"
+                  color="primary"
+                  sx={{ 
+                    position: 'absolute', 
+                    top: -8, 
+                    right: -8,
+                    fontWeight: 'bold'
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
+          
           <label htmlFor="camera-input">
             <Fab
               color="primary"
               component="span"
               size="large"
               disabled={uploading}
+              sx={{ position: 'relative' }}
             >
               <CameraIcon />
+              {capturedPhotos.length > 0 && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: 24,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {capturedPhotos.length}
+                </Box>
+              )}
             </Fab>
           </label>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Tippen Sie zum Fotografieren
+            {capturedPhotos.length === 0 
+              ? 'Tippen Sie zum Fotografieren'
+              : 'Nächstes Foto aufnehmen'
+            }
           </Typography>
         </Box>
 
@@ -296,21 +375,31 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
         )}
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions sx={{ justifyContent: 'space-between' }}>
         <Button onClick={handleClose} disabled={uploading}>
           Abbrechen
         </Button>
-        <Button
-          variant="contained"
-          onClick={handleUploadAll}
-          disabled={capturedPhotos.length === 0 || uploading}
-          startIcon={uploading ? <CircularProgress size={20} /> : <SaveIcon />}
-        >
-          {uploading 
-            ? `Lade hoch... (${Math.round(uploadProgress)}%)`
-            : `${capturedPhotos.length} Fotos speichern`
-          }
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {capturedPhotos.length > 0 && !uploading && (
+            <Button
+              variant="outlined"
+              onClick={handleClose}
+            >
+              Fertig
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            onClick={handleUploadAll}
+            disabled={capturedPhotos.length === 0 || uploading}
+            startIcon={uploading ? <CircularProgress size={20} /> : <SaveIcon />}
+          >
+            {uploading 
+              ? `Lade hoch... (${Math.round(uploadProgress)}%)`
+              : `${capturedPhotos.length} Fotos speichern`
+            }
+          </Button>
+        </Box>
       </DialogActions>
     </Dialog>
   );

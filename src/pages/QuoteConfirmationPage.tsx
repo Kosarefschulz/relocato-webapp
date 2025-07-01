@@ -63,6 +63,10 @@ const QuoteConfirmationPage: React.FC = () => {
   const [confirmed, setConfirmed] = useState(false);
   const [signatureModalOpen, setSignatureModalOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [dateConfirmed, setDateConfirmed] = useState(true); // Default: Datum ist bestätigt
+  const [dateUncertain, setDateUncertain] = useState(false); // Datum noch ungenau
+  const [confirmedDate, setConfirmedDate] = useState('');
+  const [confirmedAddress, setConfirmedAddress] = useState('');
 
   useEffect(() => {
     loadQuoteData();
@@ -118,11 +122,15 @@ const QuoteConfirmationPage: React.FC = () => {
           setCustomer(foundCustomer);
           setCustomerName(foundCustomer.name);
           setCustomerEmail(foundCustomer.email);
+          setConfirmedDate(foundCustomer.movingDate ? new Date(foundCustomer.movingDate).toISOString().split('T')[0] : '');
+          setConfirmedAddress(foundCustomer.fromAddress || '');
         } else {
           console.warn('⚠️ Kunde nicht gefunden, verwende Angebotsdaten');
           // Fallback: Verwende Daten aus dem Angebot
           setCustomerName(foundQuote.customerName || 'Kunde');
           setCustomerEmail('');
+          setConfirmedDate('');
+          setConfirmedAddress('');
         }
       } catch (customerError) {
         console.error('⚠️ Fehler beim Laden des Kunden:', customerError);
@@ -144,7 +152,7 @@ const QuoteConfirmationPage: React.FC = () => {
   };
 
   const handleConfirmQuote = async () => {
-    if (!quote || !agbAccepted) return;
+    if (!quote || !agbAccepted || !customerEmail) return;
 
     setConfirming(true);
     try {
@@ -154,7 +162,10 @@ const QuoteConfirmationPage: React.FC = () => {
         customerId: quote.customerId, // Explizit customerId beibehalten
         status: 'confirmed' as const,
         confirmedAt: new Date(),
-        confirmedBy: customerEmail || customerName || 'Kunde'
+        confirmedBy: customerEmail || customerName || 'Kunde',
+        confirmedDate: dateUncertain ? 'Noch zu klären' : confirmedDate,
+        confirmedAddress: confirmedAddress,
+        dateUncertain: dateUncertain
       };
       
       console.log('📝 Aktualisiere Angebot:', {
@@ -517,7 +528,27 @@ const QuoteConfirmationPage: React.FC = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <Stack spacing={2} sx={{ mt: 2 }}>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            {/* Kundendetails Anzeige */}
+            <Box sx={{ 
+              backgroundColor: 'grey.50', 
+              p: 2, 
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'grey.300'
+            }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Ihre Angaben:
+              </Typography>
+              <Typography variant="body2">
+                <strong>Name:</strong> {customerName || customer?.name || 'Nicht angegeben'}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Adresse:</strong> {confirmedAddress || customer?.fromAddress || 'Nicht angegeben'}
+              </Typography>
+            </Box>
+
+            {/* Name und Email Eingabe */}
             <TextField
               label="Ihr Name"
               value={customerName}
@@ -533,6 +564,69 @@ const QuoteConfirmationPage: React.FC = () => {
               fullWidth
               required
             />
+            
+            {/* Adresse Eingabe */}
+            <TextField
+              label="Umzugsadresse (Von)"
+              value={confirmedAddress}
+              onChange={(e) => setConfirmedAddress(e.target.value)}
+              fullWidth
+              multiline
+              rows={2}
+              helperText="Bitte geben Sie die vollständige Adresse ein"
+            />
+            
+            {/* Datum Bestätigung */}
+            <Box sx={{ 
+              backgroundColor: 'primary.50', 
+              p: 2, 
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'primary.200'
+            }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Umzugsdatum:
+              </Typography>
+              
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    checked={dateConfirmed && !dateUncertain} 
+                    onChange={(e) => {
+                      setDateConfirmed(e.target.checked);
+                      if (e.target.checked) setDateUncertain(false);
+                    }}
+                  />
+                }
+                label="Datum bestätigt"
+              />
+              
+              {dateConfirmed && !dateUncertain && (
+                <TextField
+                  label="Umzugsdatum"
+                  type="date"
+                  value={confirmedDate}
+                  onChange={(e) => setConfirmedDate(e.target.value)}
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  InputLabelProps={{ shrink: true }}
+                  required
+                />
+              )}
+              
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    checked={dateUncertain} 
+                    onChange={(e) => {
+                      setDateUncertain(e.target.checked);
+                      if (e.target.checked) setDateConfirmed(false);
+                    }}
+                  />
+                }
+                label="Datum noch ungenau (wird später geklärt)"
+              />
+            </Box>
             
             <Alert severity="info" sx={{ mt: 2 }}>
               Mit der Bestätigung erteilen Sie uns den verbindlichen Auftrag zur 
@@ -558,7 +652,7 @@ const QuoteConfirmationPage: React.FC = () => {
             variant="contained"
             color="success"
             onClick={handleConfirmQuote}
-            disabled={!agbAccepted || !customerName || !customerEmail || confirming}
+            disabled={!agbAccepted || !customerName || !customerEmail || (!dateUncertain && !confirmedDate) || confirming}
             startIcon={confirming ? <CircularProgress size={20} /> : <CheckCircleIcon />}
           >
             Verbindlich bestätigen

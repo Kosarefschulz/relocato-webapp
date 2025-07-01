@@ -4,7 +4,11 @@ import { quoteCalculationService } from './quoteCalculation';
 
 export const sendConfirmationEmail = async (
   customer: Customer,
-  quote: Quote,
+  quote: Quote & { 
+    confirmedDate?: string;
+    confirmedAddress?: string;
+    dateUncertain?: boolean;
+  },
   customerEmail: string
 ): Promise<boolean> => {
   try {
@@ -51,6 +55,13 @@ export const sendConfirmationEmail = async (
       
       <p>wir freuen uns, dass Sie unser Angebot angenommen haben! Ihre Bestätigung wurde erfolgreich registriert.</p>
       
+      ${quote.dateUncertain ? `
+      <div style="background-color: #FFF3E0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #FF9800;">
+        <p style="margin: 0;"><strong>🗓️ Terminabstimmung:</strong> Da Sie angegeben haben, dass der Umzugstermin noch nicht feststeht, 
+        wird sich unser Kundenservice innerhalb von 24 Stunden bei Ihnen melden, um gemeinsam einen passenden Termin zu finden.</p>
+      </div>
+      ` : ''}
+      
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h3 style="color: #333; margin-top: 0;">Ihre Auftragsdetails:</h3>
         <ul style="list-style: none; padding: 0;">
@@ -63,13 +74,20 @@ export const sendConfirmationEmail = async (
             hour: '2-digit',
             minute: '2-digit'
           })}</li>
-          <li style="margin: 10px 0;"><strong>Umzugstermin:</strong> ${customer.movingDate ? new Date(customer.movingDate).toLocaleDateString('de-DE', {
-            weekday: 'long',
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-          }) : 'Nach Absprache'}</li>
-          <li style="margin: 10px 0;"><strong>Von:</strong> ${customer.fromAddress || 'Wird noch mitgeteilt'}</li>
+          <li style="margin: 10px 0;"><strong>Umzugstermin:</strong> ${quote.dateUncertain ? 'Noch zu klären (wird in Kürze mit Ihnen abgestimmt)' : 
+            quote.confirmedDate ? new Date(quote.confirmedDate).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            }) : 
+            customer.movingDate ? new Date(customer.movingDate).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            }) : 'Nach Absprache'}</li>
+          <li style="margin: 10px 0;"><strong>Von:</strong> ${quote.confirmedAddress || customer.fromAddress || 'Wird noch mitgeteilt'}</li>
           <li style="margin: 10px 0;"><strong>Nach:</strong> ${customer.toAddress || 'Wird noch mitgeteilt'}</li>
           <li style="margin: 10px 0;"><strong>Volumen:</strong> ${quoteDetails.volume} m³</li>
           <li style="margin: 10px 0;"><strong>Entfernung:</strong> ${quoteDetails.distance} km</li>
@@ -180,19 +198,32 @@ export const sendConfirmationEmail = async (
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h3 style="color: #333; margin-top: 0;">Ihre Vorteile bei uns:</h3>
         <ul style="list-style: none; padding: 0;">
-          <li style="margin: 5px 0;">✓ Transparente Preisgestaltung ohne versteckte Kosten</li>
-          <li style="margin: 5px 0;">✓ Professionelles und erfahrenes Umzugsteam</li>
-          <li style="margin: 5px 0;">✓ Umfassender Versicherungsschutz inklusive</li>
-          <li style="margin: 5px 0;">✓ Flexible Terminvereinbarung nach Ihren Wünschen</li>
+          <li style="margin: 5px 0;">✓ Festpreisgarantie - keine versteckten Kosten</li>
+          <li style="margin: 5px 0;">✓ Professionelles Team mit über 10 Jahren Erfahrung</li>
+          <li style="margin: 5px 0;">✓ Vollständiger Versicherungsschutz bis 5 Mio. Euro</li>
+          <li style="margin: 5px 0;">✓ Flexible Terminvereinbarung auch kurzfristig möglich</li>
+          <li style="margin: 5px 0;">✓ Kostenlose Bereitstellung von Umzugsmaterial</li>
+          <li style="margin: 5px 0;">✓ Auf Wunsch Übernahme aller behördlichen Formalitäten</li>
+        </ul>
+      </div>
+      
+      <div style="background-color: #FFF3E0; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #FF9800;">
+        <h3 style="color: #E65100; margin-top: 0;">Wichtige Informationen:</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 5px 0;">📋 <strong>Checkliste:</strong> Sie erhalten rechtzeitig unsere bewährte Umzugs-Checkliste</li>
+          <li style="margin: 5px 0;">📦 <strong>Verpackung:</strong> Alle Umzugsmaterialien werden kostenfrei zur Verfügung gestellt</li>
+          <li style="margin: 5px 0;">🔧 <strong>Montage:</strong> Möbel werden fachgerecht de- und montiert</li>
+          <li style="margin: 5px 0;">🚚 <strong>Transport:</strong> Moderne LKW mit Luftfederung für sicheren Transport</li>
         </ul>
       </div>
       
       <h3>Wie geht es weiter?</h3>
       <ol>
-        <li><strong>Auftragsbestätigung:</strong> Sie erhalten in Kürze eine detaillierte Auftragsbestätigung per E-Mail.</li>
-        <li><strong>Terminabsprache:</strong> Unser Team wird sich bezüglich der genauen Uhrzeiten mit Ihnen in Verbindung setzen.</li>
-        <li><strong>Vorbereitung:</strong> Ca. eine Woche vor dem Umzug erhalten Sie eine Checkliste zur optimalen Vorbereitung.</li>
-        <li><strong>Umzugstag:</strong> Unser Team erscheint pünktlich zum vereinbarten Termin.</li>
+        ${quote.dateUncertain ? '<li><strong>Terminvereinbarung:</strong> Wir kontaktieren Sie innerhalb von 24 Stunden zur genauen Terminabstimmung.</li>' : ''}
+        <li><strong>Detaillierte Planung:</strong> Unser Umzugsberater bespricht mit Ihnen alle Details und den genauen Ablauf.</li>
+        <li><strong>Vorbereitung:</strong> Ca. eine Woche vor dem Umzug erhalten Sie unsere bewährte Umzugs-Checkliste.</li>
+        <li><strong>Umzugstag:</strong> Unser erfahrenes Team erscheint pünktlich mit allen benötigten Materialien.</li>
+        <li><strong>Nachbetreuung:</strong> Auch nach dem Umzug sind wir für eventuelle Fragen für Sie da.</li>
       </ol>
       
       <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung:</p>
