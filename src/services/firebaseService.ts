@@ -106,6 +106,8 @@ class FirebaseService {
         console.error('Customers collection not initialized');
         return null;
       }
+      
+      // Versuche zuerst mit der direkten ID
       const docRef = doc(this.customersCollection, customerId);
       const docSnap = await getDoc(docRef);
       
@@ -131,6 +133,38 @@ class FirebaseService {
         
         return customerData as Customer;
       }
+      
+      // Wenn nicht gefunden, suche nach Kundennummer
+      console.log(`⚠️ Kunde mit ID ${customerId} nicht gefunden, suche nach Kundennummer...`);
+      const q = query(this.customersCollection, where('customerNumber', '==', customerId));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const foundDoc = querySnapshot.docs[0];
+        const data = foundDoc.data();
+        console.log(`✅ Kunde gefunden mit Firebase ID: ${foundDoc.id}`);
+        
+        const customerData: any = {
+          id: foundDoc.id,
+          ...data,
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' 
+            ? data.createdAt.toDate() 
+            : data.createdAt || new Date(),
+        };
+        
+        // Skip salesNotes for now to avoid errors
+        if (customerData.salesNotes) {
+          delete customerData.salesNotes;
+        }
+        
+        // Convert cancelledAt if exists
+        if (customerData.cancelledAt && typeof customerData.cancelledAt.toDate === 'function') {
+          customerData.cancelledAt = customerData.cancelledAt.toDate();
+        }
+        
+        return customerData as Customer;
+      }
+      
       return null;
     } catch (error) {
       console.error('❌ Fehler beim Laden des Kunden:', error);

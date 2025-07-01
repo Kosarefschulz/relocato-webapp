@@ -109,17 +109,23 @@ const QuoteConfirmationPage: React.FC = () => {
 
       // Lade Kundendaten
       console.log('🔍 Suche Kunde mit ID:', foundQuote.customerId);
-      const customers = await databaseService.getCustomers();
-      console.log(`📊 ${customers.length} Kunden gefunden`);
-      const foundCustomer = customers.find(c => c.id === foundQuote.customerId);
-      console.log('🎯 Gefundener Kunde:', foundCustomer);
-      
-      if (foundCustomer) {
-        setCustomer(foundCustomer);
-        setCustomerName(foundCustomer.name);
-        setCustomerEmail(foundCustomer.email);
-      } else {
-        console.warn('⚠️ Kunde nicht gefunden, verwende Angebotsdaten');
+      try {
+        // Verwende getCustomer statt getCustomers für bessere Performance und Kundennummer-Suche
+        const foundCustomer = await databaseService.getCustomer(foundQuote.customerId);
+        console.log('🎯 Gefundener Kunde:', foundCustomer);
+        
+        if (foundCustomer) {
+          setCustomer(foundCustomer);
+          setCustomerName(foundCustomer.name);
+          setCustomerEmail(foundCustomer.email);
+        } else {
+          console.warn('⚠️ Kunde nicht gefunden, verwende Angebotsdaten');
+          // Fallback: Verwende Daten aus dem Angebot
+          setCustomerName(foundQuote.customerName || 'Kunde');
+          setCustomerEmail('');
+        }
+      } catch (customerError) {
+        console.error('⚠️ Fehler beim Laden des Kunden:', customerError);
         // Fallback: Verwende Daten aus dem Angebot
         setCustomerName(foundQuote.customerName || 'Kunde');
         setCustomerEmail('');
