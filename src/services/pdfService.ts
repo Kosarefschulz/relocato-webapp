@@ -359,8 +359,10 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     doc.setLineWidth(0.5);
     doc.rect(margin, yPosition, rightMargin - margin, 30, 'D'); // Höher
     
-    const nettoPreis = quote.price / 1.19;
-    const mwst = quote.price - nettoPreis;
+    // Verwende calculation.finalPrice wenn vorhanden, sonst quote.price
+    const finalPrice = quote.calculation?.finalPrice || quote.price;
+    const nettoPreis = finalPrice / 1.19;
+    const mwst = finalPrice - nettoPreis;
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
@@ -385,7 +387,7 @@ export const generatePDF = async (customer: Customer, quote: QuoteData & { volum
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text('Gesamtsumme Festpreis inkl. MwSt.', margin + 5, yPosition + 27);
-    doc.text(quote.price.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 27, { align: 'right' });
+    doc.text(finalPrice.toFixed(2).replace('.', ',') + ' €', rightMargin - 5, yPosition + 27, { align: 'right' });
     
     yPosition += 40; // Viel mehr Abstand
     

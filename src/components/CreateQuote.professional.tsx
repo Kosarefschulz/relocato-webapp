@@ -258,7 +258,7 @@ const CreateQuote: React.FC = () => {
       
       const pdfBlob = isWertvoll 
         ? await generateWertvollProfessionalPDF(customer, quoteData)
-        : await generatePDF(customer, quoteData);
+        : await generatePDF(customer, quoteData, generateEmailHTML(customer, calculation, quoteDetails));
       console.log('✅ PDF erstellt, Größe:', pdfBlob.size, 'bytes');
       
       const url = URL.createObjectURL(pdfBlob);

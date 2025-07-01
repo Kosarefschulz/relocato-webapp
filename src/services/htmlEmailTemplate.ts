@@ -5,7 +5,7 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
   // Berechne Preise mit finalPrice
   const nettoPreis = calculation.finalPrice / 1.19;
   const mwst = calculation.finalPrice - nettoPreis;
-  const rabatt = calculation.basePrice * 0.05; // 5% Rabatt
+  // Rabatt wurde entfernt - nicht mehr verwendet
   const grundhaftung = Math.round(quoteDetails.volume * 620);
   
   const angebotNr = `3097191025051418452${Math.floor(Math.random() * 10)}`;
@@ -525,10 +525,10 @@ export const generateEmailHTML = (customer: Customer, calculation: QuoteCalculat
     </div>
     
     <p class="footer-text">
-        RELOCATO® Bielefeld | Detmolder Str. 234a, 33605 Bielefeld<br>
+        RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld<br>
         Tel: (0521) 1200551-0 | E-Mail: bielefeld@relocato.de | Web: www.relocato.de<br>
-        Wertvoll Dienstleistungen GmbH | Geschäftsführer: M. Michailowski & M. Knaub<br>
-        Amtsgericht Bielefeld HRB 43574 | USt-IdNr.: DE328644143
+        Wertvoll Dienstleistungen GmbH | Geschäftsführer: Sergej Schulz<br>
+        Amtsgericht Bielefeld HRB 43574 | USt-IdNr.: DE815143866
     </p>
 </body>
 </html>`;
