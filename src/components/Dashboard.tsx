@@ -19,6 +19,7 @@ import MobileLayout from './MobileLayout';
 import SyncStatus from './SyncStatus';
 import LogoutButton from './LogoutButton';
 import NotificationCenter from './NotificationCenter';
+import AcceptedQuotesPreview from './AcceptedQuotesPreview';
 import { motion } from 'framer-motion';
 
 const Dashboard: React.FC = () => {
@@ -131,6 +132,9 @@ const Dashboard: React.FC = () => {
               }
             </Typography>
           </motion.div>
+          
+          {/* Angenommene Angebote Vorschau */}
+          <AcceptedQuotesPreview />
           
           <Grid container spacing={isMobile ? 2 : 3} sx={{ justifyContent: 'center' }}>
             {dashboardItems.map((item, index) => (

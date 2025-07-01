@@ -68,6 +68,11 @@ export interface Quote {
   volume?: number;
   company?: 'relocato' | 'wertvoll' | 'ruempelschmiede'; // Firma für das Angebot
   distance?: number;
+  // Umzugsinformationen
+  moveDate?: string;
+  moveFrom?: string;
+  moveTo?: string;
+  notes?: string;
   // Service-Details
   packingRequested?: boolean;
   additionalServices?: string[];
