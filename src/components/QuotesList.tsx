@@ -164,14 +164,23 @@ const QuotesList: React.FC = () => {
       try {
         const success = await googleSheetsService.deleteQuote(quoteId);
         if (success) {
+          // Entferne das Angebot aus der lokalen Liste
           setQuotes(quotes.filter(q => q.id !== quoteId));
           setSnackbar({ open: true, message: 'Angebot erfolgreich gelöscht', severity: 'success' });
+          
+          // Lade die Angebote nach 1 Sekunde neu, um sicherzustellen, dass die Änderung persistiert wurde
+          setTimeout(() => {
+            loadQuotes();
+          }, 1000);
         } else {
           setSnackbar({ open: true, message: 'Fehler beim Löschen des Angebots', severity: 'error' });
         }
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
         setSnackbar({ open: true, message: 'Fehler beim Löschen des Angebots', severity: 'error' });
+        
+        // Bei Fehler: Lade die Liste neu, um den korrekten Stand anzuzeigen
+        loadQuotes();
       }
     }
   };
