@@ -23,7 +23,17 @@ export const sendClearanceQuoteEmail = async (
   const company = getCompanyConfig('ruempelschmiede');
   
   // Verwende das neue Template
-  const emailHtml = generateRuempelschmiedeEmailHTML(customer, quote, recipientEmail);
+  const emailHtml = generateRuempelschmiedeEmailHTML(
+    customer.name,
+    `RS-${quote.id}`,
+    quote.price,
+    customer.movingDate,
+    customer.fromAddress,
+    customer.toAddress,
+    quote.volume,
+    quote.distance,
+    []
+  );
 
   // Altes Template wird nicht mehr benötigt, aber für Referenz behalten
   /*

@@ -191,18 +191,33 @@ const CreateQuoteMultiCompany: React.FC = () => {
       setLoading(true);
       const finalPrice = useManualPrice ? manualTotalPrice : (calculation?.totalPrice || 0);
       
+      // Generate quote ID
+      const quoteId = Date.now().toString();
+      
       const quoteData = {
+        id: quoteId,
         customerId: customer.id,
         customerName: customer.name,
         price: finalPrice,
         comment: quoteDetails.notes,
         createdAt: new Date(),
         createdBy: 'user',
-        status: 'Angebot versendet',
+        status: 'sent' as const,
         volume: quoteDetails.volume,
         distance: quoteDetails.distance,
-        details: quoteDetails,
-        calculation: calculation,
+        packingRequested: quoteDetails.packingRequested,
+        boxCount: quoteDetails.boxCount,
+        parkingZonePrice: quoteDetails.parkingZonePrice,
+        storagePrice: quoteDetails.storagePrice,
+        furnitureAssemblyPrice: quoteDetails.furnitureAssemblyPrice,
+        furnitureDisassemblyPrice: quoteDetails.furnitureDisassemblyPrice,
+        cleaningService: quoteDetails.cleaningService,
+        cleaningHours: quoteDetails.cleaningHours,
+        clearanceService: quoteDetails.clearanceService,
+        clearanceVolume: quoteDetails.clearanceVolume,
+        pianoTransport: quoteDetails.pianoTransport,
+        heavyItemsCount: quoteDetails.heavyItemsCount,
+        packingMaterials: quoteDetails.packingMaterials,
         company: selectedCompany
       };
       
@@ -221,7 +236,6 @@ const CreateQuoteMultiCompany: React.FC = () => {
       
       const companyConfig = COMPANY_CONFIGS[selectedCompany];
       // Generate confirmation token
-      const quoteId = Date.now().toString();
       const token = tokenService.generateQuoteToken({ id: quoteId } as any);
       
       // Generate email with QR code and confirmation link
@@ -282,17 +296,29 @@ const CreateQuoteMultiCompany: React.FC = () => {
       const finalPrice = useManualPrice ? manualTotalPrice : (calculation?.totalPrice || 0);
       
       const quoteData = {
+        id: Date.now().toString(),
         customerId: customer.id,
         customerName: customer.name,
         price: finalPrice,
         comment: quoteDetails.notes,
         createdAt: new Date(),
         createdBy: 'user',
-        status: 'Entwurf',
+        status: 'draft' as const,
         volume: quoteDetails.volume,
         distance: quoteDetails.distance,
-        details: quoteDetails,
-        calculation: calculation,
+        packingRequested: quoteDetails.packingRequested,
+        boxCount: quoteDetails.boxCount,
+        parkingZonePrice: quoteDetails.parkingZonePrice,
+        storagePrice: quoteDetails.storagePrice,
+        furnitureAssemblyPrice: quoteDetails.furnitureAssemblyPrice,
+        furnitureDisassemblyPrice: quoteDetails.furnitureDisassemblyPrice,
+        cleaningService: quoteDetails.cleaningService,
+        cleaningHours: quoteDetails.cleaningHours,
+        clearanceService: quoteDetails.clearanceService,
+        clearanceVolume: quoteDetails.clearanceVolume,
+        pianoTransport: quoteDetails.pianoTransport,
+        heavyItemsCount: quoteDetails.heavyItemsCount,
+        packingMaterials: quoteDetails.packingMaterials,
         company: selectedCompany
       };
       
