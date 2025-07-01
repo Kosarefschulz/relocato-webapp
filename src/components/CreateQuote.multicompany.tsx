@@ -41,6 +41,7 @@ import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
 import { generatePDF } from '../services/pdfService';
 import { generateWertvollPDF } from '../services/pdfServiceWertvoll';
+import { generateRuempelschmiedePDF } from '../services/pdfServiceRuempelschmiede';
 import { tokenService } from '../services/tokenService';
 
 const CreateQuoteMultiCompany: React.FC = () => {
@@ -206,9 +207,17 @@ const CreateQuoteMultiCompany: React.FC = () => {
       };
       
       // Generate PDF based on selected company
-      const pdfBlob = selectedCompany === 'wertvoll' 
-        ? await generateWertvollPDF(customer, quoteData)
-        : await generatePDF(customer, quoteData);
+      let pdfBlob;
+      switch (selectedCompany) {
+        case 'wertvoll':
+          pdfBlob = await generateWertvollPDF(customer, quoteData);
+          break;
+        case 'ruempelschmiede':
+          pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
+          break;
+        default:
+          pdfBlob = await generatePDF(customer, quoteData);
+      }
       
       const companyConfig = COMPANY_CONFIGS[selectedCompany];
       // Generate confirmation token
@@ -288,9 +297,17 @@ const CreateQuoteMultiCompany: React.FC = () => {
       };
       
       // Generate PDF based on selected company
-      const pdfBlob = selectedCompany === 'wertvoll' 
-        ? await generateWertvollPDF(customer, quoteData)
-        : await generatePDF(customer, quoteData);
+      let pdfBlob;
+      switch (selectedCompany) {
+        case 'wertvoll':
+          pdfBlob = await generateWertvollPDF(customer, quoteData);
+          break;
+        case 'ruempelschmiede':
+          pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
+          break;
+        default:
+          pdfBlob = await generatePDF(customer, quoteData);
+      }
       
       const url = URL.createObjectURL(pdfBlob);
       const fileName = `Angebot_${customer.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('de-DE').replace(/\./g, '-')}.pdf`;
@@ -364,12 +381,31 @@ const CreateQuoteMultiCompany: React.FC = () => {
                   </Box>
                 </Box>
               </ToggleButton>
+              <ToggleButton value="ruempelschmiede" aria-label="Rümpel Schmiede">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <BusinessIcon />
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Typography variant="body2" fontWeight="bold">
+                      Rümpel Schmiede
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Professionelle Entrümpelung
+                    </Typography>
+                  </Box>
+                </Box>
+              </ToggleButton>
             </ToggleButtonGroup>
           </Box>
           
           {selectedCompany === 'wertvoll' && (
             <Alert severity="info" sx={{ mt: 1 }}>
               Wertvoll Dienstleistungen spezialisiert sich auf Entrümpelungen, Rückbau und Renovierungsarbeiten.
+            </Alert>
+          )}
+          
+          {selectedCompany === 'ruempelschmiede' && (
+            <Alert severity="info" sx={{ mt: 1 }}>
+              Rümpel Schmiede ist Ihr Partner für professionelle Entrümpelungen mit Festpreisgarantie.
             </Alert>
           )}
         </Box>
@@ -528,7 +564,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
                 />
               </Grid>
             </>
-          ) : (
+          ) : selectedCompany === 'wertvoll' ? (
             <>
               <Grid item xs={12} sm={6}>
                 <FormControlLabel
@@ -571,6 +607,74 @@ const CreateQuoteMultiCompany: React.FC = () => {
                     sx={{ mt: 1 }}
                   />
                 )}
+              </Grid>
+            </>
+          ) : (
+            // Rümpel Schmiede Services
+            <>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedServices.clearance}
+                      onChange={(e) => setSelectedServices({ ...selectedServices, clearance: e.target.checked })}
+                    />
+                  }
+                  label="Komplette Entrümpelung"
+                />
+                {selectedServices.clearance && (
+                  <TextField
+                    fullWidth
+                    label="Geschätztes Volumen (m³)"
+                    type="number"
+                    value={quoteDetails.clearanceVolume}
+                    onChange={(e) => setQuoteDetails({ ...quoteDetails, clearanceVolume: Number(e.target.value) })}
+                    sx={{ mt: 1 }}
+                  />
+                )}
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedServices.cleaning}
+                      onChange={(e) => setSelectedServices({ ...selectedServices, cleaning: e.target.checked })}
+                    />
+                  }
+                  label="Besenreine Übergabe"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedServices.heavyItems}
+                      onChange={(e) => setSelectedServices({ ...selectedServices, heavyItems: e.target.checked })}
+                    />
+                  }
+                  label="Sperrgut-Entsorgung"
+                />
+                {selectedServices.heavyItems && (
+                  <TextField
+                    fullWidth
+                    label="Anzahl Sperrgut-Teile"
+                    type="number"
+                    value={quoteDetails.heavyItemsCount}
+                    onChange={(e) => setQuoteDetails({ ...quoteDetails, heavyItemsCount: Number(e.target.value) })}
+                    sx={{ mt: 1 }}
+                  />
+                )}
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedServices.packingMaterials}
+                      onChange={(e) => setSelectedServices({ ...selectedServices, packingMaterials: e.target.checked })}
+                    />
+                  }
+                  label="Wertgegenstände separieren"
+                />
               </Grid>
             </>
           )}

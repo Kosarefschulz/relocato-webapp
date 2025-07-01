@@ -331,7 +331,28 @@ class FirebaseService {
   async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<void> {
     try {
       if (!this.quotesCollection) throw new Error('Quotes collection not initialized');
-      const docRef = doc(this.quotesCollection, quoteId);
+      
+      // Versuche zuerst mit der direkten ID
+      let docRef = doc(this.quotesCollection, quoteId);
+      let docSnapshot = await getDoc(docRef);
+      
+      // Wenn das Dokument nicht existiert, suche nach der numerischen ID
+      if (!docSnapshot.exists()) {
+        console.log(`⚠️ Dokument mit ID ${quoteId} nicht gefunden, suche nach numerischer ID...`);
+        
+        // Suche das Dokument mit der numerischen ID im Datenfeld
+        const q = query(this.quotesCollection, where('id', '==', quoteId));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          // Verwende die Firebase Document ID des gefundenen Dokuments
+          const foundDoc = querySnapshot.docs[0];
+          docRef = foundDoc.ref;
+          console.log(`✅ Dokument gefunden mit Firebase ID: ${foundDoc.id}`);
+        } else {
+          throw new Error(`Angebot mit ID ${quoteId} nicht gefunden`);
+        }
+      }
       
       // Filter out undefined values
       const updateData: any = {

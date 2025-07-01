@@ -216,24 +216,43 @@ const QuoteConfirmationPage: React.FC = () => {
   };
 
   const handleDownloadPdf = async (withSignature: boolean = false, signatureData?: SignatureData) => {
-    if (!quote || !customer) return;
+    if (!quote) return;
 
     try {
       setDownloadingPdf(true);
       
+      // Erstelle ein Fallback-Customer-Objekt wenn keiner gefunden wurde
+      const customerForPdf = customer || {
+        id: quote.customerId,
+        name: customerName || quote.customerName || 'Kunde',
+        email: customerEmail || '',
+        phone: '',
+        fromAddress: 'Wird noch mitgeteilt',
+        toAddress: 'Wird noch mitgeteilt',
+        movingDate: new Date().toISOString(),
+        apartment: {
+          rooms: 0,
+          area: 0,
+          floor: 0,
+          hasElevator: false
+        },
+        services: []
+      };
+      
       const quoteData = {
-        customerId: customer?.id || quote.customerId,
-        customerName: customer?.name || customerName,
+        customerId: customerForPdf.id,
+        customerName: customerForPdf.name,
         price: quote.price,
         comment: quote.comment || '',
         createdAt: quote.createdAt,
         createdBy: quote.createdBy,
         status: quote.status,
         volume: quote.volume || 50,
-        distance: quote.distance || 25
+        distance: quote.distance || 25,
+        company: quote.company
       };
 
-      const pdfBlob = await generatePDF(customer, quoteData);
+      const pdfBlob = await generatePDF(customerForPdf, quoteData);
       
       // Download
       const url = URL.createObjectURL(pdfBlob);
