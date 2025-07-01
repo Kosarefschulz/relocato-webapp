@@ -757,7 +757,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
             <Divider sx={{ my: 2 }} />
             
             <Box sx={{ mb: 2 }}>
-              {calculation.basePrice > 0 && (
+              {calculation.basePrice > 0 && !useManualPrice && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography>Basispreis</Typography>
                   <Typography>€{calculation.basePrice.toFixed(2)}</Typography>
