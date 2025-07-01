@@ -34,12 +34,12 @@ export const COMPANY_CONFIGS: Record<CompanyType, CompanyConfig> = {
     legalName: 'Relocato GmbH',
     services: 'Professionelle Umzugsdienstleistungen',
     address: {
-      street: 'Hauptstraße 1',
+      street: 'Albrechtstraße 27',
       city: 'Bielefeld',
-      zip: '33602'
+      zip: '33615'
     },
     contact: {
-      phone: '0521 1200510',
+      phone: '(0521) 1200551-0',
       email: 'info@relocato.de'
     },
     bank: {
@@ -61,10 +61,10 @@ export const COMPANY_CONFIGS: Record<CompanyType, CompanyConfig> = {
     address: {
       street: 'Albrechtstraße 27',
       city: 'Bielefeld',
-      zip: '33602'
+      zip: '33615'
     },
     contact: {
-      phone: '0521 12005510',
+      phone: '(0521) 1200551-0',
       mobile: '0174 8083023',
       email: 'wertvolldienstleistungen@gmail.com'
     },
@@ -90,7 +90,7 @@ export const COMPANY_CONFIGS: Record<CompanyType, CompanyConfig> = {
       zip: '33615'
     },
     contact: {
-      phone: '0521 12005510',
+      phone: '(0521) 1200551-0',
       email: 'info@ruempelschmiede.de'
     },
     bank: {

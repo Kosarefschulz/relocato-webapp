@@ -357,7 +357,7 @@ const CreateQuote: React.FC = () => {
               
               <p style="font-size: 12px; color: #666;">
                 RELOCATO® Bielefeld<br>
-                Detmolder Str. 234a, 33605 Bielefeld<br>
+                Albrechtstraße 27, 33615 Bielefeld<br>
                 Wertvoll Dienstleistungen GmbH | HRB 43574
               </p>
             </div>
@@ -448,7 +448,7 @@ const CreateQuote: React.FC = () => {
               
               <p style="font-size: 12px; color: #666;">
                 RELOCATO® Bielefeld<br>
-                Detmolder Str. 234a, 33605 Bielefeld<br>
+                Albrechtstraße 27, 33615 Bielefeld<br>
                 Wertvoll Dienstleistungen GmbH | HRB 43574
               </p>
             </div>

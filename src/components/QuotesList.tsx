@@ -391,6 +391,40 @@ const QuotesList: React.FC = () => {
   const acceptedQuotes = quotes.filter(q => q.status === 'accepted' || q.status === 'invoiced').length;
   const acceptanceRate = totalQuotes > 0 ? (acceptedQuotes / totalQuotes) * 100 : 0;
 
+  // Sort quotes by status: accepted first, then rejected, then rest
+  const sortedQuotes = [...quotes].sort((a, b) => {
+    const statusOrder = {
+      'accepted': 0,
+      'invoiced': 1,
+      'rejected': 2,
+      'sent': 3,
+      'draft': 4
+    };
+    
+    const orderA = statusOrder[a.status as keyof typeof statusOrder] ?? 5;
+    const orderB = statusOrder[b.status as keyof typeof statusOrder] ?? 5;
+    
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    
+    // If same status, sort by date (newest first)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  // Get border color based on status
+  const getBorderColor = (status: Quote['status']) => {
+    switch (status) {
+      case 'accepted':
+      case 'invoiced':
+        return theme.palette.success.main;
+      case 'rejected':
+        return theme.palette.error.main;
+      default:
+        return theme.palette.grey[400];
+    }
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -561,8 +595,40 @@ const QuotesList: React.FC = () => {
 
       {/* Quotes List */}
       <Grid container spacing={2}>
-        {quotes.map((quote, index) => (
-          <Grid item xs={12} key={quote.id}>
+        {sortedQuotes.map((quote, index) => {
+          // Check if we need to show a status group header
+          const showStatusHeader = index === 0 || sortedQuotes[index - 1].status !== quote.status;
+          const statusGroupTitle = quote.status === 'accepted' || quote.status === 'invoiced' 
+            ? '✅ Angenommene Angebote'
+            : quote.status === 'rejected'
+            ? '❌ Abgelehnte Angebote'
+            : '📋 Offene Angebote';
+          
+          return (
+            <React.Fragment key={quote.id}>
+              {showStatusHeader && (
+                <Grid item xs={12}>
+                  <Box sx={{ 
+                    mt: index === 0 ? 0 : 3, 
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                  }}>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        fontWeight: 'bold',
+                        color: getBorderColor(quote.status)
+                      }}
+                    >
+                      {statusGroupTitle}
+                    </Typography>
+                    <Divider sx={{ flex: 1 }} />
+                  </Box>
+                </Grid>
+              )}
+              <Grid item xs={12}>
             <MotionCard
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -576,8 +642,14 @@ const QuotesList: React.FC = () => {
               sx={{
                 cursor: selectMode ? 'pointer' : 'default',
                 border: selectMode && selectedQuotes.includes(quote.id) 
-                  ? `2px solid ${theme.palette.primary.main}` 
-                  : '1px solid transparent',
+                  ? `3px solid ${theme.palette.primary.main}` 
+                  : `2px solid ${getBorderColor(quote.status)}`,
+                boxShadow: quote.status === 'accepted' || quote.status === 'invoiced' 
+                  ? `0 0 8px ${alpha(theme.palette.success.main, 0.3)}`
+                  : quote.status === 'rejected'
+                  ? `0 0 8px ${alpha(theme.palette.error.main, 0.3)}`
+                  : 'none',
+                transition: 'all 0.3s ease',
               }}
             >
               <CardContent>
@@ -799,8 +871,10 @@ const QuotesList: React.FC = () => {
                 </Grid>
               </CardContent>
             </MotionCard>
-          </Grid>
-        ))}
+              </Grid>
+            </React.Fragment>
+          );
+        })}
       </Grid>
 
       {/* Invoice Dialog */}

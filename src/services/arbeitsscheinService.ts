@@ -264,7 +264,7 @@ export const generateArbeitsschein = (data: ArbeitsscheinData): Blob => {
   // Footer
   doc.setTextColor(102, 102, 102);
   doc.setFontSize(8);
-  centerText('RELOCATO® Bielefeld | Detmolder Str. 234a, 33605 Bielefeld | Tel: (0521) 1200551-0', pageHeight - 20);
+  centerText('RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageHeight - 20);
   centerText('www.relocato.de | Wertvoll Dienstleistungen GmbH', pageHeight - 17);
 
   return doc.output('blob');
