@@ -18,7 +18,9 @@ import { sendEmail } from '../services/emailService';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
+import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
 import { generatePDF } from '../services/pdfService';
+import { tokenService } from '../services/tokenService';
 import { useResponsive } from '../hooks/useResponsive';
 
 const CreateQuote: React.FC = () => {
@@ -127,8 +129,11 @@ const CreateQuote: React.FC = () => {
     try {
       console.log('💰 Speichere Angebot...');
       
+      const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const token = tokenService.generateQuoteToken({ id: quoteId } as any);
+      
       const quote = {
-        id: `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: quoteId,
         customerId: customer.id,
         customerName: customer.name,
         price: calculation.finalPrice,
@@ -139,7 +144,8 @@ const CreateQuote: React.FC = () => {
         volume: quoteDetails.volume,
         distance: quoteDetails.distance,
         calculation: calculation,
-        details: quoteDetails
+        details: quoteDetails,
+        confirmationToken: token
       };
       
       await googleSheetsService.addQuote(quote);
@@ -182,11 +188,19 @@ const CreateQuote: React.FC = () => {
       // PDF generieren
       const pdfBlob = await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));
       
-      // E-Mail senden
+      // E-Mail senden mit neuem Template inkl. QR-Code und Bestätigungslink
+      const emailContent = generateQuoteEmailHTMLSync({
+        customer,
+        calculation,
+        quoteDetails,
+        confirmationToken: quote.confirmationToken,
+        companyName: 'RELOCATO® Bielefeld'
+      });
+      
       const emailData = {
         to: customer.email,
-        subject: `Ihr Umzugsangebot von wertvoll`,
-        content: generateEmailHTML(customer, calculation, quoteDetails),
+        subject: `Ihr Umzugsangebot von RELOCATO®`,
+        content: emailContent,
         attachments: [{
           filename: `Umzugsangebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
           content: pdfBlob

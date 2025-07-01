@@ -34,6 +34,7 @@ import { databaseService as googleSheetsService } from '../config/database.confi
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import { tokenService } from '../services/tokenService';
+import { generateQRCode } from '../services/qrCodeService';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -281,32 +282,85 @@ const CreateQuote: React.FC = () => {
         };
         
         const pdfBlob = await generatePDF(customer, quoteData, htmlContent);
+        const confirmationUrl = tokenService.generateConfirmationUrl(confirmationToken);
+        const qrCodeDataUrl = await generateQRCode(confirmationUrl);
         
         const emailData = {
           to: customer.email,
           subject: `Ihr Umzugsangebot von RELOCATO® Bielefeld`,
           content: `
-            Sehr geehrte/r ${customer.name},
-            
-            vielen Dank für Ihre Anfrage! Anbei erhalten Sie Ihr persönliches Umzugsangebot.
-            
-            Angebotsübersicht:
-            - Umzugstermin: ${customer.movingDate || 'Nach Absprache'}
-            - Von: ${customer.fromAddress || 'Wird noch mitgeteilt'}
-            - Nach: ${customer.toAddress || 'Wird noch mitgeteilt'}
-            - Volumen: ${quoteDetails.volume} m³
-            - Entfernung: ${quoteDetails.distance} km
-            
-            Gesamtpreis: ${calculation.finalPrice.toFixed(2).replace('.', ',')} € (inkl. 19% MwSt.)
-            
-            Das detaillierte Angebot finden Sie im PDF-Anhang.
-            
-            Bei Fragen stehen wir Ihnen gerne zur Verfügung:
-            Tel: (0521) 1200551-0
-            E-Mail: bielefeld@relocato.de
-            
-            Mit freundlichen Grüßen
-            Ihr RELOCATO® Team Bielefeld
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #8BC34A;">Sehr geehrte/r ${customer.name},</h2>
+              
+              <p>vielen Dank für Ihre Anfrage! Anbei erhalten Sie Ihr persönliches Umzugsangebot.</p>
+              
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0;">Angebotsübersicht:</h3>
+                <ul style="list-style: none; padding: 0;">
+                  <li style="margin: 10px 0;"><strong>Umzugstermin:</strong> ${customer.movingDate || 'Nach Absprache'}</li>
+                  <li style="margin: 10px 0;"><strong>Von:</strong> ${customer.fromAddress || 'Wird noch mitgeteilt'}</li>
+                  <li style="margin: 10px 0;"><strong>Nach:</strong> ${customer.toAddress || 'Wird noch mitgeteilt'}</li>
+                  <li style="margin: 10px 0;"><strong>Volumen:</strong> ${quoteDetails.volume} m³</li>
+                  <li style="margin: 10px 0;"><strong>Entfernung:</strong> ${quoteDetails.distance} km</li>
+                </ul>
+              </div>
+              
+              <div style="background-color: #8BC34A; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                <h2 style="margin: 0; font-size: 36px;">Gesamtpreis: ${calculation.finalPrice.toFixed(2).replace('.', ',')} €</h2>
+                <p style="margin: 5px 0; opacity: 0.9;">inkl. 19% MwSt.</p>
+              </div>
+              
+              <div style="background-color: #E8F5E9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #8BC34A;">
+                <h3 style="color: #8BC34A; margin-top: 0; text-align: center;">Angebot online bestätigen</h3>
+                
+                <p style="text-align: center; margin: 20px 0;">
+                  <a href="${confirmationUrl}" 
+                     style="display: inline-block; background-color: #8BC34A; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                    ✓ Angebot online bestätigen
+                  </a>
+                </p>
+                
+                <p style="text-align: center; font-size: 14px; color: #666; margin: 10px 0;">
+                  Falls der Button nicht funktioniert, kopieren Sie diesen Link:<br>
+                  <a href="${confirmationUrl}" 
+                     style="color: #1976d2; word-break: break-all;">
+                    ${confirmationUrl}
+                  </a>
+                </p>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                  <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Oder scannen Sie diesen QR-Code:</p>
+                  <img src="${qrCodeDataUrl}" 
+                       alt="QR Code" 
+                       style="width: 200px; height: 200px; border: 2px solid #8BC34A; padding: 10px; background: white;">
+                </div>
+                
+                <ul style="list-style: none; padding: 0; margin: 15px 0; font-size: 14px;">
+                  <li style="margin: 5px 0;">✓ Angebot digital unterschreiben</li>
+                  <li style="margin: 5px 0;">✓ Verbindliche Auftragserteilung</li>
+                  <li style="margin: 5px 0;">✓ Sofortige Bestätigung erhalten</li>
+                </ul>
+              </div>
+              
+              <p>Das detaillierte Angebot finden Sie im PDF-Anhang.</p>
+              
+              <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung:</p>
+              <ul style="list-style: none; padding: 0;">
+                <li style="margin: 5px 0;">📞 Tel: (0521) 1200551-0</li>
+                <li style="margin: 5px 0;">✉️ E-Mail: bielefeld@relocato.de</li>
+              </ul>
+              
+              <p>Mit freundlichen Grüßen<br>
+              Ihr RELOCATO® Team Bielefeld</p>
+              
+              <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+              
+              <p style="font-size: 12px; color: #666;">
+                RELOCATO® Bielefeld<br>
+                Detmolder Str. 234a, 33605 Bielefeld<br>
+                Wertvoll Dienstleistungen GmbH | HRB 43574
+              </p>
+            </div>
           `,
           attachments: [{
             filename: `Umzugsangebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
@@ -327,37 +381,77 @@ const CreateQuote: React.FC = () => {
       try {
         console.log('📧 Sende Text-E-Mail ohne PDF...');
         
+        const confirmationUrl = tokenService.generateConfirmationUrl(confirmationToken);
+        
         const textEmailData = {
           to: customer.email,
           subject: `Ihr Umzugsangebot von RELOCATO® Bielefeld`,
           content: `
-            Sehr geehrte/r ${customer.name},
-            
-            vielen Dank für Ihre Anfrage! Hier ist Ihr Umzugsangebot:
-            
-            UMZUGSDETAILS:
-            - Von: ${customer.fromAddress || 'Wird noch mitgeteilt'}
-            - Nach: ${customer.toAddress || 'Wird noch mitgeteilt'}
-            - Umzugstermin: ${customer.movingDate || 'Nach Absprache'}
-            - Wohnungsgröße: ${customer.apartment?.rooms || '?'} Zimmer, ${customer.apartment?.area || '?'} m²
-            - Volumen: ${quoteDetails.volume} m³
-            - Entfernung: ${quoteDetails.distance} km
-            
-            GESAMTPREIS: ${calculation.finalPrice.toFixed(2).replace('.', ',')} € (inkl. 19% MwSt.)
-            
-            Dieses Angebot ist 14 Tage gültig.
-            
-            Bei Fragen stehen wir Ihnen gerne zur Verfügung:
-            Tel: (0521) 1200551-0
-            E-Mail: bielefeld@relocato.de
-            
-            Mit freundlichen Grüßen
-            Ihr RELOCATO® Team Bielefeld
-            
-            ---
-            RELOCATO® Bielefeld
-            Detmolder Str. 234a, 33605 Bielefeld
-            Wertvoll Dienstleistungen GmbH | HRB 43574
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #8BC34A;">Sehr geehrte/r ${customer.name},</h2>
+              
+              <p>vielen Dank für Ihre Anfrage! Hier ist Ihr Umzugsangebot:</p>
+              
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0;">UMZUGSDETAILS:</h3>
+                <ul style="list-style: none; padding: 0;">
+                  <li style="margin: 10px 0;"><strong>Von:</strong> ${customer.fromAddress || 'Wird noch mitgeteilt'}</li>
+                  <li style="margin: 10px 0;"><strong>Nach:</strong> ${customer.toAddress || 'Wird noch mitgeteilt'}</li>
+                  <li style="margin: 10px 0;"><strong>Umzugstermin:</strong> ${customer.movingDate || 'Nach Absprache'}</li>
+                  <li style="margin: 10px 0;"><strong>Wohnungsgröße:</strong> ${customer.apartment?.rooms || '?'} Zimmer, ${customer.apartment?.area || '?'} m²</li>
+                  <li style="margin: 10px 0;"><strong>Volumen:</strong> ${quoteDetails.volume} m³</li>
+                  <li style="margin: 10px 0;"><strong>Entfernung:</strong> ${quoteDetails.distance} km</li>
+                </ul>
+              </div>
+              
+              <div style="background-color: #8BC34A; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                <h2 style="margin: 0; font-size: 36px;">GESAMTPREIS: ${calculation.finalPrice.toFixed(2).replace('.', ',')} €</h2>
+                <p style="margin: 5px 0; opacity: 0.9;">inkl. 19% MwSt.</p>
+              </div>
+              
+              <div style="background-color: #E8F5E9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #8BC34A;">
+                <h3 style="color: #8BC34A; margin-top: 0; text-align: center;">Angebot online ansehen & bestätigen</h3>
+                
+                <p style="text-align: center; margin: 20px 0;">
+                  <a href="${confirmationUrl}" 
+                     style="display: inline-block; background-color: #8BC34A; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                    ✓ Angebot online ansehen
+                  </a>
+                </p>
+                
+                <p style="text-align: center; font-size: 14px; color: #666; margin: 10px 0;">
+                  Falls der Button nicht funktioniert, kopieren Sie diesen Link:<br>
+                  <a href="${confirmationUrl}" 
+                     style="color: #1976d2; word-break: break-all;">
+                    ${confirmationUrl}
+                  </a>
+                </p>
+                
+                <p style="text-align: center; font-size: 14px; color: #666; margin: 20px 0;">
+                  <strong>Hinweis:</strong> Um den QR-Code zu sehen und das Angebot digital zu unterschreiben,<br>
+                  besuchen Sie bitte den obigen Link.
+                </p>
+              </div>
+              
+              <p>Dieses Angebot ist 14 Tage gültig.</p>
+              
+              <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung:</p>
+              <ul style="list-style: none; padding: 0;">
+                <li style="margin: 5px 0;">📞 Tel: (0521) 1200551-0</li>
+                <li style="margin: 5px 0;">✉️ E-Mail: bielefeld@relocato.de</li>
+              </ul>
+              
+              <p>Mit freundlichen Grüßen<br>
+              Ihr RELOCATO® Team Bielefeld</p>
+              
+              <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+              
+              <p style="font-size: 12px; color: #666;">
+                RELOCATO® Bielefeld<br>
+                Detmolder Str. 234a, 33605 Bielefeld<br>
+                Wertvoll Dienstleistungen GmbH | HRB 43574
+              </p>
+            </div>
           `
         };
         

@@ -26,6 +26,8 @@ import { Quote, Customer, Invoice } from '../types';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { generatePDF, generateInvoicePDF } from '../services/pdfService';
 import { sendEmail } from '../services/emailService';
+import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
+import { tokenService } from '../services/tokenService';
 import { motion } from 'framer-motion';
 import QuoteVersionManager from './QuoteVersionManager';
 
@@ -201,20 +203,22 @@ const QuotesList: React.FC = () => {
       // Generate PDF first
       const pdfBlob = await generatePDF(customer, quote);
       
+      // Generate or use existing confirmation token
+      const token = quote.confirmationToken || tokenService.generateQuoteToken(quote);
+      
+      // Generate email with QR code and confirmation link
+      const emailContent = generateQuoteEmailHTMLSync({
+        customer,
+        calculation: { finalPrice: quote.price } as any,
+        quoteDetails: { volume: quote.volume || 0, distance: quote.distance || 0 },
+        confirmationToken: token
+      });
+      
       // Send email
       const emailData = {
         to: customer.email,
         subject: `Ihr Umzugsangebot von Relocato`,
-        content: `
-          <h2>Sehr geehrte/r ${customer.name},</h2>
-          <p>vielen Dank für Ihre Anfrage. Anbei finden Sie Ihr individuelles Umzugsangebot.</p>
-          <p><strong>Umzugstermin:</strong> ${new Date(customer.movingDate).toLocaleDateString('de-DE')}</p>
-          <p><strong>Von:</strong> ${customer.fromAddress}</p>
-          <p><strong>Nach:</strong> ${customer.toAddress}</p>
-          <p><strong>Gesamtpreis:</strong> €${quote.price.toFixed(2)}</p>
-          <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
-          <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
-        `,
+        content: emailContent,
         attachments: [{
           filename: `Angebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
           content: pdfBlob
@@ -224,9 +228,12 @@ const QuotesList: React.FC = () => {
       const sent = await sendEmail(emailData);
       
       if (sent) {
-        // Update quote status to sent
-        const updatedQuote = { ...quote, status: 'sent' as const };
-        await googleSheetsService.updateQuote(quote.id, { status: 'sent' });
+        // Update quote status to sent and save token if newly generated
+        const updateData: any = { status: 'sent' };
+        if (!quote.confirmationToken) {
+          updateData.confirmationToken = token;
+        }
+        await googleSheetsService.updateQuote(quote.id, updateData);
         
         // Update local state immediately without reload
         setQuotes(prevQuotes => prevQuotes.map(q => 

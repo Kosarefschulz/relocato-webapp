@@ -16,8 +16,10 @@ import { sendEmail } from '../services/emailService';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
+import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
 import { generatePDF } from '../services/pdfService';
 import { generateWertvollProfessionalPDF } from '../services/pdfServiceWertvollProfessional';
+import { tokenService } from '../services/tokenService';
 
 const CreateQuote: React.FC = () => {
   const location = useLocation();
@@ -118,8 +120,11 @@ const CreateQuote: React.FC = () => {
     try {
       console.log('💰 Speichere Angebot...');
       
+      const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const token = tokenService.generateQuoteToken({ id: quoteId } as any);
+      
       const quote = {
-        id: `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: quoteId,
         customerId: customer.id,
         customerName: customer.name,
         price: calculation.finalPrice,
@@ -130,7 +135,8 @@ const CreateQuote: React.FC = () => {
         volume: quoteDetails.volume,
         distance: quoteDetails.distance,
         calculation: calculation,
-        details: quoteDetails
+        details: quoteDetails,
+        confirmationToken: token
       };
       
       await googleSheetsService.addQuote(quote);
@@ -183,11 +189,19 @@ const CreateQuote: React.FC = () => {
         ? await generateWertvollProfessionalPDF(customer, quote)
         : await generatePDF(customer, quote, generateEmailHTML(customer, calculation, quoteDetails));
       
-      // E-Mail senden
+      // E-Mail senden mit dem neuen Template inkl. QR-Code und Bestätigungslink
+      const emailContent = generateQuoteEmailHTMLSync({
+        customer,
+        calculation,
+        quoteDetails,
+        confirmationToken: quote.confirmationToken,
+        companyName: isWertvoll ? 'wertvoll' : 'RELOCATO® Bielefeld'
+      });
+      
       const emailData = {
         to: customer.email,
-        subject: `Ihr Umzugsangebot von wertvoll`,
-        content: generateEmailHTML(customer, calculation, quoteDetails),
+        subject: `Ihr Umzugsangebot von ${isWertvoll ? 'wertvoll' : 'RELOCATO®'}`,
+        content: emailContent,
         attachments: [{
           filename: `Umzugsangebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
           content: pdfBlob
