@@ -365,7 +365,7 @@ const AcceptedQuotesPreview: React.FC = () => {
                 startIcon={<ReceiptIcon />}
                 onClick={() => {
                   handleCloseDetails();
-                  navigate(`/customer/${selectedQuote.customerId}`);
+                  navigate(`/customer-details/${selectedQuote.customerId}`);
                 }}
               >
                 Zum Kunden

@@ -107,16 +107,33 @@ const DispositionPage: React.FC = () => {
 
   const loadDispositionCustomers = async () => {
     try {
+      console.log('🔍 Lade Dispositionsdaten...');
+      
       // Load quotes and customers from Google Sheets
       const [quotes, allCustomers] = await Promise.all([
         googleSheetsService.getQuotes(),
         googleSheetsService.getCustomers()
       ]);
       
-      // Filter accepted and confirmed quotes and map to disposition customers
+      console.log(`📊 Gefundene Angebote: ${quotes.length}`);
+      console.log(`👥 Gefundene Kunden: ${allCustomers.length}`);
+      
+      // Debug: Zeige alle Quote-Status
+      const statusCounts = quotes.reduce((acc: any, quote: any) => {
+        acc[quote.status] = (acc[quote.status] || 0) + 1;
+        return acc;
+      }, {});
+      console.log('📈 Status-Verteilung:', statusCounts);
+      
+      // Filter nur bestätigte (confirmed) Angebote
       const acceptedQuotes = quotes.filter((quote: any) => 
-        quote.status === 'accepted' || quote.status === 'confirmed'
+        quote.status === 'confirmed'
       );
+      
+      console.log(`✅ Bestätigte Angebote: ${acceptedQuotes.length}`);
+      acceptedQuotes.forEach((q: any) => {
+        console.log(`- Angebot ${q.id}: Status=${q.status}, Kunde=${q.customerId}, Erstellt=${q.createdAt}`);
+      });
       
       const dispositionCustomers = acceptedQuotes.map((quote: any) => {
         const customer = allCustomers.find((c: any) => c.id === quote.customerId);
@@ -143,9 +160,12 @@ const DispositionPage: React.FC = () => {
         };
       }).filter(Boolean);
       
-      setCustomers(dispositionCustomers.filter(c => c !== null) as DispositionCustomer[]);
+      const validCustomers = dispositionCustomers.filter(c => c !== null) as DispositionCustomer[];
+      console.log(`🎯 Gültige Dispositionskunden: ${validCustomers.length}`);
+      
+      setCustomers(validCustomers);
     } catch (error) {
-      console.error('Fehler beim Laden der Dispositionsdaten:', error);
+      console.error('❌ Fehler beim Laden der Dispositionsdaten:', error);
     }
   };
 

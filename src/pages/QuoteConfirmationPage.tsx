@@ -684,7 +684,7 @@ const QuoteConfirmationPage: React.FC = () => {
             variant="contained"
             color="success"
             onClick={handleConfirmQuote}
-            disabled={!agbAccepted || !customerName || !customerEmail || (!dateUncertain && !confirmedDate) || confirming}
+            disabled={!agbAccepted || !customerName || !customerEmail || (dateConfirmed && !dateUncertain && !confirmedDate) || confirming}
             startIcon={confirming ? <CircularProgress size={20} /> : <CheckCircleIcon />}
           >
             Verbindlich bestätigen
