@@ -1,4 +1,4 @@
-export type CompanyType = 'relocato' | 'wertvoll';
+export type CompanyType = 'relocato' | 'wertvoll' | 'ruempelschmiede';
 
 export interface CompanyConfig {
   type: CompanyType;
@@ -78,5 +78,30 @@ export const COMPANY_CONFIGS: Record<CompanyType, CompanyConfig> = {
       taxNumber: '305/5883/3310'
     },
     ceo: ['Markus Knaub', 'Michael Michailowski']
+  },
+  ruempelschmiede: {
+    type: 'ruempelschmiede',
+    name: 'Rümpel Schmiede',
+    legalName: 'Wertvoll Dienstleistungen GmbH',
+    services: 'Professionelle Entrümpelungen • Haushaltsauflösungen • Kellerentrümpelungen',
+    address: {
+      street: 'Albrechtstraße 27',
+      city: 'Bielefeld',
+      zip: '33615'
+    },
+    contact: {
+      phone: '0521 12005510',
+      email: 'info@ruempelschmiede.de'
+    },
+    bank: {
+      name: 'Volksbank Bielefeld',
+      iban: 'DE54 4786 0125 0590 4826 00'
+    },
+    legal: {
+      court: 'Amtsgericht Bielefeld',
+      hrb: 'HRB 43574',
+      taxNumber: 'DE328644143'
+    },
+    ceo: ['Sergej Schulz']
   }
 };

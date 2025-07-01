@@ -377,17 +377,20 @@ export const sendClearanceQuoteEmail = async (
       throw new Error(`Email sending failed: ${response.statusText}`);
     }
 
-    // Speichere E-Mail-Historie
-    await databaseService.addEmailHistory({
-      customerId: customer.id,
-      subject: emailData.subject,
-      body: emailHtml,
-      sentAt: new Date(),
-      sentBy: quote.createdBy || 'System',
-      type: 'quote',
-      attachments: [`Entrümpelungsangebot_${customer.name}.pdf`],
-      status: 'sent'
-    });
+    // Speichere E-Mail-Historie (nur wenn die Methode existiert)
+    if ('addEmailHistory' in databaseService && typeof databaseService.addEmailHistory === 'function') {
+      await databaseService.addEmailHistory({
+        id: `email-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        customerId: customer.id,
+        subject: emailData.subject,
+        body: emailHtml,
+        sentAt: new Date(),
+        sentBy: quote.createdBy || 'System',
+        type: 'quote',
+        attachments: [`Entrümpelungsangebot_${customer.name}.pdf`],
+        status: 'sent'
+      });
+    }
 
     console.log('✅ Entrümpelungsangebot-E-Mail erfolgreich gesendet');
   } catch (error) {
