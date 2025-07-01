@@ -23,7 +23,7 @@ export const generateQuoteEmailHTML = async (options: QuoteEmailOptions): Promis
     companyName = 'RELOCATO® Bielefeld',
     companyEmail = 'bielefeld@relocato.de',
     companyPhone = '(0521) 1200551-0',
-    companyAddress = 'Detmolder Str. 234a, 33605 Bielefeld<br>Wertvoll Dienstleistungen GmbH | HRB 43574'
+    companyAddress = 'Albrechtstraße 27, 33605 Bielefeld<br>Wertvoll Dienstleistungen GmbH | HRB 43574'
   } = options;
 
   let confirmationSection = '';
@@ -133,7 +133,7 @@ export const generateQuoteEmailHTMLSync = (options: QuoteEmailOptions): string =
     companyName = 'RELOCATO® Bielefeld',
     companyEmail = 'bielefeld@relocato.de',
     companyPhone = '(0521) 1200551-0',
-    companyAddress = 'Detmolder Str. 234a, 33605 Bielefeld<br>Wertvoll Dienstleistungen GmbH | HRB 43574'
+    companyAddress = 'Albrechtstraße 27, 33605 Bielefeld<br>Wertvoll Dienstleistungen GmbH | HRB 43574'
   } = options;
 
   let confirmationSection = '';

@@ -39,7 +39,7 @@ export const COMPANY_CONFIGS: Record<CompanyType, CompanyConfig> = {
       zip: '33602'
     },
     contact: {
-      phone: '0521 12345678',
+      phone: '0521 1200510',
       email: 'info@relocato.de'
     },
     bank: {
