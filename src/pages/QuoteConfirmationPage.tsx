@@ -41,6 +41,7 @@ import { tokenService } from '../services/tokenService';
 import { motion } from 'framer-motion';
 import SignatureModal from '../components/SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
+import { sendConfirmationEmail } from '../services/confirmationEmailService';
 
 const MotionCard = motion(Card);
 
@@ -140,13 +141,40 @@ const QuoteConfirmationPage: React.FC = () => {
 
     setConfirming(true);
     try {
-      // Update quote status
-      await databaseService.updateQuote(quote.id, {
+      // Update quote status - WICHTIG: customerId beibehalten!
+      const updatedQuote = {
         ...quote,
-        status: 'confirmed',
+        customerId: quote.customerId, // Explizit customerId beibehalten
+        status: 'confirmed' as const,
         confirmedAt: new Date(),
         confirmedBy: customerEmail || customerName || 'Kunde'
+      };
+      
+      console.log('📝 Aktualisiere Angebot:', {
+        quoteId: quote.id,
+        customerId: updatedQuote.customerId,
+        status: updatedQuote.status
       });
+      
+      await databaseService.updateQuote(quote.id, updatedQuote);
+      
+      // Send confirmation email
+      try {
+        console.log('📧 Sende Bestätigungsmail...');
+        await sendConfirmationEmail(
+          customer || { 
+            id: quote.customerId,
+            name: customerName || quote.customerName || 'Kunde',
+            email: customerEmail || ''
+          } as Customer,
+          updatedQuote,
+          customerEmail || ''
+        );
+        console.log('✅ Bestätigungsmail gesendet');
+      } catch (emailError) {
+        console.error('⚠️ Fehler beim Senden der Bestätigungsmail:', emailError);
+        // Don't fail the whole confirmation if email fails
+      }
 
       setConfirmed(true);
       setConfirmDialog(false);

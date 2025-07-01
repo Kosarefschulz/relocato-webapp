@@ -229,7 +229,10 @@ const QuotesList: React.FC = () => {
       
       if (sent) {
         // Update quote status to sent and save token if newly generated
-        const updateData: any = { status: 'sent' };
+        const updateData: any = { 
+          status: 'sent',
+          customerId: quote.customerId // Stelle sicher, dass customerId erhalten bleibt
+        };
         if (!quote.confirmationToken) {
           updateData.confirmationToken = token;
         }
@@ -237,7 +240,7 @@ const QuotesList: React.FC = () => {
         
         // Update local state immediately without reload
         setQuotes(prevQuotes => prevQuotes.map(q => 
-          q.id === quote.id ? { ...q, status: 'sent' as const } : q
+          q.id === quote.id ? { ...q, status: 'sent' as const, confirmationToken: token } : q
         ));
         
         setSnackbar({ open: true, message: 'Angebot erfolgreich versendet. Sie können jetzt den Status aktualisieren.', severity: 'success' });
