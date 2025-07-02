@@ -40,7 +40,7 @@ export async function analyzeCustomerMapping(googleSheetsService: any) {
     
     // Analyze quote customerIds
     const quoteCustomerIds = quotes.map((q: any) => q.customerId).filter((id: any): id is string => Boolean(id));
-    const uniqueQuoteCustomerIds = [...new Set(quoteCustomerIds)];
+    const uniqueQuoteCustomerIds: string[] = [...new Set(quoteCustomerIds)];
     
     console.log('\n📋 Quote Customer IDs:');
     console.log(`  - Total: ${quoteCustomerIds.length}`);
@@ -83,7 +83,7 @@ export async function analyzeCustomerMapping(googleSheetsService: any) {
     console.log('\n💡 Suggested Fixes:');
     
     // Check if quotes use customer numbers but customers only have Firebase IDs
-    const sampleQuoteId = uniqueQuoteCustomerIds[0];
+    const sampleQuoteId = uniqueQuoteCustomerIds[0] as string | undefined;
     const isCustomerNumber = sampleQuoteId?.startsWith('K');
     const hasFirebaseIds = customerIdFormats.firebaseIds.length > 0;
     
