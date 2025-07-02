@@ -113,7 +113,7 @@ const SharePage: React.FC = () => {
       const shareLink = await firebaseService.getShareLinkByToken(token || '');
 
       if (!shareLink) {
-        setError('Ungültiger oder abgelaufener Link');
+        setError('not_found');
         setLoading(false);
         return;
       }
@@ -121,7 +121,7 @@ const SharePage: React.FC = () => {
       // Check if link is expired
       const expirationDate = new Date(shareLink.expiresAt);
       if (expirationDate < new Date()) {
-        setError('Dieser Link ist abgelaufen');
+        setError('expired');
         setLoading(false);
         return;
       }
@@ -221,15 +221,36 @@ const SharePage: React.FC = () => {
           >
             <Paper sx={{ p: 4, textAlign: 'center' }}>
               <Alert severity="error" sx={{ mb: 3 }}>
-                {error || 'Ein Fehler ist aufgetreten'}
+                {error === 'not_found' && 'Ungültiger Link - Der angeforderte Link existiert nicht.'}
+                {error === 'expired' && 'Abgelaufener Link - Dieser Link ist nicht mehr gültig.'}
+                {error && error !== 'not_found' && error !== 'expired' && error}
               </Alert>
-              <Button 
-                variant="contained" 
-                onClick={() => navigate('/')}
-                color="primary"
-              >
-                Zur Startseite
-              </Button>
+              
+              {error === 'expired' && (
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Bitte wenden Sie sich an Ihren Umzugsberater, um einen neuen Link zu erhalten.
+                </Typography>
+              )}
+              
+              <Stack direction="row" spacing={2} justifyContent="center">
+                <Button 
+                  variant="contained" 
+                  onClick={() => navigate('/')}
+                  color="primary"
+                >
+                  Zur Startseite
+                </Button>
+                
+                {(error === 'expired' || error === 'not_found') && (
+                  <Button 
+                    variant="outlined" 
+                    href="tel:+4952112005510"
+                    color="primary"
+                  >
+                    Kontakt aufnehmen
+                  </Button>
+                )}
+              </Stack>
             </Paper>
           </motion.div>
         </Container>
