@@ -691,7 +691,7 @@ export const prepareArbeitsscheinData = (quote: Quote, customer: Customer): Arbe
   }
   
   // Add standard services based on quote data
-  if (quote.furnitureAssembly) {
+  if (quote.furnitureAssemblyPrice && quote.furnitureAssemblyPrice > 0) {
     leistungen.push('Möbeldemontage');
     leistungen.push('Möbelremontage');
   }
