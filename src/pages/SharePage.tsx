@@ -33,6 +33,8 @@ interface CustomerData {
   assignedVehicles?: any[];
   photos?: string[];
   quoteData?: any;
+  arbeitsscheinHTML?: string;
+  arbeitsscheinData?: string;
 }
 
 const SharePage: React.FC = () => {
@@ -44,6 +46,8 @@ const SharePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [showArbeitsschein, setShowArbeitsschein] = useState(false);
+  const [shareLinkData, setShareLinkData] = useState<any>(null);
 
   const handleGenerateArbeitsschein = () => {
     if (!customerData || !customerData.quoteData) {
@@ -124,6 +128,9 @@ const SharePage: React.FC = () => {
 
       // Update link usage
       await firebaseService.updateShareLinkUsage(shareLink.id);
+      
+      // Store the full share link data (includes arbeitsscheinHTML)
+      setShareLinkData(shareLink);
 
       // Load data from Google Sheets
       const [customers, quotes] = await Promise.all([
@@ -321,20 +328,33 @@ const SharePage: React.FC = () => {
           <Paper sx={{ p: 3, mt: 3, textAlign: 'center' }}>
             <AssignmentIcon sx={{ fontSize: 48, color: theme.palette.primary.main, mb: 2 }} />
             <Typography variant="h6" gutterBottom>
-              Arbeitsschein generieren
+              Arbeitsschein
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Erstellen Sie einen Arbeitsschein für diesen Umzugsauftrag zur Vorlage beim Kunden
+              Arbeitsschein für diesen Umzugsauftrag zur Vorlage beim Kunden
             </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<PdfIcon />}
-              onClick={handleGenerateArbeitsschein}
-              sx={{ mt: 1 }}
-            >
-              Arbeitsschein als PDF generieren
-            </Button>
+            <Stack direction="row" spacing={2} justifyContent="center">
+              {shareLinkData?.arbeitsscheinHTML && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<AssignmentIcon />}
+                  onClick={() => setShowArbeitsschein(true)}
+                  sx={{ mt: 1 }}
+                >
+                  Arbeitsschein anzeigen
+                </Button>
+              )}
+              <Button
+                variant={shareLinkData?.arbeitsscheinHTML ? "outlined" : "contained"}
+                size="large"
+                startIcon={<PdfIcon />}
+                onClick={handleGenerateArbeitsschein}
+                sx={{ mt: 1 }}
+              >
+                Als PDF generieren
+              </Button>
+            </Stack>
           </Paper>
 
           {/* Photos Section */}
@@ -422,6 +442,65 @@ const SharePage: React.FC = () => {
                 objectFit: 'contain',
               }}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Arbeitsschein Dialog */}
+      <Dialog
+        open={showArbeitsschein}
+        onClose={() => setShowArbeitsschein(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+          }
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          p: 2,
+          borderBottom: 1,
+          borderColor: 'divider'
+        }}>
+          <Typography variant="h6">Arbeitsschein</Typography>
+          <Stack direction="row" spacing={1}>
+            <Button
+              startIcon={<PdfIcon />}
+              onClick={() => {
+                handleGenerateArbeitsschein();
+                setShowArbeitsschein(false);
+              }}
+            >
+              Als PDF herunterladen
+            </Button>
+            <IconButton onClick={() => setShowArbeitsschein(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </Box>
+        <DialogContent sx={{ p: 0 }}>
+          {shareLinkData?.arbeitsscheinHTML && (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                overflow: 'auto',
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <Box
+                dangerouslySetInnerHTML={{ __html: shareLinkData.arbeitsscheinHTML }}
+                sx={{
+                  backgroundColor: 'white',
+                  margin: '0 auto',
+                  boxShadow: 2,
+                }}
+              />
+            </Box>
           )}
         </DialogContent>
       </Dialog>

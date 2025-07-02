@@ -47,6 +47,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { firebaseService } from '../services/firebaseService';
+import { prepareArbeitsscheinData, generateArbeitsscheinHTML } from '../services/arbeitsscheinService';
 
 interface Vehicle {
   id: string;
@@ -125,12 +126,12 @@ const DispositionPage: React.FC = () => {
       }, {});
       console.log('📈 Status-Verteilung:', statusCounts);
       
-      // Filter nur bestätigte (confirmed) Angebote
+      // Filter für angenommene (accepted) und bestätigte (confirmed) Angebote
       const acceptedQuotes = quotes.filter((quote: any) => 
-        quote.status === 'confirmed'
+        quote.status === 'accepted' || quote.status === 'confirmed'
       );
       
-      console.log(`✅ Bestätigte Angebote: ${acceptedQuotes.length}`);
+      console.log(`✅ Angenommene/Bestätigte Angebote: ${acceptedQuotes.length}`);
       acceptedQuotes.forEach((q: any) => {
         console.log(`- Angebot ${q.id}: Status=${q.status}, Kunde=${q.customerId}, Erstellt=${q.createdAt}`);
       });
@@ -240,11 +241,32 @@ const DispositionPage: React.FC = () => {
     setSelectedCustomer(customer);
     
     try {
-      // Create share link in Firebase
+      // First, get the quote and full customer data
+      const [quotes, customers] = await Promise.all([
+        googleSheetsService.getQuotes(),
+        googleSheetsService.getCustomers()
+      ]);
+      
+      const quote = quotes.find((q: any) => q.id === customer.quoteId);
+      const fullCustomer = customers.find((c: any) => c.id === customer.id);
+      
+      if (!quote || !fullCustomer) {
+        throw new Error('Angebot oder Kunde nicht gefunden');
+      }
+      
+      // Generate Arbeitsschein HTML
+      const arbeitsscheinData = prepareArbeitsscheinData(quote, fullCustomer);
+      const arbeitsscheinHTML = generateArbeitsscheinHTML(arbeitsscheinData);
+      
+      // Create share link in Firebase with Arbeitsschein
       const shareLink = await firebaseService.createShareLink(
         customer.id,
         customer.quoteId,
-        'disposition' // You can add user ID here if available
+        'disposition', // You can add user ID here if available
+        {
+          arbeitsscheinHTML,
+          arbeitsscheinData: JSON.stringify(arbeitsscheinData)
+        }
       );
       
       // Generate URL

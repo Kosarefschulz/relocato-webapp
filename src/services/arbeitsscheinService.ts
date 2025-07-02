@@ -1,13 +1,14 @@
 import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { PaymentInfo } from '../types';
+import { PaymentInfo, Quote, Customer } from '../types';
 
 export interface ArbeitsscheinData {
   auftragsnummer: string;
   kunde: {
     name: string;
     telefon: string;
+    email?: string;
   };
   datum: Date;
   volumen: number;
@@ -264,8 +265,453 @@ export const generateArbeitsschein = (data: ArbeitsscheinData): Blob => {
   // Footer
   doc.setTextColor(102, 102, 102);
   doc.setFontSize(8);
-  centerText('RELOCATO® Bielefeld | Albrechtstraße 27, 33615 Bielefeld | Tel: (0521) 1200551-0', pageHeight - 20);
+  centerText('RELOCATO® Bielefeld | Detmolder Str. 234a, 33605 Bielefeld | Tel: (0521) 1200551-0', pageHeight - 20);
   centerText('www.relocato.de | Wertvoll Dienstleistungen GmbH', pageHeight - 17);
 
   return doc.output('blob');
+};
+
+export const generateArbeitsscheinHTML = (data: ArbeitsscheinData): string => {
+  const formattedDate = format(data.datum, 'dd.MM.yyyy', { locale: de });
+  const formattedVolume = data.volumen.toFixed(2).replace('.', ',');
+  const formattedPrice = new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR'
+  }).format(data.preis);
+
+  return `<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbeitsschein - ${data.auftragsnummer}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
+            background-color: #fff;
+        }
+        
+        .container {
+            max-width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            padding: 10mm;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8BC34A;
+        }
+        
+        .company-name {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .registered {
+            font-size: 12pt;
+            vertical-align: super;
+        }
+        
+        h1 {
+            font-size: 18pt;
+            color: #8BC34A;
+            text-align: center;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+        
+        .info-section {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-item {
+            margin-bottom: 5px;
+            font-size: 10pt;
+        }
+        
+        .label {
+            font-weight: bold;
+            color: #555;
+            display: inline-block;
+            min-width: 100px;
+        }
+        
+        .value {
+            color: #000;
+        }
+        
+        .address-section {
+            background-color: #e8f5e9;
+            border: 1px solid #4caf50;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .address-box h3 {
+            color: #4caf50;
+            margin-bottom: 5px;
+            font-size: 11pt;
+        }
+        
+        .address-box p {
+            font-size: 10pt;
+        }
+        
+        .service-section {
+            margin-bottom: 10px;
+        }
+        
+        .service-header {
+            background-color: #8BC34A;
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        
+        .service-content {
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #fafafa;
+            font-size: 10pt;
+        }
+        
+        .service-content p {
+            margin: 3px 0;
+        }
+        
+        .price-section {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            border-radius: 5px;
+        }
+        
+        .price-label {
+            font-size: 12pt;
+            margin-bottom: 5px;
+        }
+        
+        .price-amount {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #8BC34A;
+        }
+        
+        .confirmation-section {
+            background-color: #f9f9f9;
+            border: 1px solid #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .confirmation-header {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .checkbox-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            font-size: 10pt;
+        }
+        
+        .checkbox {
+            width: 15px;
+            height: 15px;
+            border: 2px solid #333;
+            margin-right: 8px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        
+        .signature-section {
+            margin-top: auto;
+            padding-top: 15px;
+        }
+        
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .signature-box {
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-bottom: 2px solid #000;
+            height: 40px;
+            margin-bottom: 3px;
+        }
+        
+        .signature-label {
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .container {
+                margin: 0;
+                padding: 10mm;
+            }
+        }
+        
+        @media screen and (max-width: 768px) {
+            .container {
+                height: auto;
+                padding: 10px;
+            }
+            
+            .info-grid, .address-grid, .signature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="logo-section">
+            <div class="company-name">RELOCATO<span class="registered">®</span></div>
+        </div>
+        
+        <h1>Arbeitsschein</h1>
+        
+        <!-- Kundeninformationen -->
+        <div class="info-section">
+            <div class="info-grid">
+                <div>
+                    <div class="info-item">
+                        <span class="label">Auftragsnummer:</span>
+                        <span class="value"><strong>${data.auftragsnummer}</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Kunde:</span>
+                        <span class="value">${data.kunde.name}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Telefon:</span>
+                        <span class="value">${data.kunde.telefon}</span>
+                    </div>
+                    ${data.kunde.email ? `
+                    <div class="info-item">
+                        <span class="label">E-Mail:</span>
+                        <span class="value">${data.kunde.email}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                <div>
+                    <div class="info-item">
+                        <span class="label">Datum:</span>
+                        <span class="value"><strong>${formattedDate}</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Volumen:</span>
+                        <span class="value">${formattedVolume} m³</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Strecke:</span>
+                        <span class="value">${data.strecke} km</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Adressen -->
+        <div class="address-section">
+            <div class="address-grid">
+                <div class="address-box">
+                    <h3>VON</h3>
+                    <p>${data.vonAdresse.strasse}<br>
+                    ${data.vonAdresse.ort}<br>
+                    ${data.vonAdresse.etage ? `<strong>${data.vonAdresse.etage}</strong>` : ''}</p>
+                </div>
+                <div class="address-box">
+                    <h3>NACH</h3>
+                    <p>${data.nachAdresse.strasse}<br>
+                    ${data.nachAdresse.ort}<br>
+                    ${data.nachAdresse.etage ? `<strong>${data.nachAdresse.etage}</strong>` : ''}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leistungen -->
+        <div class="service-section">
+            <div class="service-header">Durchgeführte Leistungen</div>
+            <div class="service-content">
+                ${data.leistungen.map(leistung => `<p>✓ ${leistung}</p>`).join('\n                ')}
+            </div>
+        </div>
+        
+        <!-- Preis -->
+        <div class="price-section">
+            <div class="price-label">RECHNUNGSBETRAG</div>
+            <div class="price-amount">${formattedPrice}</div>
+            <div style="font-size: 10pt; margin-top: 5px;">inkl. 19% MwSt.</div>
+        </div>
+        
+        <!-- Bestätigung -->
+        <div class="confirmation-section">
+            <div class="confirmation-header">LEISTUNGSBESTÄTIGUNG</div>
+            <div class="checkbox-item">
+                <div class="checkbox"></div>
+                <span>Die Umzugsleistungen wurden vollständig und ordnungsgemäß erbracht</span>
+            </div>
+            <div class="checkbox-item">
+                <div class="checkbox"></div>
+                <span>Das Umzugsgut wurde unbeschädigt transportiert</span>
+            </div>
+            <div class="checkbox-item">
+                <div class="checkbox"></div>
+                <span>Alle vereinbarten Leistungen wurden durchgeführt</span>
+            </div>
+            <div class="checkbox-item">
+                <div class="checkbox"></div>
+                <span>Zahlung erfolgt per: _____________________</span>
+            </div>
+        </div>
+        
+        <!-- Unterschriften -->
+        <div class="signature-section">
+            <div class="signature-grid">
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Datum, Unterschrift Kunde</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Datum, Unterschrift RELOCATO® Mitarbeiter</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            RELOCATO® Bielefeld | Detmolder Str. 234a, 33605 Bielefeld | Tel: (0521) 1200551-0<br>
+            www.relocato.de | Wertvoll Dienstleistungen GmbH
+        </div>
+    </div>
+</body>
+</html>`;
+};
+
+export const prepareArbeitsscheinData = (quote: Quote, customer: Customer): ArbeitsscheinData => {
+  // Format date
+  const moveDate = customer.movingDate ? new Date(customer.movingDate) : new Date();
+
+  // Extract address parts
+  const extractAddressParts = (address: string) => {
+    const parts = address.split(',').map(part => part.trim());
+    return {
+      strasse: parts[0] || '',
+      ort: parts.slice(1).join(', ') || '',
+      etage: '' // This would need to be extracted from additional data
+    };
+  };
+
+  const vonAdresse = extractAddressParts(customer.fromAddress || '');
+  const nachAdresse = extractAddressParts(customer.toAddress || '');
+
+  // Extract volume from quote items
+  let totalVolume = 0;
+  if (quote.items) {
+    quote.items.forEach(item => {
+      if (item.volume) {
+        totalVolume += item.volume;
+      }
+    });
+  }
+
+  // Calculate distance (simplified - in real app this would use a mapping service)
+  const distance = 10; // Placeholder in km
+
+  // Extract services from quote
+  const leistungen: string[] = [];
+  if (quote.items) {
+    quote.items.forEach(item => {
+      if (item.name && !leistungen.includes(item.name)) {
+        leistungen.push(item.name);
+      }
+    });
+  }
+
+  // Add standard services
+  if (totalVolume > 0) {
+    leistungen.unshift(`Transport inkl. Be- und Entladen (${totalVolume.toFixed(2).replace('.', ',')} m³)`);
+  }
+
+  // Generate order number (format: YYYYMMDDHHMM)
+  const now = new Date();
+  const orderNumber = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+
+  return {
+    auftragsnummer: orderNumber,
+    kunde: {
+      name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.companyName || 'Kunde',
+      telefon: customer.phone || '',
+      email: customer.email
+    },
+    datum: moveDate,
+    volumen: totalVolume,
+    strecke: distance,
+    vonAdresse,
+    nachAdresse,
+    leistungen: leistungen.length > 0 ? leistungen : ['Umzugsleistungen'],
+    preis: quote.totalPrice || 0,
+    paymentInfo: undefined // This would come from payment data
+  };
 };

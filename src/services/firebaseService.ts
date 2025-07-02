@@ -815,7 +815,7 @@ class FirebaseService {
 
   // ==================== SHARE LINKS ====================
 
-  async createShareLink(customerId: string, quoteId: string, createdBy?: string): Promise<ShareLink> {
+  async createShareLink(customerId: string, quoteId: string, createdBy?: string, additionalData?: any): Promise<ShareLink> {
     try {
       if (!this.shareLinksCollection) throw new Error('ShareLinks collection not initialized');
       
@@ -833,6 +833,7 @@ class FirebaseService {
         expiresAt: Timestamp.fromDate(expiresAt),
         createdAt: serverTimestamp(),
         createdBy,
+        ...(additionalData || {}), // Add any additional data (like arbeitsscheinHTML)
       };
       
       const docRef = await addDoc(this.shareLinksCollection, shareLinkData);
@@ -883,6 +884,8 @@ class FirebaseService {
         usedAt: data.usedAt && typeof data.usedAt.toDate === 'function'
           ? data.usedAt.toDate()
           : data.usedAt,
+        arbeitsscheinHTML: data.arbeitsscheinHTML, // Include arbeitsschein data
+        arbeitsscheinData: data.arbeitsscheinData,
       };
     } catch (error) {
       console.error('❌ Fehler beim Abrufen des Share Links:', error);
