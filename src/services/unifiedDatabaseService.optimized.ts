@@ -49,6 +49,11 @@ class UnifiedDatabaseServiceOptimized {
       );
 
       if (cachedCustomer) {
+        // Cache with both ID and customerNumber for faster future lookups
+        this.customerCache.set(cachedCustomer.id, cachedCustomer);
+        if (cachedCustomer.customerNumber && cachedCustomer.customerNumber !== cachedCustomer.id) {
+          this.customerCache.set(cachedCustomer.customerNumber, cachedCustomer);
+        }
         return cachedCustomer;
       }
 
@@ -71,6 +76,46 @@ class UnifiedDatabaseServiceOptimized {
       console.error('Error fetching customer:', error);
       return null;
     }
+  }
+
+  /**
+   * Get customer by ID or customer number - robust method
+   */
+  async getCustomerByIdOrNumber(idOrNumber: string): Promise<Customer | null> {
+    if (!idOrNumber) return null;
+    
+    // First try normal getCustomer which already handles both
+    const customer = await this.getCustomer(idOrNumber);
+    if (customer) return customer;
+    
+    // If still not found, do a more thorough search
+    console.log(`🔍 Erweiterte Suche nach Kunde: ${idOrNumber}`);
+    const allCustomers = await this.getCustomers();
+    
+    // Try exact match first
+    let found = allCustomers.find(c => 
+      c.id === idOrNumber || 
+      c.customerNumber === idOrNumber
+    );
+    
+    // Try case-insensitive match
+    if (!found) {
+      const searchLower = idOrNumber.toLowerCase();
+      found = allCustomers.find(c => 
+        c.id?.toLowerCase() === searchLower || 
+        c.customerNumber?.toLowerCase() === searchLower
+      );
+    }
+    
+    if (found) {
+      // Cache for future use
+      this.customerCache.set(found.id, found);
+      if (found.customerNumber) {
+        this.customerCache.set(found.customerNumber, found);
+      }
+    }
+    
+    return found || null;
   }
 
   async addCustomer(customer: Omit<Customer, 'id'>): Promise<string> {

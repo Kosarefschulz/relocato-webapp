@@ -99,7 +99,11 @@ export const generateArbeitsschein = (data: ArbeitsscheinData): Blob => {
   doc.setFont('helvetica', 'bold');
   doc.text('Datum:', rightX, infoY);
   doc.setFont('helvetica', 'normal');
-  doc.text(format(data.datum, 'dd.MM.yyyy', { locale: de }), rightX + 35, infoY);
+  // Ensure datum is a valid Date object before formatting
+  const dateToFormat = data.datum instanceof Date && !isNaN(data.datum.getTime()) 
+    ? data.datum 
+    : new Date();
+  doc.text(format(dateToFormat, 'dd.MM.yyyy', { locale: de }), rightX + 35, infoY);
   
   infoY += 7;
   doc.setFont('helvetica', 'bold');
@@ -272,7 +276,11 @@ export const generateArbeitsschein = (data: ArbeitsscheinData): Blob => {
 };
 
 export const generateArbeitsscheinHTML = (data: ArbeitsscheinData): string => {
-  const formattedDate = format(data.datum, 'dd.MM.yyyy', { locale: de });
+  // Ensure datum is a valid Date object before formatting
+  const dateToFormat = data.datum instanceof Date && !isNaN(data.datum.getTime()) 
+    ? data.datum 
+    : new Date();
+  const formattedDate = format(dateToFormat, 'dd.MM.yyyy', { locale: de });
   const formattedVolume = data.volumen.toFixed(2).replace('.', ',');
   const formattedPrice = new Intl.NumberFormat('de-DE', {
     style: 'currency',
@@ -650,8 +658,32 @@ export const generateArbeitsscheinHTML = (data: ArbeitsscheinData): string => {
 };
 
 export const prepareArbeitsscheinData = (quote: Quote, customer: Customer): ArbeitsscheinData => {
-  // Format date
-  const moveDate = customer.movingDate ? new Date(customer.movingDate) : new Date();
+  // Format date with proper validation
+  let moveDate: Date;
+  
+  // Check if movingDate exists and try to parse it
+  if (customer.movingDate) {
+    const parsedDate = new Date(customer.movingDate);
+    // Check if the date is valid
+    if (!isNaN(parsedDate.getTime())) {
+      moveDate = parsedDate;
+    } else {
+      console.warn(`Invalid movingDate for customer ${customer.id}: ${customer.movingDate}`);
+      moveDate = new Date();
+    }
+  } else {
+    // If no movingDate, try to use moveDate from quote
+    if (quote.moveDate) {
+      const parsedQuoteDate = new Date(quote.moveDate);
+      if (!isNaN(parsedQuoteDate.getTime())) {
+        moveDate = parsedQuoteDate;
+      } else {
+        moveDate = new Date();
+      }
+    } else {
+      moveDate = new Date();
+    }
+  }
 
   // Extract address parts
   const extractAddressParts = (address: string) => {

@@ -112,7 +112,7 @@ const DispositionPage: React.FC = () => {
     try {
       console.log('🔍 Lade Dispositionsdaten...');
       
-      // Load quotes and customers from Google Sheets
+      // Load quotes and customers from database service
       const [quotes, allCustomers] = await Promise.all([
         googleSheetsService.getQuotes(),
         googleSheetsService.getCustomers()
@@ -120,6 +120,15 @@ const DispositionPage: React.FC = () => {
       
       console.log(`📊 Gefundene Angebote: ${quotes.length}`);
       console.log(`👥 Gefundene Kunden: ${allCustomers.length}`);
+      
+      // Debug: Log einige Beispiel-Kunden-IDs
+      if (allCustomers.length > 0) {
+        console.log('📋 Beispiel Kunden-IDs:', allCustomers.slice(0, 3).map((c: any) => ({
+          id: c.id,
+          customerNumber: c.customerNumber,
+          name: c.name
+        })));
+      }
       
       // Debug: Zeige alle Quote-Status
       const statusCounts = quotes.reduce((acc: any, quote: any) => {
@@ -138,14 +147,45 @@ const DispositionPage: React.FC = () => {
         console.log(`- Angebot ${q.id}: Status=${q.status}, Kunde=${q.customerId}, Erstellt=${q.createdAt}`);
       });
       
-      const dispositionCustomers = acceptedQuotes.map((quote: any) => {
+      // Map quotes to customers and fetch missing ones
+      const dispositionCustomersPromises = acceptedQuotes.map(async (quote: any) => {
         // Try to find customer by id or customerNumber
-        const customer = allCustomers.find((c: any) => 
+        let customer = allCustomers.find((c: any) => 
           c.id === quote.customerId || 
           c.customerNumber === quote.customerId
         );
+        
+        // Debug: Log customer search details
         if (!customer) {
           console.log(`⚠️ Kunde nicht gefunden für Quote ${quote.id} mit customerId ${quote.customerId}`);
+          console.log(`   Verfügbare Kunden-IDs: ${allCustomers.slice(0, 5).map((c: any) => `${c.id} (${c.customerNumber})`).join(', ')}...`);
+          
+          // Try case-insensitive search as fallback
+          customer = allCustomers.find((c: any) => 
+            c.id?.toLowerCase() === quote.customerId?.toLowerCase() || 
+            c.customerNumber?.toLowerCase() === quote.customerId?.toLowerCase()
+          );
+          
+          if (customer) {
+            console.log(`✅ Kunde gefunden nach case-insensitive Suche: ${customer.id} (${customer.customerNumber})`);
+          }
+        }
+        
+        // If still not found, try to fetch directly from service
+        if (!customer && quote.customerId) {
+          console.log(`🔍 Versuche Kunde direkt vom Service zu laden: ${quote.customerId}`);
+          try {
+            customer = await googleSheetsService.getCustomer(quote.customerId);
+            if (customer) {
+              console.log(`✅ Kunde direkt geladen: ${customer.id} (${customer.customerNumber})`);
+            }
+          } catch (error) {
+            console.error(`❌ Fehler beim direkten Laden des Kunden:`, error);
+          }
+        }
+        
+        if (!customer) {
+          console.log(`❌ Kunde definitiv nicht gefunden für Quote ${quote.id}`);
           return null;
         }
         
@@ -173,7 +213,10 @@ const DispositionPage: React.FC = () => {
           createdAt: quote.createdAt,
           assignedVehicles: savedData.assignedVehicles || [],
         };
-      }).filter(Boolean);
+      });
+      
+      // Warte auf alle Promises
+      const dispositionCustomers = await Promise.all(dispositionCustomersPromises);
       
       const validCustomers = dispositionCustomers.filter(c => c !== null) as DispositionCustomer[];
       console.log(`🎯 Gültige Dispositionskunden: ${validCustomers.length}`);
