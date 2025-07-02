@@ -160,10 +160,15 @@ const CreateQuote: React.FC = () => {
       const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const token = tokenService.generateQuoteToken({ id: quoteId } as any);
       
+      // Ensure we use the correct customer ID (Firebase ID, not customer number)
+      const customerIdToUse = customer.id;
+      console.log(`🔍 Quote Customer ID Mapping: ${customerIdToUse} (${customer.customerNumber || 'no customer number'})`);
+      
       const quote = {
         id: quoteId,
-        customerId: customer.id,
+        customerId: customerIdToUse,
         customerName: customer.name,
+        customerNumber: customer.customerNumber, // Store customer number separately for reference
         price: finalCalculation.finalPrice,
         comment: quoteDetails.notes,
         createdAt: new Date(),
@@ -322,6 +327,7 @@ const CreateQuote: React.FC = () => {
       const quoteData = {
         customerId: customer.id || 'temp-id',
         customerName: customer.name || 'Unbekannt',
+        customerNumber: customer.customerNumber, // Store customer number separately
         price: finalCalculation.finalPrice || 0,
         comment: quoteDetails.notes || '',
         createdAt: new Date(),

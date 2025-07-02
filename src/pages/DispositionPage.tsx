@@ -159,6 +159,25 @@ const DispositionPage: React.FC = () => {
         name: c.name || c.companyName || 'Unbekannt'
       })));
       
+      // Zusätzliche Diagnose
+      const customerNumbersInDb = allCustomers
+        .map((c: any) => c.customerNumber)
+        .filter(Boolean)
+        .slice(0, 10);
+      console.log('📊 Beispiel Kundennummern in DB:', customerNumbersInDb);
+      
+      // Prüfe ob es ein Format-Problem gibt
+      const sampleQuoteCustomerId = acceptedQuotes[0]?.customerId;
+      if (sampleQuoteCustomerId) {
+        console.log(`🔍 Suche nach Format-Match für: "${sampleQuoteCustomerId}"`);
+        const exactMatch = allCustomers.find((c: any) => c.customerNumber === sampleQuoteCustomerId);
+        const partialMatch = allCustomers.find((c: any) => 
+          c.customerNumber?.includes(sampleQuoteCustomerId.slice(-6))
+        );
+        console.log('  - Exakter Match:', exactMatch ? 'Gefunden' : 'Nicht gefunden');
+        console.log('  - Teilweiser Match:', partialMatch ? `Gefunden: ${partialMatch.customerNumber}` : 'Nicht gefunden');
+      }
+      
       // Map quotes to customers and fetch missing ones
       const dispositionCustomersPromises = acceptedQuotes.map(async (quote: any) => {
         let customer = null;
@@ -229,11 +248,22 @@ const DispositionPage: React.FC = () => {
           console.log(`✅ Kunde gefunden: ${customer.name || customer.customerNumber} für Quote ${quote.id} via: ${searchStrategies.join(', ')}`);
         }
         
-        // If still not found, try to fetch directly from service
+        // If still not found, try to fetch directly from service with robust search
         if (!customer && quote.customerId) {
           console.log(`🔍 Versuche Kunde direkt vom Service zu laden: ${quote.customerId}`);
           try {
-            const fetchedCustomer = await googleSheetsService.getCustomer(quote.customerId);
+            // First try the normal getCustomer method
+            let fetchedCustomer = await googleSheetsService.getCustomer(quote.customerId);
+            
+            // If not found, try the more robust search method
+            if (!fetchedCustomer && googleSheetsService.findCustomerByAnyIdentifier) {
+              console.log(`🔎 Verwende robuste Suchmethode...`);
+              fetchedCustomer = await googleSheetsService.findCustomerByAnyIdentifier(
+                quote.customerId, 
+                { name: quote.customerName }
+              );
+            }
+            
             if (fetchedCustomer) {
               customer = fetchedCustomer;
               console.log(`✅ Kunde direkt geladen: ${customer.id} (${customer.customerNumber})`);

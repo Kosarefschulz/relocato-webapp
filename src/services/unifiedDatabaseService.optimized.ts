@@ -93,18 +93,25 @@ class UnifiedDatabaseServiceOptimized {
     const allCustomers = await this.getCustomers();
     
     // Try exact match first
-    let found = allCustomers.find(c => 
+    let found: Customer | null = null;
+    const exactMatch = allCustomers.find(c => 
       c.id === idOrNumber || 
       c.customerNumber === idOrNumber
     );
+    if (exactMatch) {
+      found = exactMatch;
+    }
     
     // Try case-insensitive match
     if (!found) {
       const searchLower = idOrNumber.toLowerCase();
-      found = allCustomers.find(c => 
+      const caseInsensitiveMatch = allCustomers.find(c => 
         c.id?.toLowerCase() === searchLower || 
         c.customerNumber?.toLowerCase() === searchLower
       );
+      if (caseInsensitiveMatch) {
+        found = caseInsensitiveMatch;
+      }
     }
     
     if (found) {
@@ -141,11 +148,14 @@ class UnifiedDatabaseServiceOptimized {
     // Strategy 3: Normalized customer number (remove leading zeros)
     if (!found && identifier.startsWith('K')) {
       const normalized = identifier.replace(/^K0*/, 'K');
-      found = allCustomers.find(c => {
+      const result = allCustomers.find(c => {
         const normalizedCustomerNumber = c.customerNumber?.replace(/^K0*/, 'K');
         return normalizedCustomerNumber === normalized;
       });
-      if (found) console.log(`✅ Kunde gefunden via normalisierte Kundennummer`);
+      if (result) {
+        found = result;
+        console.log(`✅ Kunde gefunden via normalisierte Kundennummer`);
+      }
     }
     
     // Strategy 4: Partial match (last N characters)
@@ -154,10 +164,13 @@ class UnifiedDatabaseServiceOptimized {
       for (const suffixLength of [8, 6, 4]) {
         if (identifier.length >= suffixLength) {
           const suffix = identifier.slice(-suffixLength);
-          found = allCustomers.find(c => 
+          const result = allCustomers.find(c => 
             c.customerNumber?.endsWith(suffix) || 
             c.id?.endsWith(suffix)
           );
+          if (result) {
+            found = result;
+          }
           if (found) {
             console.log(`✅ Kunde gefunden via Suffix-Match (letzte ${suffixLength} Zeichen)`);
             break;
@@ -169,7 +182,7 @@ class UnifiedDatabaseServiceOptimized {
     // Strategy 5: Name-based search if hint provided
     if (!found && additionalHints?.name) {
       const searchName = additionalHints.name.toLowerCase();
-      found = allCustomers.find(c => {
+      const result = allCustomers.find(c => {
         const customerName = c.name?.toLowerCase() || '';
         const companyName = c.company?.toLowerCase() || '';
         const fullName = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase().trim();
@@ -180,6 +193,9 @@ class UnifiedDatabaseServiceOptimized {
                customerName.includes(searchName) ||
                companyName.includes(searchName);
       });
+      if (result) {
+        found = result;
+      }
       if (found) console.log(`✅ Kunde gefunden via Name-Suche`);
     }
     
@@ -187,10 +203,13 @@ class UnifiedDatabaseServiceOptimized {
     if (!found && identifier.match(/\d+/)) {
       const numbers = identifier.match(/\d+/g)?.join('') || '';
       if (numbers.length >= 4) {
-        found = allCustomers.find(c => {
+        const result = allCustomers.find(c => {
           const customerNumbers = c.customerNumber?.match(/\d+/g)?.join('') || '';
           return customerNumbers.includes(numbers) || numbers.includes(customerNumbers);
         });
+        if (result) {
+          found = result;
+        }
         if (found) console.log(`✅ Kunde gefunden via Fuzzy-Nummer-Suche`);
       }
     }
