@@ -39,7 +39,7 @@ export async function analyzeCustomerMapping(googleSheetsService: any) {
     console.log(`  - Other: ${customerIdFormats.other.length}`);
     
     // Analyze quote customerIds
-    const quoteCustomerIds = quotes.map((q: any) => q.customerId).filter(Boolean);
+    const quoteCustomerIds = quotes.map((q: any) => q.customerId).filter((id: any): id is string => Boolean(id));
     const uniqueQuoteCustomerIds = [...new Set(quoteCustomerIds)];
     
     console.log('\n📋 Quote Customer IDs:');
