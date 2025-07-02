@@ -143,40 +143,99 @@ const DispositionPage: React.FC = () => {
       );
       
       console.log(`✅ Angenommene/Bestätigte Angebote: ${acceptedQuotes.length}`);
+      
+      // Detaillierte Analyse der customerIds
+      const uniqueCustomerIds = [...new Set(acceptedQuotes.map((q: any) => q.customerId))];
+      console.log(`📊 Eindeutige Customer-IDs in Angeboten: ${uniqueCustomerIds.join(', ')}`);
+      
       acceptedQuotes.forEach((q: any) => {
         console.log(`- Angebot ${q.id}: Status=${q.status}, Kunde=${q.customerId}, Erstellt=${q.createdAt}`);
       });
       
+      // Debug: Zeige Beispiel-Kunden zur besseren Analyse
+      console.log('🔍 Beispiel-Kunden (erste 5):', allCustomers.slice(0, 5).map((c: any) => ({
+        id: c.id,
+        customerNumber: c.customerNumber,
+        name: c.name || c.companyName || 'Unbekannt'
+      })));
+      
       // Map quotes to customers and fetch missing ones
       const dispositionCustomersPromises = acceptedQuotes.map(async (quote: any) => {
-        // Try to find customer by id or customerNumber
-        let customer = allCustomers.find((c: any) => 
-          c.id === quote.customerId || 
-          c.customerNumber === quote.customerId
-        );
+        let customer = null;
+        const searchStrategies = [];
         
-        // Debug: Log customer search details
+        // Strategie 1: Direkte ID-Übereinstimmung
+        customer = allCustomers.find((c: any) => c.id === quote.customerId);
+        if (customer) {
+          searchStrategies.push('Direkte ID-Übereinstimmung');
+        }
+        
+        // Strategie 2: Kundennummer-Übereinstimmung
         if (!customer) {
-          console.log(`⚠️ Kunde nicht gefunden für Quote ${quote.id} mit customerId ${quote.customerId}`);
-          console.log(`   Verfügbare Kunden-IDs: ${allCustomers.slice(0, 5).map((c: any) => `${c.id} (${c.customerNumber})`).join(', ')}...`);
-          
-          // Try case-insensitive search as fallback
+          customer = allCustomers.find((c: any) => c.customerNumber === quote.customerId);
+          if (customer) searchStrategies.push('Kundennummer-Übereinstimmung');
+        }
+        
+        // Strategie 3: Case-insensitive Suche
+        if (!customer) {
           customer = allCustomers.find((c: any) => 
             c.id?.toLowerCase() === quote.customerId?.toLowerCase() || 
             c.customerNumber?.toLowerCase() === quote.customerId?.toLowerCase()
           );
-          
-          if (customer) {
-            console.log(`✅ Kunde gefunden nach case-insensitive Suche: ${customer.id} (${customer.customerNumber})`);
-          }
+          if (customer) searchStrategies.push('Case-insensitive Übereinstimmung');
+        }
+        
+        // Strategie 4: Normalisierte Kundennummer (ohne führende Nullen)
+        if (!customer && quote.customerId?.startsWith('K')) {
+          const normalizedQuoteId = quote.customerId.replace(/^K0*/, 'K');
+          customer = allCustomers.find((c: any) => {
+            const normalizedCustomerNumber = c.customerNumber?.replace(/^K0*/, 'K');
+            return normalizedCustomerNumber === normalizedQuoteId;
+          });
+          if (customer) searchStrategies.push('Normalisierte Kundennummer');
+        }
+        
+        // Strategie 5: Teilweise Übereinstimmung (letzte 8 Zeichen)
+        if (!customer && quote.customerId?.length > 8) {
+          const quoteSuffix = quote.customerId.slice(-8);
+          customer = allCustomers.find((c: any) => 
+            c.customerNumber?.endsWith(quoteSuffix) || c.id?.endsWith(quoteSuffix)
+          );
+          if (customer) searchStrategies.push('Teilweise Übereinstimmung (Suffix)');
+        }
+        
+        // Strategie 6: Name-basierte Suche
+        if (!customer && quote.customerName) {
+          customer = allCustomers.find((c: any) => {
+            const customerFullName = `${c.firstName || ''} ${c.lastName || ''}`.trim();
+            return c.name === quote.customerName || 
+                   c.companyName === quote.customerName ||
+                   customerFullName === quote.customerName ||
+                   c.name?.toLowerCase() === quote.customerName?.toLowerCase();
+          });
+          if (customer) searchStrategies.push('Name-basierte Suche');
+        }
+        
+        // Debug-Ausgabe
+        if (!customer) {
+          console.log(`⚠️ Kunde nicht gefunden für Quote ${quote.id}`);
+          console.log(`   - Quote customerId: "${quote.customerId}"`);
+          console.log(`   - Quote customerName: "${quote.customerName || 'N/A'}"`);
+          console.log(`   - Getestete Strategien: Alle 6 Strategien ohne Erfolg`);
+          console.log(`   - Beispiel Kunden-IDs: ${allCustomers.slice(0, 3).map((c: any) => 
+            `${c.id?.substring(0, 8)}... (${c.customerNumber || 'keine Nr.'})`
+          ).join(', ')}`);
+        } else {
+          console.log(`✅ Kunde gefunden: ${customer.name || customer.customerNumber} für Quote ${quote.id} via: ${searchStrategies.join(', ')}`);
         }
         
         // If still not found, try to fetch directly from service
         if (!customer && quote.customerId) {
           console.log(`🔍 Versuche Kunde direkt vom Service zu laden: ${quote.customerId}`);
           try {
-            customer = await googleSheetsService.getCustomer(quote.customerId);
-            if (customer) {
+            const fetchedCustomer = await googleSheetsService.getCustomer(quote.customerId);
+            if (fetchedCustomer) {
+              customer = fetchedCustomer;
               console.log(`✅ Kunde direkt geladen: ${customer.id} (${customer.customerNumber})`);
             }
           } catch (error) {

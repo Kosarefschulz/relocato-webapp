@@ -118,6 +118,96 @@ class UnifiedDatabaseServiceOptimized {
     return found || null;
   }
 
+  /**
+   * Find customer by any identifier - most robust search method
+   * Tries multiple strategies to find a customer
+   */
+  async findCustomerByAnyIdentifier(identifier: string, additionalHints?: { name?: string }): Promise<Customer | null> {
+    if (!identifier) return null;
+    
+    console.log(`🔎 Robuste Kundensuche für: "${identifier}"`);
+    
+    // Strategy 1: Try normal methods first
+    const directResult = await this.getCustomerByIdOrNumber(identifier);
+    if (directResult) {
+      console.log(`✅ Kunde gefunden via direkte Suche`);
+      return directResult;
+    }
+    
+    // Strategy 2: Load all customers for advanced search
+    const allCustomers = await this.getCustomers();
+    let found: Customer | null = null;
+    
+    // Strategy 3: Normalized customer number (remove leading zeros)
+    if (!found && identifier.startsWith('K')) {
+      const normalized = identifier.replace(/^K0*/, 'K');
+      found = allCustomers.find(c => {
+        const normalizedCustomerNumber = c.customerNumber?.replace(/^K0*/, 'K');
+        return normalizedCustomerNumber === normalized;
+      });
+      if (found) console.log(`✅ Kunde gefunden via normalisierte Kundennummer`);
+    }
+    
+    // Strategy 4: Partial match (last N characters)
+    if (!found && identifier.length > 6) {
+      // Try with last 8, 6, and 4 characters
+      for (const suffixLength of [8, 6, 4]) {
+        if (identifier.length >= suffixLength) {
+          const suffix = identifier.slice(-suffixLength);
+          found = allCustomers.find(c => 
+            c.customerNumber?.endsWith(suffix) || 
+            c.id?.endsWith(suffix)
+          );
+          if (found) {
+            console.log(`✅ Kunde gefunden via Suffix-Match (letzte ${suffixLength} Zeichen)`);
+            break;
+          }
+        }
+      }
+    }
+    
+    // Strategy 5: Name-based search if hint provided
+    if (!found && additionalHints?.name) {
+      const searchName = additionalHints.name.toLowerCase();
+      found = allCustomers.find(c => {
+        const customerName = c.name?.toLowerCase() || '';
+        const companyName = c.company?.toLowerCase() || '';
+        const fullName = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase().trim();
+        
+        return customerName === searchName || 
+               companyName === searchName || 
+               fullName === searchName ||
+               customerName.includes(searchName) ||
+               companyName.includes(searchName);
+      });
+      if (found) console.log(`✅ Kunde gefunden via Name-Suche`);
+    }
+    
+    // Strategy 6: Fuzzy search on customer number
+    if (!found && identifier.match(/\d+/)) {
+      const numbers = identifier.match(/\d+/g)?.join('') || '';
+      if (numbers.length >= 4) {
+        found = allCustomers.find(c => {
+          const customerNumbers = c.customerNumber?.match(/\d+/g)?.join('') || '';
+          return customerNumbers.includes(numbers) || numbers.includes(customerNumbers);
+        });
+        if (found) console.log(`✅ Kunde gefunden via Fuzzy-Nummer-Suche`);
+      }
+    }
+    
+    if (found) {
+      // Cache for future use
+      this.customerCache.set(found.id, found);
+      if (found.customerNumber) {
+        this.customerCache.set(found.customerNumber, found);
+      }
+      return found;
+    }
+    
+    console.log(`❌ Kunde nicht gefunden trotz aller Suchstrategien`);
+    return null;
+  }
+
   async addCustomer(customer: Omit<Customer, 'id'>): Promise<string> {
     try {
       // Clean phone numbers before saving
