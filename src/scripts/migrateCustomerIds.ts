@@ -126,7 +126,11 @@ export async function migrateQuoteCustomerIds(dryRun = true): Promise<MigrationR
         databaseService.getCustomers()
       ]);
       
-      const customerByNumber = new Map(customers.map(c => [c.customerNumber, c]).filter(([k]) => k));
+      const customerByNumber = new Map(
+        customers
+          .map(c => [c.customerNumber, c] as [string | undefined, any])
+          .filter((entry): entry is [string, any] => entry[0] !== undefined && entry[0] !== null)
+      );
       
       for (const quote of quotes) {
         if (quote.customerId?.match(/^K\d+$/)) {
