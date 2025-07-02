@@ -185,11 +185,9 @@ class UnifiedDatabaseServiceOptimized {
       const result = allCustomers.find(c => {
         const customerName = c.name?.toLowerCase() || '';
         const companyName = c.company?.toLowerCase() || '';
-        const fullName = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase().trim();
         
         return customerName === searchName || 
                companyName === searchName || 
-               fullName === searchName ||
                customerName.includes(searchName) ||
                companyName.includes(searchName);
       });
