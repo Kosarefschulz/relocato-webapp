@@ -45,6 +45,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { parseDate, formatDate } from '../utils/dateUtils';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { firebaseService } from '../services/firebaseService';
 import { prepareArbeitsscheinData, generateArbeitsscheinHTML } from '../services/arbeitsscheinService';
@@ -708,7 +709,7 @@ const DispositionPage: React.FC = () => {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(customer.moveDate), 'dd.MM.yyyy', { locale: de })}
+                        {formatDate(customer.moveDate, { includeWeekday: false, fallback: '-' })}
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ maxWidth: 200 }} noWrap>

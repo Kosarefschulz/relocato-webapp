@@ -9,6 +9,7 @@ import { autoSyncService } from './services/autoSyncService';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import SimpleAuth from './components/SimpleAuth';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -365,8 +366,9 @@ function App() {
   const isQuoteConfirmationPage = window.location.pathname.startsWith('/quote-confirmation/');
 
   return (
-    <ThemeProvider>
-      <Router>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <Router>
         <SimpleAuth>
           <VisibilityFix />
           <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
@@ -385,6 +387,7 @@ function App() {
         </SimpleAuth>
       </Router>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
