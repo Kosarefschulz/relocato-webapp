@@ -255,10 +255,10 @@ const DispositionPage: React.FC = () => {
             // First try the normal getCustomer method
             let fetchedCustomer = await googleSheetsService.getCustomer(quote.customerId);
             
-            // If not found, try the more robust search method
-            if (!fetchedCustomer && googleSheetsService.findCustomerByAnyIdentifier) {
+            // If not found, try the more robust search method (only available in UnifiedDatabaseService)
+            if (!fetchedCustomer && 'findCustomerByAnyIdentifier' in googleSheetsService) {
               console.log(`🔎 Verwende robuste Suchmethode...`);
-              fetchedCustomer = await googleSheetsService.findCustomerByAnyIdentifier(
+              fetchedCustomer = await (googleSheetsService as any).findCustomerByAnyIdentifier(
                 quote.customerId, 
                 { name: quote.customerName }
               );
