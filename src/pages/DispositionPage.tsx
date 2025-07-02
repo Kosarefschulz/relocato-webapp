@@ -434,6 +434,33 @@ const DispositionPage: React.FC = () => {
         });
       }
       
+      // FALLBACK: If customer not found in the new fetch but was loaded in DispositionPage,
+      // use the customer data from the parameter (it was successfully loaded from service)
+      if (!fullCustomer) {
+        console.log('⚠️ Fallback: Verwende Kundendaten aus DispositionPage, da Kunde in neuer Abfrage nicht gefunden wurde');
+        console.log('👥 Customer-Daten aus DispositionPage:', {
+          id: customer.id,
+          customerNumber: customer.customerNumber,
+          name: `${customer.firstName} ${customer.lastName}`.trim()
+        });
+        
+        // Create a complete customer object from the disposition data
+        fullCustomer = {
+          id: customer.id,
+          customerNumber: customer.customerNumber,
+          name: `${customer.firstName} ${customer.lastName}`.trim(),
+          email: customer.email,
+          phone: customer.phone,
+          movingDate: customer.moveDate,
+          fromAddress: customer.fromAddress,
+          toAddress: customer.toAddress,
+          // Add required fields with defaults
+          apartment: 0,
+          services: [],
+          createdAt: new Date()
+        } as any;
+      }
+      
       if (!quote) {
         console.error('❌ Angebot nicht gefunden:', {
           quoteId: customer.quoteId,
