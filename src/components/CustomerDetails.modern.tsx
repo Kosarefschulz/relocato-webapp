@@ -63,6 +63,7 @@ import CustomerTagsAndNotes from './CustomerTagsAndNotes';
 import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
 import ShareCustomerButton from './ShareCustomerButton';
+import DispositionLinkButton from './DispositionLinkButton';
 // import SalesActions from './SalesActions'; // Temporarily disabled
 // import SalesStatus from './SalesStatus'; // Temporarily disabled
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
@@ -433,6 +434,7 @@ const CustomerDetails: React.FC = () => {
                   Bearbeiten
                 </Button>
                 <ShareCustomerButton customer={customer} />
+                <DispositionLinkButton customer={customer} />
               </Box>
             )}
           </Box>
