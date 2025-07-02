@@ -79,6 +79,8 @@ interface ShareLink {
   expiresAt: string;
   createdAt: string;
   quoteId: string;
+  arbeitsscheinHTML?: string;
+  arbeitsscheinData?: string;
 }
 
 const DispositionPage: React.FC = () => {

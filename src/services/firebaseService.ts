@@ -27,6 +27,8 @@ interface ShareLink {
   createdAt: Date;
   createdBy?: string;
   usedAt?: Date;
+  arbeitsscheinHTML?: string;
+  arbeitsscheinData?: string;
 }
 
 class FirebaseService {
