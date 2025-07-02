@@ -139,23 +139,35 @@ const DispositionPage: React.FC = () => {
       });
       
       const dispositionCustomers = acceptedQuotes.map((quote: any) => {
-        const customer = allCustomers.find((c: any) => c.id === quote.customerId);
-        if (!customer) return null;
+        // Try to find customer by id or customerNumber
+        const customer = allCustomers.find((c: any) => 
+          c.id === quote.customerId || 
+          c.customerNumber === quote.customerId
+        );
+        if (!customer) {
+          console.log(`⚠️ Kunde nicht gefunden für Quote ${quote.id} mit customerId ${quote.customerId}`);
+          return null;
+        }
         
         // Load saved disposition data from localStorage
         const savedDispositions = JSON.parse(localStorage.getItem('dispositions') || '{}');
         const savedData = savedDispositions[quote.id] || {};
         
+        // Extract name parts
+        const nameParts = (customer.name || '').split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
         return {
           id: customer.id,
-          customerNumber: customer.customerNumber,
-          firstName: '',
-          lastName: '',
-          email: customer.email,
-          phone: customer.phone,
-          moveDate: customer.movingDate || new Date().toISOString(),
-          fromAddress: customer.fromAddress || '',
-          toAddress: customer.toAddress || '',
+          customerNumber: customer.customerNumber || quote.customerId,
+          firstName: firstName,
+          lastName: lastName,
+          email: customer.email || '',
+          phone: customer.phone || '',
+          moveDate: customer.movingDate || quote.moveDate || new Date().toISOString(),
+          fromAddress: customer.fromAddress || quote.moveFrom || '',
+          toAddress: customer.toAddress || quote.moveTo || '',
           status: savedData.status || 'accepted' as const,
           quoteId: quote.id,
           createdAt: quote.createdAt,
