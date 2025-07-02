@@ -61,7 +61,7 @@ const SharePage: React.FC = () => {
       return {
         strasse: parts[0] || '',
         ort: parts.slice(1).join(', ') || '',
-        etage: customerData.quoteData.fromFloor || 'Erdgeschoss' // You might need to add floor info to quote
+        etage: '' // Floor info not available in quote
       };
     };
 

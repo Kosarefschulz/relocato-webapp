@@ -666,27 +666,34 @@ export const prepareArbeitsscheinData = (quote: Quote, customer: Customer): Arbe
   const vonAdresse = extractAddressParts(customer.fromAddress || '');
   const nachAdresse = extractAddressParts(customer.toAddress || '');
 
-  // Extract volume from quote items
-  let totalVolume = 0;
-  if (quote.items) {
-    quote.items.forEach(item => {
-      if (item.volume) {
-        totalVolume += item.volume;
-      }
-    });
-  }
+  // Extract volume from quote
+  const totalVolume = quote.volume || 0;
 
-  // Calculate distance (simplified - in real app this would use a mapping service)
-  const distance = 10; // Placeholder in km
+  // Extract distance from quote
+  const distance = quote.distance || 10; // Default to 10km if not provided
 
   // Extract services from quote
   const leistungen: string[] = [];
-  if (quote.items) {
-    quote.items.forEach(item => {
-      if (item.name && !leistungen.includes(item.name)) {
-        leistungen.push(item.name);
+  
+  // Add packing service if requested
+  if (quote.packingRequested) {
+    leistungen.push('Verpackungsmaterial bereitgestellt');
+    leistungen.push('Ein- und Auspacken');
+  }
+  
+  // Add additional services
+  if (quote.additionalServices && quote.additionalServices.length > 0) {
+    quote.additionalServices.forEach(service => {
+      if (!leistungen.includes(service)) {
+        leistungen.push(service);
       }
     });
+  }
+  
+  // Add standard services based on quote data
+  if (quote.furnitureAssembly) {
+    leistungen.push('Möbeldemontage');
+    leistungen.push('Möbelremontage');
   }
 
   // Add standard services
@@ -711,7 +718,7 @@ export const prepareArbeitsscheinData = (quote: Quote, customer: Customer): Arbe
     vonAdresse,
     nachAdresse,
     leistungen: leistungen.length > 0 ? leistungen : ['Umzugsleistungen'],
-    preis: quote.totalPrice || 0,
+    preis: quote.price || 0,
     paymentInfo: undefined // This would come from payment data
   };
 };
