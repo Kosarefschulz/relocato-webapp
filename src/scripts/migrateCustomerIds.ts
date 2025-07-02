@@ -38,8 +38,12 @@ export async function analyzeQuoteCustomerIds(): Promise<MigrationReport> {
     report.totalQuotes = quotes.length;
     
     // Create customer lookup maps
-    const customerById = new Map(customers.map(c => [c.id, c]));
-    const customerByNumber = new Map(customers.map(c => [c.customerNumber, c]).filter(([k]) => k));
+    const customerById = new Map(customers.map(c => [c.id, c] as [string, any]));
+    const customerByNumber = new Map(
+      customers
+        .map(c => [c.customerNumber, c] as [string | undefined, any])
+        .filter((entry): entry is [string, any] => entry[0] !== undefined && entry[0] !== null)
+    );
     
     console.log(`📊 Total Quotes: ${quotes.length}`);
     console.log(`👥 Total Customers: ${customers.length}`);
