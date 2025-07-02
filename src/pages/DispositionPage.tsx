@@ -388,6 +388,12 @@ const DispositionPage: React.FC = () => {
     setSelectedCustomer(customer);
     
     try {
+      console.log('🔗 Starte Link-Generierung für Kunde:', {
+        customerId: customer.id,
+        customerNumber: customer.customerNumber,
+        quoteId: customer.quoteId
+      });
+      
       // First, get the quote and full customer data
       const [quotes, customers] = await Promise.all([
         googleSheetsService.getQuotes(),
@@ -395,17 +401,70 @@ const DispositionPage: React.FC = () => {
       ]);
       
       const quote = quotes.find((q: any) => q.id === customer.quoteId);
-      const fullCustomer = customers.find((c: any) => c.id === customer.id);
       
-      if (!quote || !fullCustomer) {
-        throw new Error('Angebot oder Kunde nicht gefunden');
+      // Try to find customer by ID or customerNumber
+      let fullCustomer = customers.find((c: any) => c.id === customer.id);
+      
+      if (!fullCustomer) {
+        console.log('🔍 Kunde nicht mit ID gefunden, versuche mit customerNumber:', customer.customerNumber);
+        fullCustomer = customers.find((c: any) => c.customerNumber === customer.customerNumber);
       }
+      
+      if (!fullCustomer) {
+        console.log('🔍 Kunde nicht mit customerNumber gefunden, versuche mit normalisierten IDs');
+        fullCustomer = customers.find((c: any) => {
+          // Normalisiere beide Seiten für den Vergleich
+          const normalizedCustomerId = customer.id?.replace(/^K0*/, 'K');
+          const normalizedCustomerNumber = customer.customerNumber?.replace(/^K0*/, 'K');
+          const normalizedDbId = c.id?.replace(/^K0*/, 'K');
+          const normalizedDbNumber = c.customerNumber?.replace(/^K0*/, 'K');
+          
+          return normalizedDbId === normalizedCustomerId || 
+                 normalizedDbNumber === normalizedCustomerNumber ||
+                 normalizedDbId === normalizedCustomerNumber ||
+                 normalizedDbNumber === normalizedCustomerId;
+        });
+      }
+      
+      if (!quote) {
+        console.error('❌ Angebot nicht gefunden:', {
+          quoteId: customer.quoteId,
+          totalQuotes: quotes.length,
+          firstFewQuoteIds: quotes.slice(0, 5).map((q: any) => q.id)
+        });
+        throw new Error('Angebot nicht gefunden');
+      }
+      
+      if (!fullCustomer) {
+        console.error('❌ Kunde nicht gefunden:', {
+          customerId: customer.id,
+          customerNumber: customer.customerNumber,
+          totalCustomers: customers.length,
+          firstFewCustomers: customers.slice(0, 5).map((c: any) => ({
+            id: c.id,
+            customerNumber: c.customerNumber,
+            name: c.name
+          }))
+        });
+        throw new Error('Kunde nicht gefunden');
+      }
+      
+      console.log('✅ Daten gefunden:', {
+        quote: { id: quote.id, status: quote.status },
+        customer: { id: fullCustomer.id, name: fullCustomer.name }
+      });
       
       // Generate Arbeitsschein HTML
       const arbeitsscheinData = prepareArbeitsscheinData(quote, fullCustomer);
       const arbeitsscheinHTML = generateArbeitsscheinHTML(arbeitsscheinData);
       
+      console.log('📄 Arbeitsschein generiert:', {
+        dataLength: JSON.stringify(arbeitsscheinData).length,
+        htmlLength: arbeitsscheinHTML.length
+      });
+      
       // Create share link in Firebase with Arbeitsschein
+      console.log('🔥 Erstelle ShareLink in Firebase...');
       const shareLink = await firebaseService.createShareLink(
         customer.id,
         customer.quoteId,
@@ -416,14 +475,30 @@ const DispositionPage: React.FC = () => {
         }
       );
       
+      if (!shareLink || !shareLink.token) {
+        throw new Error('ShareLink konnte nicht erstellt werden - Token fehlt');
+      }
+      
+      console.log('✅ ShareLink erfolgreich erstellt:', {
+        shareLinkId: shareLink.id,
+        token: shareLink.token,
+        expiresAt: shareLink.expiresAt
+      });
+      
       // Generate URL
       const baseUrl = window.location.origin;
       const link = `${baseUrl}/share/${shareLink.token}`;
+      
+      console.log('🌐 Generierte URL:', link);
+      
       setGeneratedLink(link);
       setLinkDialogOpen(true);
+      setSnackbarMessage('Link erfolgreich generiert');
+      setSnackbarOpen(true);
     } catch (error) {
-      console.error('Fehler beim Generieren des Links:', error);
-      setSnackbarMessage('Fehler beim Generieren des Links');
+      console.error('❌ Fehler beim Generieren des Links:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      setSnackbarMessage(`Fehler: ${errorMessage}`);
       setSnackbarOpen(true);
     }
   };

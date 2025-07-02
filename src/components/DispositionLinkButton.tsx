@@ -43,15 +43,24 @@ const DispositionLinkButton: React.FC<DispositionLinkButtonProps> = ({ customer,
     setError(null);
     
     try {
+      console.log('🔗 Starte Link-Generierung für Kunde:', {
+        customerId: customer.id,
+        customerNumber: customer.customerNumber,
+        hasProvidedQuote: !!propQuote
+      });
+      
       let quoteToUse = propQuote || selectedQuote;
       
       // If no quote is provided, find the latest accepted/confirmed quote for this customer
       if (!quoteToUse) {
+        console.log('🔍 Suche nach bestätigten Angeboten...');
         const quotes = await googleSheetsService.getQuotes();
         const customerQuotes = quotes.filter((q: Quote) => 
           (q.customerId === customer.id || q.customerId === customer.customerNumber) &&
           (q.status === 'accepted' || q.status === 'confirmed')
         );
+        
+        console.log(`📄 Gefundene bestätigte Angebote: ${customerQuotes.length}`);
         
         if (customerQuotes.length === 0) {
           setError('Keine bestätigten Angebote für diesen Kunden gefunden');
@@ -63,13 +72,26 @@ const DispositionLinkButton: React.FC<DispositionLinkButtonProps> = ({ customer,
         quoteToUse = customerQuotes.sort((a: Quote, b: Quote) => 
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )[0];
+        
+        console.log('✅ Verwende Angebot:', {
+          quoteId: quoteToUse.id,
+          status: quoteToUse.status,
+          createdAt: quoteToUse.createdAt
+        });
       }
       
       // Generate Arbeitsschein
+      console.log('📄 Generiere Arbeitsschein...');
       const arbeitsscheinData = prepareArbeitsscheinData(quoteToUse, customer);
       const arbeitsscheinHTML = generateArbeitsscheinHTML(arbeitsscheinData);
       
+      console.log('📄 Arbeitsschein generiert:', {
+        dataSize: JSON.stringify(arbeitsscheinData).length,
+        htmlSize: arbeitsscheinHTML.length
+      });
+      
       // Create share link in Firebase with Arbeitsschein
+      console.log('🔥 Erstelle ShareLink in Firebase...');
       const shareLink = await firebaseService.createShareLink(
         customer.id,
         quoteToUse.id,
@@ -80,13 +102,27 @@ const DispositionLinkButton: React.FC<DispositionLinkButtonProps> = ({ customer,
         }
       );
       
+      if (!shareLink || !shareLink.token) {
+        throw new Error('ShareLink konnte nicht erstellt werden - Token fehlt');
+      }
+      
+      console.log('✅ ShareLink erfolgreich erstellt:', {
+        shareLinkId: shareLink.id,
+        token: shareLink.token,
+        expiresAt: shareLink.expiresAt
+      });
+      
       // Generate URL
       const baseUrl = window.location.origin;
       const generatedLink = `${baseUrl}/share/${shareLink.token}`;
+      
+      console.log('🌐 Generierte URL:', generatedLink);
+      
       setLink(generatedLink);
     } catch (error) {
-      console.error('Fehler beim Generieren des Links:', error);
-      setError('Fehler beim Generieren des Links');
+      console.error('❌ Fehler beim Generieren des Links:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Fehler beim Generieren des Links';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

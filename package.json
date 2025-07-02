@@ -96,7 +96,8 @@
     "migrate:all": "node migration/vercel/migrate-all.js",
     "db:setup": "psql $POSTGRES_URL -f migration/vercel/vercel-schema.sql",
     "switch:vercel": "node scripts/switch-to-vercel.js && npm start",
-    "switch:firebase": "node scripts/switch-to-firebase.js && npm start"
+    "switch:firebase": "node scripts/switch-to-firebase.js && npm start",
+    "debug:sharelinks": "ts-node src/scripts/debugShareLinks.ts"
   },
   "eslintConfig": {
     "extends": [
@@ -123,10 +124,11 @@
     "body-parser": "^2.2.0",
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "imap": "^0.8.19",
     "mailparser": "^3.7.3",
-    "svgo": "^4.0.0"
+    "svgo": "^4.0.0",
+    "ts-node": "^10.9.2"
   }
 }

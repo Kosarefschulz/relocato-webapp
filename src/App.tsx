@@ -55,6 +55,7 @@ import AccountingDashboard from './pages/AccountingDashboard';
 import CustomerImportPage from './pages/CustomerImportPage';
 import SharedCustomerView from './pages/SharedCustomerView';
 import TrelloImportPage from './pages/TrelloImportPage';
+import DebugShareLinksPage from './pages/DebugShareLinksPage';
 
 
 export const AuthContext = React.createContext<{
@@ -289,6 +290,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/import-trello" 
         element={<TrelloImportPage />} 
+      />
+      
+      {/* Debug ShareLinks Page (nur für Entwicklung) */}
+      <Route 
+        path="/debug-sharelinks" 
+        element={<DebugShareLinksPage />} 
       />
       
       {/* Default Route */}

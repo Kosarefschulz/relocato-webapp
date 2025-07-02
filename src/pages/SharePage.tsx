@@ -109,24 +109,55 @@ const SharePage: React.FC = () => {
 
   const loadShareData = async () => {
     try {
-      // Get share link from Firebase
-      const shareLink = await firebaseService.getShareLinkByToken(token || '');
-
-      if (!shareLink) {
+      console.log('🔍 Lade SharePage mit Token:', {
+        token,
+        tokenLength: token?.length,
+        url: window.location.href
+      });
+      
+      if (!token) {
+        console.error('❌ Kein Token in URL gefunden');
         setError('not_found');
         setLoading(false);
         return;
       }
+      
+      // Get share link from Firebase
+      console.log('🔥 Suche ShareLink in Firebase...');
+      const shareLink = await firebaseService.getShareLinkByToken(token);
+
+      if (!shareLink) {
+        console.error('❌ ShareLink nicht in Firebase gefunden für Token:', token);
+        setError('not_found');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('✅ ShareLink gefunden:', {
+        id: shareLink.id,
+        customerId: shareLink.customerId,
+        quoteId: shareLink.quoteId,
+        hasArbeitsscheinHTML: !!shareLink.arbeitsscheinHTML
+      });
 
       // Check if link is expired
       const expirationDate = new Date(shareLink.expiresAt);
-      if (expirationDate < new Date()) {
+      const now = new Date();
+      console.log('📅 Prüfe Ablaufdatum:', {
+        expiresAt: expirationDate.toISOString(),
+        now: now.toISOString(),
+        isExpired: expirationDate < now
+      });
+      
+      if (expirationDate < now) {
+        console.warn('⚠️ ShareLink ist abgelaufen');
         setError('expired');
         setLoading(false);
         return;
       }
 
       // Update link usage
+      console.log('🔄 Aktualisiere Link-Nutzung...');
       await firebaseService.updateShareLinkUsage(shareLink.id);
       
       // Store the full share link data (includes arbeitsscheinHTML)

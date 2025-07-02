@@ -822,7 +822,16 @@ class FirebaseService {
       if (!this.shareLinksCollection) throw new Error('ShareLinks collection not initialized');
       
       // Generate unique token
-      const token = btoa(`${customerId}-${Date.now()}-${Math.random()}`).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+      const rawToken = `${customerId}-${Date.now()}-${Math.random()}`;
+      const token = btoa(rawToken).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+      
+      console.log('🔑 Generiere ShareLink Token:', {
+        customerId,
+        quoteId,
+        rawToken: rawToken.substring(0, 20) + '...',
+        generatedToken: token,
+        tokenLength: token.length
+      });
       
       // Create expiration date (7 days from now)
       const expiresAt = new Date();
@@ -838,9 +847,27 @@ class FirebaseService {
         ...(additionalData || {}), // Add any additional data (like arbeitsscheinHTML)
       };
       
+      console.log('📝 ShareLink Daten vor Speicherung:', {
+        ...shareLinkData,
+        arbeitsscheinHTML: additionalData?.arbeitsscheinHTML ? 'Vorhanden' : 'Nicht vorhanden',
+        arbeitsscheinData: additionalData?.arbeitsscheinData ? 'Vorhanden' : 'Nicht vorhanden'
+      });
+      
       const docRef = await addDoc(this.shareLinksCollection, shareLinkData);
       
-      console.log('✅ Share Link erstellt:', docRef.id);
+      console.log('✅ Share Link erfolgreich in Firebase gespeichert:', {
+        documentId: docRef.id,
+        collection: 'shareLinks',
+        token: token
+      });
+      
+      // Verify the link was saved by reading it back
+      const savedDoc = await getDoc(docRef);
+      if (savedDoc.exists()) {
+        console.log('✅ ShareLink Verifizierung erfolgreich - Dokument existiert in Firebase');
+      } else {
+        console.error('❌ ShareLink Verifizierung fehlgeschlagen - Dokument nicht gefunden!');
+      }
       
       return {
         id: docRef.id,
@@ -850,26 +877,70 @@ class FirebaseService {
         expiresAt,
         createdAt: new Date(),
         createdBy,
+        arbeitsscheinHTML: additionalData?.arbeitsscheinHTML,
+        arbeitsscheinData: additionalData?.arbeitsscheinData,
       };
     } catch (error) {
       console.error('❌ Fehler beim Erstellen des Share Links:', error);
+      console.error('Details:', {
+        customerId,
+        quoteId,
+        hasFirebaseConnection: !!this.shareLinksCollection,
+        errorMessage: error instanceof Error ? error.message : 'Unbekannter Fehler'
+      });
       throw error;
     }
   }
 
   async getShareLinkByToken(token: string): Promise<ShareLink | null> {
     try {
-      if (!this.shareLinksCollection) throw new Error('ShareLinks collection not initialized');
+      if (!this.shareLinksCollection) {
+        console.error('❌ ShareLinks collection nicht initialisiert!');
+        throw new Error('ShareLinks collection not initialized');
+      }
+      
+      console.log('🔍 Suche ShareLink mit Token:', {
+        token,
+        tokenLength: token.length,
+        collection: 'shareLinks'
+      });
       
       const q = query(this.shareLinksCollection, where('token', '==', token));
       const querySnapshot = await getDocs(q);
       
+      console.log('📊 Query-Ergebnis:', {
+        gefundeneDokumente: querySnapshot.size,
+        empty: querySnapshot.empty
+      });
+      
       if (querySnapshot.empty) {
+        console.warn('⚠️ Kein ShareLink mit diesem Token gefunden');
+        
+        // Debug: Liste alle ShareLinks auf (nur für Debugging)
+        try {
+          const allLinks = await getDocs(this.shareLinksCollection);
+          console.log(`📋 Gesamt ShareLinks in DB: ${allLinks.size}`);
+          allLinks.forEach(doc => {
+            const data = doc.data();
+            console.log(`  - ID: ${doc.id}, Token: ${data.token?.substring(0, 8)}..., Customer: ${data.customerId}`);
+          });
+        } catch (debugError) {
+          console.error('Debug-Fehler:', debugError);
+        }
+        
         return null;
       }
       
       const doc = querySnapshot.docs[0];
       const data = doc.data();
+      
+      console.log('✅ ShareLink gefunden:', {
+        documentId: doc.id,
+        customerId: data.customerId,
+        quoteId: data.quoteId,
+        hasArbeitsscheinHTML: !!data.arbeitsscheinHTML,
+        expiresAt: data.expiresAt?.toDate ? data.expiresAt.toDate() : data.expiresAt
+      });
       
       return {
         id: doc.id,
@@ -891,6 +962,11 @@ class FirebaseService {
       };
     } catch (error) {
       console.error('❌ Fehler beim Abrufen des Share Links:', error);
+      console.error('Details:', {
+        token,
+        hasFirebaseConnection: !!this.shareLinksCollection,
+        errorMessage: error instanceof Error ? error.message : 'Unbekannter Fehler'
+      });
       throw error;
     }
   }
