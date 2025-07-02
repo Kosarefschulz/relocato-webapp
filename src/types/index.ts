@@ -77,6 +77,7 @@ export interface Quote {
   id: string;
   customerId: string;
   customerName: string;
+  customerNumber?: string; // Kundennummer für bessere Zuordnung
   price: number;
   comment?: string;
   createdAt: Date;
