@@ -862,11 +862,21 @@ class FirebaseService {
       });
       
       // Verify the link was saved by reading it back
-      const savedDoc = await getDoc(docRef);
-      if (savedDoc.exists()) {
-        console.log('✅ ShareLink Verifizierung erfolgreich - Dokument existiert in Firebase');
-      } else {
-        console.error('❌ ShareLink Verifizierung fehlgeschlagen - Dokument nicht gefunden!');
+      try {
+        const savedDoc = await getDoc(docRef);
+        if (savedDoc.exists()) {
+          console.log('✅ ShareLink Verifizierung erfolgreich - Dokument existiert in Firebase');
+          const savedData = savedDoc.data();
+          console.log('💾 Gespeicherte Daten:', {
+            token: savedData.token,
+            customerId: savedData.customerId,
+            quoteId: savedData.quoteId
+          });
+        } else {
+          console.error('❌ ShareLink Verifizierung fehlgeschlagen - Dokument nicht gefunden!');
+        }
+      } catch (verifyError) {
+        console.warn('⚠️ Verifizierung übersprungen:', verifyError);
       }
       
       return {

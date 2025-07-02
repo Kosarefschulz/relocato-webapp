@@ -105,6 +105,7 @@ const DebugShareLinksPage: React.FC = () => {
 
   const handleCreateTestLink = async () => {
     try {
+      console.log('🔧 Erstelle Test-ShareLink...');
       const shareLink = await firebaseService.createShareLink(
         testCustomerId,
         testQuoteId,
@@ -115,11 +116,20 @@ const DebugShareLinksPage: React.FC = () => {
         }
       );
 
-      console.log('Test-ShareLink erstellt:', shareLink);
+      console.log('✅ Test-ShareLink erstellt:', shareLink);
+      
+      // Show success message
+      alert(`Test-Link erstellt!\n\nToken: ${shareLink.token}\nURL: ${window.location.origin}/share/${shareLink.token}`);
+      
       setCreateDialogOpen(false);
-      loadShareLinks();
+      
+      // Reload after a short delay to ensure Firebase has processed the write
+      setTimeout(() => {
+        loadShareLinks();
+      }, 1000);
     } catch (error) {
-      console.error('Fehler beim Erstellen des Test-Links:', error);
+      console.error('❌ Fehler beim Erstellen des Test-Links:', error);
+      alert('Fehler beim Erstellen des Test-Links. Siehe Konsole für Details.');
     }
   };
 

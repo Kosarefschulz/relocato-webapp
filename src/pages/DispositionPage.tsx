@@ -288,8 +288,16 @@ const DispositionPage: React.FC = () => {
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
         
+        // Log customer data for debugging
+        console.log('🕵️ DispositionCustomer Mapping:', {
+          originalCustomerId: customer.id,
+          customerNumber: customer.customerNumber,
+          quoteCustomerId: quote.customerId,
+          willUseId: customer.id // This is what we'll use
+        });
+        
         return {
-          id: customer.id,
+          id: customer.id, // Use the actual customer ID from database
           customerNumber: customer.customerNumber || quote.customerId,
           firstName: firstName,
           lastName: lastName,
@@ -465,9 +473,16 @@ const DispositionPage: React.FC = () => {
       
       // Create share link in Firebase with Arbeitsschein
       console.log('🔥 Erstelle ShareLink in Firebase...');
+      console.log('🆔 IDs für ShareLink:', {
+        customerId: fullCustomer.id,
+        customerIdFromParam: customer.id,
+        quoteId: quote.id,
+        quoteIdFromParam: customer.quoteId
+      });
+      
       const shareLink = await firebaseService.createShareLink(
-        customer.id,
-        customer.quoteId,
+        fullCustomer.id, // Use the full customer ID from database
+        quote.id, // Use the actual quote ID
         'disposition', // You can add user ID here if available
         {
           arbeitsscheinHTML,
