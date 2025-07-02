@@ -708,7 +708,7 @@ export const prepareArbeitsscheinData = (quote: Quote, customer: Customer): Arbe
   return {
     auftragsnummer: orderNumber,
     kunde: {
-      name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.companyName || 'Kunde',
+      name: customer.name || customer.company || 'Kunde',
       telefon: customer.phone || '',
       email: customer.email
     },
