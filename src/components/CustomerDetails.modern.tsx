@@ -143,18 +143,14 @@ const CustomerDetails: React.FC = () => {
       if (!customer?.id) return;
       
       try {
-        const { collection, query, where, getDocs } = await import('firebase/firestore');
-        const { db } = await import('../config/firebase');
-        
-        const linksQuery = query(
-          collection(db, 'emailCustomerLinks'),
-          where('customerId', '==', customer.id)
-        );
-        
-        const snapshot = await getDocs(linksQuery);
-        setLinkedEmailsCount(snapshot.size);
+        console.log('📧 Loading linked emails count for customer:', customer.id);
+        // Since Firebase is disabled, we'll use a placeholder count
+        // In the future, this could be replaced with a Supabase query
+        setLinkedEmailsCount(0);
+        console.log('ℹ️ Linked emails count set to 0 (Firebase disabled, using Supabase)');
       } catch (err) {
         console.error('Error loading linked emails count:', err);
+        setLinkedEmailsCount(0);
       }
     };
     

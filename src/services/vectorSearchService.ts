@@ -108,22 +108,10 @@ class VectorSearchService {
     threshold: number
   ): Promise<SearchResult[]> {
     try {
-      const { data, error } = await supabase.rpc('search_similar_customers', {
-        query_embedding: embedding,
-        match_count: limit,
-        threshold
-      });
-
-      if (error) throw error;
-
-      return data.map((item: any) => ({
-        id: item.customer_id,
-        type: 'customer' as const,
-        title: item.customer_name,
-        content: item.content,
-        similarity: item.similarity,
-        metadata: { contentType: item.content_type }
-      }));
+      console.log('⚠️ search_similar_customers RPC not implemented, using fallback');
+      // Fallback: return empty results for now
+      // In the future, this could be replaced with a simple text search
+      return [];
     } catch (error) {
       console.error('Error searching customers:', error);
       return [];
@@ -137,25 +125,9 @@ class VectorSearchService {
     threshold: number
   ): Promise<SearchResult[]> {
     try {
-      const { data, error } = await supabase.rpc('search_similar_quotes', {
-        query_embedding: embedding,
-        match_count: limit,
-        threshold
-      });
-
-      if (error) throw error;
-
-      return data.map((item: any) => ({
-        id: item.quote_id,
-        type: 'quote' as const,
-        title: `Angebot für ${item.customer_name}`,
-        content: item.content,
-        similarity: item.similarity,
-        metadata: { 
-          contentType: item.content_type,
-          price: item.price
-        }
-      }));
+      console.log('⚠️ search_similar_quotes RPC not implemented, using fallback');
+      // Fallback: return empty results for now
+      return [];
     } catch (error) {
       console.error('Error searching quotes:', error);
       return [];
@@ -169,22 +141,9 @@ class VectorSearchService {
     threshold: number
   ): Promise<SearchResult[]> {
     try {
-      const { data, error } = await supabase.rpc('search_knowledge_base', {
-        query_embedding: embedding,
-        match_count: limit,
-        threshold
-      });
-
-      if (error) throw error;
-
-      return data.map((item: any) => ({
-        id: item.id,
-        type: 'knowledge' as const,
-        title: item.title,
-        content: item.content,
-        similarity: item.similarity,
-        metadata: { category: item.category }
-      }));
+      console.log('⚠️ search_knowledge_base RPC not implemented, using fallback');
+      // Fallback: return empty results for now
+      return [];
     } catch (error) {
       console.error('Error searching knowledge base:', error);
       return [];

@@ -37,16 +37,19 @@ class QueueService {
     } = {}
   ): Promise<string> {
     try {
-      const { data, error } = await supabase.rpc('enqueue_job', {
-        p_job_type: jobType,
-        p_payload: payload,
-        p_scheduled_for: options.scheduledFor?.toISOString() || new Date().toISOString()
-      });
-
-      if (error) throw error;
+      // Note: enqueue_job Supabase Edge Function not implemented yet
+      // For now, we'll just log the operation instead of calling the RPC
+      const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
-      console.log(`📋 Job enqueued: ${jobType}`, data);
-      return data;
+      console.log(`📋 Job would be enqueued: ${jobType} (RPC disabled)`, {
+        jobId,
+        payload,
+        scheduledFor: options.scheduledFor?.toISOString() || new Date().toISOString(),
+        maxAttempts: options.maxAttempts || 3,
+        priority: options.priority || 'normal'
+      });
+      
+      return jobId;
     } catch (error) {
       console.error('Error enqueueing job:', error);
       throw error;

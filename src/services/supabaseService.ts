@@ -50,14 +50,36 @@ export class SupabaseService {
 
   async getCustomer(customerId: string): Promise<Customer | null> {
     try {
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .or(`id.eq.${customerId},firebase_id.eq.${customerId}`)
-        .eq('is_deleted', false)
-        .single();
+      console.log('🔍 Searching for customer with ID:', customerId);
+      
+      // Check if it's a UUID format first
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customerId);
+      
+      let query;
+      if (isUUID) {
+        // If it's a UUID, search by id
+        query = supabase
+          .from('customers')
+          .select('*')
+          .eq('id', customerId)
+          .eq('is_deleted', false);
+      } else {
+        // If it's not a UUID, search by firebase_id or customer_number
+        query = supabase
+          .from('customers')
+          .select('*')
+          .or(`firebase_id.eq.${customerId},customer_number.eq.${customerId}`)
+          .eq('is_deleted', false);
+      }
+      
+      const { data, error } = await query.single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Customer query error:', error);
+        return null;
+      }
+      
+      console.log('✅ Customer found:', data?.name || data?.id);
       return data ? this.mapSupabaseCustomerToLocal(data) : null;
     } catch (error) {
       console.error('Error fetching customer:', error);
@@ -196,12 +218,24 @@ export class SupabaseService {
       const supabaseQuote = this.mapLocalQuoteToSupabase(quote);
       
       // Ensure we use the actual Supabase customer UUID
-      const { data: customerData, error: customerError } = await supabase
-        .from('customers')
-        .select('id')
-        .or(`id.eq.${quote.customerId},firebase_id.eq.${quote.customerId}`)
-        .eq('is_deleted', false)
-        .single();
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(quote.customerId);
+      
+      let customerQuery;
+      if (isUUID) {
+        customerQuery = supabase
+          .from('customers')
+          .select('id')
+          .eq('id', quote.customerId)
+          .eq('is_deleted', false);
+      } else {
+        customerQuery = supabase
+          .from('customers')
+          .select('id')
+          .or(`firebase_id.eq.${quote.customerId},customer_number.eq.${quote.customerId}`)
+          .eq('is_deleted', false);
+      }
+      
+      const { data: customerData, error: customerError } = await customerQuery.single();
 
       if (customerError || !customerData) {
         throw new Error(`Cannot resolve customer ID: ${quote.customerId}. Customer may not exist in Supabase.`);

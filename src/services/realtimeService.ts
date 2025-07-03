@@ -131,17 +131,16 @@ class RealtimeService {
 
     this.currentUser = { ...this.currentUser, ...presence };
     
-    // Update in database
-    await supabase.rpc('update_user_presence', {
-      p_user_id: this.currentUser.userId,
-      p_user_name: this.currentUser.userName,
-      p_status: this.currentUser.status,
-      p_current_page: this.currentUser.currentPage,
-      p_device_info: this.currentUser.deviceInfo,
-      p_location: this.currentUser.location
+    // Note: Supabase Edge Functions for user_presence not implemented yet
+    // For now, we'll just log the operation instead of calling the RPC
+    console.log('📍 User presence update (RPC disabled):', {
+      userId: this.currentUser.userId,
+      userName: this.currentUser.userName,
+      status: this.currentUser.status,
+      currentPage: this.currentUser.currentPage
     });
 
-    // Update in presence channel
+    // Update in presence channel (this still works)
     const presenceChannel = this.channels.get('presence');
     if (presenceChannel) {
       await presenceChannel.track({
@@ -316,26 +315,53 @@ class RealtimeService {
 
   // Get online users
   async getOnlineUsers(): Promise<UserPresence[]> {
-    const { data, error } = await supabase
-      .from('user_presence')
-      .select('*')
-      .gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()) // Last 5 minutes
-      .order('last_seen', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('user_presence')
+        .select('*')
+        .gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()) // Last 5 minutes
+        .order('last_seen', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching online users:', error);
-      return [];
+      if (error) {
+        console.log('⚠️ user_presence table not found, using presence channel data instead');
+        return this.getUsersFromPresenceChannel();
+      }
+
+      return data.map(user => ({
+        userId: user.user_id || 'unknown',
+        userName: user.user_name || 'Unbekannter Nutzer',
+        status: user.status as any || 'offline',
+        currentPage: user.current_page,
+        lastSeen: new Date(user.last_seen),
+        deviceInfo: user.device_info,
+        location: user.location
+      }));
+    } catch (error) {
+      console.log('⚠️ Error accessing user_presence table, using fallback');
+      return this.getUsersFromPresenceChannel();
     }
+  }
 
-    return data.map(user => ({
-      userId: user.user_id || 'unknown',
-      userName: user.user_name || 'Unbekannter Nutzer',
-      status: user.status as any || 'offline',
-      currentPage: user.current_page,
-      lastSeen: new Date(user.last_seen),
-      deviceInfo: user.device_info,
-      location: user.location
-    }));
+  // Fallback method to get users from presence channel
+  private getUsersFromPresenceChannel(): UserPresence[] {
+    const presenceChannel = this.channels.get('presence');
+    if (!presenceChannel) return [];
+
+    const state = presenceChannel.presenceState();
+    const users: UserPresence[] = [];
+    
+    Object.entries(state).forEach(([key, presences]) => {
+      presences.forEach((presence: any) => {
+        users.push({
+          userId: presence.user_id || 'unknown',
+          userName: presence.user_name || 'Unbekannter Nutzer',
+          status: presence.status || 'online',
+          lastSeen: new Date(presence.online_at || Date.now())
+        });
+      });
+    });
+
+    return users;
   }
 
   // Handle app events
