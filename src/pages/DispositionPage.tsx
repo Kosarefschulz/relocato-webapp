@@ -257,9 +257,9 @@ const DispositionPage: React.FC = () => {
             let fetchedCustomer = await databaseService.getCustomer(quote.customerId);
             
             // If not found, try the more robust search method (only available in UnifiedDatabaseService)
-            if (!fetchedCustomer && 'findCustomerByAnyIdentifier' in googleSheetsService) {
+            if (!fetchedCustomer && 'findCustomerByAnyIdentifier' in databaseService) {
               console.log(`🔎 Verwende robuste Suchmethode...`);
-              fetchedCustomer = await (googleSheetsService as any).findCustomerByAnyIdentifier(
+              fetchedCustomer = await (databaseService as any).findCustomerByAnyIdentifier(
                 quote.customerId, 
                 { name: quote.customerName }
               );

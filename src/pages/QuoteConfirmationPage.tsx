@@ -231,6 +231,8 @@ const QuoteConfirmationPage: React.FC = () => {
           const calendarEvent = {
             title: `Umzug: ${customerName || quote.customerName || 'Kunde'}`,
             date: eventDate,
+            start: eventDate,
+            end: eventDate,
             type: 'moving' as const,
             customerId: quote.customerId,
             customerName: customerName || quote.customerName || 'Kunde',

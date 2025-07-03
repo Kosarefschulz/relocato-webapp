@@ -143,16 +143,15 @@ export async function migrateQuoteCustomerIds(dryRun = true): Promise<MigrationR
           if (correctCustomer) {
             console.log(`🔧 Fixing Quote ${quote.id}: ${quote.customerId} -> ${correctCustomer.id}`);
             
-            const success = await databaseService.updateQuote(quote.id, {
-              customerId: correctCustomer.id,
-              customerNumber: quote.customerId // Preserve original customer number
-            });
-            
-            if (success) {
+            try {
+              await databaseService.updateQuote(quote.id, {
+                customerId: correctCustomer.id,
+                customerNumber: quote.customerId // Preserve original customer number
+              });
               report.fixedQuotes++;
-            } else {
+            } catch (error) {
+              console.error(`❌ Failed to update quote ${quote.id}:`, error);
               report.failedFixes.push(quote.id);
-              console.error(`❌ Failed to update quote ${quote.id}`);
             }
           }
         }

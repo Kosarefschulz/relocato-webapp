@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
   Chip,
   LinearProgress,
   IconButton,
@@ -19,6 +18,7 @@ import {
   Button,
   Alert
 } from '@mui/material';
+import Grid from './GridCompat';
 import {
   People as PeopleIcon,
   Schedule as ScheduleIcon,

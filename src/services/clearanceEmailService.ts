@@ -397,9 +397,11 @@ export const sendClearanceQuoteEmail = async (
       await databaseService.addEmailHistory({
         id: `email-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         customerId: customer.id,
+        recipient: customer.email,
         subject: emailData.subject,
         body: emailHtml,
         sentAt: new Date(),
+        createdAt: new Date(),
         sentBy: quote.createdBy || 'System',
         type: 'quote',
         attachments: [`Entrümpelungsangebot_${customer.name}.pdf`],

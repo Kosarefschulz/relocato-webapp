@@ -59,7 +59,7 @@ import {
   AttachMoney as AttachMoneyIcon,
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { animations } from '../styles/modernTheme';
 import { formatDate, parseDate } from '../utils/dateUtils';
@@ -92,7 +92,7 @@ const CustomersList: React.FC = () => {
         if (!initialLoad) {
           setLoading(true);
         }
-        const customers = await googleSheetsService.getCustomers();
+        const customers = await databaseService.getCustomers();
         setCustomers(customers);
       } catch (error) {
         console.error('Fehler beim Laden der Kunden:', error);
@@ -186,12 +186,8 @@ const CustomersList: React.FC = () => {
         
         for (const customerId of selectedCustomers) {
           try {
-            const success = await googleSheetsService.deleteCustomer(customerId);
-            if (success) {
-              successCount++;
-            } else {
-              errorCount++;
-            }
+            await databaseService.deleteCustomer(customerId);
+            successCount++;
           } catch (error) {
             errorCount++;
           }
@@ -224,16 +220,12 @@ const CustomersList: React.FC = () => {
     
     if (window.confirm('Möchten Sie diesen Kunden wirklich löschen?')) {
       try {
-        const success = await googleSheetsService.deleteCustomer(customerId);
-        if (success) {
-          // Kunde aus der lokalen Liste entfernen
-          setCustomers(customers.filter(c => c.id !== customerId));
-          setSnackbarMessage('Kunde erfolgreich gelöscht');
-          setSnackbarOpen(true);
-        } else {
-          setSnackbarMessage('Fehler beim Löschen des Kunden');
-          setSnackbarOpen(true);
-        }
+        await databaseService.deleteCustomer(customerId);
+        
+        // Kunde aus der lokalen Liste entfernen
+        setCustomers(customers.filter(c => c.id !== customerId));
+        setSnackbarMessage('Kunde erfolgreich gelöscht');
+        setSnackbarOpen(true);
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
         setSnackbarMessage('Fehler beim Löschen des Kunden');
@@ -250,8 +242,8 @@ const CustomersList: React.FC = () => {
   };
 
   const handleExportClick = () => {
-    const csvData = 'exportLocalCustomersForSheets' in googleSheetsService 
-      ? (googleSheetsService as any).exportLocalCustomersForSheets()
+    const csvData = 'exportLocalCustomersForSheets' in databaseService 
+      ? (databaseService as any).exportLocalCustomersForSheets()
       : 'Export nicht verfügbar';
     setExportData(csvData);
     setExportDialogOpen(true);
@@ -271,13 +263,13 @@ const CustomersList: React.FC = () => {
   };
 
   const handleClearLocalCustomers = async () => {
-    if ('clearLocalCustomers' in googleSheetsService) {
-      (googleSheetsService as any).clearLocalCustomers();
+    if ('clearLocalCustomers' in databaseService) {
+      (databaseService as any).clearLocalCustomers();
     }
     setExportDialogOpen(false);
     setSnackbarMessage('Lokale Kunden wurden gelöscht');
     setSnackbarOpen(true);
-    const allCustomers = await googleSheetsService.getCustomers();
+    const allCustomers = await databaseService.getCustomers();
     setCustomers(allCustomers);
   };
 

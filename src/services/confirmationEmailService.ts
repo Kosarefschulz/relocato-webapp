@@ -423,6 +423,8 @@ const createGoogleCalendarEvent = async (
       id: `quote-${quote.id}`,
       title: `Umzug: ${customer.name}`,
       date: eventDate,
+      start: new Date(`${eventDate}T08:00:00`), // Default 8:00 Uhr  
+      end: new Date(`${eventDate}T16:00:00`), // Default 16:00 Uhr
       startTime: new Date(`${eventDate}T08:00:00`), // Default 8:00 Uhr
       endTime: new Date(`${eventDate}T16:00:00`), // Default 16:00 Uhr
       type: 'moving' as const,

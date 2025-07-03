@@ -22,11 +22,11 @@ class GoogleCalendarService {
             description: calendarEvent.description || '',
             location: calendarEvent.location || '',
             start: {
-              dateTime: this.getEventDateTime(calendarEvent.date, calendarEvent.startTime),
+              dateTime: this.getEventDateTime(calendarEvent.date || calendarEvent.start, calendarEvent.startTime),
               timeZone: 'Europe/Berlin',
             },
             end: {
-              dateTime: this.getEventDateTime(calendarEvent.date, calendarEvent.endTime || this.addHours(calendarEvent.startTime, 4)),
+              dateTime: this.getEventDateTime(calendarEvent.date || calendarEvent.end, calendarEvent.endTime || this.addHours(calendarEvent.startTime, 4)),
               timeZone: 'Europe/Berlin',
             },
             extendedProperties: {

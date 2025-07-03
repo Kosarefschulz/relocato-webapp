@@ -215,6 +215,20 @@ export class SupabaseService {
     }
   }
 
+  async deleteQuote(quoteId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('quotes')
+        .update({ is_deleted: true })
+        .or(`id.eq.${quoteId},firebase_id.eq.${quoteId}`);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+      throw error;
+    }
+  }
+
   // Invoice Operations
   async getInvoices(): Promise<Invoice[]> {
     try {
@@ -365,7 +379,7 @@ export class SupabaseService {
       const supabaseUpdates: any = {};
       
       if (updates.usedAt !== undefined) {
-        supabaseUpdates.used_at = updates.usedAt?.toISOString();
+        supabaseUpdates.used_at = updates.usedAt instanceof Date ? updates.usedAt.toISOString() : updates.usedAt;
       }
       if (updates.arbeitsscheinHTML !== undefined) {
         supabaseUpdates.arbeitsschein_html = updates.arbeitsscheinHTML;
@@ -492,8 +506,8 @@ export class SupabaseService {
       const supabaseEvent = {
         customer_id: event.customerId,
         title: event.title,
-        start_date: event.start.toISOString(),
-        end_date: event.end.toISOString(),
+        start_date: event.start instanceof Date ? event.start.toISOString() : event.start,
+        end_date: event.end instanceof Date ? event.end.toISOString() : event.end,
         type: event.type,
         description: event.description,
         location: event.location,
@@ -621,7 +635,7 @@ export class SupabaseService {
       services: customer.services,
       sales_status: customer.salesStatus,
       status: customer.status,
-      cancelled_at: customer.cancelledAt?.toISOString(),
+      cancelled_at: customer.cancelledAt instanceof Date ? customer.cancelledAt.toISOString() : customer.cancelledAt,
       notes: customer.notes,
       volume: customer.volume,
       distance: customer.distance,
@@ -703,8 +717,10 @@ export class SupabaseService {
       id: data.firebase_id || data.id,
       customerId: data.customer_id,
       quoteId: data.quote_id,
+      customerName: data.customer_name || '',
       invoiceNumber: data.invoice_number,
       amount: data.amount,
+      totalPrice: data.total_price || data.amount || 0,
       status: data.status,
       dueDate: new Date(data.due_date),
       paidDate: data.paid_date ? new Date(data.paid_date) : undefined,
@@ -722,8 +738,8 @@ export class SupabaseService {
     const supabaseInvoice: any = {
       amount: invoice.amount,
       status: invoice.status,
-      due_date: invoice.dueDate.toISOString(),
-      paid_date: invoice.paidDate?.toISOString(),
+      due_date: invoice.dueDate instanceof Date ? invoice.dueDate.toISOString() : invoice.dueDate,
+      paid_date: invoice.paidDate instanceof Date ? invoice.paidDate.toISOString() : invoice.paidDate,
       items: invoice.items,
       notes: invoice.notes
     };

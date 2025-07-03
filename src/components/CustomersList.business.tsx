@@ -18,7 +18,7 @@ import {
   TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 
 const CustomersList: React.FC = () => {
   const navigate = useNavigate();
@@ -115,7 +115,7 @@ const CustomersList: React.FC = () => {
       setError('');
       
       // Load customers from Google Sheets
-      const customers = await googleSheetsService.getCustomers();
+      const customers = await databaseService.getCustomers();
       setCustomers(customers);
       
     } catch (err) {
@@ -130,15 +130,11 @@ const CustomersList: React.FC = () => {
     if (window.confirm(`Kunde "${customer.name}" wirklich löschen?\n\nAlle zugehörigen Angebote und Rechnungen werden ebenfalls gelöscht.`)) {
       try {
         setLoading(true);
-        const success = await googleSheetsService.deleteCustomer(customer.id);
+        await databaseService.deleteCustomer(customer.id);
         
-        if (success) {
-          // Refresh list
-          await loadCustomers();
-          console.log('✅ Kunde erfolgreich gelöscht:', customer.name);
-        } else {
-          setError('Fehler beim Löschen des Kunden');
-        }
+        // Refresh list
+        await loadCustomers();
+        console.log('✅ Kunde erfolgreich gelöscht:', customer.name);
       } catch (err) {
         console.error('Fehler beim Löschen:', err);
         setError('Fehler beim Löschen des Kunden');

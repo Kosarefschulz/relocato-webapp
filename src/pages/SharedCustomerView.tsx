@@ -31,11 +31,12 @@ import {
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { shareTokenService, ShareToken } from '../services/shareTokenService';
-import { Customer } from '../types';
+import { Customer, Quote } from '../types';
 import { databaseService } from '../config/database.config';
 import CustomerInfo from '../components/CustomerInfo';
 import CustomerPhotos from '../components/CustomerPhotos';
 import CustomerTagsAndNotes from '../components/CustomerTagsAndNotes';
+import { prepareArbeitsscheinData, generateArbeitsscheinHTML } from '../services/arbeitsscheinService';
 
 const SharedCustomerView: React.FC = () => {
   const { tokenId } = useParams<{ tokenId: string }>();
@@ -46,6 +47,7 @@ const SharedCustomerView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<ShareToken | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
@@ -74,6 +76,13 @@ const SharedCustomerView: React.FC = () => {
       if (!customerData) {
         setError('Kunde nicht gefunden.');
         return;
+      }
+      
+      // Angebote laden falls Berechtigung vorhanden
+      if (validToken.permissions.viewQuote) {
+        const quotesData = await databaseService.getQuotes();
+        const customerQuotes = quotesData.filter(q => q.customerId === validToken.customerId);
+        setQuotes(customerQuotes);
       }
       
       setCustomer(customerData);

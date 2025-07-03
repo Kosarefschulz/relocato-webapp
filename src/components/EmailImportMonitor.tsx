@@ -55,29 +55,34 @@ const EmailImportMonitor: React.FC = () => {
 
   const loadImportData = async () => {
     try {
-      // Load import metadata
-      const metadata = await databaseService.getDocument('system', 'import_metadata');
-      if (metadata?.lastImport) {
-        setLastImport(metadata.lastImport.toDate());
-        setCurrentStats(metadata.lastImportStats);
-        
-        // Calculate next import (every 2 hours)
-        const next = new Date(metadata.lastImport.toDate());
-        next.setHours(next.getHours() + 2);
-        setNextImport(next);
+      // Check if Firebase-specific methods are available
+      if ('getDocument' in databaseService && 'getCollection' in databaseService) {
+        // Load import metadata
+        const metadata = await (databaseService as any).getDocument('system', 'import_metadata');
+        if (metadata?.lastImport) {
+          setLastImport(metadata.lastImport.toDate());
+          setCurrentStats(metadata.lastImportStats);
+          
+          // Calculate next import (every 2 hours)
+          const next = new Date(metadata.lastImport.toDate());
+          next.setHours(next.getHours() + 2);
+          setNextImport(next);
+        }
+
+        // Load import history
+        const historyData = await (databaseService as any).getCollection('import_history');
+        setHistory(historyData.slice(0, 10).map((h: any) => ({
+          ...h,
+          timestamp: h.timestamp.toDate()
+        })) as ImportHistory[]);
+
+        // Count failed imports
+        const failedImports = await (databaseService as any).getCollection('failed_imports');
+        const unresolvedCount = failedImports.filter((f: any) => !f.resolved).length;
+        setFailedCount(unresolvedCount);
+      } else {
+        console.log('Firebase-specific methods not available in current database service');
       }
-
-      // Load import history
-      const historyData = await databaseService.getCollection('import_history');
-      setHistory(historyData.slice(0, 10).map(h => ({
-        ...h,
-        timestamp: h.timestamp.toDate()
-      })) as ImportHistory[]);
-
-      // Count failed imports
-      const failedImports = await databaseService.getCollection('failed_imports');
-      const unresolvedCount = failedImports.filter(f => !f.resolved).length;
-      setFailedCount(unresolvedCount);
 
     } catch (error) {
       console.error('Error loading import data:', error);

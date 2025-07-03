@@ -29,6 +29,7 @@ export interface DatabaseService {
   getQuotesByCustomerId(customerId: string): Promise<Quote[]>;
   addQuote(quote: Quote): Promise<string>;
   updateQuote(quoteId: string, updates: Partial<Quote>): Promise<void>;
+  deleteQuote(quoteId: string): Promise<void>;
 
   // Invoice operations
   getInvoices(): Promise<Invoice[]>;
@@ -72,9 +73,9 @@ class DatabaseAbstractionService implements DatabaseService {
     // Set up primary and fallback services based on configuration
     if (DATABASE_CONFIG.provider === 'supabase') {
       this.primaryService = supabaseService;
-      this.fallbackService = DATABASE_CONFIG.fallbackToFirebase ? firebaseService : null;
+      this.fallbackService = DATABASE_CONFIG.fallbackToFirebase ? firebaseService as any : null;
     } else {
-      this.primaryService = firebaseService;
+      this.primaryService = firebaseService as any;
       this.fallbackService = null;
     }
     
@@ -128,7 +129,7 @@ class DatabaseAbstractionService implements DatabaseService {
     return this.withFallback(() => this.currentService.getCustomer(customerId));
   }
 
-  async addCustomer(customer: Customer): Promise<string> {
+  async addCustomer(customer: Omit<Customer, 'id'>): Promise<string> {
     return this.withFallback(() => this.currentService.addCustomer(customer));
   }
 
@@ -163,6 +164,10 @@ class DatabaseAbstractionService implements DatabaseService {
 
   async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<void> {
     return this.withFallback(() => this.currentService.updateQuote(quoteId, updates));
+  }
+
+  async deleteQuote(quoteId: string): Promise<void> {
+    return this.withFallback(() => this.currentService.deleteQuote(quoteId));
   }
 
   // Invoice operations
@@ -253,10 +258,12 @@ class DatabaseAbstractionService implements DatabaseService {
   async switchProvider(provider: 'firebase' | 'supabase'): Promise<void> {
     console.log(`🔄 Switching database provider to ${provider}...`);
     
-    const newService = provider === 'supabase' ? supabaseService : firebaseService;
+    const newService = provider === 'supabase' ? supabaseService : firebaseService as any;
     
     try {
-      await newService.initialize();
+      if ('initialize' in newService) {
+        await newService.initialize();
+      }
       this.currentService = newService;
       console.log(`✅ Successfully switched to ${provider}`);
     } catch (error) {
@@ -268,7 +275,7 @@ class DatabaseAbstractionService implements DatabaseService {
   // Get current provider
   getCurrentProvider(): string {
     if (this.currentService === supabaseService) return 'supabase';
-    if (this.currentService === firebaseService) return 'firebase';
+    if (this.currentService === (firebaseService as any)) return 'firebase';
     return 'unknown';
   }
 }

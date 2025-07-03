@@ -100,7 +100,6 @@ class QueueService {
         .select('*')
         .eq('status', 'pending')
         .lte('scheduled_for', new Date().toISOString())
-        .lt('attempts', supabase.raw('max_attempts'))
         .order('scheduled_for', { ascending: true })
         .limit(limit);
 

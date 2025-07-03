@@ -1,7 +1,9 @@
 export interface CalendarEvent {
   id: string;
   title: string;
-  date: Date | string;
+  date?: Date | string;
+  start: Date | string;
+  end: Date | string;
   startTime?: Date | string;
   endTime?: Date | string;
   type: 'viewing' | 'moving' | 'quote' | 'imported' | 'other';
@@ -9,6 +11,7 @@ export interface CalendarEvent {
   customerName?: string;
   description?: string;
   location?: string;
+  attendees?: any[];
   source?: 'manual' | 'apple-calendar' | 'google-calendar' | 'import';
   importedAt?: Date | string;
   originalEventId?: string;
@@ -32,6 +35,7 @@ export interface Customer {
   services: string[];
   notes?: string;
   createdAt?: Date;
+  updatedAt?: Date;
   viewingScheduled?: boolean;
   viewingDate?: string;
   contacted?: boolean;
@@ -46,10 +50,21 @@ export interface Customer {
   address?: string; // Zusätzliche Adresse
   city?: string; // Stadt
   zip?: string; // PLZ
+  cancelledAt?: Date | string; // Stornierungsdatum
+  volume?: number; // Volumen für Umzug
+  distance?: number; // Entfernung
+  furnitureAssemblyPrice?: number; // Möbelmontage Preis
+  packingServicePrice?: number; // Verpackungsservice Preis
+  storageServicePrice?: number; // Lagerservice Preis
+  disposalServicePrice?: number; // Entsorgungsservice Preis
+  cleaningServicePrice?: number; // Reinigungsservice Preis
+  boreServicePrice?: number; // Bohrservice Preis
+  heavyItemPrice?: number; // Schwergut Preis
+  subtotal?: number; // Zwischensumme
+  tax?: number; // Steuer
+  total?: number; // Gesamtsumme
+  salesStatus?: 'reached' | 'not_reached' | 'cancelled' | string; // Verkaufsstatus
   salutation?: string; // Anrede
-  // Vertriebsstatus-Felder
-  salesStatus?: 'reached' | 'not_reached' | 'cancelled'; // Vertriebsstatus
-  cancelledAt?: Date | string; // Wann wurde storniert
   cancelledReason?: string; // Grund für Stornierung
   salesNotes?: SalesNote[]; // Vertriebsnotizen
   notReachedCount?: number; // Anzahl der erfolglosen Kontaktversuche
@@ -81,6 +96,7 @@ export interface Quote {
   price: number;
   comment?: string;
   createdAt: Date;
+  updatedAt?: Date;
   createdBy: string;
   status: 'draft' | 'sent' | 'confirmed' | 'accepted' | 'rejected' | 'invoiced';
   volume?: number;
@@ -92,6 +108,7 @@ export interface Quote {
   moveTo?: string;
   notes?: string;
   // Service-Details
+  services?: Record<string, any>;
   packingRequested?: boolean;
   additionalServices?: string[];
   boxCount?: number;
@@ -153,13 +170,14 @@ export interface Invoice {
   customerName: string;
   invoiceNumber: string;
   price?: number;
+  amount?: number;
   taxAmount?: number;
   totalPrice: number;
   items?: InvoiceItem[];
-  createdAt: string;
+  createdAt: string | Date;
   createdBy?: string;
-  dueDate: string;
-  paidDate?: string;
+  dueDate: string | Date;
+  paidDate?: string | Date;
   status: string;
   notes?: string;
   company?: 'relocato' | 'wertvoll' | 'ruempelschmiede'; // Firma für die Rechnung
@@ -199,13 +217,16 @@ export interface ShareLink {
 export interface EmailHistory {
   id: string;
   customerId: string;
+  recipient: string;
   subject: string;
   body: string;
   sentAt: Date;
-  sentBy: string;
+  createdAt: Date;
+  sentBy?: string;
   type: 'quote' | 'invoice' | 'reminder' | 'general';
   attachments?: string[];
-  status: 'sent' | 'delivered' | 'opened' | 'failed';
+  status: 'sent' | 'delivered' | 'opened' | 'failed' | 'pending';
+  error?: string;
 }
 
 export interface QuoteTemplate {

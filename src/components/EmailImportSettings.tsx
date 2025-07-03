@@ -57,9 +57,13 @@ const EmailImportSettings: React.FC = () => {
 
   const loadSettings = async () => {
     try {
-      const doc = await databaseService.getDocument('system', 'import_settings');
-      if (doc) {
-        setSettings(doc as ImportSettings);
+      if ('getDocument' in databaseService) {
+        const doc = await (databaseService as any).getDocument('system', 'import_settings');
+        if (doc) {
+          setSettings(doc as ImportSettings);
+        }
+      } else {
+        console.log('Firebase-specific getDocument not available');
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -73,8 +77,12 @@ const EmailImportSettings: React.FC = () => {
     setMessage('');
     
     try {
-      await databaseService.updateDocument('system', 'import_settings', settings);
-      setMessage('Einstellungen gespeichert!');
+      if ('updateDocument' in databaseService) {
+        await (databaseService as any).updateDocument('system', 'import_settings', settings);
+        setMessage('Einstellungen gespeichert!');
+      } else {
+        setMessage('Speichern nicht verfügbar - Firebase-spezifische Funktion');
+      }
     } catch (error) {
       console.error('Error saving settings:', error);
       setMessage('Fehler beim Speichern der Einstellungen');

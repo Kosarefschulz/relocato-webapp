@@ -94,6 +94,7 @@ const quoteStatusConfig = {
 } as const;
 
 const emailStatusConfig = {
+  pending: { color: 'warning', label: 'Ausstehend' },
   sent: { color: 'default', label: 'Gesendet' },
   delivered: { color: 'info', label: 'Zugestellt' },
   opened: { color: 'success', label: 'Geöffnet' },

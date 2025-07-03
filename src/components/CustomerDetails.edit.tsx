@@ -35,7 +35,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Customer, Quote, Invoice } from '../types';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import emailHistoryService from '../services/emailHistoryService';
 import CustomerInfo from './CustomerInfo';
 import CustomerPhotos from './CustomerPhotos';
@@ -136,7 +136,7 @@ const CustomerDetails: React.FC = () => {
       console.log('🔍 CustomerDetails - Loading data for ID:', customerId);
       
       // Lade Kundendaten
-      const customersData = await googleSheetsService.getCustomers();
+      const customersData = await databaseService.getCustomers();
       console.log('📊 Total customers loaded:', customersData.length);
       console.log('🔍 Looking for customer with ID:', customerId);
       console.log('📋 All customer IDs:', customersData.map(c => c.id));
@@ -159,8 +159,8 @@ const CustomerDetails: React.FC = () => {
         // Lade zusätzliche Daten parallel (mit Fallback)
         try {
           const [allQuotes, allInvoices] = await Promise.all([
-            googleSheetsService.getQuotes().catch(() => []),
-            googleSheetsService.getInvoices().catch(() => [])
+            databaseService.getQuotes().catch(() => []),
+            databaseService.getInvoices().catch(() => [])
           ]);
           
           const quotesData = allQuotes.filter(q => q.customerId === customerId);
@@ -239,11 +239,20 @@ const CustomerDetails: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!editedCustomer) return;
+    if (!editedCustomer || !customer) return;
     
     setSaving(true);
     try {
-      await googleSheetsService.updateCustomer(editedCustomer.id, editedCustomer);
+      // Erstelle updates object mit den Änderungen
+      const updates: Partial<Customer> = {};
+      if (editedCustomer.name !== customer.name) updates.name = editedCustomer.name;
+      if (editedCustomer.email !== customer.email) updates.email = editedCustomer.email;
+      if (editedCustomer.phone !== customer.phone) updates.phone = editedCustomer.phone;
+      if (editedCustomer.fromAddress !== customer.fromAddress) updates.fromAddress = editedCustomer.fromAddress;
+      if (editedCustomer.toAddress !== customer.toAddress) updates.toAddress = editedCustomer.toAddress;
+      if (editedCustomer.movingDate !== customer.movingDate) updates.movingDate = editedCustomer.movingDate;
+      
+      await databaseService.updateCustomer(editedCustomer.id, updates);
       
       setCustomer(editedCustomer);
       setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
@@ -261,15 +270,11 @@ const CustomerDetails: React.FC = () => {
     const updatedCustomer = { ...customer, ...updates };
     
     try {
-      const success = await googleSheetsService.updateCustomer(customer.id, updatedCustomer);
+      await databaseService.updateCustomer(customer.id, updates);
       
-      if (success) {
-        setCustomer(updatedCustomer);
-        setEditedCustomer(updatedCustomer);
-        setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
-      } else {
-        setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });
-      }
+      setCustomer(updatedCustomer);
+      setEditedCustomer(updatedCustomer);
+      setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
       setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });

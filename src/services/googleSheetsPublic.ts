@@ -455,9 +455,11 @@ class GoogleSheetsPublicService {
       {
         id: 'email_1',
         customerId: customerId,
+        recipient: 'demo@example.com',
         subject: 'Ihr Umzugsangebot von Relocato',
         body: 'Sehr geehrte Damen und Herren, anbei finden Sie Ihr persönliches Umzugsangebot...',
         sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 Tage her
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         sentBy: 'system',
         type: 'quote',
         attachments: ['Angebot_2024_001.pdf'],
@@ -466,9 +468,11 @@ class GoogleSheetsPublicService {
       {
         id: 'email_2',
         customerId: customerId,
+        recipient: 'demo@example.com',
         subject: 'Erinnerung: Ihr Umzugstermin naht',
         body: 'Guten Tag, wir möchten Sie daran erinnern, dass Ihr Umzug in 3 Tagen stattfindet...',
         sentAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 Tag her
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
         sentBy: 'system',
         type: 'reminder',
         status: 'delivered'

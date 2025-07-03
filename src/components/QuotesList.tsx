@@ -23,7 +23,7 @@ import {
   IndeterminateCheckBox as IndeterminateCheckBoxIcon,
 } from '@mui/icons-material';
 import { Quote, Customer, Invoice } from '../types';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { generatePDF, generateInvoicePDF } from '../services/pdfService';
 import { sendEmail } from '../services/emailService';
 import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
@@ -64,9 +64,9 @@ const QuotesList: React.FC = () => {
       setError('');
       
       const [quotesData, customersData, invoicesData] = await Promise.all([
-        googleSheetsService.getQuotes(),
-        googleSheetsService.getCustomers(),
-        googleSheetsService.getInvoices()
+        databaseService.getQuotes(),
+        databaseService.getCustomers(),
+        databaseService.getInvoices()
       ]);
       
       setQuotes(quotesData);
@@ -118,12 +118,8 @@ const QuotesList: React.FC = () => {
         
         for (const quoteId of selectedQuotes) {
           try {
-            const success = await googleSheetsService.deleteQuote(quoteId);
-            if (success) {
-              successCount++;
-            } else {
-              errorCount++;
-            }
+            await databaseService.deleteQuote(quoteId);
+            successCount++;
           } catch (error) {
             errorCount++;
           }
@@ -162,19 +158,16 @@ const QuotesList: React.FC = () => {
     
     if (window.confirm('Möchten Sie dieses Angebot wirklich löschen?')) {
       try {
-        const success = await googleSheetsService.deleteQuote(quoteId);
-        if (success) {
-          // Entferne das Angebot aus der lokalen Liste
-          setQuotes(quotes.filter(q => q.id !== quoteId));
-          setSnackbar({ open: true, message: 'Angebot erfolgreich gelöscht', severity: 'success' });
-          
-          // Lade die Angebote nach 1 Sekunde neu, um sicherzustellen, dass die Änderung persistiert wurde
-          setTimeout(() => {
-            loadData();
-          }, 1000);
-        } else {
-          setSnackbar({ open: true, message: 'Fehler beim Löschen des Angebots', severity: 'error' });
-        }
+        await databaseService.deleteQuote(quoteId);
+        
+        // Entferne das Angebot aus der lokalen Liste
+        setQuotes(quotes.filter(q => q.id !== quoteId));
+        setSnackbar({ open: true, message: 'Angebot erfolgreich gelöscht', severity: 'success' });
+        
+        // Lade die Angebote nach 1 Sekunde neu, um sicherzustellen, dass die Änderung persistiert wurde
+        setTimeout(() => {
+          loadData();
+        }, 1000);
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
         setSnackbar({ open: true, message: 'Fehler beim Löschen des Angebots', severity: 'error' });
@@ -245,7 +238,7 @@ const QuotesList: React.FC = () => {
         if (!quote.confirmationToken) {
           updateData.confirmationToken = token;
         }
-        await googleSheetsService.updateQuote(quote.id, updateData);
+        await databaseService.updateQuote(quote.id, updateData);
         
         // Update local state immediately without reload
         setQuotes(prevQuotes => prevQuotes.map(q => 
@@ -304,17 +297,17 @@ const QuotesList: React.FC = () => {
         status: 'sent'
       };
 
-      await googleSheetsService.addInvoice({...invoice, id: `INV-${Date.now()}`});
+      await databaseService.addInvoice({...invoice, id: `INV-${Date.now()}`});
 
       // Update quote status
-      await googleSheetsService.updateQuote(quote.id, { status: 'invoiced' });
+      await databaseService.updateQuote(quote.id, { status: 'invoiced' });
       setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'invoiced' as const } : q));
 
       // Send invoice if requested
       if (sendInvoice) {
         try {
           // Get the saved invoice with ID
-          const invoices = await googleSheetsService.getInvoices();
+          const invoices = await databaseService.getInvoices();
           const savedInvoice = invoices.find(inv => 
             inv.invoiceNumber === invoiceNumber && 
             inv.customerId === customer.id
@@ -763,7 +756,7 @@ const QuotesList: React.FC = () => {
                             e.stopPropagation();
                             setUpdatingStatus(quote.id);
                             try {
-                              await googleSheetsService.updateQuote(quote.id, { status: 'accepted' });
+                              await databaseService.updateQuote(quote.id, { status: 'accepted' });
                               setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'accepted' as const } : q));
                               setSnackbar({ open: true, message: 'Angebot wurde als angenommen markiert', severity: 'success' });
                             } catch (error) {
@@ -785,7 +778,7 @@ const QuotesList: React.FC = () => {
                             e.stopPropagation();
                             setUpdatingStatus(quote.id);
                             try {
-                              await googleSheetsService.updateQuote(quote.id, { status: 'rejected' });
+                              await databaseService.updateQuote(quote.id, { status: 'rejected' });
                               setQuotes(quotes.map(q => q.id === quote.id ? { ...q, status: 'rejected' as const } : q));
                               setSnackbar({ open: true, message: 'Angebot wurde als abgelehnt markiert', severity: 'success' });
                             } catch (error) {
