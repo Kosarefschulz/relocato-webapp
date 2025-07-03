@@ -96,13 +96,15 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   const loadPhotos = async () => {
     try {
       setLoading(true);
-      // Nur Firebase Storage verwenden
+      // Firebase Storage is disabled - return empty array
       const firebasePhotos = await firebaseStorageService.loadPhotos(customer.id);
-      console.log(`📸 ${firebasePhotos.length} Fotos aus Firebase Storage geladen`);
-      setPhotos(firebasePhotos);
+      setPhotos(firebasePhotos); // Will be empty array from disabled service
+      if (firebasePhotos.length === 0) {
+        console.log('ℹ️ Keine Fotos verfügbar - Firebase Storage ist deaktiviert');
+      }
     } catch (error) {
       console.error('Fehler beim Laden der Fotos:', error);
-      setError('Fehler beim Laden der Fotos. Bitte versuchen Sie es später erneut.');
+      setError('Foto-System ist derzeit nicht verfügbar.');
     } finally {
       setLoading(false);
     }
@@ -114,78 +116,20 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   };
 
   const handleUpload = async () => {
-    if (uploadFiles.length === 0) return; // Kategorie ist jetzt optional
+    if (uploadFiles.length === 0) return;
 
     setUploading(true);
     setUploadProgress(0);
     setError('');
 
     try {
-      let uploadedCount = 0;
-      let errorCount = 0;
-      
-      for (const file of uploadFiles) {
-        try {
-          console.log(`📤 Uploade ${file.name} zu Firebase Storage...`);
-          const result = await firebaseStorageService.uploadPhoto(
-            customer.id,
-            file,
-            uploadCategory || 'Sonstiges',
-            uploadDescription
-          );
-          
-          if (result) {
-            uploadedCount++;
-            console.log(`✅ ${file.name} erfolgreich hochgeladen`);
-          } else {
-            errorCount++;
-          }
-        } catch (error) {
-          console.error('Upload fehlgeschlagen:', error);
-          errorCount++;
-          
-          if (error instanceof Error) {
-            if (error.message.includes('storage/unauthorized')) {
-              setError('Keine Berechtigung zum Hochladen. Bitte wenden Sie sich an den Administrator.');
-              break;
-            } else if (error.message.includes('storage/quota-exceeded')) {
-              setError('Speicherplatz-Limit erreicht. Bitte wenden Sie sich an den Administrator.');
-              break;
-            }
-          }
-        }
-        
-        setUploadProgress(((uploadedCount + errorCount) / uploadFiles.length) * 100);
-      }
-
-      // Fotos neu laden
-      await loadPhotos();
-      
-      // Analytics: Track uploaded photos
-      if (uploadedCount > 0) {
-        analytics.trackPhotoUploaded(customer.id, uploadedCount);
-      }
-      
-      // Feedback anzeigen
-      if (errorCount > 0 && !error) {
-        setError(`${uploadedCount} Fotos erfolgreich hochgeladen, ${errorCount} Fehler aufgetreten.`);
-      } else if (uploadedCount === uploadFiles.length) {
-        // Alle erfolgreich hochgeladen
-        console.log(`✅ Alle ${uploadedCount} Fotos erfolgreich hochgeladen`);
-      }
-      
-      // Dialog schließen und zurücksetzen
-      if (!error) { // Nur schließen wenn kein kritischer Fehler
-        setShowUploadDialog(false);
-        setUploadFiles([]);
-        setUploadCategory('');
-        setUploadDescription('');
-        setUploadProgress(0);
-      }
+      // Firebase Storage is disabled
+      setError('Foto-Upload ist derzeit deaktiviert. Firebase Storage wurde durch Supabase ersetzt. Upload-Funktionalität wird in Zukunft wieder verfügbar sein.');
+      console.warn(`Upload attempted but Firebase Storage is disabled for ${uploadFiles.length} files`);
       
     } catch (error) {
       console.error('Fehler beim Upload:', error);
-      setError('Fehler beim Hochladen der Fotos. Bitte versuchen Sie es erneut.');
+      setError('Foto-Upload ist nicht verfügbar.');
     } finally {
       setUploading(false);
     }
@@ -195,18 +139,12 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     if (window.confirm('Möchten Sie dieses Foto wirklich löschen?')) {
       try {
         setLoading(true);
-        const success = await firebaseStorageService.deletePhoto(customer.id, photoId);
-        
-        if (success) {
-          await loadPhotos();
-          console.log('✅ Foto erfolgreich gelöscht');
-          analytics.trackPhotoDeleted(customer.id);
-        } else {
-          setError('Fehler beim Löschen des Fotos');
-        }
+        // Firebase Storage is disabled
+        setError('Foto-Löschung ist derzeit deaktiviert. Firebase Storage wurde durch Supabase ersetzt.');
+        console.warn(`Delete attempted but Firebase Storage is disabled for photo: ${photoId}`);
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
-        setError('Fehler beim Löschen des Fotos');
+        setError('Foto-Löschung ist nicht verfügbar.');
       } finally {
         setLoading(false);
       }

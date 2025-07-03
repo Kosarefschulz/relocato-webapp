@@ -14,50 +14,18 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID?.trim()
 };
 
-console.log('Firebase Config:', {
-  apiKey: firebaseConfig.apiKey ? 'SET' : 'MISSING',
-  authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId,
-  storageBucket: firebaseConfig.storageBucket,
-  messagingSenderId: firebaseConfig.messagingSenderId,
-  appId: firebaseConfig.appId ? 'SET' : 'MISSING'
-});
+// Firebase is disabled - app now uses Supabase only
+console.log('⚠️ Firebase disabled - app is now Supabase-only');
 
-// Firebase erst initialisieren wenn alle Env-Variablen vorhanden sind
+// Firebase services are disabled
 let app: any = null;
 let auth: any = null;
 let db: any = null;
 let storage: any = null;
 let functions: any = null;
 
-if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
-  try {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    
-    // Initialize Firestore with persistent cache
-    db = initializeFirestore(app, {
-      localCache: persistentLocalCache()
-    });
-    
-    storage = getStorage(app);
-    functions = getFunctions(app, 'europe-west1');
-
-    // Auth-Persistenz sofort nach Initialisierung setzen
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        console.log('✅ Auth-Persistenz aktiviert');
-      })
-      .catch((error) => {
-        console.error('❌ Fehler beim Setzen der Auth-Persistenz:', error);
-      });
-  } catch (error) {
-    console.error('❌ Firebase Initialisierung fehlgeschlagen:', error);
-    console.log('⚠️ App läuft ohne Firebase weiter');
-  }
-} else {
-  console.warn('⚠️ Firebase nicht konfiguriert - bitte .env.local vervollständigen');
-}
+// All Firebase services are intentionally disabled
+console.log('ℹ️ All Firebase services are disabled. App uses Supabase for all data operations.');
 
 // Auth-Persistenz Promise für App.tsx
 export const authPersistencePromise = Promise.resolve();

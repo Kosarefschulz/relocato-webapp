@@ -132,25 +132,12 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
     setError('');
     
     try {
-      let uploaded = 0;
-      
-      for (const photo of capturedPhotos) {
-        await firebaseStorageService.uploadPhoto(
-          customerId,
-          photo.file,
-          photo.category,
-          ''
-        );
-        uploaded++;
-        setUploadProgress((uploaded / capturedPhotos.length) * 100);
-      }
-
-      console.log(`✅ ${capturedPhotos.length} Fotos erfolgreich hochgeladen`);
-      onPhotosUploaded();
-      handleClose();
+      // Firebase Storage is disabled - show informative error
+      setError('Foto-Upload ist derzeit deaktiviert. Firebase Storage wurde durch Supabase ersetzt. Bitte verwenden Sie alternative Upload-Methoden.');
+      console.warn('Photo upload attempted but Firebase Storage is disabled');
     } catch (error) {
       console.error('Fehler beim Upload:', error);
-      setError('Fehler beim Hochladen der Fotos. Bitte versuchen Sie es erneut.');
+      setError('Foto-Upload ist nicht verfügbar.');
     } finally {
       setUploading(false);
       setUploadProgress(0);

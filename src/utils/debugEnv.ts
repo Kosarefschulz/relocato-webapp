@@ -1,14 +1,7 @@
 // Debug utility to check environment variables
 export const debugEnvironmentVariables = () => {
   console.log('=== Environment Variables Debug ===');
-  console.log('Firebase Config:', {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY ? '✅ SET' : '❌ MISSING',
-    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || '❌ MISSING',
-    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || '❌ MISSING',
-    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || '❌ MISSING',
-    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '❌ MISSING',
-    appId: process.env.REACT_APP_FIREBASE_APP_ID ? '✅ SET' : '❌ MISSING',
-  });
+  console.log('ℹ️ Firebase disabled - app uses Supabase only');
   
   console.log('Google Sheets Config:', {
     spreadsheetId: process.env.REACT_APP_GOOGLE_SHEETS_ID || '❌ MISSING',

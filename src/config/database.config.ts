@@ -13,8 +13,9 @@ import { unifiedDatabaseService } from '../services/unifiedDatabaseService.optim
 /**
  * Database provider configuration
  * Can be 'firebase', 'supabase', or 'sheets'
+ * Firebase is disabled, so defaulting to 'supabase'
  */
-export const DATABASE_PROVIDER = process.env.REACT_APP_DATABASE_PROVIDER || 'firebase';
+export const DATABASE_PROVIDER = process.env.REACT_APP_DATABASE_PROVIDER || 'supabase';
 
 /**
  * Legacy configuration for backward compatibility

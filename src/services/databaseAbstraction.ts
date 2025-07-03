@@ -58,9 +58,9 @@ export interface DatabaseService {
 
 // Database service configuration
 export const DATABASE_CONFIG = {
-  provider: process.env.REACT_APP_DATABASE_PROVIDER || 'firebase', // 'firebase' or 'supabase'
+  provider: process.env.REACT_APP_DATABASE_PROVIDER || 'supabase', // 'firebase' or 'supabase' - Firebase is disabled
   autoSwitch: process.env.REACT_APP_DATABASE_AUTO_SWITCH === 'true',
-  fallbackToFirebase: process.env.REACT_APP_DATABASE_FALLBACK === 'true'
+  fallbackToFirebase: false // Firebase is disabled, no fallback to Firebase
 };
 
 class DatabaseAbstractionService implements DatabaseService {
@@ -71,14 +71,9 @@ class DatabaseAbstractionService implements DatabaseService {
 
   constructor() {
     // Set up primary and fallback services based on configuration
-    if (DATABASE_CONFIG.provider === 'supabase') {
-      this.primaryService = supabaseService;
-      this.fallbackService = DATABASE_CONFIG.fallbackToFirebase ? firebaseService as any : null;
-    } else {
-      this.primaryService = firebaseService as any;
-      this.fallbackService = null;
-    }
-    
+    // Firebase is disabled, only use Supabase
+    this.primaryService = supabaseService;
+    this.fallbackService = null; // No fallback to Firebase since it's disabled
     this.currentService = this.primaryService;
   }
 
