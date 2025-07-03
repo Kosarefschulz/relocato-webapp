@@ -183,18 +183,62 @@ export class SupabaseService {
 
   async addQuote(quote: Quote): Promise<string> {
     try {
+      // Validate quote data before processing
+      this.validateQuoteData(quote);
+
+      // First, resolve the customer ID to ensure we have the correct Supabase UUID
+      const customer = await this.getCustomer(quote.customerId);
+      if (!customer) {
+        throw new Error(`Customer not found with ID: ${quote.customerId}`);
+      }
+
+      // Create the Supabase quote with resolved customer ID
       const supabaseQuote = this.mapLocalQuoteToSupabase(quote);
       
+      // Ensure we use the actual Supabase customer UUID
+      const { data: customerData, error: customerError } = await supabase
+        .from('customers')
+        .select('id')
+        .or(`id.eq.${quote.customerId},firebase_id.eq.${quote.customerId}`)
+        .eq('is_deleted', false)
+        .single();
+
+      if (customerError || !customerData) {
+        throw new Error(`Cannot resolve customer ID: ${quote.customerId}. Customer may not exist in Supabase.`);
+      }
+
+      // Update the customer_id to use the resolved Supabase UUID
+      supabaseQuote.customer_id = customerData.id;
+
+      console.log('📝 Creating quote in Supabase:', {
+        originalCustomerId: quote.customerId,
+        resolvedCustomerId: supabaseQuote.customer_id,
+        customerName: supabaseQuote.customer_name,
+        price: supabaseQuote.price,
+        status: supabaseQuote.status,
+        supabaseQuote
+      });
+
       const { data, error } = await supabase
         .from('quotes')
         .insert(supabaseQuote)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase quote creation failed:', {
+          error,
+          quote: supabaseQuote,
+          postgresErrorCode: error.code,
+          postgresErrorMessage: error.message
+        });
+        throw error;
+      }
+
+      console.log('✅ Quote created successfully in Supabase:', data.id);
       return data.id;
     } catch (error) {
-      console.error('Error adding quote:', error);
+      console.error('❌ Error adding quote to Supabase:', error);
       throw error;
     }
   }
@@ -585,6 +629,33 @@ export class SupabaseService {
     return btoa(uuidv4()).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
   }
 
+  private validateQuoteData(quote: Quote): void {
+    const errors: string[] = [];
+
+    if (!quote.customerId) {
+      errors.push('customerId is required');
+    }
+    if (!quote.customerName) {
+      errors.push('customerName is required');
+    }
+    if (quote.price === undefined || quote.price === null || isNaN(Number(quote.price))) {
+      errors.push('price must be a valid number');
+    }
+    if (!quote.createdBy) {
+      errors.push('createdBy is required');
+    }
+
+    // Validate status if provided
+    const validStatuses = ['draft', 'sent', 'accepted', 'confirmed', 'rejected', 'invoiced'];
+    if (quote.status && !validStatuses.includes(quote.status)) {
+      errors.push(`status must be one of: ${validStatuses.join(', ')}`);
+    }
+
+    if (errors.length > 0) {
+      throw new Error(`Quote validation failed: ${errors.join(', ')}`);
+    }
+  }
+
   // Mapping functions
   private mapSupabaseCustomerToLocal(data: any): Customer {
     return {
@@ -687,27 +758,49 @@ export class SupabaseService {
   }
 
   private mapLocalQuoteToSupabase(quote: Quote, isUpdate = false): any {
+    // Validate required fields
+    if (!quote.customerName) {
+      throw new Error('Quote customerName is required');
+    }
+    if (quote.price === undefined || quote.price === null) {
+      throw new Error('Quote price is required');
+    }
+
+    // Ensure status is valid for Supabase CHECK constraint
+    const validStatuses = ['draft', 'sent', 'accepted', 'confirmed', 'rejected', 'invoiced'];
+    const status = quote.status || 'draft';
+    if (!validStatuses.includes(status)) {
+      console.warn(`Invalid quote status '${status}', using 'draft' instead`);
+    }
+
     const supabaseQuote: any = {
       customer_name: quote.customerName,
-      status: quote.status,
-      price: quote.price,
-      volume: quote.volume,
-      distance: quote.distance,
-      move_date: quote.moveDate,
-      move_from: quote.moveFrom,
-      move_to: quote.moveTo,
-      confirmation_token: quote.confirmationToken,
-      confirmed_at: quote.confirmedAt?.toISOString(),
-      confirmed_by: quote.confirmedBy,
-      comment: quote.comment,
-      created_by: quote.createdBy,
-      services: quote.services
+      status: validStatuses.includes(status) ? status : 'draft',
+      price: Number(quote.price),
+      volume: quote.volume ? Number(quote.volume) : null,
+      distance: quote.distance ? Number(quote.distance) : null,
+      move_date: quote.moveDate || null,
+      move_from: quote.moveFrom || null,
+      move_to: quote.moveTo || null,
+      confirmation_token: quote.confirmationToken || null,
+      confirmed_at: quote.confirmedAt ? (quote.confirmedAt instanceof Date ? quote.confirmedAt.toISOString() : quote.confirmedAt) : null,
+      confirmed_by: quote.confirmedBy || null,
+      comment: quote.comment || null,
+      created_by: quote.createdBy || 'system',
+      services: quote.services || {}
     };
 
     if (!isUpdate) {
       supabaseQuote.customer_id = quote.customerId;
       supabaseQuote.firebase_id = quote.id;
     }
+
+    // Remove undefined values to avoid Supabase issues
+    Object.keys(supabaseQuote).forEach(key => {
+      if (supabaseQuote[key] === undefined) {
+        delete supabaseQuote[key];
+      }
+    });
 
     return supabaseQuote;
   }

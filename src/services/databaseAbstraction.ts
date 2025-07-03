@@ -236,16 +236,29 @@ class DatabaseAbstractionService implements DatabaseService {
     try {
       return await operation();
     } catch (error) {
-      console.error('Operation failed on current service:', error);
+      const currentProvider = this.getCurrentProvider();
+      console.error(`❌ Operation failed on ${currentProvider} service:`, error);
+      
+      // Log more details for quote-related operations
+      if (error instanceof Error && error.message.includes('quote')) {
+        console.error('🔍 Quote operation details:', {
+          provider: currentProvider,
+          error: error.message,
+          stack: error.stack
+        });
+      }
       
       if (this.fallbackService && DATABASE_CONFIG.autoSwitch && this.currentService !== this.fallbackService) {
-        console.log('🔄 Switching to fallback service...');
+        const fallbackProvider = this.currentService === supabaseService ? 'firebase' : 'supabase';
+        console.log(`🔄 Switching from ${currentProvider} to ${fallbackProvider} fallback service...`);
         this.currentService = this.fallbackService;
         
         try {
-          return await operation();
+          const result = await operation();
+          console.log(`✅ Operation succeeded on ${fallbackProvider} fallback service`);
+          return result;
         } catch (fallbackError) {
-          console.error('Operation also failed on fallback service:', fallbackError);
+          console.error(`❌ Operation also failed on ${fallbackProvider} fallback service:`, fallbackError);
           throw fallbackError;
         }
       }
