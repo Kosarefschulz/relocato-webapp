@@ -233,6 +233,12 @@ class DatabaseAbstractionService implements DatabaseService {
 
   // Helper method for automatic fallback
   private async withFallback<T>(operation: () => Promise<T>): Promise<T> {
+    // If fallback is disabled, only use primary service (Supabase)
+    if (!DATABASE_CONFIG.autoSwitch) {
+      console.log('🎯 Using Supabase only - fallback disabled');
+      return await operation();
+    }
+    
     try {
       return await operation();
     } catch (error) {
