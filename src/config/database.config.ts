@@ -3,21 +3,34 @@
  * This file determines which database service to use throughout the application
  */
 
-// Import both services
+// Import the database abstraction layer
+import { databaseAbstraction } from '../services/databaseAbstraction';
+
+// Legacy imports for backward compatibility
 import { googleSheetsPublicService } from '../services/googleSheetsPublic';
 import { unifiedDatabaseService } from '../services/unifiedDatabaseService.optimized';
 
 /**
+ * Database provider configuration
+ * Can be 'firebase', 'supabase', or 'sheets'
+ */
+export const DATABASE_PROVIDER = process.env.REACT_APP_DATABASE_PROVIDER || 'firebase';
+
+/**
+ * Legacy configuration for backward compatibility
  * Set to true to use Firebase as primary database
  * Set to false to use Google Sheets + localStorage
  */
-export const USE_FIREBASE_PRIMARY = true;
+export const USE_FIREBASE_PRIMARY = DATABASE_PROVIDER !== 'sheets';
 
 /**
  * Export the service to use based on configuration
  * All components should import from here instead of importing services directly
  */
-export const databaseService = USE_FIREBASE_PRIMARY 
+export const databaseService = databaseAbstraction;
+
+// Legacy export for backward compatibility
+export const legacyDatabaseService = USE_FIREBASE_PRIMARY 
   ? unifiedDatabaseService 
   : googleSheetsPublicService;
 

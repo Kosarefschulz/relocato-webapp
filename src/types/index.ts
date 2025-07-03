@@ -181,6 +181,21 @@ export interface Consultant {
   role: 'admin' | 'consultant';
 }
 
+export interface ShareLink {
+  id: string;
+  customerId: string;
+  quoteId: string;
+  token: string;
+  expiresAt: Date | string;
+  createdAt: Date | string;
+  createdBy?: string;
+  usedAt?: Date | string;
+  arbeitsscheinHTML?: string;
+  arbeitsscheinData?: string;
+  lastUsed?: string;
+  usageCount?: number;
+}
+
 export interface EmailHistory {
   id: string;
   customerId: string;

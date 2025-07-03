@@ -46,9 +46,9 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { parseDate, formatDate } from '../utils/dateUtils';
-import { databaseService as googleSheetsService } from '../config/database.config';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../config/database.config';
 import { prepareArbeitsscheinData, generateArbeitsscheinHTML } from '../services/arbeitsscheinService';
+import { shareTokenService } from '../services/shareTokenService';
 
 interface Vehicle {
   id: string;
@@ -115,8 +115,8 @@ const DispositionPage: React.FC = () => {
       
       // Load quotes and customers from database service
       const [quotes, allCustomers] = await Promise.all([
-        googleSheetsService.getQuotes(),
-        googleSheetsService.getCustomers()
+        databaseService.getQuotes(),
+        databaseService.getCustomers()
       ]);
       
       console.log(`📊 Gefundene Angebote: ${quotes.length}`);
@@ -254,7 +254,7 @@ const DispositionPage: React.FC = () => {
           console.log(`🔍 Versuche Kunde direkt vom Service zu laden: ${quote.customerId}`);
           try {
             // First try the normal getCustomer method
-            let fetchedCustomer = await googleSheetsService.getCustomer(quote.customerId);
+            let fetchedCustomer = await databaseService.getCustomer(quote.customerId);
             
             // If not found, try the more robust search method (only available in UnifiedDatabaseService)
             if (!fetchedCustomer && 'findCustomerByAnyIdentifier' in googleSheetsService) {
@@ -404,8 +404,8 @@ const DispositionPage: React.FC = () => {
       
       // First, get the quote and full customer data
       const [quotes, customers] = await Promise.all([
-        googleSheetsService.getQuotes(),
-        googleSheetsService.getCustomers()
+        databaseService.getQuotes(),
+        databaseService.getCustomers()
       ]);
       
       const quote = quotes.find((q: any) => q.id === customer.quoteId);
@@ -498,38 +498,37 @@ const DispositionPage: React.FC = () => {
         htmlLength: arbeitsscheinHTML.length
       });
       
-      // Create share link in Firebase with Arbeitsschein
-      console.log('🔥 Erstelle ShareLink in Firebase...');
+      // Create share link using the WORKING shareTokenService
+      console.log('🔥 Erstelle ShareLink mit shareTokenService...');
       console.log('🆔 IDs für ShareLink:', {
         customerId: fullCustomer.id,
-        customerIdFromParam: customer.id,
-        quoteId: quote.id,
-        quoteIdFromParam: customer.quoteId
+        customerName: fullCustomer.name
       });
       
-      const shareLink = await firebaseService.createShareLink(
-        fullCustomer.id, // Use the full customer ID from database
-        quote.id, // Use the actual quote ID
-        'disposition', // You can add user ID here if available
+      const shareToken = await shareTokenService.createShareToken(
+        fullCustomer.id,
+        fullCustomer.name,
+        'disposition',
         {
-          arbeitsscheinHTML,
-          arbeitsscheinData: JSON.stringify(arbeitsscheinData)
+          viewCustomer: true,
+          viewQuote: true, // Enable quote viewing for disposition links
+          viewInvoice: false,
+          viewPhotos: true
         }
       );
       
-      if (!shareLink || !shareLink.token) {
-        throw new Error('ShareLink konnte nicht erstellt werden - Token fehlt');
+      if (!shareToken || !shareToken.id) {
+        throw new Error('ShareToken konnte nicht erstellt werden');
       }
       
-      console.log('✅ ShareLink erfolgreich erstellt:', {
-        shareLinkId: shareLink.id,
-        token: shareLink.token,
-        expiresAt: shareLink.expiresAt
+      console.log('✅ ShareToken erfolgreich erstellt:', {
+        tokenId: shareToken.id,
+        customerId: shareToken.customerId,
+        expiresAt: shareToken.expiresAt
       });
       
-      // Generate URL
-      const baseUrl = window.location.origin;
-      const link = `${baseUrl}/share/${shareLink.token}`;
+      // Generate URL using the working system
+      const link = shareTokenService.generateShareUrl(shareToken.id);
       
       console.log('🌐 Generierte URL:', link);
       
@@ -991,7 +990,7 @@ const DispositionPage: React.FC = () => {
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <Alert severity="info" sx={{ mb: 2 }}>
-              Dieser Link ist 7 Tage gültig und ermöglicht Mitarbeitern den Zugriff auf Kundendaten und Fotos.
+              Dieser Link ist 7 Tage gültig und ermöglicht Mitarbeitern den Zugriff auf Kundendaten, Angebote und Fotos.
             </Alert>
             <TextField
               fullWidth

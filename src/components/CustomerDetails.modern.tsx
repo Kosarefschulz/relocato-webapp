@@ -285,15 +285,11 @@ const CustomerDetails: React.FC = () => {
     
     setSaving(true);
     try {
-      const success = await googleSheetsService.updateCustomer(editedCustomer.id, editedCustomer);
+      await googleSheetsService.updateCustomer(editedCustomer.id, editedCustomer);
       
-      if (success) {
-        setCustomer(editedCustomer);
-        setEditMode(false);
-        setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
-      } else {
-        setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });
-      }
+      setCustomer(editedCustomer);
+      setEditMode(false);
+      setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
       setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });
@@ -308,15 +304,11 @@ const CustomerDetails: React.FC = () => {
     const updatedCustomer = { ...customer, ...updates };
     
     try {
-      const success = await googleSheetsService.updateCustomer(customer.id, updatedCustomer);
+      await googleSheetsService.updateCustomer(customer.id, updatedCustomer);
       
-      if (success) {
-        setCustomer(updatedCustomer);
-        setEditedCustomer(updatedCustomer);
-        setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
-      } else {
-        setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });
-      }
+      setCustomer(updatedCustomer);
+      setEditedCustomer(updatedCustomer);
+      setSnackbar({ open: true, message: 'Änderungen gespeichert!', severity: 'success' });
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
       setSnackbar({ open: true, message: 'Fehler beim Speichern', severity: 'error' });

@@ -17,8 +17,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { generateArbeitsschein, ArbeitsscheinData } from '../services/arbeitsscheinService';
-import { databaseService as googleSheetsService } from '../config/database.config';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../config/database.config';
 
 interface CustomerData {
   id: string;
@@ -38,7 +37,8 @@ interface CustomerData {
 }
 
 const SharePage: React.FC = () => {
-  const { token } = useParams<{ token: string }>();
+  const { token, shareId } = useParams<{ token?: string; shareId?: string }>();
+  const actualToken = token || shareId; // Support both parameter names
   const navigate = useNavigate();
   const theme = useTheme();
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
@@ -105,29 +105,31 @@ const SharePage: React.FC = () => {
 
   useEffect(() => {
     loadShareData();
-  }, [token]);
+  }, [actualToken]);
 
   const loadShareData = async () => {
     try {
       console.log('🔍 Lade SharePage mit Token:', {
-        token,
-        tokenLength: token?.length,
-        url: window.location.href
+        token: actualToken,
+        tokenLength: actualToken?.length,
+        url: window.location.href,
+        paramToken: token,
+        paramShareId: shareId
       });
       
-      if (!token) {
+      if (!actualToken) {
         console.error('❌ Kein Token in URL gefunden');
         setError('not_found');
         setLoading(false);
         return;
       }
       
-      // Get share link from Firebase
-      console.log('🔥 Suche ShareLink in Firebase...');
-      const shareLink = await firebaseService.getShareLinkByToken(token);
+      // Get share link
+      console.log('🔥 Suche ShareLink...');
+      const shareLink = await databaseService.getShareLinkByToken(actualToken);
 
       if (!shareLink) {
-        console.error('❌ ShareLink nicht in Firebase gefunden für Token:', token);
+        console.error('❌ ShareLink nicht gefunden für Token:', actualToken);
         setError('not_found');
         setLoading(false);
         return;
@@ -158,15 +160,18 @@ const SharePage: React.FC = () => {
 
       // Update link usage
       console.log('🔄 Aktualisiere Link-Nutzung...');
-      await firebaseService.updateShareLinkUsage(shareLink.id);
+      await databaseService.updateShareLink(shareLink.token, { 
+        lastUsed: new Date().toISOString(),
+        usageCount: (shareLink.usageCount || 0) + 1
+      });
       
       // Store the full share link data (includes arbeitsscheinHTML)
       setShareLinkData(shareLink);
 
-      // Load data from Google Sheets
+      // Load data
       const [customers, quotes] = await Promise.all([
-        googleSheetsService.getCustomers(),
-        googleSheetsService.getQuotes()
+        databaseService.getCustomers(),
+        databaseService.getQuotes()
       ]);
 
       let customer = customers.find((c: any) => c.id === shareLink.customerId);
@@ -194,7 +199,7 @@ const SharePage: React.FC = () => {
       if (!customer) {
         console.log('🔍 Versuche Kunde direkt zu laden:', shareLink.customerId);
         try {
-          const directCustomer = await googleSheetsService.getCustomer(shareLink.customerId);
+          const directCustomer = await databaseService.getCustomer(shareLink.customerId);
           if (directCustomer) {
             customer = directCustomer;
           }

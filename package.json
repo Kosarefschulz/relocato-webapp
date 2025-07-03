@@ -23,6 +23,7 @@
     "@mui/x-charts": "^8.5.1",
     "@mui/x-date-pickers": "^8.5.1",
     "@sendgrid/mail": "^8.1.5",
+    "@supabase/supabase-js": "^2.50.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -97,7 +98,11 @@
     "db:setup": "psql $POSTGRES_URL -f migration/vercel/vercel-schema.sql",
     "switch:vercel": "node scripts/switch-to-vercel.js && npm start",
     "switch:firebase": "node scripts/switch-to-firebase.js && npm start",
-    "debug:sharelinks": "ts-node src/scripts/debugShareLinks.ts"
+    "debug:sharelinks": "ts-node src/scripts/debugShareLinks.ts",
+    "supabase:schema": "npx supabase db push --db-url $SUPABASE_DB_URL < src/scripts/supabase-schema.sql",
+    "supabase:migrate": "ts-node src/scripts/migrate-to-supabase.ts",
+    "supabase:test": "node src/scripts/test-supabase.js",
+    "switch:supabase": "REACT_APP_DATABASE_PROVIDER=supabase npm start"
   },
   "eslintConfig": {
     "extends": [

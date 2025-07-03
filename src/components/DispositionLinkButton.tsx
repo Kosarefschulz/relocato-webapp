@@ -20,8 +20,7 @@ import {
   ContentCopy as CopyIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
-import { firebaseService } from '../services/firebaseService';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { prepareArbeitsscheinData, generateArbeitsscheinHTML } from '../services/arbeitsscheinService';
 import { Customer, Quote } from '../types';
 
@@ -54,7 +53,7 @@ const DispositionLinkButton: React.FC<DispositionLinkButtonProps> = ({ customer,
       // If no quote is provided, find the latest accepted/confirmed quote for this customer
       if (!quoteToUse) {
         console.log('🔍 Suche nach bestätigten Angeboten...');
-        const quotes = await googleSheetsService.getQuotes();
+        const quotes = await databaseService.getQuotes();
         const customerQuotes = quotes.filter((q: Quote) => 
           (q.customerId === customer.id || q.customerId === customer.customerNumber) &&
           (q.status === 'accepted' || q.status === 'confirmed')
@@ -90,16 +89,12 @@ const DispositionLinkButton: React.FC<DispositionLinkButtonProps> = ({ customer,
         htmlSize: arbeitsscheinHTML.length
       });
       
-      // Create share link in Firebase with Arbeitsschein
-      console.log('🔥 Erstelle ShareLink in Firebase...');
-      const shareLink = await firebaseService.createShareLink(
+      // Create share link with Arbeitsschein
+      console.log('🔥 Erstelle ShareLink...');
+      const shareLink = await databaseService.createShareLink(
         customer.id,
         quoteToUse.id,
-        'disposition-link',
-        {
-          arbeitsscheinHTML,
-          arbeitsscheinData: JSON.stringify(arbeitsscheinData)
-        }
+        7 * 24 * 60 * 60 * 1000 // 7 days in ms
       );
       
       if (!shareLink || !shareLink.token) {

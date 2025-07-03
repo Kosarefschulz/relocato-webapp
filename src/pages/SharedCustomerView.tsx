@@ -248,13 +248,58 @@ const SharedCustomerView: React.FC = () => {
           </Box>
         )}
         
-        {activeTab === 1 && token.permissions.viewPhotos && (
+        {token && token.permissions.viewQuote && quotes.length > 0 && activeTab === 1 && (
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Angebote & Arbeitsschein
+            </Typography>
+            {quotes.map((quote) => {
+              const arbeitsscheinData = prepareArbeitsscheinData(quote, customer!);
+              const arbeitsscheinHTML = generateArbeitsscheinHTML(arbeitsscheinData);
+              
+              return (
+                <Card key={quote.id} sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Angebot #{quote.id}
+                    </Typography>
+                    <Typography color="text.secondary" gutterBottom>
+                      Status: {quote.status === 'confirmed' ? 'Bestätigt' : 'Angenommen'}
+                    </Typography>
+                    <Typography variant="body2" gutterBottom>
+                      Erstellt: {new Date(quote.createdAt).toLocaleDateString('de-DE')}
+                    </Typography>
+                    
+                    <Divider sx={{ my: 2 }} />
+                    
+                    <Typography variant="h6" gutterBottom>
+                      Arbeitsschein
+                    </Typography>
+                    <Box 
+                      sx={{ 
+                        border: 1, 
+                        borderColor: 'divider', 
+                        borderRadius: 1, 
+                        p: 2,
+                        maxHeight: 400,
+                        overflow: 'auto'
+                      }}
+                      dangerouslySetInnerHTML={{ __html: arbeitsscheinHTML }}
+                    />
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Box>
+        )}
+        
+        {token.permissions.viewPhotos && activeTab === (token.permissions.viewQuote && quotes.length > 0 ? 2 : 1) && (
           <Box>
             <CustomerPhotos customer={customer} />
           </Box>
         )}
         
-        {activeTab === 2 && (
+        {activeTab === (token.permissions.viewQuote && quotes.length > 0 ? (token.permissions.viewPhotos ? 3 : 2) : (token.permissions.viewPhotos ? 2 : 1)) && (
           <Box>
             <CustomerTagsAndNotes 
               customer={customer} 

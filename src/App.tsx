@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { CircularProgress, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import { User } from './services/authService';
 import { authService } from './services/authService';
 import { usePageTracking } from './hooks/useAnalytics';
@@ -10,6 +10,10 @@ import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import SimpleAuth from './components/SimpleAuth';
 import ErrorBoundary from './components/ErrorBoundary';
+import { usePresence } from './hooks/useRealtime';
+import { RealtimeNotifications } from './components/RealtimeNotifications';
+import { OnlineUsers } from './components/OnlineUsers';
+import { realtimeService } from './services/realtimeService';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -56,6 +60,7 @@ import CustomerImportPage from './pages/CustomerImportPage';
 import SharedCustomerView from './pages/SharedCustomerView';
 import TrelloImportPage from './pages/TrelloImportPage';
 import DebugShareLinksPage from './pages/DebugShareLinksPage';
+import RealtimeDashboard from './components/RealtimeDashboard';
 
 
 export const AuthContext = React.createContext<{
@@ -76,13 +81,15 @@ export const AuthContext = React.createContext<{
 function AppRoutes({ user }: { user: User | null }) {
   // Analytics Page Tracking - now inside Router context
   usePageTracking();
+  
+  // Initialize presence tracking
+  usePresence(user?.uid || 'anonymous', user?.displayName || 'Gast');
 
   return (
     <Routes>
       {/* Public routes without layout */}
       <Route path="/login" element={<Navigate to="/dashboard" />} />
       <Route path="/share/:shareId" element={<SharePage />} />
-      <Route path="/share/:token" element={<SharePage />} />
       
       {/* Quote Confirmation Page - Public Route */}
       <Route 
@@ -298,6 +305,12 @@ function AppRoutes({ user }: { user: User | null }) {
         element={<DebugShareLinksPage />} 
       />
       
+      {/* Realtime Dashboard */}
+      <Route 
+        path="/realtime" 
+        element={<RealtimeDashboard />} 
+      />
+      
       {/* Default Route */}
       <Route 
         path="/" 
@@ -311,6 +324,7 @@ function App() {
   // Dummy user - immer eingeloggt
   const user = { uid: 'dummy-user', email: 'user@example.com', displayName: 'User' } as User;
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [showOnlineUsers, setShowOnlineUsers] = useState(false);
 
   // Automatische Synchronisation beim App-Start
   useEffect(() => {
@@ -336,9 +350,29 @@ function App() {
     // Prüfe AI Config
     checkAIConfig();
     
+    // Initialize realtime service
+    if (user) {
+      realtimeService.initialize(user.uid, user.displayName || user.email || 'Unknown User').then(() => {
+        console.log('✅ Realtime service initialized');
+      });
+    }
+    
+    // Check if online users should be shown
+    const savedShowOnlineUsers = localStorage.getItem('showOnlineUsers');
+    if (savedShowOnlineUsers === 'true') {
+      setShowOnlineUsers(true);
+    }
+    
+    // Listen for showOnlineUsers changes
+    const handleShowOnlineUsersChange = (event: any) => {
+      setShowOnlineUsers(event.detail);
+    };
+    window.addEventListener('showOnlineUsersChanged', handleShowOnlineUsersChange);
+    
     // Cleanup bei Unmount
     return () => {
       autoSyncService.stopAutoSync();
+      window.removeEventListener('showOnlineUsersChanged', handleShowOnlineUsersChange);
     };
   }, []);
 
@@ -380,6 +414,24 @@ function App() {
           <VisibilityFix />
           <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
             <AppRoutes user={user} />
+            
+            {/* Real-time Notifications */}
+            <RealtimeNotifications />
+            
+            {/* Online Users Widget */}
+            {showOnlineUsers && (
+              <Box
+                sx={{
+                  position: 'fixed',
+                  bottom: 80,
+                  right: 20,
+                  maxWidth: 300,
+                  zIndex: 1000
+                }}
+              >
+                <OnlineUsers />
+              </Box>
+            )}
             
             {/* PWA Install Prompt - Only show when user is logged in */}
             {/* {user && <PWAInstallPrompt />} */}

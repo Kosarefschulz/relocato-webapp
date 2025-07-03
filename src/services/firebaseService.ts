@@ -16,20 +16,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Customer, Quote, Invoice, EmailHistory, CalendarEvent } from '../types';
-
-interface ShareLink {
-  id: string;
-  customerId: string;
-  quoteId: string;
-  token: string;
-  expiresAt: Date;
-  createdAt: Date;
-  createdBy?: string;
-  usedAt?: Date;
-  arbeitsscheinHTML?: string;
-  arbeitsscheinData?: string;
-}
+import { Customer, Quote, Invoice, EmailHistory, CalendarEvent, ShareLink } from '../types';
 
 class FirebaseService {
   // Collections - nur initialisieren wenn db vorhanden

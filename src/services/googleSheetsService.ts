@@ -125,6 +125,15 @@ class GoogleSheetsService {
     return success;
   }
 
+  async updateCustomer(id: string, customer: Customer): Promise<void> {
+    // For now, this is a no-op since we don't have update functionality for Google Sheets
+    // In a real implementation, you would find the row by ID and update it
+    console.log('Update customer called:', { id, customer });
+    
+    // Mock successful update
+    return Promise.resolve();
+  }
+
   async getQuotes(): Promise<Quote[]> {
     const rows = await this.fetchFromSheet(this.config.quotesRange);
     

@@ -21,6 +21,7 @@ import LogoutButton from './LogoutButton';
 import NotificationCenter from './NotificationCenter';
 import AcceptedQuotesPreview from './AcceptedQuotesPreview';
 import { motion } from 'framer-motion';
+import { SmartSearch } from './SmartSearch';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -117,111 +118,116 @@ const Dashboard: React.FC = () => {
 
       {/* Dashboard Content */}
       <Container maxWidth="lg" sx={{ mt: isMobile ? 2 : 4, mb: 4, px: isMobile ? 2 : 3 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 'bold' }}>
-              Willkommen zurück!
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: isMobile ? 3 : 4, fontSize: isMobile ? '0.9rem' : '1rem' }}>
-              {isMobile 
-                ? new Date().toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })
-                : `Hier ist Ihre Übersicht für heute, ${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}`
-              }
-            </Typography>
-          </motion.div>
-          
-          {/* Angenommene Angebote Vorschau */}
-          <AcceptedQuotesPreview />
-          
-          <Grid container spacing={isMobile ? 2 : 3} sx={{ justifyContent: 'center' }}>
-            {dashboardItems.map((item, index) => (
-              <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 'bold' }}>
+            Willkommen zurück!
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: isMobile ? 3 : 4, fontSize: isMobile ? '0.9rem' : '1rem' }}>
+            {isMobile 
+              ? new Date().toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })
+              : `Hier ist Ihre Übersicht für heute, ${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}`
+            }
+          </Typography>
+        </motion.div>
+        
+        {/* Smart Search */}
+        <Box sx={{ mb: 3 }}>
+          <SmartSearch />
+        </Box>
+
+        {/* Angenommene Angebote Vorschau */}
+        <AcceptedQuotesPreview />
+        
+        <Grid container spacing={isMobile ? 2 : 3} sx={{ justifyContent: 'center' }}>
+          {dashboardItems.map((item, index) => (
+            <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card 
+                  elevation={0}
+                  sx={{ 
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    height: '100%',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    overflow: 'hidden',
+                    '&:hover': {
+                      transform: isMobile ? 'none' : 'translateY(-8px)',
+                      boxShadow: isMobile ? theme.shadows[2] : theme.shadows[8],
+                      borderColor: item.color,
+                      '& .icon-box': {
+                        transform: 'scale(1.1)',
+                      }
+                    },
+                    '&:active': isMobile ? {
+                      transform: 'scale(0.98)',
+                      transition: 'transform 0.1s'
+                    } : {}
+                  }}
+                  onClick={() => navigate(item.path)}
                 >
-                  <Card 
-                    elevation={0}
-                    sx={{ 
-                      cursor: 'pointer',
-                      transition: 'all 0.3s',
-                      height: '100%',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      overflow: 'hidden',
-                      '&:hover': {
-                        transform: isMobile ? 'none' : 'translateY(-8px)',
-                        boxShadow: isMobile ? theme.shadows[2] : theme.shadows[8],
-                        borderColor: item.color,
-                        '& .icon-box': {
-                          transform: 'scale(1.1)',
-                        }
-                      },
-                      '&:active': isMobile ? {
-                        transform: 'scale(0.98)',
-                        transition: 'transform 0.1s'
-                      } : {}
-                    }}
-                    onClick={() => navigate(item.path)}
-                  >
-                    <CardContent sx={{ 
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      p: isMobile ? 3 : 4
-                    }}>
-                      <Box 
-                        className="icon-box"
-                        sx={{ 
-                          width: { xs: 70, sm: 80, md: 100 },
-                          height: { xs: 70, sm: 80, md: 100 },
-                          borderRadius: '50%',
-                          background: item.gradient,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          mb: { xs: 2, sm: 3 },
-                          transition: 'transform 0.3s',
-                          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                          color: 'white'
-                        }}
-                      >
-                        {item.icon}
-                      </Box>
-                      <Typography 
-                        variant="h6" 
-                        sx={{ 
-                          fontWeight: 700,
-                          mb: 1,
-                          fontSize: isMobile ? '1.1rem' : '1.25rem'
-                        }}
-                      >
-                        {item.title}
-                      </Typography>
-                      <Typography 
-                        variant="body2" 
-                        color="text.secondary"
-                        sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.875rem', md: '0.95rem' },
-                          display: { xs: 'none', sm: 'block' }
-                        }}
-                      >
-                        {item.description}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
+                  <CardContent sx={{ 
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    p: isMobile ? 3 : 4
+                  }}>
+                    <Box 
+                      className="icon-box"
+                      sx={{ 
+                        width: { xs: 70, sm: 80, md: 100 },
+                        height: { xs: 70, sm: 80, md: 100 },
+                        borderRadius: '50%',
+                        background: item.gradient,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: { xs: 2, sm: 3 },
+                        transition: 'transform 0.3s',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        color: 'white'
+                      }}
+                    >
+                      {item.icon}
+                    </Box>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        fontWeight: 700,
+                        mb: 1,
+                        fontSize: isMobile ? '1.1rem' : '1.25rem'
+                      }}
+                    >
+                      {item.title}
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{ 
+                        fontSize: { xs: '0.75rem', sm: '0.875rem', md: '0.95rem' },
+                        display: { xs: 'none', sm: 'block' }
+                      }}
+                    >
+                      {item.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
     </>
   );
 

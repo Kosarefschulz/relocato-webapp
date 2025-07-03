@@ -9,6 +9,7 @@ import {
   Error as ErrorIcon,
   ManageSearch as ManageSearchIcon,
   SmartToy as AIIcon,
+  Speed as SpeedIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import DuplicateCustomerManager from '../components/DuplicateCustomerManager';
@@ -110,8 +111,8 @@ const AdminToolsPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* AI Configuration Button */}
-        <Box sx={{ mb: 3 }}>
+        {/* Admin Action Buttons */}
+        <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button
             variant="contained"
             color="primary"
@@ -121,6 +122,16 @@ const AdminToolsPage: React.FC = () => {
             sx={{ width: { xs: '100%', sm: 'auto' } }}
           >
             KI-Assistent konfigurieren
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="large"
+            startIcon={<SpeedIcon />}
+            onClick={() => navigate('/realtime')}
+            sx={{ width: { xs: '100%', sm: 'auto' } }}
+          >
+            Real-time Dashboard
           </Button>
         </Box>
       </Box>

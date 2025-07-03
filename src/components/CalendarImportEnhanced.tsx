@@ -311,11 +311,18 @@ const CalendarImportEnhanced: React.FC = () => {
       services: ['Umzug']
     } as Omit<Customer, 'id'>;
 
-    const customerId = await databaseService.addCustomer(customerData);
+    // Generate a temporary ID for the customer
+    const tempCustomer = {
+      ...customerData,
+      id: `temp-${Date.now()}`
+    } as Customer;
+
+    const customerId = await databaseService.addCustomer(tempCustomer);
     
     // Also create a calendar event if the method exists
     if ('addCalendarEvent' in databaseService && typeof databaseService.addCalendarEvent === 'function' && typeof customerId === 'string') {
       await databaseService.addCalendarEvent({
+      id: '',
       title: event.summary,
       date: event.date,
       startTime: event.startTime,
@@ -356,6 +363,7 @@ const CalendarImportEnhanced: React.FC = () => {
     // Create calendar event linked to existing customer
     if ('addCalendarEvent' in databaseService && typeof databaseService.addCalendarEvent === 'function') {
       await databaseService.addCalendarEvent({
+        id: '',
         title: event.summary,
         date: event.date,
         startTime: event.startTime,
