@@ -328,9 +328,9 @@ class RealtimeService {
     }
 
     return data.map(user => ({
-      userId: user.user_id,
-      userName: user.user_name,
-      status: user.status as any,
+      userId: user.user_id || 'unknown',
+      userName: user.user_name || 'Unbekannter Nutzer',
+      status: user.status as any || 'offline',
       currentPage: user.current_page,
       lastSeen: new Date(user.last_seen),
       deviceInfo: user.device_info,
@@ -354,8 +354,8 @@ class RealtimeService {
     Object.entries(state).forEach(([key, presences]) => {
       presences.forEach((presence: any) => {
         users.push({
-          userId: presence.user_id,
-          userName: presence.user_name,
+          userId: presence.user_id || 'unknown',
+          userName: presence.user_name || 'Unbekannter Nutzer',
           status: presence.status || 'online',
           lastSeen: new Date(presence.online_at)
         });

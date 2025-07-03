@@ -1,0 +1,28 @@
+VERCEL ENVIRONMENT VARIABLES TO ADD:
+=====================================
+
+Variable Name: REACT_APP_DATABASE_PROVIDER
+Value: supabase
+Environment: Production
+
+Variable Name: REACT_APP_DATABASE_AUTO_SWITCH
+Value: true
+Environment: Production
+
+Variable Name: REACT_APP_DATABASE_FALLBACK
+Value: true
+Environment: Production
+
+Variable Name: REACT_APP_SUPABASE_URL
+Value: https://kmxipuaqierjqaikuimi.supabase.co
+Environment: Production
+
+Variable Name: REACT_APP_SUPABASE_ANON_KEY
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtteGlwdWFxaWVyanFhaWt1aW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjU2NDUsImV4cCI6MjA2NjAwMTY0NX0.2S3cAnBh4zDFFQNpJ-VN17YrSJXyclyFjywN2izuPaU
+Environment: Production
+
+AFTER ADDING ALL VARIABLES:
+===========================
+1. Go to Deployments tab
+2. Click "Redeploy" on the latest deployment
+3. Make sure it's a Production deployment

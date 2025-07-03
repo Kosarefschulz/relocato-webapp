@@ -29,7 +29,7 @@ export const OnlineUsers: React.FC = () => {
             key={user.userId}
             title={
               <Box>
-                <Typography variant="body2">{user.userName}</Typography>
+                <Typography variant="body2">{user.userName || 'Unbekannter Nutzer'}</Typography>
                 <Typography variant="caption" color="text.secondary">
                   {user.currentPage && `Auf: ${user.currentPage}`}
                 </Typography>
@@ -55,11 +55,11 @@ export const OnlineUsers: React.FC = () => {
                   }
                 >
                   <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                    {user.userName.charAt(0).toUpperCase()}
+                    {user.userName?.charAt(0)?.toUpperCase() || '?'}
                   </Avatar>
                 </Badge>
               }
-              label={user.userName}
+              label={user.userName || 'Unbekannter Nutzer'}
               sx={{
                 backgroundColor: 'background.paper',
                 '&:hover': {
