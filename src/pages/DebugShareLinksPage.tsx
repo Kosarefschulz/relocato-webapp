@@ -34,9 +34,7 @@ import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
 } from '@mui/icons-material';
-import { firebaseService } from '../services/firebaseService';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { databaseService } from '../services/databaseAbstraction';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -71,31 +69,11 @@ const DebugShareLinksPage: React.FC = () => {
   const loadShareLinks = async () => {
     setLoading(true);
     try {
-      if (!db) {
-        console.error('Firebase nicht initialisiert');
-        return;
-      }
-
-      const shareLinksCollection = collection(db, 'shareLinks');
-      const snapshot = await getDocs(shareLinksCollection);
-      
-      const links: ShareLink[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        links.push({
-          id: doc.id,
-          customerId: data.customerId,
-          quoteId: data.quoteId,
-          token: data.token,
-          expiresAt: data.expiresAt?.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt),
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-          createdBy: data.createdBy,
-          usedAt: data.usedAt?.toDate ? data.usedAt.toDate() : undefined,
-          arbeitsscheinHTML: data.arbeitsscheinHTML,
-        });
-      });
-
-      setShareLinks(links.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+      console.log('🔧 Loading ShareLinks using database service...');
+      // Note: This debug page would need a new method to list all share links
+      // For now, we'll show an empty list with a message
+      setShareLinks([]);
+      console.log('ℹ️ ShareLink listing not available in abstraction service - this is a debug page');
     } catch (error) {
       console.error('Fehler beim Laden der ShareLinks:', error);
     } finally {
@@ -106,14 +84,10 @@ const DebugShareLinksPage: React.FC = () => {
   const handleCreateTestLink = async () => {
     try {
       console.log('🔧 Erstelle Test-ShareLink...');
-      const shareLink = await firebaseService.createShareLink(
+      const shareLink = await databaseService.createShareLink(
         testCustomerId,
         testQuoteId,
-        'debug-page',
-        {
-          arbeitsscheinHTML: '<h1>Test Arbeitsschein</h1><p>Dies ist ein Test-Arbeitsschein für Debug-Zwecke.</p>',
-          arbeitsscheinData: JSON.stringify({ test: true, createdAt: new Date().toISOString() })
-        }
+        7 * 24 * 60 * 60 * 1000 // 7 days expiration
       );
 
       console.log('✅ Test-ShareLink erstellt:', shareLink);
@@ -139,9 +113,8 @@ const DebugShareLinksPage: React.FC = () => {
     }
 
     try {
-      const shareLinksCollection = collection(db, 'shareLinks');
-      await deleteDoc(doc(shareLinksCollection, linkId));
-      loadShareLinks();
+      console.log('ℹ️ ShareLink deletion not available in abstraction service - this is a debug page');
+      alert('ShareLink deletion not implemented for Supabase service yet');
     } catch (error) {
       console.error('Fehler beim Löschen:', error);
     }

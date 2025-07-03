@@ -1,19 +1,5 @@
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  startAfter,
-  getDocs,
-  QueryDocumentSnapshot,
-  DocumentData,
-  Timestamp,
-  onSnapshot,
-  QuerySnapshot,
-  where
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
 import { Customer, Quote, Invoice } from '../types';
+import { databaseService } from './databaseAbstraction';
 
 interface PaginationOptions {
   pageSize: number;
@@ -24,14 +10,14 @@ interface PaginationOptions {
 
 interface PaginatedResult<T> {
   data: T[];
-  lastDoc: QueryDocumentSnapshot<DocumentData> | null;
+  lastDoc: any | null;  // Changed from QueryDocumentSnapshot to generic
   hasMore: boolean;
   totalLoaded: number;
 }
 
 class PaginationService {
   private cache = new Map<string, any[]>();
-  private lastDocs = new Map<string, QueryDocumentSnapshot<DocumentData>>();
+  private lastDocs = new Map<string, any>();
   private listeners = new Map<string, () => void>();
   private cacheTimestamps = new Map<string, number>();
 
@@ -56,49 +42,81 @@ class PaginationService {
     }
 
     try {
-      const customersRef = collection(db, 'customers');
-      let q = query(
-        customersRef,
-        orderBy(options.orderByField || 'createdAt', options.orderDirection || 'desc'),
-        limit(options.pageSize)
-      );
-
-      // Add filters if provided
-      if (options.filters) {
-        options.filters.forEach(filter => {
-          q = query(q, where(filter.field, filter.operator, filter.value));
-        });
-      }
-
-      const snapshot = await getDocs(q);
-      const customers: Customer[] = [];
+      console.log('📄 Loading customers via database service (pagination disabled in Supabase mode)...');
       
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        customers.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as Customer);
+      // Since Firebase is disabled, we'll load all customers and simulate pagination
+      const allCustomers = await databaseService.getCustomers();
+      
+      // Sort customers by creation date (most recent first)
+      const sortedCustomers = allCustomers.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA; // Descending order
       });
 
-      const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+      // Simulate pagination
+      const pageSize = options.pageSize || 500;
+      const paginatedData = sortedCustomers.slice(0, pageSize);
       
-      // Cache the results with timestamp
-      this.cache.set(cacheKey, customers);
+      // Cache the result
+      this.cache.set(cacheKey, paginatedData);
       this.cacheTimestamps.set(cacheKey, Date.now());
-      if (lastDoc) {
-        this.lastDocs.set(cacheKey, lastDoc);
+      this.lastDocs.set(cacheKey, paginatedData.length > 0 ? paginatedData[paginatedData.length - 1] : null);
+
+      return {
+        data: paginatedData,
+        lastDoc: paginatedData.length > 0 ? paginatedData[paginatedData.length - 1] : null,
+        hasMore: allCustomers.length > pageSize,
+        totalLoaded: paginatedData.length
+      };
+
+    } catch (error) {
+      console.error('❌ Error loading customers via database service:', error);
+      return {
+        data: [],
+        lastDoc: null,
+        hasMore: false,
+        totalLoaded: 0
+      };
+    }
+  }
+
+  /**
+   * Load more customers after the last document
+   */
+  async loadMoreCustomers(lastDoc: any, options: PaginationOptions = { pageSize: 20 }): Promise<PaginatedResult<Customer>> {
+    try {
+      console.log('📄 Loading more customers via database service (pagination disabled in Supabase mode)...');
+      
+      // Since Firebase is disabled, we'll load all customers and simulate pagination
+      const allCustomers = await databaseService.getCustomers();
+      
+      // Sort customers by creation date (most recent first)
+      const sortedCustomers = allCustomers.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA; // Descending order
+      });
+
+      // Find the index of the last document
+      let startIndex = 0;
+      if (lastDoc && lastDoc.id) {
+        startIndex = sortedCustomers.findIndex(customer => customer.id === lastDoc.id) + 1;
       }
 
+      // Get the next page
+      const pageSize = options.pageSize || 20;
+      const nextPage = sortedCustomers.slice(startIndex, startIndex + pageSize);
+      
       return {
-        data: customers,
-        lastDoc: lastDoc || null,
-        hasMore: snapshot.docs.length >= options.pageSize,
-        totalLoaded: customers.length
+        data: nextPage,
+        lastDoc: nextPage.length > 0 ? nextPage[nextPage.length - 1] : null,
+        hasMore: startIndex + pageSize < sortedCustomers.length,
+        totalLoaded: nextPage.length
       };
+
     } catch (error) {
-      console.error('Error loading initial customers:', error);
+      console.error('❌ Error loading more customers via database service:', error);
       return {
         data: [],
         lastDoc: null,
@@ -109,43 +127,40 @@ class PaginationService {
   }
 
   /**
-   * Load next page of customers
+   * Load quotes with pagination - alias for loadInitialQuotes for backward compatibility
    */
-  async loadMoreCustomers(
-    lastDoc: QueryDocumentSnapshot<DocumentData>,
-    options: PaginationOptions = { pageSize: 50 }
-  ): Promise<PaginatedResult<Customer>> {
+  async loadQuotes(lastDoc?: any, options: PaginationOptions = { pageSize: 100 }): Promise<PaginatedResult<Quote>> {
+    return this.loadInitialQuotes(options);
+  }
+
+  /**
+   * Load initial batch of quotes
+   */
+  async loadInitialQuotes(options: PaginationOptions = { pageSize: 100 }): Promise<PaginatedResult<Quote>> {
     try {
-      const customersRef = collection(db, 'customers');
-      const q = query(
-        customersRef,
-        orderBy(options.orderByField || 'createdAt', options.orderDirection || 'desc'),
-        startAfter(lastDoc),
-        limit(options.pageSize)
-      );
-
-      const snapshot = await getDocs(q);
-      const customers: Customer[] = [];
+      console.log('📄 Loading quotes via database service (pagination disabled in Supabase mode)...');
       
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        customers.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as Customer);
+      const allQuotes = await databaseService.getQuotes();
+      
+      // Sort quotes by creation date (most recent first)
+      const sortedQuotes = allQuotes.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
       });
 
-      const newLastDoc = snapshot.docs[snapshot.docs.length - 1];
-
+      const pageSize = options.pageSize || 100;
+      const paginatedData = sortedQuotes.slice(0, pageSize);
+      
       return {
-        data: customers,
-        lastDoc: newLastDoc || null,
-        hasMore: snapshot.docs.length >= options.pageSize,
-        totalLoaded: customers.length
+        data: paginatedData,
+        lastDoc: paginatedData.length > 0 ? paginatedData[paginatedData.length - 1] : null,
+        hasMore: allQuotes.length > pageSize,
+        totalLoaded: paginatedData.length
       };
+
     } catch (error) {
-      console.error('Error loading more customers:', error);
+      console.error('❌ Error loading quotes via database service:', error);
       return {
         data: [],
         lastDoc: null,
@@ -156,40 +171,152 @@ class PaginationService {
   }
 
   /**
-   * Subscribe to real-time updates for new customers
+   * Load invoices with pagination - alias for loadInitialInvoices for backward compatibility
    */
-  subscribeToNewCustomers(
-    callback: (customers: Customer[]) => void,
-    options: { since?: Date } = {}
-  ): () => void {
-    const customersRef = collection(db, 'customers');
-    const since = options.since || new Date();
-    
-    const q = query(
-      customersRef,
-      where('createdAt', '>', Timestamp.fromDate(since)),
-      orderBy('createdAt', 'desc')
-    );
+  async loadInvoices(lastDoc?: any, options: PaginationOptions = { pageSize: 100 }): Promise<PaginatedResult<Invoice>> {
+    return this.loadInitialInvoices(options);
+  }
 
-    const unsubscribe = onSnapshot(q, (snapshot: QuerySnapshot) => {
-      const newCustomers: Customer[] = [];
+  /**
+   * Load initial batch of invoices
+   */
+  async loadInitialInvoices(options: PaginationOptions = { pageSize: 100 }): Promise<PaginatedResult<Invoice>> {
+    try {
+      console.log('📄 Loading invoices via database service (pagination disabled in Supabase mode)...');
       
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        newCustomers.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as Customer);
+      const allInvoices = await databaseService.getInvoices();
+      
+      // Sort invoices by creation date (most recent first)
+      const sortedInvoices = allInvoices.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
       });
 
-      callback(newCustomers);
+      const pageSize = options.pageSize || 100;
+      const paginatedData = sortedInvoices.slice(0, pageSize);
+      
+      return {
+        data: paginatedData,
+        lastDoc: paginatedData.length > 0 ? paginatedData[paginatedData.length - 1] : null,
+        hasMore: allInvoices.length > pageSize,
+        totalLoaded: paginatedData.length
+      };
+
+    } catch (error) {
+      console.error('❌ Error loading invoices via database service:', error);
+      return {
+        data: [],
+        lastDoc: null,
+        hasMore: false,
+        totalLoaded: 0
+      };
+    }
+  }
+
+  /**
+   * Search customers with pagination
+   */
+  async searchCustomers(searchTerm: string, options: PaginationOptions = { pageSize: 50 }): Promise<PaginatedResult<Customer>> {
+    try {
+      console.log('🔍 Searching customers via database service...');
+      
+      const searchResults = await databaseService.searchCustomers(searchTerm);
+      
+      const pageSize = options.pageSize || 50;
+      const paginatedData = searchResults.slice(0, pageSize);
+      
+      return {
+        data: paginatedData,
+        lastDoc: paginatedData.length > 0 ? paginatedData[paginatedData.length - 1] : null,
+        hasMore: searchResults.length > pageSize,
+        totalLoaded: paginatedData.length
+      };
+
+    } catch (error) {
+      console.error('❌ Error searching customers via database service:', error);
+      return {
+        data: [],
+        lastDoc: null,
+        hasMore: false,
+        totalLoaded: 0
+      };
+    }
+  }
+
+  /**
+   * Generic search with pagination for backward compatibility
+   */
+  async searchWithPagination<T>(
+    collection: string,
+    field: string,
+    searchTerm: string,
+    lastDoc?: any,
+    options: PaginationOptions = { pageSize: 50 }
+  ): Promise<PaginatedResult<T>> {
+    try {
+      console.log(`🔍 Generic search with pagination: ${collection}.${field} = "${searchTerm}"`);
+      
+      // For now, only support customer search since that's what we have in the database service
+      if (collection === 'customers') {
+        const result = await this.searchCustomers(searchTerm, options);
+        return result as PaginatedResult<T>;
+      } else {
+        console.warn(`❌ Search not supported for collection: ${collection}`);
+        return {
+          data: [],
+          lastDoc: null,
+          hasMore: false,
+          totalLoaded: 0
+        };
+      }
+
+    } catch (error) {
+      console.error('❌ Error in generic search with pagination:', error);
+      return {
+        data: [],
+        lastDoc: null,
+        hasMore: false,
+        totalLoaded: 0
+      };
+    }
+  }
+
+  /**
+   * Clear all caches
+   */
+  clearCache(): void {
+    console.log('🧹 Clearing pagination cache...');
+    this.cache.clear();
+    this.lastDocs.clear();
+    this.cacheTimestamps.clear();
+    
+    // Clear any active listeners
+    this.listeners.forEach(unsubscribe => {
+      if (unsubscribe) unsubscribe();
     });
+    this.listeners.clear();
+  }
 
-    // Store unsubscribe function
-    const listenerId = `new_customers_${Date.now()}`;
+  /**
+   * Cleanup method - alias for clearCache for backward compatibility
+   */
+  cleanup(): void {
+    this.clearCache();
+  }
+
+  /**
+   * Subscribe to real-time updates for customers
+   */
+  subscribeToCustomers(callback: (customers: Customer[]) => void): () => void {
+    console.log('👁️ Setting up customer subscription via database service...');
+    
+    // Use the database service's subscription method
+    const unsubscribe = databaseService.subscribeToCustomers(callback);
+    
+    const listenerId = `customers_${Date.now()}`;
     this.listeners.set(listenerId, unsubscribe);
-
+    
     return () => {
       unsubscribe();
       this.listeners.delete(listenerId);
@@ -197,190 +324,65 @@ class PaginationService {
   }
 
   /**
-   * Load quotes with pagination
+   * Subscribe to real-time updates for quotes
    */
-  async loadQuotes(
-    lastDoc: QueryDocumentSnapshot<DocumentData> | null,
-    options: PaginationOptions = { pageSize: 50 }
-  ): Promise<PaginatedResult<Quote>> {
-    try {
-      const quotesRef = collection(db, 'quotes');
-      let q = query(
-        quotesRef,
-        orderBy(options.orderByField || 'createdAt', options.orderDirection || 'desc'),
-        limit(options.pageSize)
-      );
+  subscribeToQuotes(callback: (quotes: Quote[]) => void): () => void {
+    console.log('👁️ Setting up quotes subscription via database service...');
+    
+    const unsubscribe = databaseService.subscribeToQuotes(callback);
+    
+    const listenerId = `quotes_${Date.now()}`;
+    this.listeners.set(listenerId, unsubscribe);
+    
+    return () => {
+      unsubscribe();
+      this.listeners.delete(listenerId);
+    };
+  }
 
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc));
+  /**
+   * Subscribe to new customers created after a specific date
+   */
+  subscribeToNewCustomers(callback: (customers: Customer[]) => void, options?: { since?: Date }): () => void {
+    console.log('👁️ Setting up new customers subscription via database service...');
+    
+    // Since we don't have real-time filtering by date in our current implementation,
+    // we'll use the regular subscription and filter locally
+    const unsubscribe = databaseService.subscribeToCustomers((allCustomers) => {
+      if (options?.since) {
+        const sinceTime = options.since.getTime();
+        const newCustomers = allCustomers.filter(customer => {
+          const createdAt = customer.createdAt ? new Date(customer.createdAt).getTime() : 0;
+          return createdAt > sinceTime;
+        });
+        callback(newCustomers);
+      } else {
+        callback(allCustomers);
       }
-
-      const snapshot = await getDocs(q);
-      const quotes: Quote[] = [];
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        quotes.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as Quote);
-      });
-
-      const newLastDoc = snapshot.docs[snapshot.docs.length - 1];
-
-      return {
-        data: quotes,
-        lastDoc: newLastDoc || null,
-        hasMore: snapshot.docs.length >= options.pageSize,
-        totalLoaded: quotes.length
-      };
-    } catch (error) {
-      console.error('Error loading quotes:', error);
-      return {
-        data: [],
-        lastDoc: null,
-        hasMore: false,
-        totalLoaded: 0
-      };
-    }
+    });
+    
+    const listenerId = `newCustomers_${Date.now()}`;
+    this.listeners.set(listenerId, unsubscribe);
+    
+    return () => {
+      unsubscribe();
+      this.listeners.delete(listenerId);
+    };
   }
 
   /**
-   * Load invoices with pagination
+   * Get cache statistics
    */
-  async loadInvoices(
-    lastDoc: QueryDocumentSnapshot<DocumentData> | null,
-    options: PaginationOptions = { pageSize: 50 }
-  ): Promise<PaginatedResult<Invoice>> {
-    try {
-      const invoicesRef = collection(db, 'invoices');
-      let q = query(
-        invoicesRef,
-        orderBy(options.orderByField || 'createdAt', options.orderDirection || 'desc'),
-        limit(options.pageSize)
-      );
-
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc));
-      }
-
-      const snapshot = await getDocs(q);
-      const invoices: Invoice[] = [];
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        invoices.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' 
-            ? data.createdAt.toDate() 
-            : data.createdAt || new Date(),
-          dueDate: data.dueDate && typeof data.dueDate.toDate === 'function'
-            ? data.dueDate.toDate()
-            : data.dueDate || new Date(),
-          paidDate: data.paidDate && typeof data.paidDate.toDate === 'function'
-            ? data.paidDate.toDate()
-            : data.paidDate,
-        } as Invoice);
-      });
-
-      const newLastDoc = snapshot.docs[snapshot.docs.length - 1];
-
-      return {
-        data: invoices,
-        lastDoc: newLastDoc || null,
-        hasMore: snapshot.docs.length >= options.pageSize,
-        totalLoaded: invoices.length
-      };
-    } catch (error) {
-      console.error('Error loading invoices:', error);
-      return {
-        data: [],
-        lastDoc: null,
-        hasMore: false,
-        totalLoaded: 0
-      };
-    }
-  }
-
-  /**
-   * Search with pagination
-   */
-  async searchWithPagination<T>(
-    collectionName: string,
-    searchField: string,
-    searchValue: string,
-    lastDoc: QueryDocumentSnapshot<DocumentData> | null,
-    options: PaginationOptions = { pageSize: 20 }
-  ): Promise<PaginatedResult<T>> {
-    try {
-      const collectionRef = collection(db, collectionName);
-      let q = query(
-        collectionRef,
-        where(searchField, '>=', searchValue),
-        where(searchField, '<=', searchValue + '\uf8ff'),
-        orderBy(searchField),
-        limit(options.pageSize)
-      );
-
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc));
-      }
-
-      const snapshot = await getDocs(q);
-      const results: T[] = [];
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        results.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-        } as T);
-      });
-
-      const newLastDoc = snapshot.docs[snapshot.docs.length - 1];
-
-      return {
-        data: results,
-        lastDoc: newLastDoc || null,
-        hasMore: snapshot.docs.length >= options.pageSize,
-        totalLoaded: results.length
-      };
-    } catch (error) {
-      console.error('Error searching with pagination:', error);
-      return {
-        data: [],
-        lastDoc: null,
-        hasMore: false,
-        totalLoaded: 0
-      };
-    }
-  }
-
-  /**
-   * Clear cache for a specific key or all caches
-   */
-  clearCache(key?: string) {
-    if (key) {
-      this.cache.delete(key);
-      this.lastDocs.delete(key);
-      this.cacheTimestamps.delete(key);
-    } else {
-      this.cache.clear();
-      this.lastDocs.clear();
-      this.cacheTimestamps.clear();
-    }
-  }
-
-  /**
-   * Cleanup all listeners
-   */
-  cleanup() {
-    this.listeners.forEach(unsubscribe => unsubscribe());
-    this.listeners.clear();
-    this.clearCache();
+  getCacheStats(): { size: number; keys: string[]; oldestEntry?: number } {
+    const keys = Array.from(this.cache.keys());
+    const timestamps = Array.from(this.cacheTimestamps.values());
+    const oldestEntry = timestamps.length > 0 ? Math.min(...timestamps) : undefined;
+    
+    return {
+      size: this.cache.size,
+      keys,
+      oldestEntry
+    };
   }
 }
 

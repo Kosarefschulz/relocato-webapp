@@ -1,7 +1,7 @@
 import { OpenAIService } from './openaiService';
 import { AIContextManager } from './aiContextManager';
 import { Customer, Quote, Invoice } from '../../types';
-import { firebaseService } from '../firebaseService';
+import { databaseService } from '../databaseAbstraction';
 import { sendEmail } from '../emailService';
 import { pdfService } from '../pdfServiceWrapper';
 import { quoteCalculationService } from '../quoteCalculation';
@@ -122,7 +122,7 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
   }
 
   private async createQuote(data: any): Promise<Quote> {
-    const customer = await firebaseService.getCustomerById(data.customerId);
+    const customer = await databaseService.getCustomer(data.customerId);
     if (!customer) {
       throw new Error('Kunde nicht gefunden');
     }
@@ -162,12 +162,12 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
       distance: data.distance || 50
     };
 
-    const quoteId = await firebaseService.addQuote(quote as Omit<Quote, 'id'>);
+    const quoteId = await databaseService.addQuote(quote as Quote);
     return { ...quote, id: quoteId } as Quote;
   }
 
   private async createInvoice(data: any): Promise<Invoice> {
-    const customer = await firebaseService.getCustomerById(data.customerId);
+    const customer = await databaseService.getCustomer(data.customerId);
     if (!customer) {
       throw new Error('Kunde nicht gefunden');
     }
@@ -187,7 +187,7 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
       notes: data.notes || ''
     };
 
-    const invoiceId = await firebaseService.addInvoice(invoice as Omit<Invoice, 'id'>);
+    const invoiceId = await databaseService.addInvoice(invoice as Invoice);
     return { ...invoice, id: invoiceId } as Invoice;
   }
 
@@ -208,7 +208,7 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
 
   private async updateCustomer(data: any): Promise<void> {
     const { customerId, updates } = data;
-    await firebaseService.updateCustomer(customerId, updates);
+    await databaseService.updateCustomer(customerId, updates);
   }
 
   private async generatePDF(data: any): Promise<Blob> {
@@ -226,9 +226,9 @@ Gib strukturierte Aktionen zurück, die ausgeführt werden sollen.
       case 'customer':
         return await this.contextManager.getCustomerContext(id);
       case 'quote':
-        return await firebaseService.getQuoteById(id);
+        return await databaseService.getQuote(id);
       case 'invoice':
-        return await firebaseService.getInvoiceById(id);
+        return await databaseService.getInvoice(id);
       default:
         return null;
     }

@@ -21,7 +21,7 @@ class FirebaseServiceWrapper {
   async getCustomerById(customerId: string): Promise<Customer | null> {
     if (!this.isFirebaseAvailable()) return null;
     const { firebaseService } = await import('./firebaseService');
-    return firebaseService.getCustomerById(customerId);
+    return firebaseService.getCustomer(customerId);
   }
 
   async addCustomer(customer: Omit<Customer, 'id'>): Promise<string> {
@@ -72,7 +72,7 @@ class FirebaseServiceWrapper {
   async getQuote(quoteId: string): Promise<Quote | null> {
     if (!this.isFirebaseAvailable()) return null;
     const { firebaseService } = await import('./firebaseService');
-    return firebaseService.getQuoteById?.(quoteId) || null;
+    return firebaseService.getQuote(quoteId);
   }
 
   async deleteQuote(quoteId: string): Promise<void> {
@@ -96,7 +96,7 @@ class FirebaseServiceWrapper {
   async getInvoice(invoiceId: string): Promise<Invoice | null> {
     if (!this.isFirebaseAvailable()) return null;
     const { firebaseService } = await import('./firebaseService');
-    return firebaseService.getInvoiceById?.(invoiceId) || null;
+    return firebaseService.getInvoice(invoiceId);
   }
 
   async updateInvoice(invoiceId: string, updates: Partial<Invoice>): Promise<void> {

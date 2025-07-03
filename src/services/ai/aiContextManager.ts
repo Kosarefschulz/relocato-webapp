@@ -1,5 +1,5 @@
 import { Customer, Quote, Invoice, Consultant, CustomerNote } from '../../types';
-import { firebaseService } from '../firebaseService';
+import { databaseService } from '../databaseAbstraction';
 import { paginationService } from '../paginationService';
 import { quoteCalculationService } from '../quoteCalculation';
 import { sendEmail } from '../emailService';
@@ -36,7 +36,7 @@ export class AIContextManager {
     notes: CustomerNote[];
     emails: any[];
   }> {
-    const customer = await firebaseService.getCustomerById(customerId);
+    const customer = await databaseService.getCustomer(customerId);
     if (!customer) {
       return {
         customer: null,
@@ -48,8 +48,10 @@ export class AIContextManager {
     }
 
     const [quotes, invoices] = await Promise.all([
-      firebaseService.getQuotesByCustomerId(customerId),
-      firebaseService.getInvoicesByCustomer(customerId)
+      databaseService.getQuotesByCustomerId(customerId),
+      databaseService.getInvoices().then(allInvoices => 
+        allInvoices.filter(invoice => invoice.customerId === customerId)
+      )
     ]);
     
     // Customer notes are part of the customer object
@@ -163,13 +165,13 @@ export class AIContextManager {
   }
 
   private async getAllQuotes(): Promise<Quote[]> {
-    // Just return all quotes from firebase for now
-    return await firebaseService.getQuotes();
+    // Just return all quotes from database service for now
+    return await databaseService.getQuotes();
   }
 
   private async getAllInvoices(): Promise<Invoice[]> {
-    // Just return all invoices from firebase for now
-    return await firebaseService.getInvoices();
+    // Just return all invoices from database service for now
+    return await databaseService.getInvoices();
   }
 
   async getSystemCapabilities(): Promise<string> {

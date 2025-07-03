@@ -1,4 +1,4 @@
-import { firebaseService } from '../firebaseService';
+import { databaseService } from '../databaseAbstraction';
 import { sendEmail } from '../emailService';
 import { pdfService } from '../pdfServiceWrapper';
 import { quoteCalculationService } from '../quoteCalculation';
@@ -101,7 +101,7 @@ export class AIBackgroundService {
   }): Promise<any> {
     // Suche oder erstelle Kunde
     let customer: Customer | null = null;
-    const customers = await firebaseService.getCustomers();
+    const customers = await databaseService.getCustomers();
     
     customer = customers.find(c => 
       c.name.toLowerCase().includes(data.customerName.toLowerCase())
@@ -126,7 +126,7 @@ export class AIBackgroundService {
         services: []
       };
       
-      const customerId = await firebaseService.addCustomer(newCustomer);
+      const customerId = await databaseService.addCustomer(newCustomer);
       customer = { ...newCustomer, id: customerId };
     }
 
@@ -167,7 +167,7 @@ export class AIBackgroundService {
       distance: 50
     };
 
-    const quoteId = await firebaseService.addQuote(quote);
+    const quoteId = await databaseService.addQuote(quote as Quote);
     const savedQuote = { ...quote, id: quoteId } as Quote;
 
     // Sende E-Mail wenn gewünscht
@@ -214,14 +214,14 @@ export class AIBackgroundService {
 
   private async updateCustomerData(data: any): Promise<any> {
     const { customerId, updates } = data;
-    await firebaseService.updateCustomer(customerId, updates);
-    return await firebaseService.getCustomerById(customerId);
+    await databaseService.updateCustomer(customerId, updates);
+    return await databaseService.getCustomer(customerId);
   }
 
   private async processFollowUp(data: any): Promise<any> {
     // Implementiere Follow-Up Logik
     const { customerId, message } = data;
-    const customer = await firebaseService.getCustomerById(customerId);
+    const customer = await databaseService.getCustomer(customerId);
     
     if (!customer || !customer.email) {
       throw new Error('Kunde nicht gefunden oder keine E-Mail');
