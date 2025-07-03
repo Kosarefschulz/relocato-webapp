@@ -169,23 +169,83 @@ const SharePage: React.FC = () => {
         googleSheetsService.getQuotes()
       ]);
 
-      const customer = customers.find((c: any) => c.id === shareLink.customerId);
+      let customer = customers.find((c: any) => c.id === shareLink.customerId);
+      
+      // Try to find by customerNumber if not found by ID
       if (!customer) {
+        console.log('🔍 Kunde nicht mit ID gefunden, versuche mit customerNumber');
+        customer = customers.find((c: any) => c.customerNumber === shareLink.customerId);
+      }
+      
+      // Try normalized search
+      if (!customer) {
+        console.log('🔍 Versuche normalisierte Suche');
+        customer = customers.find((c: any) => {
+          const normalizedShareId = shareLink.customerId?.replace(/^K0*/, 'K');
+          const normalizedDbId = c.id?.replace(/^K0*/, 'K');
+          const normalizedDbNumber = c.customerNumber?.replace(/^K0*/, 'K');
+          
+          return normalizedDbId === normalizedShareId || 
+                 normalizedDbNumber === normalizedShareId;
+        });
+      }
+      
+      // Try to load directly from service
+      if (!customer) {
+        console.log('🔍 Versuche Kunde direkt zu laden:', shareLink.customerId);
+        try {
+          const directCustomer = await googleSheetsService.getCustomer(shareLink.customerId);
+          if (directCustomer) {
+            customer = directCustomer;
+          }
+        } catch (error) {
+          console.error('Fehler beim direkten Laden:', error);
+        }
+      }
+      
+      if (!customer) {
+        console.error('❌ Kunde definitiv nicht gefunden:', {
+          customerId: shareLink.customerId,
+          totalCustomers: customers.length,
+          firstFewCustomers: customers.slice(0, 3).map((c: any) => ({
+            id: c.id,
+            customerNumber: c.customerNumber
+          }))
+        });
         setError('Kundendaten nicht gefunden');
         setLoading(false);
         return;
       }
+      
+      console.log('✅ Kunde gefunden:', {
+        id: customer.id,
+        customerNumber: customer.customerNumber,
+        name: customer.name
+      });
 
-      // Find the specific quote
+      // Find the specific quote - check multiple statuses
       const acceptedQuote = quotes.find((q: any) => 
-        q.id === shareLink.quoteId && q.status === 'accepted'
+        q.id === shareLink.quoteId && (q.status === 'accepted' || q.status === 'confirmed')
       );
 
       if (!acceptedQuote) {
+        console.error('❌ Angebot nicht gefunden:', {
+          quoteId: shareLink.quoteId,
+          totalQuotes: quotes.length,
+          quotesForCustomer: quotes.filter((q: any) => 
+            q.customerId === shareLink.customerId
+          ).map((q: any) => ({ id: q.id, status: q.status }))
+        });
         setError('Angebot nicht gefunden');
         setLoading(false);
         return;
       }
+      
+      console.log('✅ Angebot gefunden:', {
+        id: acceptedQuote.id,
+        status: acceptedQuote.status,
+        customerName: acceptedQuote.customerName
+      });
 
       // Load disposition data
       const savedDispositions = JSON.parse(localStorage.getItem('dispositions') || '{}');
@@ -199,18 +259,25 @@ const SharePage: React.FC = () => {
         'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800',
       ];
 
+      // Extract name parts
+      const nameParts = (customer.name || '').split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
       setCustomerData({
         id: customer.id,
         customerNumber: customer.customerNumber || '',
-        firstName: '',
-        lastName: '',
-        email: customer.email,
-        phone: customer.phone,
-        moveDate: customer.movingDate || new Date().toISOString(),
-        fromAddress: customer.fromAddress || '',
-        toAddress: customer.toAddress || '',
+        firstName: firstName,
+        lastName: lastName,
+        email: customer.email || '',
+        phone: customer.phone || '',
+        moveDate: customer.movingDate || acceptedQuote.moveDate || new Date().toISOString(),
+        fromAddress: customer.fromAddress || acceptedQuote.moveFrom || '',
+        toAddress: customer.toAddress || acceptedQuote.moveTo || '',
         assignedVehicles: dispositionData.assignedVehicles || [],
         quoteData: acceptedQuote,
+        arbeitsscheinHTML: shareLink.arbeitsscheinHTML,
+        arbeitsscheinData: shareLink.arbeitsscheinData,
       });
       setPhotos(mockPhotos);
       setLoading(false);
