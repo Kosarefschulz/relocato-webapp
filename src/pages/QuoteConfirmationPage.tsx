@@ -41,7 +41,7 @@ import { tokenService } from '../services/tokenService';
 import { motion } from 'framer-motion';
 import SignatureModal from '../components/SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
-import { sendConfirmationEmail } from '../services/confirmationEmailService';
+import { supabaseEmailService } from '../services/supabaseEmailService';
 import { notificationService } from '../services/notificationService';
 import { databaseService as unifiedService } from '../services/unifiedDatabaseService.optimized';
 
@@ -194,14 +194,16 @@ const QuoteConfirmationPage: React.FC = () => {
       // Send confirmation email
       try {
         console.log('📧 Sende Bestätigungsmail...');
-        await sendConfirmationEmail(
-          customer || { 
-            id: quote.customerId,
-            name: customerName || quote.customerName || 'Kunde',
-            email: customerEmail || ''
-          } as Customer,
-          updatedQuote,
-          customerEmail || ''
+        await supabaseEmailService.sendConfirmationEmail(
+          quote.customerId,
+          customerEmail || '',
+          customerName || quote.customerName || 'Kunde',
+          {
+            moveDate: updatedQuote.moveDate,
+            moveFrom: updatedQuote.moveFrom,
+            moveTo: updatedQuote.moveTo,
+            price: updatedQuote.price
+          }
         );
         console.log('✅ Bestätigungsmail gesendet');
       } catch (emailError) {

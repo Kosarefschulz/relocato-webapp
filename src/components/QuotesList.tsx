@@ -25,7 +25,7 @@ import {
 import { Quote, Customer, Invoice } from '../types';
 import { databaseService } from '../config/database.config';
 import { generatePDF, generateInvoicePDF } from '../services/pdfService';
-import { sendEmail } from '../services/emailService';
+import { supabaseEmailService } from '../services/supabaseEmailService';
 import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
 import { tokenService } from '../services/tokenService';
 import { motion } from 'framer-motion';
@@ -227,7 +227,20 @@ const QuotesList: React.FC = () => {
         }]
       };
 
-      const sent = await sendEmail(emailData);
+      // Convert blob to base64 for supabase email service
+      const pdfBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(pdfBlob);
+      });
+      
+      const sent = await supabaseEmailService.sendQuoteEmail(
+        quote.customerId,
+        customer.email,
+        customer.name,
+        quote,
+        pdfBase64
+      );
       
       if (sent) {
         // Update quote status to sent and save token if newly generated
@@ -336,7 +349,25 @@ const QuotesList: React.FC = () => {
               }]
             };
 
-            await sendEmail(emailData);
+            // Convert invoice PDF blob to base64
+            const invoicePdfBase64 = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.readAsDataURL(pdfBlob);
+            });
+            
+            await supabaseEmailService.sendEmail({
+              to: customer.email,
+              subject: `Rechnung ${invoiceNumber} - ${customer.name}`,
+              content: `Sehr geehrte/r ${customer.name},\n\nanbei finden Sie Ihre Rechnung ${invoiceNumber}.\n\nVielen Dank für Ihr Vertrauen!`,
+              customerId: quote.customerId,
+              templateType: 'invoice',
+              attachments: [{
+                filename: `Rechnung_${invoiceNumber}.pdf`,
+                content: invoicePdfBase64,
+                contentType: 'application/pdf'
+              }]
+            });
           }
         } catch (error) {
           console.error('Error sending invoice email:', error);
