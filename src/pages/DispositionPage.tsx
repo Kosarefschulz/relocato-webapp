@@ -48,7 +48,6 @@ import { de } from 'date-fns/locale';
 import { parseDate, formatDate } from '../utils/dateUtils';
 import { databaseService } from '../config/database.config';
 import { prepareArbeitsscheinData, generateArbeitsscheinHTML } from '../services/arbeitsscheinService';
-import { shareTokenService } from '../services/shareTokenService';
 
 interface Vehicle {
   id: string;
@@ -498,37 +497,42 @@ const DispositionPage: React.FC = () => {
         htmlLength: arbeitsscheinHTML.length
       });
       
-      // Create share link using the WORKING shareTokenService
-      console.log('🔥 Erstelle ShareLink mit shareTokenService...');
+      // Create share link using database abstraction layer (Supabase)
+      console.log('🔥 Erstelle ShareLink mit databaseService (Supabase)...');
       console.log('🆔 IDs für ShareLink:', {
         customerId: fullCustomer.id,
-        customerName: fullCustomer.name
+        customerName: fullCustomer.name,
+        quoteId: customer.quoteId
       });
       
-      const shareToken = await shareTokenService.createShareToken(
+      const shareLink = await databaseService.createShareLink(
         fullCustomer.id,
-        fullCustomer.name,
-        'disposition',
-        {
-          viewCustomer: true,
-          viewQuote: true, // Enable quote viewing for disposition links
-          viewInvoice: false,
-          viewPhotos: true
-        }
+        customer.quoteId,
+        7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
       );
       
-      if (!shareToken || !shareToken.id) {
-        throw new Error('ShareToken konnte nicht erstellt werden');
+      if (!shareLink || !shareLink.id) {
+        throw new Error('ShareLink konnte nicht erstellt werden');
       }
       
-      console.log('✅ ShareToken erfolgreich erstellt:', {
-        tokenId: shareToken.id,
-        customerId: shareToken.customerId,
-        expiresAt: shareToken.expiresAt
+      // Update the ShareLink with Arbeitsschein data
+      await databaseService.updateShareLink(shareLink.token, {
+        arbeitsscheinHTML: arbeitsscheinHTML,
+        arbeitsscheinData: JSON.stringify(arbeitsscheinData),
+        createdBy: 'disposition'
       });
       
-      // Generate URL using the working system
-      const link = shareTokenService.generateShareUrl(shareToken.id);
+      console.log('✅ ShareLink erfolgreich erstellt:', {
+        linkId: shareLink.id,
+        token: shareLink.token,
+        customerId: shareLink.customerId,
+        quoteId: shareLink.quoteId,
+        expiresAt: shareLink.expiresAt
+      });
+      
+      // Generate URL
+      const baseUrl = window.location.origin;
+      const link = `${baseUrl}/shared/customer/${shareLink.token}`;
       
       console.log('🌐 Generierte URL:', link);
       
