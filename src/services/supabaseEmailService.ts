@@ -53,13 +53,12 @@ class SupabaseEmailService {
         templateType: emailData.templateType
       });
 
-      // Call Supabase Edge Function
+      // Call Supabase Edge Function (config now handled by environment variables)
       const { data, error } = await supabase.functions.invoke('send-email', {
         body: {
           to: emailData.to,
           subject: emailData.subject,
           content: emailData.content,
-          config: this.config,
           attachments: emailData.attachments
         }
       });

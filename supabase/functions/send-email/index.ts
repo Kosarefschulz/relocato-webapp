@@ -1,23 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts"
-
-interface EmailRequest {
-  to: string;
-  subject: string;
-  content: string;
-  config: {
-    host: string;
-    port: number;
-    user: string;
-    pass: string;
-    from: string;
-  };
-  attachments?: Array<{
-    filename: string;
-    content: string;
-    contentType: string;
-  }>;
-}
 
 serve(async (req) => {
   // Handle CORS
@@ -33,36 +14,55 @@ serve(async (req) => {
   }
 
   try {
-    const { to, subject, content, config, attachments }: EmailRequest = await req.json()
+    console.log('📧 Supabase Edge Function started...')
     
-    console.log('📧 Sending email via IONOS SMTP...', { to, subject })
+    const requestBody = await req.json()
+    console.log('📨 Request body:', JSON.stringify(requestBody, null, 2))
     
-    const client = new SmtpClient()
+    const { to, subject, content } = requestBody
     
-    // Connect to IONOS SMTP server
-    await client.connectTLS({
-      hostname: config.host,
-      port: config.port,
-      username: config.user,
-      password: config.pass,
+    // Get SMTP config from environment variables
+    const smtpConfig = {
+      host: Deno.env.get('SMTP_HOST') || 'smtp.ionos.de',
+      port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
+      user: Deno.env.get('SMTP_USER') || '',
+      pass: Deno.env.get('SMTP_PASS') || '',
+      from: Deno.env.get('SMTP_FROM') || ''
+    }
+    
+    console.log('🔧 SMTP Config loaded:', { 
+      host: smtpConfig.host, 
+      port: smtpConfig.port, 
+      user: smtpConfig.user ? '***' : 'missing',
+      pass: smtpConfig.pass ? '***' : 'missing',
+      from: smtpConfig.from 
     })
     
-    // Send email
-    await client.send({
-      from: config.from,
-      to: to,
-      subject: subject,
-      content: content,
-      html: content,
-    })
+    // Validate required fields
+    if (!to || !subject || !content) {
+      throw new Error('Missing required fields: to, subject, or content')
+    }
     
-    await client.close()
+    if (!smtpConfig.user || !smtpConfig.pass) {
+      throw new Error('SMTP credentials not configured')
+    }
     
-    console.log('✅ Email sent successfully')
+    // For now, just return success without actually sending
+    // This helps us test the configuration first
+    console.log('✅ Email would be sent successfully')
+    console.log(`To: ${to}`)
+    console.log(`Subject: ${subject}`)
+    console.log(`From: ${smtpConfig.from}`)
     
     return new Response(JSON.stringify({ 
       success: true, 
-      message: 'Email sent successfully' 
+      message: 'Email would be sent successfully (test mode)',
+      config: {
+        host: smtpConfig.host,
+        port: smtpConfig.port,
+        from: smtpConfig.from,
+        hasCredentials: !!smtpConfig.user && !!smtpConfig.pass
+      }
     }), {
       headers: { 
         "Content-Type": "application/json",
@@ -70,11 +70,12 @@ serve(async (req) => {
       },
     })
   } catch (error) {
-    console.error('❌ Email sending failed:', error)
+    console.error('❌ Edge Function error:', error)
     
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: error.message,
+      stack: error.stack
     }), {
       status: 500,
       headers: { 
