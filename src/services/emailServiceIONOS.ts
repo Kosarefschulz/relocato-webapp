@@ -44,6 +44,26 @@ class IONOSEmailService {
   private baseUrl: string = '/api/email';
   private backendUrl: string;
 
+  // Helper function to parse email addresses
+  private parseEmailAddress(emailStr: string | any): { name?: string; address: string } {
+    if (typeof emailStr === 'object' && emailStr !== null) {
+      return emailStr;
+    }
+    
+    if (typeof emailStr !== 'string') {
+      return { address: 'unknown@unknown.com' };
+    }
+    
+    // Parse "Name <email@example.com>" format
+    const match = emailStr.match(/^(.+)\s*<(.+)>$/);
+    if (match) {
+      return { name: match[1].trim(), address: match[2].trim() };
+    }
+    
+    // Just an email address
+    return { address: emailStr.trim() };
+  }
+
   constructor() {
     // Firebase Functions are deployed in mixed regions currently
     const hostname = window.location.hostname;
@@ -65,6 +85,19 @@ class IONOSEmailService {
   async getFolders(): Promise<Folder[]> {
     try {
       console.log('📁 Fetching folders...');
+      
+      // For localhost, return default folders
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('🏠 Using default folders for local development');
+        return [
+          { name: 'INBOX', path: 'INBOX', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'inbox', unreadCount: 0, totalCount: 0 },
+          { name: 'Sent', path: 'Sent', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'sent', unreadCount: 0, totalCount: 0 },
+          { name: 'Drafts', path: 'Drafts', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'drafts', unreadCount: 0, totalCount: 0 },
+          { name: 'Trash', path: 'Trash', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'trash', unreadCount: 0, totalCount: 0 },
+          { name: 'Spam', path: 'Spam', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'spam', unreadCount: 0, totalCount: 0 }
+        ];
+      }
+      
       const url = this.backendUrl === 'mixed'
         ? 'https://europe-west3-umzugsapp.cloudfunctions.net/getEmailFolders'
         : this.backendUrl 
@@ -104,6 +137,44 @@ class IONOSEmailService {
   async getEmails(folder: string = 'INBOX', page: number = 1, limit: number = 50): Promise<{ emails: EmailType[], total: number }> {
     try {
       console.log('📧 Fetching emails:', { folder, page, limit });
+      
+      // For localhost, use the local email server
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        const localUrl = `/api/email-sync?folder=${folder}&limit=${limit}`;
+        console.log('🏠 Using local email server:', localUrl);
+        
+        const response = await fetch(localUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📬 Local email response:', { count: data.emails.length, source: data.source });
+        
+        // Transform local server response to match expected format
+        const transformedEmails = data.emails.map((email: any) => ({
+          id: email.uid,
+          uid: email.uid,
+          folder: folder,
+          subject: email.subject || 'No subject',
+          from: this.parseEmailAddress(email.from),
+          to: Array.isArray(email.to) ? email.to.map((addr: string) => this.parseEmailAddress(addr)) : [],
+          date: email.date,
+          text: email.body || email.text,
+          html: email.html,
+          textAsHtml: email.body ? `<pre>${email.body}</pre>` : undefined,
+          preview: email.preview,
+          flags: email.flags || [],
+          attachments: email.attachments || []
+        }));
+        
+        return {
+          emails: transformedEmails,
+          total: data.count || transformedEmails.length
+        };
+      }
+      
+      // For production, use Firebase Functions
       const url = this.backendUrl === 'mixed'
         ? 'https://us-central1-umzugsapp.cloudfunctions.net/listEmails'
         : this.backendUrl 

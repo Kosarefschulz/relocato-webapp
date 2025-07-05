@@ -136,7 +136,25 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
   const loadEmails = async () => {
     try {
       setLoading(true);
+      console.log('🔍 DEBUG: Loading emails for folder:', selectedFolder, 'page:', page);
       const response = await emailService.getEmails(selectedFolder, page, 50);
+      
+      console.log('📧 DEBUG: Email response:', {
+        totalEmails: response.total,
+        emailCount: response.emails.length,
+        firstEmail: response.emails[0] ? {
+          id: response.emails[0].id,
+          subject: response.emails[0].subject,
+          hasHtml: !!response.emails[0].html,
+          hasText: !!response.emails[0].text,
+          hasTextAsHtml: !!response.emails[0].textAsHtml,
+          contentLength: {
+            html: response.emails[0].html?.length || 0,
+            text: response.emails[0].text?.length || 0,
+            textAsHtml: response.emails[0].textAsHtml?.length || 0
+          }
+        } : null
+      });
       
       if (page === 1) {
         setEmails(response.emails);
@@ -147,6 +165,7 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
       setTotalEmails(response.total);
       setHasMore(response.emails.length === 50);
     } catch (error) {
+      console.error('❌ DEBUG: Email loading error:', error);
       showSnackbar('Failed to load emails', 'error');
       onError?.('Failed to load emails');
     } finally {
