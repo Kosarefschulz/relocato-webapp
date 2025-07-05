@@ -131,6 +131,11 @@ module.exports = async function handler(req, res) {
           console.log('⚠️ Supabase failed, using fallback data');
         }
 
+        // Return the real data from Supabase if successful
+        if (emailData?.success && emailData?.emails) {
+          return res.status(200).json(emailData);
+        }
+        
         // Fallback to sample data if Supabase fails
         const currentDate = new Date();
         return res.status(200).json({

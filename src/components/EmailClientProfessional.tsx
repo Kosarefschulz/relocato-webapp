@@ -594,7 +594,7 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
                           <Typography
                             variant="body1"
                             sx={{
-                              fontWeight: !email.flags.includes('SEEN') ? 'bold' : 'normal',
+                              fontWeight: !email.flags?.includes('\\Seen') ? 'bold' : 'normal',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',
@@ -617,7 +617,7 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
                             component="span"
                             variant="body2"
                             sx={{
-                              fontWeight: !email.flags.includes('SEEN') ? 'bold' : 'normal',
+                              fontWeight: !email.flags?.includes('\\Seen') ? 'bold' : 'normal',
                               display: 'block',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',

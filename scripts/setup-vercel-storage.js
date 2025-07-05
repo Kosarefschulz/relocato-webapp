@@ -55,7 +55,7 @@ JWT_SECRET=your-secret-key-here
 
 # Email Settings (IONOS)
 IONOS_EMAIL=bielefeld@relocato.de
-IONOS_PASSWORD=Bicm1308!
+IONOS_PASSWORD=Bicm1308
 IONOS_IMAP_HOST=imap.ionos.de
 IONOS_SMTP_HOST=smtp.ionos.de
 `;
