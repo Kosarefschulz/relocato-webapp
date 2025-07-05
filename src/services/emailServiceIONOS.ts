@@ -45,7 +45,7 @@ class IONOSEmailService {
   private backendUrl: string;
 
   constructor() {
-    // Standardize all email functions to use europe-west3 region
+    // Firebase Functions are deployed in mixed regions currently
     const hostname = window.location.hostname;
     
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -53,9 +53,11 @@ class IONOSEmailService {
       this.backendUrl = '';
       this.baseUrl = '/api/email';
     } else {
-      // Production - use Firebase Functions (standardized to europe-west3)
-      this.backendUrl = 'https://europe-west3-umzugsapp.cloudfunctions.net';
-      this.baseUrl = this.backendUrl;
+      // Production - Firebase Functions are in mixed regions
+      // listEmails, readEmail -> us-central1
+      // getEmailFolders, sendEmail -> europe-west3
+      this.backendUrl = 'mixed'; // Flag for mixed regions
+      this.baseUrl = '';
     }
   }
 
@@ -63,7 +65,9 @@ class IONOSEmailService {
   async getFolders(): Promise<Folder[]> {
     try {
       console.log('📁 Fetching folders...');
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://europe-west3-umzugsapp.cloudfunctions.net/getEmailFolders'
+        : this.backendUrl 
         ? `${this.backendUrl}/getEmailFolders` 
         : `${this.baseUrl}/folders`;
       const response = await fetch(url, {
@@ -100,7 +104,9 @@ class IONOSEmailService {
   async getEmails(folder: string = 'INBOX', page: number = 1, limit: number = 50): Promise<{ emails: EmailType[], total: number }> {
     try {
       console.log('📧 Fetching emails:', { folder, page, limit });
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/listEmails'
+        : this.backendUrl 
         ? `${this.backendUrl}/listEmails` 
         : `${this.baseUrl}/list`;
       const response = await fetch(url, {
@@ -146,7 +152,9 @@ class IONOSEmailService {
   // Get single email
   async getEmail(uid: string, folder: string = 'INBOX'): Promise<EmailType | null> {
     try {
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/readEmail'
+        : this.backendUrl 
         ? `${this.backendUrl}/readEmail` 
         : `${this.baseUrl}/read`;
       const response = await fetch(url, {
@@ -186,7 +194,9 @@ class IONOSEmailService {
   // Send email
   async sendEmail(to: string, subject: string, content: string, attachments?: any[]): Promise<boolean> {
     try {
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://europe-west3-umzugsapp.cloudfunctions.net/sendEmail'
+        : this.backendUrl 
         ? `${this.backendUrl}/sendEmail` 
         : '/api/send-email';
       const response = await fetch(url, {
@@ -214,7 +224,9 @@ class IONOSEmailService {
   // Mark as read
   async markAsRead(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/markEmailAsRead'
+        : this.backendUrl 
         ? `${this.backendUrl}/markEmailAsRead` 
         : `${this.baseUrl}/mark-read`;
       const response = await fetch(url, {
@@ -233,7 +245,9 @@ class IONOSEmailService {
   // Mark as unread
   async markAsUnread(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/markEmailAsUnread'
+        : this.backendUrl 
         ? `${this.backendUrl}/markEmailAsUnread` 
         : `${this.baseUrl}/mark-unread`;
       const response = await fetch(url, {
@@ -252,7 +266,9 @@ class IONOSEmailService {
   // Delete email
   async deleteEmail(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/deleteEmail'
+        : this.backendUrl 
         ? `${this.backendUrl}/deleteEmail` 
         : `${this.baseUrl}/delete`;
       const response = await fetch(url, {
@@ -271,7 +287,9 @@ class IONOSEmailService {
   // Move email
   async moveEmail(uid: string, fromFolder: string, toFolder: string): Promise<boolean> {
     try {
-      const url = this.backendUrl 
+      const url = this.backendUrl === 'mixed'
+        ? 'https://us-central1-umzugsapp.cloudfunctions.net/moveEmail'
+        : this.backendUrl 
         ? `${this.backendUrl}/moveEmail` 
         : `${this.baseUrl}/move`;
       const response = await fetch(url, {
