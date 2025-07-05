@@ -182,11 +182,11 @@ class IONOSEmailService {
     try {
       console.log('📧 Fetching single email via Vercel API:', { uid, folder });
       
-      // Try Vercel API first for direct IMAP
-      const response = await fetch('/api/email-gateway', {
+      // Try direct email read endpoint first
+      const response = await fetch('/api/email-read-direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ operation: 'read', uid, folder })
+        body: JSON.stringify({ uid, folder })
       });
 
       if (response.ok) {
