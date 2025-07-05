@@ -58,7 +58,7 @@ class IONOSEmailService {
       console.log('📁 Fetching folders via Vercel API...');
       
       // Try Vercel API first for direct IMAP
-      const response = await fetch('/api/email-proxy', {
+      const response = await fetch('/api/email-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ operation: 'folders' })
@@ -132,7 +132,7 @@ class IONOSEmailService {
       console.log('📧 Fetching emails via Vercel API:', { folder, page, limit });
       
       // Try Vercel API first for direct IMAP
-      const response = await fetch('/api/email-proxy', {
+      const response = await fetch('/api/email-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ operation: 'list', folder, page, limit })
@@ -183,7 +183,7 @@ class IONOSEmailService {
       console.log('📧 Fetching single email via Vercel API:', { uid, folder });
       
       // Try Vercel API first for direct IMAP
-      const response = await fetch('/api/email-proxy', {
+      const response = await fetch('/api/email-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ operation: 'read', uid, folder })

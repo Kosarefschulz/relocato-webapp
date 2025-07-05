@@ -90,6 +90,8 @@ module.exports = async function handler(req, res) {
         });
     }
 
+    console.log(`Calling Supabase function: ${functionName}`, body);
+    
     const { data, error } = await supabase.functions.invoke(functionName, {
       body: Object.keys(body).length > 0 ? body : undefined
     });

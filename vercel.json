@@ -76,6 +76,9 @@
     },
     "api/test-imap.js": {
       "maxDuration": 10
+    },
+    "api/email-simple.js": {
+      "maxDuration": 10
     }
   },
   "env": {
