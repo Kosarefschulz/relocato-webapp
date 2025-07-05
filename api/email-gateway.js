@@ -1,4 +1,5 @@
 // IMAP Gateway using fetch-based approach
+// Force redeploy: 2025-07-05 22:30
 module.exports = async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
