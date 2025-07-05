@@ -104,40 +104,29 @@ class IONOSEmailService {
     try {
       console.log('📧 Fetching emails from Supabase:', { folder, page, limit });
       
-      // Call Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('email-list', {
+      // Try database first, fallback to IMAP
+      const { data, error } = await supabase.functions.invoke('email-list-db', {
         body: { folder, page, limit }
       });
 
       if (error) {
-        console.error('❌ Error fetching emails:', error);
-        return { emails: [], total: 0 };
+        console.error('📊 Database failed, trying IMAP...', error);
+        // If database fails, try IMAP
+        const { data: imapData, error: imapError } = await supabase.functions.invoke('email-list', {
+          body: { folder, page, limit }
+        });
+        
+        if (imapError) {
+          console.error('❌ IMAP also failed:', imapError);
+          return { emails: [], total: 0 };
+        }
+        
+        console.log('📬 IMAP Email response:', { count: imapData?.emails?.length || 0 });
+        return this.transformEmailResponse(imapData, folder);
       }
       
-      console.log('📬 Email response:', { count: data?.emails?.length || 0 });
-      
-      // Transform emails to match expected format
-      const transformedEmails = (data?.emails || []).map((email: any) => ({
-        id: email.uid || email.id,
-        uid: email.uid || email.id,
-        folder: folder,
-        subject: email.subject || 'No subject',
-        from: parseEmailAddress(email.from),
-        to: Array.isArray(email.to) ? email.to.map((addr: string) => parseEmailAddress(addr)) : [],
-        cc: email.cc || [],
-        date: email.date,
-        text: email.body || email.text,
-        html: email.html,
-        textAsHtml: email.body ? `<pre>${email.body}</pre>` : undefined,
-        preview: email.preview || email.snippet,
-        flags: email.flags || [],
-        attachments: email.attachments || []
-      }));
-      
-      return {
-        emails: transformedEmails,
-        total: data?.total || transformedEmails.length
-      };
+      console.log('📬 Database Email response:', { count: data?.emails?.length || 0 });
+      return this.transformEmailResponse(data, folder);
     } catch (error) {
       console.error('Error getting emails:', error);
       return { emails: [], total: 0 };
@@ -189,7 +178,8 @@ class IONOSEmailService {
     try {
       console.log('📧 Sending email via Supabase...');
       
-      const { data, error } = await supabase.functions.invoke('send-email', {
+      // Use new function that also stores in database
+      const { data, error } = await supabase.functions.invoke('email-send-and-store', {
         body: {
           to,
           subject,
@@ -351,6 +341,31 @@ class IONOSEmailService {
 
   disconnect() {
     console.log('No persistent connection to disconnect');
+  }
+
+  // Helper method to transform email response
+  private transformEmailResponse(data: any, folder: string): { emails: EmailType[], total: number } {
+    const transformedEmails = (data?.emails || []).map((email: any) => ({
+      id: email.uid || email.id,
+      uid: email.uid || email.id,
+      folder: folder,
+      subject: email.subject || 'No subject',
+      from: parseEmailAddress(email.from),
+      to: Array.isArray(email.to) ? email.to.map((addr: string) => parseEmailAddress(addr)) : [],
+      cc: email.cc || [],
+      date: email.date,
+      text: email.body || email.text,
+      html: email.html,
+      textAsHtml: email.body ? `<pre>${email.body}</pre>` : undefined,
+      preview: email.preview || email.snippet,
+      flags: email.flags || [],
+      attachments: email.attachments || []
+    }));
+    
+    return {
+      emails: transformedEmails,
+      total: data?.total || transformedEmails.length
+    };
   }
 }
 
