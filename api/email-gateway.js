@@ -180,22 +180,45 @@ module.exports = async function handler(req, res) {
 
       case 'read':
         const emailId = uid || '1';
+        console.log('📧 Email read request:', { emailId, folder });
         
         // Try to get real email from Supabase first
         try {
           const { createClient: createClient2 } = require('@supabase/supabase-js');
           const supabase2 = createClient2(supabaseUrl, supabaseAnonKey);
           
+          console.log('🔍 Calling Supabase email-read function...');
           const { data: emailData, error: emailError } = await supabase2.functions.invoke('email-read', {
             body: { uid: emailId, folder }
           });
           
           if (!emailError && emailData?.email) {
-            console.log('✅ Got real email from Supabase');
-            return res.status(200).json(emailData);
+            console.log('✅ Got real email from Supabase:', {
+              uid: emailData.email.uid,
+              subject: emailData.email.subject,
+              hasText: !!emailData.email.text,
+              hasHtml: !!emailData.email.html,
+              hasBody: !!emailData.email.body
+            });
+            // Ensure we have the right structure
+            return res.status(200).json({
+              success: true,
+              email: {
+                ...emailData.email,
+                text: emailData.email.text || emailData.email.body || '',
+                html: emailData.email.html || (emailData.email.body ? `<pre>${emailData.email.body}</pre>` : ''),
+                body: emailData.email.body || emailData.email.text || ''
+              }
+            });
+          } else if (emailError) {
+            console.log('❌ Supabase returned error:', emailError);
+          } else {
+            console.log('❌ No email data returned from Supabase');
           }
         } catch (err) {
-          console.log('⚠️ Supabase read failed, using fallback');
+          console.log('⚠️ Supabase read failed:', err.message);
+          console.log('Error details:', err);
+          console.log('Using fallback response');
         }
         
         // Fallback response
