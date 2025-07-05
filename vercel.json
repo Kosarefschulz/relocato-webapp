@@ -79,6 +79,12 @@
     },
     "api/email-simple.js": {
       "maxDuration": 10
+    },
+    "api/email-real.js": {
+      "maxDuration": 10
+    },
+    "api/email-gateway.js": {
+      "maxDuration": 10
     }
   },
   "env": {
