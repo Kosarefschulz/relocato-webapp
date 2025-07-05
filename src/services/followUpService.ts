@@ -1,19 +1,4 @@
-import { db } from '../config/firebase';
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  Timestamp,
-  DocumentData,
-  QueryDocumentSnapshot
-} from 'firebase/firestore';
+import { supabase } from '../config/supabase';
 import { Customer, Quote } from '../types';
 import emailTemplateService from './emailTemplateService';
 import { sendEmailViaSMTP } from './smtpEmailService';
@@ -93,20 +78,22 @@ const DEFAULT_FOLLOW_UP_RULES: Omit<FollowUpRule, 'id' | 'createdAt' | 'updatedA
 ];
 
 class FollowUpService {
-  private readonly RULES_COLLECTION = 'followUpRules';
-  private readonly SCHEDULED_COLLECTION = 'scheduledFollowUps';
+  private readonly RULES_TABLE = 'follow_up_rules';
+  private readonly SCHEDULED_TABLE = 'scheduled_follow_ups';
 
   /**
    * Initialisiert die Standard Follow-up Regeln
    */
   async initializeDefaultRules(): Promise<void> {
-    if (!db) return;
-
     try {
-      const rulesRef = collection(db, this.RULES_COLLECTION);
-      const snapshot = await getDocs(rulesRef);
+      const { data: existingRules, error } = await supabase
+        .from(this.RULES_TABLE)
+        .select('id')
+        .limit(1);
 
-      if (snapshot.empty) {
+      if (error) throw error;
+
+      if (!existingRules || existingRules.length === 0) {
         console.log('Initialisiere Standard Follow-up Regeln...');
         
         // Get follow-up email template
@@ -114,15 +101,19 @@ class FollowUpService {
         const followUpTemplate = templates.find(t => t.category === 'follow_up' && t.isActive);
         
         if (followUpTemplate) {
-          for (const rule of DEFAULT_FOLLOW_UP_RULES) {
-            await addDoc(rulesRef, {
-              ...rule,
-              emailTemplateId: followUpTemplate.id,
-              sentCount: 0,
-              createdAt: Timestamp.now(),
-              updatedAt: Timestamp.now()
-            });
-          }
+          const rulesToInsert = DEFAULT_FOLLOW_UP_RULES.map(rule => ({
+            ...rule,
+            email_template_id: followUpTemplate.id,
+            sent_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }));
+
+          const { error: insertError } = await supabase
+            .from(this.RULES_TABLE)
+            .insert(rulesToInsert);
+
+          if (insertError) throw insertError;
         }
         
         console.log('Standard Follow-up Regeln erfolgreich initialisiert');
@@ -136,18 +127,27 @@ class FollowUpService {
    * Holt alle Follow-up Regeln
    */
   async getAllRules(): Promise<FollowUpRule[]> {
-    if (!db) return [];
-
     try {
-      const rulesRef = collection(db, this.RULES_COLLECTION);
-      const snapshot = await getDocs(rulesRef);
+      const { data, error } = await supabase
+        .from(this.RULES_TABLE)
+        .select('*')
+        .order('created_at', { ascending: true });
 
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-        lastRunAt: doc.data().lastRunAt?.toDate()
+      if (error) throw error;
+
+      return (data || []).map(rule => ({
+        id: rule.id,
+        name: rule.name,
+        description: rule.description,
+        isActive: rule.is_active,
+        triggerEvent: rule.trigger_event,
+        delayDays: rule.delay_days,
+        emailTemplateId: rule.email_template_id,
+        conditions: rule.conditions,
+        createdAt: new Date(rule.created_at),
+        updatedAt: new Date(rule.updated_at),
+        lastRunAt: rule.last_run_at ? new Date(rule.last_run_at) : undefined,
+        sentCount: rule.sent_count
       } as FollowUpRule));
     } catch (error) {
       console.error('Fehler beim Abrufen der Follow-up Regeln:', error);
@@ -159,17 +159,26 @@ class FollowUpService {
    * Erstellt eine neue Follow-up Regel
    */
   async createRule(rule: Omit<FollowUpRule, 'id' | 'createdAt' | 'updatedAt' | 'lastRunAt' | 'sentCount'>): Promise<string> {
-    if (!db) throw new Error('Keine Datenbankverbindung');
-
     try {
-      const docRef = await addDoc(collection(db, this.RULES_COLLECTION), {
-        ...rule,
-        sentCount: 0,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      });
+      const { data, error } = await supabase
+        .from(this.RULES_TABLE)
+        .insert({
+          name: rule.name,
+          description: rule.description,
+          is_active: rule.isActive,
+          trigger_event: rule.triggerEvent,
+          delay_days: rule.delayDays,
+          email_template_id: rule.emailTemplateId,
+          conditions: rule.conditions,
+          sent_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
 
-      return docRef.id;
+      if (error) throw error;
+      return data.id;
     } catch (error) {
       console.error('Fehler beim Erstellen der Follow-up Regel:', error);
       throw error;
@@ -180,14 +189,27 @@ class FollowUpService {
    * Aktualisiert eine Follow-up Regel
    */
   async updateRule(id: string, updates: Partial<FollowUpRule>): Promise<void> {
-    if (!db) throw new Error('Keine Datenbankverbindung');
-
     try {
-      const docRef = doc(db, this.RULES_COLLECTION, id);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: Timestamp.now()
-      });
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
+      if (updates.triggerEvent !== undefined) updateData.trigger_event = updates.triggerEvent;
+      if (updates.delayDays !== undefined) updateData.delay_days = updates.delayDays;
+      if (updates.emailTemplateId !== undefined) updateData.email_template_id = updates.emailTemplateId;
+      if (updates.conditions !== undefined) updateData.conditions = updates.conditions;
+      if (updates.sentCount !== undefined) updateData.sent_count = updates.sentCount;
+      if (updates.lastRunAt !== undefined) updateData.last_run_at = updates.lastRunAt.toISOString();
+
+      const { error } = await supabase
+        .from(this.RULES_TABLE)
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Follow-up Regel:', error);
       throw error;
@@ -198,19 +220,23 @@ class FollowUpService {
    * Löscht eine Follow-up Regel
    */
   async deleteRule(id: string): Promise<void> {
-    if (!db) throw new Error('Keine Datenbankverbindung');
-
     try {
-      await deleteDoc(doc(db, this.RULES_COLLECTION, id));
-      
       // Cancel all scheduled follow-ups for this rule
-      const scheduledRef = collection(db, this.SCHEDULED_COLLECTION);
-      const q = query(scheduledRef, where('ruleId', '==', id), where('status', '==', 'pending'));
-      const snapshot = await getDocs(q);
+      const { error: updateError } = await supabase
+        .from(this.SCHEDULED_TABLE)
+        .update({ status: 'cancelled' })
+        .eq('rule_id', id)
+        .eq('status', 'pending');
       
-      for (const doc of snapshot.docs) {
-        await updateDoc(doc.ref, { status: 'cancelled' });
-      }
+      if (updateError) throw updateError;
+
+      // Delete the rule
+      const { error: deleteError } = await supabase
+        .from(this.RULES_TABLE)
+        .delete()
+        .eq('id', id);
+      
+      if (deleteError) throw deleteError;
     } catch (error) {
       console.error('Fehler beim Löschen der Follow-up Regel:', error);
       throw error;
@@ -225,8 +251,6 @@ class FollowUpService {
     customer: Customer,
     quote?: Quote
   ): Promise<void> {
-    if (!db) return;
-
     try {
       // Get active rules for this trigger
       const rules = await this.getAllRules();
@@ -257,17 +281,21 @@ class FollowUpService {
         const scheduledDate = new Date();
         scheduledDate.setDate(scheduledDate.getDate() + rule.delayDays);
 
-        await addDoc(collection(db, this.SCHEDULED_COLLECTION), {
-          ruleId: rule.id,
-          customerId: customer.id,
-          customerName: customer.name,
-          customerEmail: customer.email!,
-          quoteId: quote?.id,
-          scheduledFor: Timestamp.fromDate(scheduledDate),
-          status: 'pending',
-          attempts: 0,
-          createdAt: Timestamp.now()
-        });
+        const { error } = await supabase
+          .from(this.SCHEDULED_TABLE)
+          .insert({
+            rule_id: rule.id,
+            customer_id: customer.id,
+            customer_name: customer.name,
+            customer_email: customer.email!,
+            quote_id: quote?.id,
+            scheduled_for: scheduledDate.toISOString(),
+            status: 'pending',
+            attempts: 0,
+            created_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
 
         console.log(`Follow-up geplant für ${customer.name} am ${scheduledDate.toLocaleDateString('de-DE')}`);
       }
@@ -280,27 +308,33 @@ class FollowUpService {
    * Verarbeitet alle fälligen Follow-ups
    */
   async processPendingFollowUps(): Promise<void> {
-    if (!db) return;
-
     try {
       const now = new Date();
-      const scheduledRef = collection(db, this.SCHEDULED_COLLECTION);
-      const q = query(
-        scheduledRef,
-        where('status', '==', 'pending'),
-        where('scheduledFor', '<=', Timestamp.fromDate(now))
-      );
+      const { data: followUps, error } = await supabase
+        .from(this.SCHEDULED_TABLE)
+        .select('*')
+        .eq('status', 'pending')
+        .lte('scheduled_for', now.toISOString());
       
-      const snapshot = await getDocs(q);
-      console.log(`${snapshot.size} fällige Follow-ups gefunden`);
+      if (error) throw error;
+      
+      console.log(`${followUps?.length || 0} fällige Follow-ups gefunden`);
 
-      for (const doc of snapshot.docs) {
-        const followUp = {
-          id: doc.id,
-          ...doc.data(),
-          scheduledFor: doc.data().scheduledFor.toDate(),
-          createdAt: doc.data().createdAt.toDate()
-        } as ScheduledFollowUp;
+      for (const followUpData of (followUps || [])) {
+        const followUp: ScheduledFollowUp = {
+          id: followUpData.id,
+          ruleId: followUpData.rule_id,
+          customerId: followUpData.customer_id,
+          customerName: followUpData.customer_name,
+          customerEmail: followUpData.customer_email,
+          quoteId: followUpData.quote_id,
+          scheduledFor: new Date(followUpData.scheduled_for),
+          status: followUpData.status,
+          attempts: followUpData.attempts,
+          lastAttemptAt: followUpData.last_attempt_at ? new Date(followUpData.last_attempt_at) : undefined,
+          error: followUpData.error,
+          createdAt: new Date(followUpData.created_at)
+        };
 
         await this.sendFollowUp(followUp);
       }
@@ -313,16 +347,32 @@ class FollowUpService {
    * Sendet ein einzelnes Follow-up
    */
   private async sendFollowUp(followUp: ScheduledFollowUp): Promise<void> {
-    if (!db) return;
-
     try {
       // Get the rule
-      const ruleDoc = await getDoc(doc(db, this.RULES_COLLECTION, followUp.ruleId));
-      if (!ruleDoc.exists()) {
+      const { data: ruleData, error: ruleError } = await supabase
+        .from(this.RULES_TABLE)
+        .select('*')
+        .eq('id', followUp.ruleId)
+        .single();
+      
+      if (ruleError || !ruleData) {
         throw new Error('Follow-up Regel nicht gefunden');
       }
 
-      const rule = { id: ruleDoc.id, ...ruleDoc.data() } as FollowUpRule;
+      const rule: FollowUpRule = {
+        id: ruleData.id,
+        name: ruleData.name,
+        description: ruleData.description,
+        isActive: ruleData.is_active,
+        triggerEvent: ruleData.trigger_event,
+        delayDays: ruleData.delay_days,
+        emailTemplateId: ruleData.email_template_id,
+        conditions: ruleData.conditions,
+        createdAt: new Date(ruleData.created_at),
+        updatedAt: new Date(ruleData.updated_at),
+        lastRunAt: ruleData.last_run_at ? new Date(ruleData.last_run_at) : undefined,
+        sentCount: ruleData.sent_count
+      };
 
       // Get email template
       const template = await emailTemplateService.getTemplate(rule.emailTemplateId);
@@ -331,12 +381,17 @@ class FollowUpService {
       }
 
       // Get customer data
-      const customerDoc = await getDoc(doc(db, 'customers', followUp.customerId));
-      if (!customerDoc.exists()) {
+      const { data: customerData, error: customerError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('id', followUp.customerId)
+        .single();
+      
+      if (customerError || !customerData) {
         throw new Error('Kunde nicht gefunden');
       }
 
-      const customer = { id: customerDoc.id, ...customerDoc.data() } as Customer;
+      const customer = { id: customerData.id, ...customerData } as Customer;
 
       // Prepare variables
       const variables: Record<string, string> = {
@@ -348,11 +403,15 @@ class FollowUpService {
 
       // Get quote data if available
       if (followUp.quoteId) {
-        const quoteDoc = await getDoc(doc(db, 'quotes', followUp.quoteId));
-        if (quoteDoc.exists()) {
-          const quote = quoteDoc.data();
+        const { data: quoteData } = await supabase
+          .from('quotes')
+          .select('*')
+          .eq('id', followUp.quoteId)
+          .single();
+        
+        if (quoteData) {
           variables.quoteNumber = followUp.quoteId;
-          variables.quotePrice = `€ ${quote.price.toFixed(2)}`;
+          variables.quotePrice = `€ ${quoteData.price.toFixed(2)}`;
         }
       }
 
@@ -373,16 +432,22 @@ class FollowUpService {
       await sendEmailViaSMTP(emailData);
 
       // Update follow-up status
-      await updateDoc(doc(db, this.SCHEDULED_COLLECTION, followUp.id!), {
-        status: 'sent',
-        lastAttemptAt: Timestamp.now()
-      });
+      await supabase
+        .from(this.SCHEDULED_TABLE)
+        .update({
+          status: 'sent',
+          last_attempt_at: new Date().toISOString()
+        })
+        .eq('id', followUp.id!);
 
       // Update rule sent count
-      await updateDoc(doc(db, this.RULES_COLLECTION, rule.id!), {
-        sentCount: (rule.sentCount || 0) + 1,
-        lastRunAt: Timestamp.now()
-      });
+      await supabase
+        .from(this.RULES_TABLE)
+        .update({
+          sent_count: (rule.sentCount || 0) + 1,
+          last_run_at: new Date().toISOString()
+        })
+        .eq('id', rule.id!);
 
       // Save to email history
       await emailHistoryService.saveEmailRecord({
@@ -400,12 +465,15 @@ class FollowUpService {
       console.error('Fehler beim Senden des Follow-ups:', error);
       
       // Update follow-up with error
-      await updateDoc(doc(db, this.SCHEDULED_COLLECTION, followUp.id!), {
-        status: 'failed',
-        attempts: followUp.attempts + 1,
-        lastAttemptAt: Timestamp.now(),
-        error: error.message
-      });
+      await supabase
+        .from(this.SCHEDULED_TABLE)
+        .update({
+          status: 'failed',
+          attempts: followUp.attempts + 1,
+          last_attempt_at: new Date().toISOString(),
+          error: error.message
+        })
+        .eq('id', followUp.id!);
     }
   }
 
@@ -454,23 +522,22 @@ class FollowUpService {
     customerId: string,
     quoteId?: string
   ): Promise<boolean> {
-    if (!db) return false;
-
     try {
-      const scheduledRef = collection(db, this.SCHEDULED_COLLECTION);
-      let q = query(
-        scheduledRef,
-        where('ruleId', '==', ruleId),
-        where('customerId', '==', customerId),
-        where('status', '==', 'pending')
-      );
+      let query = supabase
+        .from(this.SCHEDULED_TABLE)
+        .select('id')
+        .eq('rule_id', ruleId)
+        .eq('customer_id', customerId)
+        .eq('status', 'pending');
 
       if (quoteId) {
-        q = query(q, where('quoteId', '==', quoteId));
+        query = query.eq('quote_id', quoteId);
       }
 
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return (data?.length || 0) > 0;
     } catch (error) {
       console.error('Fehler beim Prüfen existierender Follow-ups:', error);
       return false;
@@ -481,24 +548,33 @@ class FollowUpService {
    * Holt alle geplanten Follow-ups
    */
   async getScheduledFollowUps(status?: ScheduledFollowUp['status']): Promise<ScheduledFollowUp[]> {
-    if (!db) return [];
-
     try {
-      const scheduledRef = collection(db, this.SCHEDULED_COLLECTION);
-      let q = query(scheduledRef, orderBy('scheduledFor', 'asc'));
+      let query = supabase
+        .from(this.SCHEDULED_TABLE)
+        .select('*')
+        .order('scheduled_for', { ascending: true });
       
       if (status) {
-        q = query(q, where('status', '==', status));
+        query = query.eq('status', status);
       }
 
-      const snapshot = await getDocs(q);
+      const { data, error } = await query;
+      
+      if (error) throw error;
 
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        scheduledFor: doc.data().scheduledFor.toDate(),
-        createdAt: doc.data().createdAt.toDate(),
-        lastAttemptAt: doc.data().lastAttemptAt?.toDate()
+      return (data || []).map(item => ({
+        id: item.id,
+        ruleId: item.rule_id,
+        customerId: item.customer_id,
+        customerName: item.customer_name,
+        customerEmail: item.customer_email,
+        quoteId: item.quote_id,
+        scheduledFor: new Date(item.scheduled_for),
+        status: item.status,
+        attempts: item.attempts,
+        lastAttemptAt: item.last_attempt_at ? new Date(item.last_attempt_at) : undefined,
+        error: item.error,
+        createdAt: new Date(item.created_at)
       } as ScheduledFollowUp));
     } catch (error) {
       console.error('Fehler beim Abrufen der geplanten Follow-ups:', error);
@@ -510,12 +586,13 @@ class FollowUpService {
    * Storniert ein geplantes Follow-up
    */
   async cancelScheduledFollowUp(id: string): Promise<void> {
-    if (!db) throw new Error('Keine Datenbankverbindung');
-
     try {
-      await updateDoc(doc(db, this.SCHEDULED_COLLECTION, id), {
-        status: 'cancelled'
-      });
+      const { error } = await supabase
+        .from(this.SCHEDULED_TABLE)
+        .update({ status: 'cancelled' })
+        .eq('id', id);
+      
+      if (error) throw error;
     } catch (error) {
       console.error('Fehler beim Stornieren des Follow-ups:', error);
       throw error;

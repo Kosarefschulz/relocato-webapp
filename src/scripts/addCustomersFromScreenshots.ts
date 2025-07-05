@@ -101,10 +101,10 @@ async function addCustomersFromScreenshots() {
 
   for (const customer of customers) {
     try {
-      const success = await unifiedDatabaseService.addCustomer(customer);
-      if (success) {
+      const result = await unifiedDatabaseService.createCustomer(customer);
+      if (result) {
         console.log(`✓ Kunde ${customer.name} erfolgreich hinzugefügt`);
-        addedCustomers.push(customer.id);
+        addedCustomers.push(result.id);
       } else {
         console.error(`✗ Fehler beim Hinzufügen von ${customer.name}`);
       }
@@ -165,8 +165,8 @@ async function addCustomersFromScreenshots() {
 
   for (const quote of quotes) {
     try {
-      const success = await unifiedDatabaseService.addQuote(quote);
-      if (success) {
+      const quoteResult = await unifiedDatabaseService.createQuote(quote);
+      if (quoteResult) {
         console.log(`✓ Angebot für ${quote.customerName} (${quote.price} €) erfolgreich erstellt`);
       } else {
         console.error(`✗ Fehler beim Erstellen des Angebots für ${quote.customerName}`);

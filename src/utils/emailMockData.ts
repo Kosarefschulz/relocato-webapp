@@ -1,5 +1,5 @@
-import { collection, doc, setDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface MockEmailData {
   from: string;
@@ -132,10 +132,10 @@ Immobilien Bielefeld GmbH`,
   }
 ];
 
-export async function loadMockEmailsToFirestore(): Promise<number> {
+export async function loadMockEmailsToSupabase(): Promise<number> {
   try {
-    const emailsCollection = collection(db, 'emailClient');
     let count = 0;
+    const emailsToInsert = [];
     
     // Generate 20 mock emails with variations
     for (let i = 0; i < 20; i++) {
@@ -144,25 +144,36 @@ export async function loadMockEmailsToFirestore(): Promise<number> {
       const date = new Date(Date.now() - (daysAgo * 24 * 60 * 60 * 1000));
       
       const emailData = {
-        ...template,
+        id: uuidv4(),
+        from: template.from,
         to: 'bielefeld@relocato.de',
-        date: Timestamp.fromDate(date),
+        subject: template.subject,
+        text: template.text,
+        html: `<html><body>${template.text?.replace(/\n/g, '<br>')}</body></html>`,
+        date: date.toISOString(),
+        folder: template.folder,
+        is_read: i < 10 ? template.isRead : Math.random() > 0.5,
+        is_starred: template.isStarred && Math.random() > 0.3,
         uid: `mock-${Date.now()}-${i}`,
-        messageId: `<mock-${Date.now()}-${i}@example.com>`,
-        threadId: `thread-${Math.floor(i / 3)}`, // Group some emails in threads
-        // Add some variation
-        isRead: i < 10 ? template.isRead : Math.random() > 0.5,
-        isStarred: template.isStarred && Math.random() > 0.3,
-        // Add HTML version
-        html: `<html><body>${template.text?.replace(/\n/g, '<br>')}</body></html>`
+        message_id: `<mock-${Date.now()}-${i}@example.com>`,
+        thread_id: `thread-${Math.floor(i / 3)}`, // Group some emails in threads
+        attachments: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       
-      const docRef = doc(emailsCollection);
-      await setDoc(docRef, emailData);
-      count++;
+      emailsToInsert.push(emailData);
     }
     
-    console.log(`✅ Loaded ${count} mock emails to Firestore`);
+    // Insert all emails in a single batch
+    const { data, error } = await supabase
+      .from('emails')
+      .insert(emailsToInsert);
+    
+    if (error) throw error;
+    
+    count = emailsToInsert.length;
+    console.log(`✅ Loaded ${count} mock emails to Supabase`);
     return count;
   } catch (error) {
     console.error('Error loading mock emails:', error);

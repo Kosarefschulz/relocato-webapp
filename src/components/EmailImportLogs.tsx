@@ -11,8 +11,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { collection, query, orderBy, limit, getDocs, where, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 
 interface FailedImport {
   id: string;
@@ -73,23 +72,23 @@ const EmailImportLogs: React.FC = () => {
   const loadFailedImports = async () => {
     setLoading(true);
     try {
-      const q = query(
-        collection(db, 'failed_imports'),
-        orderBy('timestamp', 'desc'),
-        limit(100)
-      );
+      const { data: failedImportsData, error } = await supabase
+        .from('failed_imports')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(100);
       
-      const snapshot = await getDocs(q);
+      if (error) throw error;
+      
       const imports: FailedImport[] = [];
       const newStats = { total: 0, noName: 0, parseError: 0, other: 0 };
       
-      snapshot.forEach((doc) => {
-        const data = doc.data();
+      (failedImportsData || []).forEach((data) => {
         const failedImport = {
-          id: doc.id,
+          id: data.id,
           ...data,
-          date: data.date?.toDate() || new Date(),
-          timestamp: data.timestamp?.toDate() || new Date()
+          date: data.date ? new Date(data.date) : new Date(),
+          timestamp: data.timestamp ? new Date(data.timestamp) : new Date()
         } as FailedImport;
         
         imports.push(failedImport);
@@ -159,7 +158,13 @@ const EmailImportLogs: React.FC = () => {
   // Delete failed import
   const handleDelete = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'failed_imports', id));
+      const { error } = await supabase
+        .from('failed_imports')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
       await loadFailedImports();
     } catch (error) {
       console.error('Error deleting failed import:', error);

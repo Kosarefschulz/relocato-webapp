@@ -5,7 +5,7 @@
  */
 
 import { databaseService } from '../config/database.config';
-import { unifiedDatabaseService } from '../services/unifiedDatabaseService.optimized';
+import { unifiedDatabaseService } from '../services/unifiedDatabaseService';
 
 interface MigrationReport {
   totalQuotes: number;
@@ -78,13 +78,11 @@ export async function analyzeQuoteCustomerIds(): Promise<MigrationReport> {
           quotesToFix.push({ quote, correctCustomer: customerByNum });
           console.log(`✅ Can fix: Quote ${quote.id} -> Customer ${customerByNum.id} (${customerId})`);
         } else {
-          // Try robust search
-          const foundCustomer = await unifiedDatabaseService.findCustomerByAnyIdentifier(
-            customerId,
-            { name: quote.customerName }
-          );
+          // Try searching by name
+          const customers = await unifiedDatabaseService.searchCustomers(quote.customerName);
           
-          if (foundCustomer) {
+          if (customers && customers.length > 0) {
+            const foundCustomer = customers[0];
             quotesToFix.push({ quote, correctCustomer: foundCustomer });
             console.log(`✅ Can fix via search: Quote ${quote.id} -> Customer ${foundCustomer.id}`);
           } else {
@@ -134,11 +132,13 @@ export async function migrateQuoteCustomerIds(dryRun = true): Promise<MigrationR
       
       for (const quote of quotes) {
         if (quote.customerId?.match(/^K\d+$/)) {
-          const correctCustomer = customerByNumber.get(quote.customerId) || 
-            await unifiedDatabaseService.findCustomerByAnyIdentifier(
-              quote.customerId,
-              { name: quote.customerName }
-            );
+          let correctCustomer = customerByNumber.get(quote.customerId);
+          if (!correctCustomer) {
+            const customers = await unifiedDatabaseService.searchCustomers(quote.customerName);
+            if (customers && customers.length > 0) {
+              correctCustomer = customers[0];
+            }
+          }
           
           if (correctCustomer) {
             console.log(`🔧 Fixing Quote ${quote.id}: ${quote.customerId} -> ${correctCustomer.id}`);

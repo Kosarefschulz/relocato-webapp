@@ -20,7 +20,7 @@ export async function getPlatformServices() {
       platform: 'vercel' as const,
     };
   } else {
-    const { unifiedDatabaseService } = await import('../services/unifiedDatabaseService.optimized');
+    const { unifiedDatabaseService } = await import('../services/unifiedDatabaseService');
     const { authService } = await import('../services/authService');
     const { sendEmail } = await import('../services/emailService');
     

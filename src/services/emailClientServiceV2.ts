@@ -1,5 +1,5 @@
 // Simplified Email Client Service V2 with Firestore option
-import { auth } from '../config/firebase';
+import { supabase } from '../config/supabase';
 // import { emailClientServiceFirestore } from './emailClientServiceFirestore';
 
 export interface Email {

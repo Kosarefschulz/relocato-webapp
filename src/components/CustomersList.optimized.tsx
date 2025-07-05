@@ -69,8 +69,7 @@ import { cleanPhoneNumber } from '../utils/phoneUtils';
 import MobileLayout from './MobileLayout';
 import CustomerCard from './CustomerCard';
 import { useMobileLayout } from '../hooks/useMobileLayout';
-import { collection, getCountFromServer } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { useDebounce } from '../hooks/useDebounce';
 
 // Motion components
@@ -200,12 +199,15 @@ const CustomersListOptimized: React.FC = () => {
   // Get total count for display using efficient count query
   const getTotalCount = async () => {
     try {
-      if (db) {
-        const customersRef = collection(db, 'customers');
-        const snapshot = await getCountFromServer(customersRef);
-        setTotalCustomers(snapshot.data().count);
+      // Get count from Supabase
+      const { count, error } = await supabase
+        .from('customers')
+        .select('*', { count: 'exact', head: true });
+      
+      if (!error && count !== null) {
+        setTotalCustomers(count);
       } else {
-        // Fallback for non-Firebase mode
+        // Fallback
         const allCustomers = await databaseService.getCustomers();
         setTotalCustomers(allCustomers.length);
       }

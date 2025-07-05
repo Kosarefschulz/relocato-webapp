@@ -1,6 +1,4 @@
 import { supabaseService } from './supabaseService';
-// Import Firebase stub to prevent initialization errors
-import { firebaseService } from './firebaseService';
 import { 
   Customer, 
   Quote, 
@@ -273,16 +271,12 @@ class DatabaseAbstractionService implements DatabaseService {
   async switchProvider(provider: 'firebase' | 'supabase'): Promise<void> {
     console.log(`🔄 Switching database provider to ${provider}...`);
     
-    let newService;
-    if (provider === 'supabase') {
-      newService = supabaseService;
-    } else {
-      // Dynamic import for Firebase service
-      if (!firebaseService) {
-        // Firebase service is now imported as stub at top level - no dynamic import needed
-      }
-      newService = firebaseService;
+    if (provider === 'firebase') {
+      console.warn('⚠️ Firebase is no longer supported. Using Supabase instead.');
+      provider = 'supabase';
     }
+    
+    const newService = supabaseService;
     
     try {
       if ('initialize' in newService) {
@@ -299,8 +293,7 @@ class DatabaseAbstractionService implements DatabaseService {
   // Get current provider
   getCurrentProvider(): string {
     if (this.currentService === supabaseService) return 'supabase';
-    if (firebaseService && this.currentService === firebaseService) return 'firebase';
-    return 'unknown';
+    return 'supabase'; // Only Supabase is supported now
   }
 }
 

@@ -1,7 +1,6 @@
 import emailHistoryService from './emailHistoryService';
 import followUpService from './followUpService';
-import { db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { supabase } from '../config/supabase';
 
 interface EmailData {
   to: string;
@@ -146,18 +145,26 @@ class SMTPEmailService {
       // Only schedule follow-ups for quote emails
       if (emailData.templateType === 'quote' && emailData.customerId && emailData.quoteId) {
         // Get customer data
-        if (!db) return;
+        const { data: customerData, error: customerError } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('id', emailData.customerId)
+          .single();
         
-        const customerDoc = await getDoc(doc(db, 'customers', emailData.customerId));
-        if (!customerDoc.exists()) return;
+        if (customerError || !customerData) return;
         
-        const customer = { id: customerDoc.id, ...customerDoc.data() } as any;
+        const customer = { id: customerData.id, ...customerData };
         
         // Get quote data
-        const quoteDoc = await getDoc(doc(db, 'quotes', emailData.quoteId));
-        if (!quoteDoc.exists()) return;
+        const { data: quoteData, error: quoteError } = await supabase
+          .from('quotes')
+          .select('*')
+          .eq('id', emailData.quoteId)
+          .single();
         
-        const quote = { id: quoteDoc.id, ...quoteDoc.data() } as any;
+        if (quoteError || !quoteData) return;
+        
+        const quote = { id: quoteData.id, ...quoteData };
         
         // Schedule follow-ups
         await followUpService.scheduleFollowUp('quote_sent', customer, quote);

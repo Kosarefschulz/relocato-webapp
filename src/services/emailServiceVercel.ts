@@ -1,4 +1,4 @@
-import { auth } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { Email, Folder } from '../types/email';
 
 interface EmailListResponse {
@@ -17,12 +17,13 @@ class EmailServiceVercel {
   }
 
   private async getAuthToken(): Promise<string> {
-    if (!auth.currentUser) {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
       throw new Error('User not authenticated');
     }
     
-    const token = await auth.currentUser.getIdToken();
-    return token;
+    return session.access_token;
   }
 
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {

@@ -1,4 +1,4 @@
-import { firebaseService } from './firebaseServiceWrapper';
+import { unifiedDatabaseService } from './unifiedDatabaseService';
 import { googleSheetsPublicService } from './googleSheetsPublic';
 import { Customer, Quote, Invoice } from '../types';
 
@@ -60,7 +60,7 @@ class MigrationService {
           }
 
           // Migriere Kunde zu Firestore
-          await firebaseService.migrateCustomerFromGoogleSheets(customer);
+          await unifiedDatabaseService.createCustomer(customer);
           completed++;
 
           if (onProgress) {
@@ -107,7 +107,7 @@ class MigrationService {
             continue;
           }
 
-          await firebaseService.migrateQuoteFromGoogleSheets(quote);
+          await unifiedDatabaseService.createQuote(quote);
           completed++;
 
           if (onProgress) {
@@ -154,7 +154,7 @@ class MigrationService {
             continue;
           }
 
-          await firebaseService.addInvoice(invoice);
+          await unifiedDatabaseService.createInvoice(invoice);
           completed++;
 
           if (onProgress) {
@@ -194,10 +194,10 @@ class MigrationService {
       }
 
       // Migriere zu Firestore
-      await firebaseService.migrateCustomerFromGoogleSheets(customer);
+      await unifiedDatabaseService.createCustomer(customer);
 
       // Verifiziere Migration
-      const migratedCustomer = await firebaseService.getCustomerById(customer.id);
+      const migratedCustomer = await unifiedDatabaseService.getCustomer(customer.id);
       
       if (migratedCustomer) {
         console.log('✅ Test-Migration erfolgreich:', migratedCustomer);
@@ -227,9 +227,9 @@ class MigrationService {
       const gsInvoices = await googleSheetsPublicService.getInvoices();
 
       // Firestore Daten
-      const fsCustomers = await firebaseService.getCustomers();
-      const fsQuotes = await firebaseService.getQuotes();
-      const fsInvoices = await firebaseService.getInvoices();
+      const fsCustomers = await unifiedDatabaseService.getCustomers();
+      const fsQuotes = await unifiedDatabaseService.getQuotes();
+      const fsInvoices = await unifiedDatabaseService.getInvoices();
 
       // Finde Unterschiede
       const differences: string[] = [];
@@ -296,9 +296,9 @@ class MigrationService {
 
     try {
       // Lösche alle Kunden
-      const customers = await firebaseService.getCustomers();
+      const customers = await unifiedDatabaseService.getCustomers();
       for (const customer of customers) {
-        await firebaseService.deleteCustomer(customer.id);
+        await unifiedDatabaseService.deleteCustomer(customer.id);
       }
 
       console.log('✅ Alle Firestore-Daten gelöscht');

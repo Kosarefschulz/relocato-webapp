@@ -1,4 +1,4 @@
-import { firebaseService } from './firebaseServiceWrapper';
+import { unifiedDatabaseService } from './unifiedDatabaseService';
 import { googleSheetsPublicService } from './googleSheetsPublic';
 import { Customer, Quote, Invoice } from '../types';
 
@@ -98,7 +98,7 @@ class AutoSyncService {
       const sheetsCustomers = await googleSheetsPublicService.getCustomers();
       
       // Lade existierende Firestore Kunden (zum Vergleich)
-      const firestoreCustomers = await firebaseService.getCustomers();
+      const firestoreCustomers = await unifiedDatabaseService.getCustomers();
       const firestoreCustomerIds = new Set(firestoreCustomers.map(c => c.id));
       
       let synced = 0;
@@ -109,12 +109,12 @@ class AutoSyncService {
         
         try {
           if (!firestoreCustomerIds.has(customer.id)) {
-            // Neuer Kunde - zu Firestore hinzufügen
-            await firebaseService.migrateCustomerFromGoogleSheets(customer);
+            // Neuer Kunde - zu Database hinzufügen
+            await unifiedDatabaseService.createCustomer(customer);
             synced++;
           } else {
             // Existierender Kunde - aktualisieren
-            await firebaseService.updateCustomer(customer.id, customer);
+            await unifiedDatabaseService.updateCustomer(customer.id, customer);
             synced++;
           }
         } catch (error) {
@@ -140,7 +140,7 @@ class AutoSyncService {
       console.log('📄 Synchronisiere Angebote...');
       
       const sheetsQuotes = await googleSheetsPublicService.getQuotes();
-      const firestoreQuotes = await firebaseService.getQuotes();
+      const firestoreQuotes = await unifiedDatabaseService.getQuotes();
       const firestoreQuoteIds = new Set(firestoreQuotes.map(q => q.id));
       
       let synced = 0;
@@ -150,10 +150,10 @@ class AutoSyncService {
         
         try {
           if (!firestoreQuoteIds.has(quote.id)) {
-            await firebaseService.migrateQuoteFromGoogleSheets(quote);
+            await unifiedDatabaseService.createQuote(quote);
             synced++;
           } else {
-            await firebaseService.updateQuote(quote.id, quote);
+            await unifiedDatabaseService.updateQuote(quote.id, quote);
             synced++;
           }
         } catch (error) {
@@ -179,7 +179,7 @@ class AutoSyncService {
       console.log('💰 Synchronisiere Rechnungen...');
       
       const sheetsInvoices = await googleSheetsPublicService.getInvoices();
-      const firestoreInvoices = await firebaseService.getInvoices();
+      const firestoreInvoices = await unifiedDatabaseService.getInvoices();
       const firestoreInvoiceIds = new Set(firestoreInvoices.map(i => i.id));
       
       let synced = 0;
@@ -189,7 +189,7 @@ class AutoSyncService {
         
         try {
           if (invoice.id && !firestoreInvoiceIds.has(invoice.id)) {
-            await firebaseService.addInvoice(invoice);
+            await unifiedDatabaseService.createInvoice(invoice);
             synced++;
           }
         } catch (error) {

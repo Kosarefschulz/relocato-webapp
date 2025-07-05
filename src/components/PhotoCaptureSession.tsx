@@ -31,7 +31,7 @@ import {
   Delete as DeleteIcon,
   Save as SaveIcon
 } from '@mui/icons-material';
-import { firebaseStorageService } from '../services/firebaseStorageService';
+import { blobStorageService } from '../services/blobStorageService';
 
 interface PhotoCaptureSessionProps {
   open: boolean;

@@ -1,5 +1,5 @@
 import googleDriveService from '../services/googleDriveService';
-import { firebaseStorageService } from '../services/firebaseStorageService';
+import { blobStorageService } from '../services/blobStorageService';
 
 /**
  * Migriert alle Fotos von localStorage zu Firebase Storage
@@ -51,12 +51,11 @@ export async function migratePhotosToFirebase() {
             const blob = await response.blob();
             const file = new File([blob], photo.fileName, { type: photo.mimeType || 'image/jpeg' });
             
-            // Upload zu Firebase
-            const result = await firebaseStorageService.uploadPhoto(
+            // Upload zu Blob Storage
+            const result = await blobStorageService.uploadFile(
               customerId,
               file,
-              photo.category || 'Sonstiges',
-              photo.description
+              photo.category || 'Sonstiges'
             );
             
             if (result) {

@@ -255,13 +255,13 @@ const DispositionPage: React.FC = () => {
             // First try the normal getCustomer method
             let fetchedCustomer = await databaseService.getCustomer(quote.customerId);
             
-            // If not found, try the more robust search method (only available in UnifiedDatabaseService)
-            if (!fetchedCustomer && 'findCustomerByAnyIdentifier' in databaseService) {
-              console.log(`🔎 Verwende robuste Suchmethode...`);
-              fetchedCustomer = await (databaseService as any).findCustomerByAnyIdentifier(
-                quote.customerId, 
-                { name: quote.customerName }
-              );
+            // If not found, try searching by name
+            if (!fetchedCustomer && quote.customerName) {
+              console.log(`🔎 Suche Kunde nach Namen: ${quote.customerName}`);
+              const customers = await databaseService.searchCustomers(quote.customerName);
+              if (customers && customers.length > 0) {
+                fetchedCustomer = customers[0];
+              }
             }
             
             if (fetchedCustomer) {

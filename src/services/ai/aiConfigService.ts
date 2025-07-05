@@ -1,5 +1,4 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { supabase } from '../../config/supabase';
 import CryptoJS from 'crypto-js';
 import { DEFAULT_AI_CONFIG } from './defaultAIConfig';
 
@@ -33,9 +32,13 @@ class AIConfigService {
     }
 
     try {
-      const configDoc = await getDoc(doc(db, 'settings', 'ai_config'));
+      const { data: configDoc, error } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('id', 'ai_config')
+        .single();
       
-      if (!configDoc.exists()) {
+      if (error || !configDoc) {
         // Verwende Default-Config wenn keine gespeichert ist
         this.configCache = DEFAULT_AI_CONFIG;
         // Versuche zu speichern, aber ignoriere Fehler
@@ -47,7 +50,7 @@ class AIConfigService {
         return this.configCache;
       }
 
-      const data = configDoc.data();
+      const data = configDoc;
       
       const decryptedApiKey = this.decrypt(data.encryptedApiKey);
       
@@ -91,12 +94,14 @@ class AIConfigService {
         updatedAt: new Date().toISOString()
       };
 
-      await setDoc(doc(db, 'settings', 'ai_config'), dataToSave);
+      await supabase
+        .from('settings')
+        .upsert({ id: 'ai_config', ...dataToSave });
       
       this.configCache = config;
     } catch (error) {
       // Ignoriere Speicherfehler, verwende Config trotzdem
-      console.log('Config konnte nicht in Firebase gespeichert werden, verwende trotzdem');
+      console.log('Config konnte nicht in Supabase gespeichert werden, verwende trotzdem');
       this.configCache = config;
     }
   }

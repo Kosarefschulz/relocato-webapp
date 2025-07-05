@@ -171,6 +171,13 @@ class BlobStorageService {
     // Vercel's Image Optimization API
     return `${url}?w=${width}&q=75`;
   }
+
+  /**
+   * Lade alle Fotos eines Kunden (Alias für listCustomerFiles)
+   */
+  async loadPhotos(customerId: string): Promise<StoredPhoto[]> {
+    return this.listCustomerFiles(customerId);
+  }
 }
 
 // Singleton Export

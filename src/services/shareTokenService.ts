@@ -1,5 +1,4 @@
-import { db } from '../config/firebase';
-import { collection, doc, setDoc, getDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { supabase } from '../config/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface ShareToken {
@@ -20,7 +19,7 @@ export interface ShareToken {
 }
 
 class ShareTokenService {
-  private readonly COLLECTION_NAME = 'shareTokens';
+  private readonly TABLE_NAME = 'share_tokens';
   private readonly TOKEN_VALIDITY_DAYS = 7;
 
   /**
@@ -53,12 +52,21 @@ class ShareTokenService {
         accessCount: 0
       };
 
-      // Token in Firestore speichern
-      await setDoc(doc(db, this.COLLECTION_NAME, tokenId), {
-        ...token,
-        createdAt: token.createdAt.toISOString(),
-        expiresAt: token.expiresAt.toISOString()
-      });
+      // Token in Supabase speichern
+      const { error } = await supabase
+        .from(this.TABLE_NAME)
+        .insert({
+          id: token.id,
+          customer_id: token.customerId,
+          customer_name: token.customerName,
+          created_at: token.createdAt.toISOString(),
+          expires_at: token.expiresAt.toISOString(),
+          created_by: token.createdBy,
+          permissions: token.permissions,
+          access_count: token.accessCount
+        });
+
+      if (error) throw error;
 
       console.log('✅ Share-Token erstellt:', tokenId);
       return token;
@@ -73,21 +81,28 @@ class ShareTokenService {
    */
   async validateToken(tokenId: string): Promise<ShareToken | null> {
     try {
-      const tokenDoc = await getDoc(doc(db, this.COLLECTION_NAME, tokenId));
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .eq('id', tokenId)
+        .single();
       
-      if (!tokenDoc.exists()) {
+      if (error || !data) {
         console.warn('⚠️ Token nicht gefunden:', tokenId);
         return null;
       }
 
-      const data = tokenDoc.data();
       const token: ShareToken = {
-        ...data,
-        id: tokenDoc.id,
-        createdAt: new Date(data.createdAt),
-        expiresAt: new Date(data.expiresAt),
-        lastAccessedAt: data.lastAccessedAt ? new Date(data.lastAccessedAt) : undefined
-      } as ShareToken;
+        id: data.id,
+        customerId: data.customer_id,
+        customerName: data.customer_name,
+        createdAt: new Date(data.created_at),
+        expiresAt: new Date(data.expires_at),
+        createdBy: data.created_by,
+        permissions: data.permissions,
+        accessCount: data.access_count,
+        lastAccessedAt: data.last_accessed_at ? new Date(data.last_accessed_at) : undefined
+      };
 
       // Prüfe ob Token abgelaufen ist
       if (token.expiresAt < new Date()) {
@@ -110,16 +125,22 @@ class ShareTokenService {
    */
   private async updateTokenAccess(tokenId: string): Promise<void> {
     try {
-      const tokenRef = doc(db, this.COLLECTION_NAME, tokenId);
-      const tokenDoc = await getDoc(tokenRef);
+      const { data, error: fetchError } = await supabase
+        .from(this.TABLE_NAME)
+        .select('access_count')
+        .eq('id', tokenId)
+        .single();
       
-      if (tokenDoc.exists()) {
-        const currentData = tokenDoc.data();
-        await setDoc(tokenRef, {
-          ...currentData,
-          accessCount: (currentData.accessCount || 0) + 1,
-          lastAccessedAt: new Date().toISOString()
-        });
+      if (!fetchError && data) {
+        const { error: updateError } = await supabase
+          .from(this.TABLE_NAME)
+          .update({
+            access_count: (data.access_count || 0) + 1,
+            last_accessed_at: new Date().toISOString()
+          })
+          .eq('id', tokenId);
+        
+        if (updateError) throw updateError;
       }
     } catch (error) {
       console.error('❌ Fehler beim Aktualisieren des Token-Zugriffs:', error);
@@ -131,30 +152,25 @@ class ShareTokenService {
    */
   async getCustomerTokens(customerId: string): Promise<ShareToken[]> {
     try {
-      const tokensQuery = query(
-        collection(db, this.COLLECTION_NAME),
-        where('customerId', '==', customerId)
-      );
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .eq('customer_id', customerId)
+        .gt('expires_at', new Date().toISOString());
       
-      const snapshot = await getDocs(tokensQuery);
-      const now = new Date();
-      const tokens: ShareToken[] = [];
-
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const token: ShareToken = {
-          ...data,
-          id: doc.id,
-          createdAt: new Date(data.createdAt),
-          expiresAt: new Date(data.expiresAt),
-          lastAccessedAt: data.lastAccessedAt ? new Date(data.lastAccessedAt) : undefined
-        } as ShareToken;
-
-        // Nur nicht abgelaufene Tokens zurückgeben
-        if (token.expiresAt > now) {
-          tokens.push(token);
-        }
-      });
+      if (error) throw error;
+      
+      const tokens: ShareToken[] = (data || []).map(item => ({
+        id: item.id,
+        customerId: item.customer_id,
+        customerName: item.customer_name,
+        createdAt: new Date(item.created_at),
+        expiresAt: new Date(item.expires_at),
+        createdBy: item.created_by,
+        permissions: item.permissions,
+        accessCount: item.access_count,
+        lastAccessedAt: item.last_accessed_at ? new Date(item.last_accessed_at) : undefined
+      }));
 
       return tokens;
     } catch (error) {
@@ -168,7 +184,13 @@ class ShareTokenService {
    */
   async deleteToken(tokenId: string): Promise<boolean> {
     try {
-      await deleteDoc(doc(db, this.COLLECTION_NAME, tokenId));
+      const { error } = await supabase
+        .from(this.TABLE_NAME)
+        .delete()
+        .eq('id', tokenId);
+      
+      if (error) throw error;
+      
       console.log('✅ Token gelöscht:', tokenId);
       return true;
     } catch (error) {
@@ -190,21 +212,28 @@ class ShareTokenService {
    */
   async cleanupExpiredTokens(): Promise<number> {
     try {
-      const tokensQuery = query(collection(db, this.COLLECTION_NAME));
-      const snapshot = await getDocs(tokensQuery);
-      const now = new Date();
-      let deletedCount = 0;
-
-      for (const doc of snapshot.docs) {
-        const data = doc.data();
-        const expiresAt = new Date(data.expiresAt);
-        
-        if (expiresAt < now) {
-          await deleteDoc(doc.ref);
-          deletedCount++;
-        }
+      // Zuerst alle abgelaufenen Tokens abrufen
+      const { data: expiredTokens, error: fetchError } = await supabase
+        .from(this.TABLE_NAME)
+        .select('id')
+        .lt('expires_at', new Date().toISOString());
+      
+      if (fetchError) throw fetchError;
+      
+      if (!expiredTokens || expiredTokens.length === 0) {
+        console.log('🧹 Keine abgelaufenen Tokens gefunden');
+        return 0;
       }
-
+      
+      // Dann alle abgelaufenen Tokens löschen
+      const { error: deleteError } = await supabase
+        .from(this.TABLE_NAME)
+        .delete()
+        .lt('expires_at', new Date().toISOString());
+      
+      if (deleteError) throw deleteError;
+      
+      const deletedCount = expiredTokens.length;
       console.log(`🧹 ${deletedCount} abgelaufene Tokens gelöscht`);
       return deletedCount;
     } catch (error) {

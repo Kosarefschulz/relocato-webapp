@@ -1,5 +1,5 @@
 import { databaseService as googleSheetsService, USE_FIREBASE_PRIMARY } from '../config/database.config';
-import { unifiedDatabaseService } from './unifiedDatabaseService.optimized';
+import { unifiedDatabaseService } from './unifiedDatabaseService';
 
 // Use the unified database service which has all methods
 const dbService = USE_FIREBASE_PRIMARY ? googleSheetsService : googleSheetsService;

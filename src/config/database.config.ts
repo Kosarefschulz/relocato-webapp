@@ -8,7 +8,7 @@ import { databaseAbstraction } from '../services/databaseAbstraction';
 
 // Legacy imports for backward compatibility
 import { googleSheetsPublicService } from '../services/googleSheetsPublic';
-import { unifiedDatabaseService } from '../services/unifiedDatabaseService.optimized';
+import { unifiedDatabaseService } from '../services/unifiedDatabaseService';
 
 /**
  * Database provider configuration

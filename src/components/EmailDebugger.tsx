@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Paper, Typography, Button, Alert } from '@mui/material';
-import { auth, db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 
 const EmailDebugger: React.FC = () => {
@@ -32,12 +31,12 @@ const EmailDebugger: React.FC = () => {
 
     // Check 1: Auth user
     try {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
         info.user = {
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName
+          uid: user.id,
+          email: user.email,
+          displayName: user.email
         };
         info.checks.push('✅ User is authenticated');
       } else {
@@ -47,17 +46,21 @@ const EmailDebugger: React.FC = () => {
       info.errors.push(`❌ Auth error: ${error.message}`);
     }
 
-    // Check 2: User document in Firestore
-    if (auth.currentUser) {
+    // Check 2: User document in Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
       try {
-        const userDocRef = doc(db, 'users', auth.currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
+        const { data: userDoc, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single();
         
-        if (userDoc.exists()) {
-          info.userDoc = userDoc.data();
+        if (!error && userDoc) {
+          info.userDoc = userDoc;
           info.checks.push('✅ User document exists');
           
-          if (info.userDoc.emailAccess) {
+          if (info.userDoc.email_access) {
             info.checks.push('✅ User has email access');
           } else {
             info.errors.push('❌ User does not have email access');
@@ -66,19 +69,19 @@ const EmailDebugger: React.FC = () => {
           info.errors.push('❌ User document does not exist');
         }
       } catch (error: any) {
-        info.errors.push(`❌ Firestore error: ${error.message}`);
+        info.errors.push(`❌ Supabase error: ${error.message}`);
       }
     }
 
-    // Check 3: Firebase configuration
+    // Check 3: Supabase configuration
     try {
-      if (db) {
-        info.checks.push('✅ Firestore is initialized');
+      if (supabase) {
+        info.checks.push('✅ Supabase is initialized');
       } else {
-        info.errors.push('❌ Firestore is not initialized');
+        info.errors.push('❌ Supabase is not initialized');
       }
     } catch (error: any) {
-      info.errors.push(`❌ Firebase config error: ${error.message}`);
+      info.errors.push(`❌ Supabase config error: ${error.message}`);
     }
 
     // Check 4: Console errors

@@ -108,10 +108,10 @@ const AddCustomersFromScreenshots: React.FC = () => {
       // Kunden hinzufügen
       for (const customer of customers) {
         try {
-          const success = await unifiedDatabaseService.addCustomer(customer);
-          if (success) {
+          const result = await unifiedDatabaseService.createCustomer(customer);
+          if (result) {
             setResult(prev => prev + `✓ Kunde ${customer.name} erfolgreich hinzugefügt\n`);
-            addedCustomers.push({ id: customer.id, name: customer.name });
+            addedCustomers.push({ id: result.id, name: customer.name });
           } else {
             setResult(prev => prev + `✗ Fehler beim Hinzufügen von ${customer.name}\n`);
           }
@@ -175,8 +175,8 @@ const AddCustomersFromScreenshots: React.FC = () => {
         const customerAdded = addedCustomers.find(c => c.id === quote.customerId);
         if (customerAdded) {
           try {
-            const success = await unifiedDatabaseService.addQuote(quote);
-            if (success) {
+            const quoteResult = await unifiedDatabaseService.createQuote(quote);
+            if (quoteResult) {
               setResult(prev => prev + `✓ Angebot für ${quote.customerName} (${quote.price} €) erfolgreich erstellt\n`);
             } else {
               setResult(prev => prev + `✗ Fehler beim Erstellen des Angebots für ${quote.customerName}\n`);

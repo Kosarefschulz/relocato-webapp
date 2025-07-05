@@ -19,8 +19,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { collection, query, orderBy, limit, getDocs, deleteDoc, doc, setDoc, addDoc, updateDoc, where } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { parseEmail } from '../utils/emailParser';
 
 interface FailedImport {
@@ -86,27 +85,27 @@ const FailedEmailRecovery: React.FC = () => {
   const loadFailedImports = async () => {
     setLoading(true);
     try {
-      const q = query(
-        collection(db, 'failed_imports'),
-        where('resolved', '==', false),
-        orderBy('timestamp', 'desc'),
-        limit(200)
-      );
+      const { data: failedImportsData, error } = await supabase
+        .from('failed_imports')
+        .select('*')
+        .eq('resolved', false)
+        .order('timestamp', { ascending: false })
+        .limit(200);
       
-      const snapshot = await getDocs(q);
+      if (error) throw error;
+      
       const imports: FailedImport[] = [];
       const newStats = { total: 0, noName: 0, parseError: 0, duplicate: 0, other: 0 };
       
-      snapshot.forEach((doc) => {
-        const data = doc.data();
+      (failedImportsData || []).forEach((data) => {
         const failedImport = {
-          id: doc.id,
+          id: data.id,
           ...data,
           emailData: {
-            ...data.emailData,
-            date: data.emailData?.date?.toDate() || new Date()
+            ...data.email_data,
+            date: data.email_data?.date ? new Date(data.email_data.date) : new Date()
           },
-          timestamp: data.timestamp?.toDate() || new Date()
+          timestamp: data.timestamp ? new Date(data.timestamp) : new Date()
         } as FailedImport;
         
         imports.push(failedImport);
@@ -228,17 +227,26 @@ const FailedEmailRecovery: React.FC = () => {
         originalFailureReason: selectedImport.reason
       };
 
-      await setDoc(doc(db, 'customers', customerNumber), customer);
+      const { error: insertError } = await supabase
+        .from('customers')
+        .insert(customer);
+      
+      if (insertError) throw insertError;
 
       // Create automatic quote
       await createAutomaticQuote(customer, selectedImport.emailData);
 
       // Mark as resolved
-      await updateDoc(doc(db, 'failed_imports', selectedImport.id), {
-        resolved: true,
-        resolvedAt: new Date(),
-        resolvedBy: 'manual_recovery'
-      });
+      const { error: updateError } = await supabase
+        .from('failed_imports')
+        .update({
+          resolved: true,
+          resolved_at: new Date().toISOString(),
+          resolved_by: 'manual_recovery'
+        })
+        .eq('id', selectedImport.id);
+      
+      if (updateError) throw updateError;
 
       // Reload
       await loadFailedImports();
@@ -258,7 +266,13 @@ const FailedEmailRecovery: React.FC = () => {
     if (!window.confirm('Möchten Sie diesen Eintrag wirklich löschen?')) return;
     
     try {
-      await deleteDoc(doc(db, 'failed_imports', id));
+      const { error } = await supabase
+        .from('failed_imports')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
       await loadFailedImports();
       if (selectedImport?.id === id) {
         setSelectedImport(null);
@@ -272,19 +286,27 @@ const FailedEmailRecovery: React.FC = () => {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    
-    const counterRef = doc(db, 'counters', `customers_${year}_${month}`);
+    const counterKey = `customers_${year}_${month}`;
     
     // Get current counter value
-    const counterDoc = await getDocs(query(collection(db, 'counters'), where('__name__', '==', `customers_${year}_${month}`)));
+    const { data: counterData, error: fetchError } = await supabase
+      .from('counters')
+      .select('value')
+      .eq('id', counterKey)
+      .single();
+    
     let counter = 1;
     
-    if (!counterDoc.empty) {
-      counter = (counterDoc.docs[0].data().value || 0) + 1;
+    if (!fetchError && counterData) {
+      counter = (counterData.value || 0) + 1;
     }
     
-    // Update counter
-    await setDoc(counterRef, { value: counter });
+    // Update or insert counter
+    const { error: upsertError } = await supabase
+      .from('counters')
+      .upsert({ id: counterKey, value: counter });
+    
+    if (upsertError) throw upsertError;
     
     return `K${year}${month}${String(counter).padStart(3, '0')}`;
   };
@@ -396,7 +418,11 @@ const FailedEmailRecovery: React.FC = () => {
       }
     };
     
-    await addDoc(collection(db, 'quotes'), quoteData);
+    const { error } = await supabase
+      .from('quotes')
+      .insert(quoteData);
+    
+    if (error) throw error;
   };
 
   const filteredImports = getFilteredImports();

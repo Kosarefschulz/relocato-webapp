@@ -219,13 +219,13 @@ export class AIContextManager {
        - Custom branding options
     
     7. Data Storage:
-       - Firebase Firestore for all data
-       - File storage in Firebase Storage
+       - Supabase PostgreSQL for all data
+       - File storage in Supabase Storage
        - Real-time data synchronization
     
     8. User Management:
        - Admin and consultant roles
-       - Firebase Authentication
+       - Supabase Authentication
        - Role-based access control
     `;
   }

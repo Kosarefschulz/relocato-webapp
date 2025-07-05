@@ -1,4 +1,4 @@
-import { firebaseService } from '../firebaseService';
+import { unifiedDatabaseService } from '../unifiedDatabaseService';
 import analyticsService from '../analyticsService';
 
 export class AISystemAnalyzer {
@@ -63,7 +63,7 @@ ${recentErrors}
 
   private async getCustomerStats(): Promise<string> {
     try {
-      const customers = await firebaseService.getCustomers();
+      const customers = await unifiedDatabaseService.getCustomers();
       const activeCustomers = customers.filter(c => {
         const lastContact = new Date(c.createdAt || 0);
         const daysSinceContact = (Date.now() - lastContact.getTime()) / (1000 * 60 * 60 * 24);
@@ -95,7 +95,7 @@ ${topCities}`;
 
   private async getQuoteStats(): Promise<string> {
     try {
-      const quotes = await firebaseService.getQuotes();
+      const quotes = await unifiedDatabaseService.getQuotes();
       const thisMonth = quotes.filter(q => {
         const date = new Date(q.createdAt);
         const now = new Date();
@@ -124,7 +124,7 @@ Angebots-Statistik:
 
   private async getInvoiceStats(): Promise<string> {
     try {
-      const invoices = await firebaseService.getInvoices();
+      const invoices = await unifiedDatabaseService.getInvoices();
       const unpaid = invoices.filter(i => i.status === 'sent' || i.status === 'unpaid');
       const totalUnpaid = unpaid.reduce((sum, i) => sum + (i.totalPrice || 0), 0);
 
@@ -146,19 +146,19 @@ Rechnungs-Statistik:
   private async checkSystemHealth(): Promise<string> {
     const checks = [];
 
-    // Firebase Connection
+    // Supabase Connection
     try {
-      await firebaseService.getCustomers();
-      checks.push('✅ Firebase: Verbunden');
+      await unifiedDatabaseService.getCustomers();
+      checks.push('✅ Supabase: Verbunden');
     } catch {
-      checks.push('❌ Firebase: Keine Verbindung');
+      checks.push('❌ Supabase: Keine Verbindung');
     }
 
     // E-Mail Service
     checks.push('✅ E-Mail: SendGrid/IONOS konfiguriert');
 
     // Storage
-    checks.push('✅ Storage: Firebase Storage aktiv');
+    checks.push('✅ Storage: Supabase Storage aktiv');
 
     // Analytics
     if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -174,7 +174,7 @@ Rechnungs-Statistik:
     return `
 - React 19.1.0 mit TypeScript
 - Material-UI für Design
-- Firebase für Backend (Firestore, Auth, Storage)
+- Supabase für Backend (PostgreSQL, Auth, Storage)
 - Vercel für Hosting
 - SendGrid/IONOS für E-Mails
 - jsPDF für PDF-Generierung
@@ -204,7 +204,7 @@ Hauptseiten:
 
   async getDatabaseStructure(): Promise<string> {
     return `
-FIRESTORE COLLECTIONS:
+SUPABASE TABLES:
 - customers/
   - {id}
     - name, phone, email, address

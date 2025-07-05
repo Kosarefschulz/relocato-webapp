@@ -1,7 +1,6 @@
-import { collection, query, where, getDocs, updateDoc, doc, arrayUnion } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { Customer } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
 interface TrelloCard {
   id: string;
@@ -50,6 +49,28 @@ export class TrelloImporter {
     this.token = token;
   }
 
+  // Helper method to map Supabase customer to local format
+  private mapSupabaseCustomerToLocal(data: any): Customer {
+    return {
+      id: data.id,
+      customerNumber: data.customer_number,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      fromAddress: data.from_address,
+      toAddress: data.to_address,
+      movingDate: data.moving_date || '',
+      apartment: data.apartment,
+      services: data.services || [],
+      createdAt: new Date(data.created_at),
+      updatedAt: new Date(data.updated_at),
+      salesStatus: data.sales_status,
+      status: data.status,
+      notes: data.notes,
+      tags: data.tags || []
+    };
+  }
+
   // Fetch board data from Trello
   async fetchBoard(boardId: string): Promise<TrelloBoard> {
     const boardUrl = `https://api.trello.com/1/boards/${boardId}?key=${this.apiKey}&token=${this.token}`;
@@ -76,34 +97,42 @@ export class TrelloImporter {
 
   // Match Trello card to existing customer
   async findCustomerByName(cardName: string): Promise<Customer | null> {
-    const customersRef = collection(db, 'customers');
-    
-    // Try exact match first
-    let q = query(customersRef, where('name', '==', cardName));
-    let snapshot = await getDocs(q);
-    
-    if (!snapshot.empty) {
-      return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Customer;
-    }
-
-    // Try partial match
-    const searchTerms = cardName.toLowerCase().split(' ');
-    const customers: Customer[] = [];
-    
-    const allCustomersSnapshot = await getDocs(customersRef);
-    allCustomersSnapshot.forEach((doc) => {
-      const customer = { id: doc.id, ...doc.data() } as Customer;
-      const customerName = customer.name.toLowerCase();
+    try {
+      // Try exact match first
+      const { data: exactMatch, error: exactError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('name', cardName)
+        .eq('is_deleted', false)
+        .single();
       
-      if (searchTerms.some(term => customerName.includes(term))) {
-        customers.push(customer);
+      if (!exactError && exactMatch) {
+        return this.mapSupabaseCustomerToLocal(exactMatch);
       }
-    });
 
-    return customers.length === 1 ? customers[0] : null;
+      // Try partial match using ilike for case-insensitive search
+      const searchTerms = cardName.toLowerCase().split(' ');
+      const { data: customers, error: searchError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('is_deleted', false);
+      
+      if (searchError) throw searchError;
+      
+      // Filter customers that match any search term
+      const matchingCustomers = customers?.filter(customer => {
+        const customerName = customer.name.toLowerCase();
+        return searchTerms.some(term => customerName.includes(term));
+      }) || [];
+
+      return matchingCustomers.length === 1 ? this.mapSupabaseCustomerToLocal(matchingCustomers[0]) : null;
+    } catch (error) {
+      console.error('Error finding customer by name:', error);
+      return null;
+    }
   }
 
-  // Download and upload attachment to Firebase Storage
+  // Download and upload attachment to Supabase Storage
   async uploadAttachment(
     attachment: TrelloAttachment, 
     customerId: string
@@ -118,13 +147,25 @@ export class TrelloImporter {
       // Create a unique filename
       const timestamp = Date.now();
       const filename = `${timestamp}_${attachment.name}`;
-      const storageRef = ref(storage, `customers/${customerId}/photos/${filename}`);
+      const filePath = `customers/${customerId}/photos/${filename}`;
       
-      // Upload to Firebase Storage
-      await uploadBytes(storageRef, blob);
-      const downloadUrl = await getDownloadURL(storageRef);
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('customer-photos')
+        .upload(filePath, blob, {
+          contentType: attachment.mimeType || 'image/jpeg',
+          cacheControl: '3600',
+          upsert: false
+        });
       
-      return downloadUrl;
+      if (error) throw error;
+      
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('customer-photos')
+        .getPublicUrl(filePath);
+      
+      return publicUrl;
     } catch (error) {
       console.error('Error uploading attachment:', error);
       throw error;
@@ -137,46 +178,67 @@ export class TrelloImporter {
     customerId: string,
     onProgress?: (message: string) => void
   ): Promise<void> {
-    const customerRef = doc(db, 'customers', customerId);
-    const updates: any = {};
-    
-    // Import notes/description
-    if (card.desc) {
-      updates.notes = card.desc;
-      onProgress?.(`Notizen importiert für ${card.name}`);
-    }
-    
-    // Import labels as tags
-    if (card.labels && card.labels.length > 0) {
-      updates.tags = arrayUnion(...card.labels.map(label => label.name));
-      onProgress?.(`${card.labels.length} Tags importiert für ${card.name}`);
-    }
-    
-    // Import attachments as photos
-    if (card.attachments && card.attachments.length > 0) {
-      const photoUrls: string[] = [];
+    try {
+      // Get current customer data
+      const { data: customer, error: fetchError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('id', customerId)
+        .single();
       
-      for (const attachment of card.attachments) {
-        if (attachment.mimeType?.startsWith('image/')) {
-          try {
-            onProgress?.(`Lade Foto hoch: ${attachment.name}`);
-            const url = await this.uploadAttachment(attachment, customerId);
-            photoUrls.push(url);
-          } catch (error) {
-            console.error(`Failed to upload ${attachment.name}:`, error);
+      if (fetchError) throw fetchError;
+      
+      const updates: any = {};
+      
+      // Import notes/description
+      if (card.desc) {
+        updates.notes = card.desc;
+        onProgress?.(`Notizen importiert für ${card.name}`);
+      }
+      
+      // Import labels as tags
+      if (card.labels && card.labels.length > 0) {
+        const existingTags = customer.tags || [];
+        const newTags = card.labels.map(label => label.name);
+        updates.tags = [...new Set([...existingTags, ...newTags])];
+        onProgress?.(`${card.labels.length} Tags importiert für ${card.name}`);
+      }
+      
+      // Import attachments as photos
+      if (card.attachments && card.attachments.length > 0) {
+        const photoUrls: string[] = [];
+        
+        for (const attachment of card.attachments) {
+          if (attachment.mimeType?.startsWith('image/')) {
+            try {
+              onProgress?.(`Lade Foto hoch: ${attachment.name}`);
+              const url = await this.uploadAttachment(attachment, customerId);
+              photoUrls.push(url);
+            } catch (error) {
+              console.error(`Failed to upload ${attachment.name}:`, error);
+            }
           }
+        }
+        
+        if (photoUrls.length > 0) {
+          const existingPhotos = customer.photos || [];
+          updates.photos = [...existingPhotos, ...photoUrls];
+          onProgress?.(`${photoUrls.length} Fotos importiert für ${card.name}`);
         }
       }
       
-      if (photoUrls.length > 0) {
-        updates.photos = arrayUnion(...photoUrls);
-        onProgress?.(`${photoUrls.length} Fotos importiert für ${card.name}`);
+      // Update customer document
+      if (Object.keys(updates).length > 0) {
+        const { error: updateError } = await supabase
+          .from('customers')
+          .update(updates)
+          .eq('id', customerId);
+        
+        if (updateError) throw updateError;
       }
-    }
-    
-    // Update customer document
-    if (Object.keys(updates).length > 0) {
-      await updateDoc(customerRef, updates);
+    } catch (error) {
+      console.error('Error importing card:', error);
+      throw error;
     }
   }
 

@@ -42,8 +42,7 @@ import emailHistoryService, { EmailRecord } from '../services/emailHistoryServic
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 
 interface CustomerCommunicationProps {
@@ -94,25 +93,23 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
 
   const loadLinkedEmails = async () => {
     try {
-      // Load linked emails from Firestore
-      const linksQuery = query(
-        collection(db, 'emailCustomerLinks'),
-        where('customerId', '==', customer.id),
-        orderBy('linkedAt', 'desc')
-      );
+      // Load linked emails from Supabase
+      const { data, error } = await supabase
+        .from('email_customer_links')
+        .select('*')
+        .eq('customer_id', customer.id)
+        .order('linked_at', { ascending: false });
       
-      const snapshot = await getDocs(linksQuery);
-      const emails: LinkedEmail[] = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          emailId: data.emailId,
-          subject: data.emailSubject || 'Kein Betreff',
-          from: data.emailFrom || 'Unbekannt',
-          date: data.linkedAt?.toDate() || new Date(),
-          hasAttachments: data.hasAttachments || false
-        };
-      });
+      if (error) throw error;
+      
+      const emails: LinkedEmail[] = (data || []).map(item => ({
+        id: item.id,
+        emailId: item.email_id,
+        subject: item.email_subject || 'Kein Betreff',
+        from: item.email_from || 'Unbekannt',
+        date: new Date(item.linked_at),
+        hasAttachments: item.has_attachments || false
+      }));
       
       setLinkedEmails(emails);
     } catch (err) {

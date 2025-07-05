@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { databaseService } from '../config/database.config';
-import { db } from '../config/firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { supabase } from '../config/supabase';
 
 const CustomerDataTester: React.FC = () => {
   const { customerId, id } = useParams<{ customerId?: string; id?: string }>();
@@ -29,34 +28,41 @@ const CustomerDataTester: React.FC = () => {
         const customer = customers.find(c => c.id === actualId);
         console.log('Found customer:', customer);
         
-        // Test 4: Direct Firebase check
-        let firebaseCustomer = null;
-        if (db && actualId) {
+        // Test 4: Direct Supabase check
+        let supabaseCustomer = null;
+        if (actualId) {
           try {
-            console.log('Test 4: Direct Firebase lookup...');
-            const docRef = doc(db, 'customers', actualId);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-              firebaseCustomer = { id: docSnap.id, ...docSnap.data() };
-              console.log('Firebase direct result:', firebaseCustomer);
+            console.log('Test 4: Direct Supabase lookup...');
+            const { data, error } = await supabase
+              .from('customers')
+              .select('*')
+              .eq('id', actualId)
+              .single();
+            
+            if (!error && data) {
+              supabaseCustomer = data;
+              console.log('Supabase direct result:', supabaseCustomer);
             } else {
-              console.log('Firebase: Document does not exist!');
+              console.log('Supabase: Document does not exist!');
             }
-          } catch (fbError) {
-            console.error('Firebase error:', fbError);
+          } catch (sbError) {
+            console.error('Supabase error:', sbError);
           }
         }
         
-        // Test 5: Check all Firebase customers
-        let firebaseIds: string[] = [];
-        if (db) {
-          try {
-            const querySnapshot = await getDocs(collection(db, 'customers'));
-            firebaseIds = querySnapshot.docs.map(doc => doc.id);
-            console.log('All Firebase IDs:', firebaseIds);
-          } catch (fbError) {
-            console.error('Firebase list error:', fbError);
+        // Test 5: Check all Supabase customers
+        let supabaseIds: string[] = [];
+        try {
+          const { data, error } = await supabase
+            .from('customers')
+            .select('id');
+          
+          if (!error && data) {
+            supabaseIds = data.map(item => item.id);
+            console.log('All Supabase IDs:', supabaseIds);
           }
+        } catch (sbError) {
+          console.error('Supabase list error:', sbError);
         }
         
         setData({
@@ -64,9 +70,9 @@ const CustomerDataTester: React.FC = () => {
           customerCount: customers.length,
           customer,
           allIds: customers.map(c => c.id),
-          firebaseCustomer,
-          firebaseIds,
-          hasFirebase: !!db
+          supabaseCustomer,
+          supabaseIds,
+          hasSupabase: true
         });
       } catch (err) {
         console.error('Error:', err);
@@ -128,15 +134,15 @@ const CustomerDataTester: React.FC = () => {
           )}
           
           <div style={{ backgroundColor: 'white', padding: '10px', marginBottom: '10px' }}>
-            <strong>Firebase Status:</strong> {data.hasFirebase ? 'CONNECTED' : 'NOT CONNECTED'}
+            <strong>Supabase Status:</strong> {data.hasSupabase ? 'CONNECTED' : 'NOT CONNECTED'}
           </div>
           
-          {data.firebaseCustomer && (
+          {data.supabaseCustomer && (
             <div style={{ backgroundColor: 'lightblue', padding: '10px', marginBottom: '10px' }}>
-              <strong>Firebase Direct Load:</strong><br/>
-              ID: {data.firebaseCustomer.id}<br/>
-              Name: {data.firebaseCustomer.name}<br/>
-              CustomerNumber: {data.firebaseCustomer.customerNumber}
+              <strong>Supabase Direct Load:</strong><br/>
+              ID: {data.supabaseCustomer.id}<br/>
+              Name: {data.supabaseCustomer.name}<br/>
+              CustomerNumber: {data.supabaseCustomer.customer_number}
             </div>
           )}
           
@@ -155,10 +161,10 @@ const CustomerDataTester: React.FC = () => {
           
           <details style={{ marginTop: '10px' }}>
             <summary style={{ cursor: 'pointer', backgroundColor: 'orange', padding: '5px' }}>
-              Firebase IDs ({data.firebaseIds?.length || 0})
+              Supabase IDs ({data.supabaseIds?.length || 0})
             </summary>
             <div style={{ backgroundColor: 'white', padding: '10px', maxHeight: '200px', overflow: 'auto' }}>
-              {data.firebaseIds?.map((id: string) => (
+              {data.supabaseIds?.map((id: string) => (
                 <div key={id} style={{ color: id === actualId ? 'red' : 'black' }}>
                   {id} {id === actualId && '← CURRENT'}
                 </div>

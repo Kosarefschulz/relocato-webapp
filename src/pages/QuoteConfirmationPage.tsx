@@ -43,7 +43,7 @@ import SignatureModal from '../components/SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
 import { supabaseEmailService } from '../services/supabaseEmailService';
 import { notificationService } from '../services/notificationService';
-import { databaseService as unifiedService } from '../services/unifiedDatabaseService.optimized';
+import { unifiedDatabaseService as unifiedService } from '../services/unifiedDatabaseService';
 
 const MotionCard = motion(Card);
 
@@ -249,8 +249,9 @@ const QuoteConfirmationPage: React.FC = () => {
             }
           };
           
-          const eventId = await unifiedService.addCalendarEvent(calendarEvent);
-          console.log('✅ Kalendereintrag erstellt:', eventId);
+          // Calendar events are not yet implemented in UnifiedDatabaseService
+          // const eventId = await unifiedService.addCalendarEvent(calendarEvent);
+          console.log('⚠️ Kalendereintrag-Funktion noch nicht implementiert');
         } catch (calendarError) {
           console.error('⚠️ Fehler beim Erstellen des Kalendereintrags:', calendarError);
           // Don't fail the whole confirmation if calendar entry fails

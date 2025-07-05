@@ -5,7 +5,7 @@ import { AIBackgroundService } from './aiBackgroundService';
 import { AISystemAnalyzer } from './aiSystemAnalyzer';
 import { AIVoiceService } from './aiVoiceService';
 import { Customer, Quote, Invoice } from '../../types';
-import { firebaseService } from '../firebaseService';
+import { unifiedDatabaseService } from '../unifiedDatabaseService';
 import { sendEmail } from '../emailService';
 import { pdfService } from '../pdfServiceWrapper';
 import { quoteCalculationService } from '../quoteCalculation';
@@ -94,7 +94,7 @@ DEINE FÄHIGKEITEN:
    - Etagenzuschläge: 3% pro Etage
    - Firmendaten: Relocato und Wertvoll Umzüge
    - E-Mail-System mit SendGrid und IONOS
-   - Firebase-basierte Datenspeicherung
+   - Supabase-basierte Datenspeicherung
 
 3. INTELLIGENTE BERATUNG:
    - Preisempfehlungen basierend auf Erfahrungswerten

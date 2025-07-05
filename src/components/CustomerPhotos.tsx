@@ -33,7 +33,7 @@ import {
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { StoredPhoto } from '../services/googleDriveService';
-import { firebaseStorageService } from '../services/firebaseStorageService';
+import { blobStorageService } from '../services/blobStorageService';
 import { useAnalytics } from '../hooks/useAnalytics';
 import PhotoCaptureSession from './PhotoCaptureSession';
 
@@ -97,7 +97,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     try {
       setLoading(true);
       // Firebase Storage is disabled - return empty array
-      const firebasePhotos = await firebaseStorageService.loadPhotos(customer.id);
+      const firebasePhotos = await blobStorageService.loadPhotos(customer.id);
       setPhotos(firebasePhotos); // Will be empty array from disabled service
       if (firebasePhotos.length === 0) {
         console.log('ℹ️ Keine Fotos verfügbar - Firebase Storage ist deaktiviert');

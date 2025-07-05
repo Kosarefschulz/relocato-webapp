@@ -3,7 +3,7 @@
  * Run this to ensure the robust customer search is working correctly
  */
 
-import { unifiedDatabaseService } from '../services/unifiedDatabaseService.optimized';
+import { unifiedDatabaseService } from '../services/unifiedDatabaseService';
 import { databaseService } from '../config/database.config';
 
 interface TestResult {
@@ -55,7 +55,7 @@ export async function testCustomerMapping(): Promise<TestResult[]> {
     console.log('\nTest 3: Robust search with partial match');
     if (customerWithNumber?.customerNumber) {
       const partialNumber = customerWithNumber.customerNumber.slice(-6);
-      const found = await unifiedDatabaseService.findCustomerByAnyIdentifier(partialNumber);
+      const found = await unifiedDatabaseService.getCustomer(partialNumber);
       results.push({
         testName: 'Partial number search',
         success: found?.id === customerWithNumber.id,
@@ -68,10 +68,8 @@ export async function testCustomerMapping(): Promise<TestResult[]> {
     console.log('\nTest 4: Name-based search');
     if (customers.length > 0) {
       const testCustomer = customers[0];
-      const found = await unifiedDatabaseService.findCustomerByAnyIdentifier(
-        'unknown-id',
-        { name: testCustomer.name }
-      );
+      const searchResults = await unifiedDatabaseService.searchCustomers(testCustomer.name);
+      const found = searchResults && searchResults.length > 0 ? searchResults[0] : null;
       results.push({
         testName: 'Name-based search',
         success: found?.id === testCustomer.id,
@@ -87,10 +85,15 @@ export async function testCustomerMapping(): Promise<TestResult[]> {
     let mappingFailures = 0;
     
     for (const quote of acceptedQuotes.slice(0, 5)) { // Test first 5
-      const customer = await unifiedDatabaseService.findCustomerByAnyIdentifier(
-        quote.customerId,
-        { name: quote.customerName }
-      );
+      let customer = await unifiedDatabaseService.getCustomer(quote.customerId);
+      
+      // If not found by ID, try searching by name
+      if (!customer && quote.customerName) {
+        const searchResults = await unifiedDatabaseService.searchCustomers(quote.customerName);
+        if (searchResults && searchResults.length > 0) {
+          customer = searchResults[0];
+        }
+      }
       
       if (customer) {
         mappingSuccesses++;
@@ -141,18 +144,18 @@ export async function testSpecificCustomerLookup(identifier: string): Promise<vo
       console.log('  ❌ Not found');
     }
     
-    // Method 2: getCustomerByIdOrNumber
-    console.log('\n2. Using getCustomerByIdOrNumber():');
-    const byIdOrNumber = await unifiedDatabaseService.getCustomerByIdOrNumber(identifier);
+    // Method 2: getCustomer (also handles customer numbers)
+    console.log('\n2. Using getCustomer() with customer number:');
+    const byIdOrNumber = await unifiedDatabaseService.getCustomer(identifier);
     if (byIdOrNumber) {
       console.log(`  ✅ Found: ${byIdOrNumber.name} (ID: ${byIdOrNumber.id})`);
     } else {
       console.log('  ❌ Not found');
     }
     
-    // Method 3: findCustomerByAnyIdentifier
-    console.log('\n3. Using findCustomerByAnyIdentifier():');
-    const robust = await unifiedDatabaseService.findCustomerByAnyIdentifier(identifier);
+    // Method 3: getCustomer
+    console.log('\n3. Using getCustomer():');
+    const robust = await unifiedDatabaseService.getCustomer(identifier);
     if (robust) {
       console.log(`  ✅ Found: ${robust.name} (ID: ${robust.id})`);
     } else {
