@@ -43,6 +43,7 @@ import './utils/emailTestUtils';
 import './utils/addCustomersFromScreenshots';
 import './utils/debugEnv';
 import './utils/testGoogleSheets';
+import { startHealthMonitoring } from './utils/startHealthMonitoring';
 import EmailImportSettings from './components/EmailImportSettings';
 import FailedEmailRecovery from './components/FailedEmailRecovery';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -53,6 +54,9 @@ import VisibilityFix from './components/VisibilityFix';
 import EmailDebugger from './components/EmailDebugger';
 import EmailTestIONOS from './components/EmailTestIONOS';
 import EmailTestPage from './components/EmailTestPage';
+import EmailTestComplete from './components/EmailTestComplete';
+import SystemHealthMonitor from './components/SystemHealthMonitor';
+import PhoenixDashboard from './components/PhoenixEngine/PhoenixDashboard';
 import { AIAssistantChatV2 } from './components/AIAssistant';
 import { aiConfigService } from './services/ai/aiConfigService';
 import QuoteConfirmationPage from './pages/QuoteConfirmationPage';
@@ -295,6 +299,24 @@ function AppRoutes({ user }: { user: User | null }) {
         element={<EmailTestPage />} 
       />
       
+      {/* Complete Email Test */}
+      <Route 
+        path="/email-test-complete" 
+        element={<EmailTestComplete />} 
+      />
+      
+      {/* System Health Monitor */}
+      <Route 
+        path="/health" 
+        element={<SystemHealthMonitor />} 
+      />
+      
+      {/* Phoenix Engine Dashboard */}
+      <Route 
+        path="/phoenix" 
+        element={<PhoenixDashboard />} 
+      />
+      
       {/* Customer Import Page */}
       <Route 
         path="/customer-import" 
@@ -363,6 +385,9 @@ function App() {
     
     // Prüfe AI Config
     checkAIConfig();
+    
+    // Start health monitoring if enabled
+    startHealthMonitoring();
     
     // Initialize realtime service
     if (user) {
