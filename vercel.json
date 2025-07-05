@@ -64,6 +64,10 @@
     },
     "api/email-imap.js": {
       "maxDuration": 30
+    },
+    "api/email-bridge.js": {
+      "maxDuration": 30,
+      "runtime": "nodejs20.x"
     }
   },
   "env": {
