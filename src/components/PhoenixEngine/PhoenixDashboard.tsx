@@ -28,11 +28,14 @@ import {
   Settings as SettingsIcon,
   RemoveRedEye as EyeIcon,
   AutoAwesome as AutoAwesomeIcon,
-  Hub as HubIcon
+  Hub as HubIcon,
+  Launch as LaunchIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { featureFlagService, PHOENIX_FEATURES, FeatureFlag } from '../../services/featureFlagService';
 
 const PhoenixDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [features, setFeatures] = useState<FeatureFlag[]>([]);
   const [phoenixEnabled, setPhoenixEnabled] = useState(false);
   const [expanded, setExpanded] = useState<string | false>(false);
@@ -151,6 +154,19 @@ const PhoenixDashboard: React.FC = () => {
               size="small"
               color={getModuleFeatures('phoenix_genesis_eye').some(f => f.enabled) ? 'primary' : 'default'}
             />
+            {featureFlagService.isEnabled(PHOENIX_FEATURES.GENESIS_EYE) && (
+              <Tooltip title="Genesis-Auge öffnen">
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/genesis-eye');
+                  }}
+                >
+                  <LaunchIcon />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
         </AccordionSummary>
         <AccordionDetails>

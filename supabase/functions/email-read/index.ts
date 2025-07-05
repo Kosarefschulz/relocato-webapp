@@ -209,27 +209,21 @@ serve(async (req) => {
       console.error('IMAP Error:', error);
       await imap.close();
       
-      // Return mock data for testing
+      // Return error instead of mock data
       return new Response(
         JSON.stringify({ 
-          success: true,
-          email: {
-            id: uid,
-            uid: uid,
-            from: { name: 'Test Sender', address: 'test@example.com' },
-            to: [{ address: IONOS_EMAIL }],
-            subject: 'Test E-Mail (Mock)',
-            date: new Date().toISOString(),
-            body: 'Dies ist der Inhalt der Test-E-Mail.\n\nMit freundlichen Grüßen,\nTest Sender',
-            text: 'Dies ist der Inhalt der Test-E-Mail.\n\nMit freundlichen Grüßen,\nTest Sender',
-            flags: ['\\Seen'],
-            folder: folder
-          },
-          error: 'IMAP failed, using mock data: ' + error.message
+          success: false,
+          error: `IMAP connection failed: ${error.message}`,
+          details: {
+            host: IONOS_IMAP_HOST,
+            port: IONOS_IMAP_PORT,
+            user: IONOS_EMAIL,
+            message: 'Please check /email-debug for detailed diagnostics'
+          }
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
+          status: 500,
         },
       )
     }
