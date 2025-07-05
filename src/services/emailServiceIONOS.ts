@@ -250,12 +250,35 @@ class IONOSEmailService {
     }
   }
 
-  // Send email via Supabase
+  // Send email - try Vercel first, then Supabase
   async sendEmail(to: string, subject: string, content: string, attachments?: any[]): Promise<boolean> {
     try {
-      console.log('📧 Sending email via Supabase...');
+      console.log('📧 Sending email via Vercel SMTP...');
       
-      // Use new function that also stores in database
+      // Try Vercel SMTP first
+      const response = await fetch('/api/email-send-smtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to,
+          subject,
+          content,
+          html: content,
+          attachments
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log('✅ Email sent via Vercel SMTP');
+          return true;
+        }
+      }
+      
+      console.log('⚠️ Vercel SMTP failed, trying Supabase...');
+      
+      // Fall back to Supabase
       const { data, error } = await supabase.functions.invoke('email-send-and-store', {
         body: {
           to,

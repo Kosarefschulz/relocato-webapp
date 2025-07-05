@@ -69,8 +69,8 @@ serve(async (req) => {
     const encoder = new TextEncoder()
     const decoder = new TextDecoder()
     
-    // Establish TLS connection
-    const conn = await Deno.connectTls({
+    // Connect to SMTP server (start with plain connection for STARTTLS)
+    let conn = await Deno.connect({
       hostname: IONOS_SMTP_HOST,
       port: IONOS_SMTP_PORT,
     })
@@ -90,6 +90,20 @@ serve(async (req) => {
     // Send EHLO
     const ehloResponse = await sendCommand(`EHLO ${IONOS_SMTP_HOST}`)
     console.log('EHLO Response:', ehloResponse)
+
+    // Send STARTTLS
+    const starttlsResponse = await sendCommand('STARTTLS')
+    console.log('STARTTLS Response:', starttlsResponse)
+
+    // Upgrade to TLS connection
+    const tlsConn = await Deno.startTls(conn, {
+      hostname: IONOS_SMTP_HOST,
+    })
+    conn = tlsConn
+
+    // Send EHLO again after TLS
+    const ehloTlsResponse = await sendCommand(`EHLO ${IONOS_SMTP_HOST}`)
+    console.log('EHLO TLS Response:', ehloTlsResponse)
 
     // Authenticate with LOGIN method
     await sendCommand('AUTH LOGIN')
