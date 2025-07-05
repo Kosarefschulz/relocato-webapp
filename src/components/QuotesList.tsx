@@ -21,6 +21,7 @@ import {
   CheckBox as CheckBoxIcon,
   CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
   IndeterminateCheckBox as IndeterminateCheckBoxIcon,
+  Palette as PaletteIcon,
 } from '@mui/icons-material';
 import { Quote, Customer, Invoice } from '../types';
 import { databaseService } from '../config/database.config';
@@ -490,6 +491,13 @@ const QuotesList: React.FC = () => {
                   startIcon={<DraftIcon />}
                 >
                   Neues Angebot
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate('/quote-designer')}
+                  startIcon={<PaletteIcon />}
+                >
+                  Layout Designer
                 </Button>
                 <Button
                   variant="outlined"

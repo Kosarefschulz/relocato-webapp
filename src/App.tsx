@@ -61,6 +61,7 @@ import SharedCustomerView from './pages/SharedCustomerView';
 import TrelloImportPage from './pages/TrelloImportPage';
 import DebugShareLinksPage from './pages/DebugShareLinksPage';
 import RealtimeDashboard from './components/RealtimeDashboard';
+import QuoteLayoutEditor from './components/QuoteLayoutEditor/QuoteLayoutEditor';
 
 
 export const AuthContext = React.createContext<{
@@ -309,6 +310,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/realtime" 
         element={<RealtimeDashboard />} 
+      />
+      
+      {/* Quote Layout Editor */}
+      <Route 
+        path="/quote-designer" 
+        element={<QuoteLayoutEditor />} 
       />
       
       {/* Default Route */}
