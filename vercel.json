@@ -61,6 +61,14 @@
     },
     "api/email/star.js": {
       "maxDuration": 10
+    },
+    "api/email-imap.ts": {
+      "maxDuration": 30
     }
+  },
+  "env": {
+    "IONOS_EMAIL": "bielefeld@relocato.de",
+    "IONOS_IMAP_HOST": "imap.ionos.de",
+    "IONOS_IMAP_PORT": "993"
   }
 }

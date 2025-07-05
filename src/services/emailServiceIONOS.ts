@@ -49,15 +49,42 @@ function parseEmailAddress(emailStr: string | any): { name?: string; address: st
 
 class IONOSEmailService {
   constructor() {
-    console.log('📧 IONOS Email Service initialized with Supabase backend');
+    console.log('📧 IONOS Email Service initialized with Vercel/Supabase backend');
   }
 
-  // Get folders from Supabase
+  // Get folders - try Vercel API first, then Supabase
   async getFolders(): Promise<Folder[]> {
     try {
-      console.log('📁 Fetching folders from Supabase...');
+      console.log('📁 Fetching folders via Vercel API...');
       
-      // Call Supabase Edge Function
+      // Try Vercel API first for direct IMAP
+      const response = await fetch('/api/email-imap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation: 'folders' })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.folders) {
+          console.log('✅ Got folders from Vercel IMAP');
+          return data.folders.map((folder: any) => ({
+            name: folder.name,
+            path: folder.path,
+            delimiter: folder.delimiter || '/',
+            flags: folder.flags || [],
+            level: folder.level || 0,
+            hasChildren: folder.hasChildren || false,
+            specialUse: mapSpecialUse(folder.name, folder.specialUse),
+            unreadCount: folder.unreadCount || 0,
+            totalCount: folder.totalCount || 0
+          }));
+        }
+      }
+      
+      console.log('⚠️ Vercel API failed, trying Supabase...');
+      
+      // Fall back to Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('email-folders', {
         method: 'GET'
       });
@@ -99,10 +126,27 @@ class IONOSEmailService {
     }
   }
 
-  // Get emails from Supabase
+  // Get emails - try Vercel API first, then Supabase
   async getEmails(folder: string = 'INBOX', page: number = 1, limit: number = 50): Promise<{ emails: EmailType[], total: number }> {
     try {
-      console.log('📧 Fetching emails from Supabase:', { folder, page, limit });
+      console.log('📧 Fetching emails via Vercel API:', { folder, page, limit });
+      
+      // Try Vercel API first for direct IMAP
+      const response = await fetch('/api/email-imap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation: 'list', folder, page, limit })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.emails) {
+          console.log('✅ Got emails from Vercel IMAP:', { count: data.emails.length });
+          return this.transformEmailResponse(data, folder);
+        }
+      }
+      
+      console.log('⚠️ Vercel API failed, trying Supabase...');
       
       // Try database first, fallback to IMAP
       const { data, error } = await supabase.functions.invoke('email-list-db', {
@@ -133,10 +177,43 @@ class IONOSEmailService {
     }
   }
 
-  // Get single email from Supabase
+  // Get single email - try Vercel API first, then Supabase
   async getEmail(uid: string, folder: string = 'INBOX'): Promise<EmailType | null> {
     try {
-      console.log('📧 Fetching single email from Supabase:', { uid, folder });
+      console.log('📧 Fetching single email via Vercel API:', { uid, folder });
+      
+      // Try Vercel API first for direct IMAP
+      const response = await fetch('/api/email-imap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation: 'read', uid, folder })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.email) {
+          console.log('✅ Got email from Vercel IMAP');
+          const email = data.email;
+          return {
+            id: email.uid || email.id,
+            uid: email.uid || email.id,
+            folder: email.folder || folder,
+            from: parseEmailAddress(email.from),
+            to: Array.isArray(email.to) ? email.to.map((addr: any) => parseEmailAddress(addr)) : [],
+            cc: email.cc || [],
+            subject: email.subject || '',
+            date: email.date,
+            text: email.text || email.body,
+            html: email.html,
+            textAsHtml: email.textAsHtml || (email.body ? `<pre>${email.body}</pre>` : undefined),
+            snippet: email.snippet || '',
+            flags: email.flags || [],
+            attachments: email.attachments || []
+          };
+        }
+      }
+      
+      console.log('⚠️ Vercel API failed, trying Supabase...');
       
       const { data, error } = await supabase.functions.invoke('email-read', {
         body: { uid, folder }
