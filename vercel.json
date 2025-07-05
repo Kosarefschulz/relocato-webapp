@@ -88,6 +88,9 @@
     },
     "api/email-mark.js": {
       "maxDuration": 10
+    },
+    "api/email-send.js": {
+      "maxDuration": 10
     }
   },
   "env": {

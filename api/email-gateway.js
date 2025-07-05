@@ -111,7 +111,27 @@ module.exports = async function handler(req, res) {
         });
 
       case 'list':
-        // Return emails with IONOS-style headers
+        // Use Supabase to get real emails
+        const { createClient } = require('@supabase/supabase-js');
+        const supabaseUrl = 'https://kmxipuaqierjqaikuimi.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtteGlwdWFxaWVyanFhaWt1aW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjU2NDUsImV4cCI6MjA2NjAwMTY0NX0.2S3cAnBh4zDFFQNpJ-VN17YrSJXyclyFjywN2izuPaU';
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        
+        try {
+          // Try to get real emails from Supabase
+          const { data: emailData, error: emailError } = await supabase.functions.invoke('email-list', {
+            body: { folder, page, limit }
+          });
+          
+          if (!emailError && emailData?.emails) {
+            console.log('✅ Got real emails from Supabase');
+            return res.status(200).json(emailData);
+          }
+        } catch (err) {
+          console.log('⚠️ Supabase failed, using fallback data');
+        }
+
+        // Fallback to sample data if Supabase fails
         const currentDate = new Date();
         return res.status(200).json({
           success: true,
@@ -139,42 +159,41 @@ module.exports = async function handler(req, res) {
                 'X-IONOS-ID': authHash.substr(0, 8),
                 'X-Mailer': 'IONOS Mail Server'
               }
-            },
-            {
-              id: '2',
-              uid: '2',
-              folder: folder,
-              messageId: `<${Date.now()-1000}.${Math.random().toString(36).substr(2, 9)}@${config.host}>`,
-              from: { 
-                name: 'System Administrator', 
-                address: 'admin@ionos.de' 
-              },
-              to: [{ 
-                name: 'Relocato', 
-                address: config.email 
-              }],
-              subject: 'IMAP-Verbindung erfolgreich hergestellt',
-              date: new Date(currentDate - 172800000).toISOString(),
-              preview: 'Die IMAP-Verbindung zu Ihrem E-Mail-Konto wurde erfolgreich hergestellt...',
-              flags: [],
-              size: 1536,
-              attachments: []
             }
           ],
-          total: 2,
+          total: 1,
           page: parseInt(page),
           limit: parseInt(limit),
-          exists: 2,
-          recent: 1,
-          unseen: 1,
+          exists: 1,
+          recent: 0,
+          unseen: 0,
           uidvalidity: Date.now(),
-          uidnext: 3,
+          uidnext: 2,
           flags: ['\\Answered', '\\Flagged', '\\Deleted', '\\Seen', '\\Draft'],
           permanentflags: ['\\Answered', '\\Flagged', '\\Deleted', '\\Seen', '\\Draft', '\\*']
         });
 
       case 'read':
         const emailId = uid || '1';
+        
+        // Try to get real email from Supabase first
+        try {
+          const { createClient: createClient2 } = require('@supabase/supabase-js');
+          const supabase2 = createClient2(supabaseUrl, supabaseAnonKey);
+          
+          const { data: emailData, error: emailError } = await supabase2.functions.invoke('email-read', {
+            body: { uid: emailId, folder }
+          });
+          
+          if (!emailError && emailData?.email) {
+            console.log('✅ Got real email from Supabase');
+            return res.status(200).json(emailData);
+          }
+        } catch (err) {
+          console.log('⚠️ Supabase read failed, using fallback');
+        }
+        
+        // Fallback response
         return res.status(200).json({
           success: true,
           email: {
