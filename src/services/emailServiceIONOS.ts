@@ -278,9 +278,25 @@ class IONOSEmailService {
     }
   }
 
-  // Mark as read via Supabase
+  // Mark as read - try Vercel first, then Supabase
   async markAsRead(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
+      // Try Vercel API first
+      const response = await fetch('/api/email-mark', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, folder, read: true })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log('✅ Marked as read via Vercel');
+          return true;
+        }
+      }
+
+      // Fall back to Supabase
       const { data, error } = await supabase.functions.invoke('email-mark-read', {
         body: { uid, folder, read: true }
       });
@@ -297,9 +313,25 @@ class IONOSEmailService {
     }
   }
 
-  // Mark as unread via Supabase
+  // Mark as unread - try Vercel first, then Supabase
   async markAsUnread(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
+      // Try Vercel API first
+      const response = await fetch('/api/email-mark', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, folder, read: false })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log('✅ Marked as unread via Vercel');
+          return true;
+        }
+      }
+
+      // Fall back to Supabase
       const { data, error } = await supabase.functions.invoke('email-mark-read', {
         body: { uid, folder, read: false }
       });
@@ -316,9 +348,25 @@ class IONOSEmailService {
     }
   }
 
-  // Delete email via Supabase
+  // Delete email - try Vercel first, then Supabase
   async deleteEmail(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
+      // Try Vercel API first
+      const response = await fetch('/api/email-actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', emailId: uid, folder })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log('✅ Email deleted via Vercel');
+          return true;
+        }
+      }
+
+      // Fall back to Supabase
       const { data, error } = await supabase.functions.invoke('email-delete', {
         body: { uid, folder }
       });
