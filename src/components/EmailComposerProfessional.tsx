@@ -180,7 +180,7 @@ const EmailComposerProfessional: React.FC<EmailComposerProfessionalProps> = ({
   const getForwardContent = (email: Email): string => {
     const date = new Date(email.date).toLocaleString();
     const from = email.from?.name || email.from?.address || 'Unknown';
-    const to = email.to?.map(t => t.address).join(', ') || '';
+    const to = Array.isArray(email.to) ? email.to.map(t => t.address).join(', ') : '';
     
     return `<br><br><div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
       <p><strong>---------- Forwarded message ----------</strong></p>

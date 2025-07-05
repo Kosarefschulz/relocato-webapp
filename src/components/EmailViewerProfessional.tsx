@@ -264,7 +264,7 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
               
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant="body2" color="text.secondary">
-                  to {email.to?.map(t => t.name || t.address).join(', ')}
+                  to {Array.isArray(email.to) ? email.to.map(t => t.name || t.address).join(', ') : 'No recipients'}
                 </Typography>
                 <IconButton
                   size="small"
@@ -280,9 +280,9 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
                     <strong>From:</strong> {email.from?.address}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>To:</strong> {email.to?.map(t => t.address).join(', ')}
+                    <strong>To:</strong> {Array.isArray(email.to) ? email.to.map(t => t.address).join(', ') : 'No recipients'}
                   </Typography>
-                  {email.cc && email.cc.length > 0 && (
+                  {Array.isArray(email.cc) && email.cc.length > 0 && (
                     <Typography variant="body2" color="text.secondary">
                       <strong>Cc:</strong> {email.cc.map(c => c.address).join(', ')}
                     </Typography>
