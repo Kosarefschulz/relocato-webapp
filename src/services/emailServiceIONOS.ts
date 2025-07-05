@@ -1,21 +1,8 @@
-// IONOS Email Service - nutzt die funktionierende IONOS-Konfiguration
+// IONOS Email Service - nutzt Supabase für alle E-Mail-Operationen
 
 // Import types from email.ts
 import { Email as EmailType, Folder } from '../types/email';
-
-// Simplified email for API responses
-interface SimpleEmail {
-  id: string;
-  from: string;
-  to: string;
-  subject: string;
-  date: string;
-  body?: string;
-  html?: string;
-  flags: string[];
-  folder: string;
-  attachments?: any[];
-}
+import { supabase } from '../config/supabase';
 
 // Helper function to map folder names to specialUse
 function mapSpecialUse(name: string, specialUse?: string): 'inbox' | 'sent' | 'drafts' | 'trash' | 'spam' | null {
@@ -40,55 +27,44 @@ function mapSpecialUse(name: string, specialUse?: string): 'inbox' | 'sent' | 'd
   return null;
 }
 
+// Helper function to parse email addresses
+function parseEmailAddress(emailStr: string | any): { name?: string; address: string } {
+  if (typeof emailStr === 'object' && emailStr !== null) {
+    return emailStr;
+  }
+  
+  if (typeof emailStr !== 'string') {
+    return { address: 'unknown@unknown.com' };
+  }
+  
+  // Parse "Name <email@example.com>" format
+  const match = emailStr.match(/^(.+)\s*<(.+)>$/);
+  if (match) {
+    return { name: match[1].trim(), address: match[2].trim() };
+  }
+  
+  // Just an email address
+  return { address: emailStr.trim() };
+}
+
 class IONOSEmailService {
-  private baseUrl: string = '/api/email';
-  private backendUrl: string;
-
-  // Helper function to parse email addresses
-  private parseEmailAddress(emailStr: string | any): { name?: string; address: string } {
-    if (typeof emailStr === 'object' && emailStr !== null) {
-      return emailStr;
-    }
-    
-    if (typeof emailStr !== 'string') {
-      return { address: 'unknown@unknown.com' };
-    }
-    
-    // Parse "Name <email@example.com>" format
-    const match = emailStr.match(/^(.+)\s*<(.+)>$/);
-    if (match) {
-      return { name: match[1].trim(), address: match[2].trim() };
-    }
-    
-    // Just an email address
-    return { address: emailStr.trim() };
-  }
-
   constructor() {
-    // Firebase Functions are deployed in mixed regions currently
-    const hostname = window.location.hostname;
-    
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      // Local development - use proxy
-      this.backendUrl = '';
-      this.baseUrl = '/api/email';
-    } else {
-      // Production - Firebase Functions are in mixed regions
-      // listEmails, readEmail -> us-central1
-      // getEmailFolders, sendEmail -> europe-west3
-      this.backendUrl = 'mixed'; // Flag for mixed regions
-      this.baseUrl = '';
-    }
+    console.log('📧 IONOS Email Service initialized with Supabase backend');
   }
 
-  // Get folders
+  // Get folders from Supabase
   async getFolders(): Promise<Folder[]> {
     try {
-      console.log('📁 Fetching folders...');
+      console.log('📁 Fetching folders from Supabase...');
       
-      // For localhost, return default folders
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.log('🏠 Using default folders for local development');
+      // Call Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('email-folders', {
+        method: 'GET'
+      });
+
+      if (error) {
+        console.error('❌ Error fetching folders:', error);
+        // Return default folders as fallback
         return [
           { name: 'INBOX', path: 'INBOX', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'inbox', unreadCount: 0, totalCount: 0 },
           { name: 'Sent', path: 'Sent', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'sent', unreadCount: 0, totalCount: 0 },
@@ -98,25 +74,8 @@ class IONOSEmailService {
         ];
       }
       
-      const url = this.backendUrl === 'mixed'
-        ? 'https://europe-west3-umzugsapp.cloudfunctions.net/getEmailFolders'
-        : this.backendUrl 
-        ? `${this.backendUrl}/getEmailFolders` 
-        : `${this.baseUrl}/folders`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (!response.ok) {
-        console.error('❌ Folders API error:', response.status, response.statusText);
-        throw new Error('Failed to get folders');
-      }
-      
-      const data = await response.json();
-      console.log('📂 Folders API response:', data);
       // Map to Folder type with proper specialUse
-      return (data.folders || []).map((folder: any) => ({
+      return (data?.folders || []).map((folder: any) => ({
         name: folder.name,
         path: folder.path,
         delimiter: folder.delimiter || '/',
@@ -129,90 +88,55 @@ class IONOSEmailService {
       }));
     } catch (error) {
       console.error('Error getting folders:', error);
-      return [];
+      // Return default folders as fallback
+      return [
+        { name: 'INBOX', path: 'INBOX', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'inbox', unreadCount: 0, totalCount: 0 },
+        { name: 'Sent', path: 'Sent', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'sent', unreadCount: 0, totalCount: 0 },
+        { name: 'Drafts', path: 'Drafts', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'drafts', unreadCount: 0, totalCount: 0 },
+        { name: 'Trash', path: 'Trash', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'trash', unreadCount: 0, totalCount: 0 },
+        { name: 'Spam', path: 'Spam', delimiter: '/', flags: [], level: 0, hasChildren: false, specialUse: 'spam', unreadCount: 0, totalCount: 0 }
+      ];
     }
   }
 
-  // Get emails
+  // Get emails from Supabase
   async getEmails(folder: string = 'INBOX', page: number = 1, limit: number = 50): Promise<{ emails: EmailType[], total: number }> {
     try {
-      console.log('📧 Fetching emails:', { folder, page, limit });
+      console.log('📧 Fetching emails from Supabase:', { folder, page, limit });
       
-      // For localhost, use the local email server
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        const localUrl = `/api/email-sync?folder=${folder}&limit=${limit}`;
-        console.log('🏠 Using local email server:', localUrl);
-        
-        const response = await fetch(localUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('📬 Local email response:', { count: data.emails.length, source: data.source });
-        
-        // Transform local server response to match expected format
-        const transformedEmails = data.emails.map((email: any) => ({
-          id: email.uid,
-          uid: email.uid,
-          folder: folder,
-          subject: email.subject || 'No subject',
-          from: this.parseEmailAddress(email.from),
-          to: Array.isArray(email.to) ? email.to.map((addr: string) => this.parseEmailAddress(addr)) : [],
-          date: email.date,
-          text: email.body || email.text,
-          html: email.html,
-          textAsHtml: email.body ? `<pre>${email.body}</pre>` : undefined,
-          preview: email.preview,
-          flags: email.flags || [],
-          attachments: email.attachments || []
-        }));
-        
-        return {
-          emails: transformedEmails,
-          total: data.count || transformedEmails.length
-        };
-      }
-      
-      // For production, use Firebase Functions
-      const url = this.backendUrl === 'mixed'
-        ? 'https://us-central1-umzugsapp.cloudfunctions.net/listEmails'
-        : this.backendUrl 
-        ? `${this.backendUrl}/listEmails` 
-        : `${this.baseUrl}/list`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folder, page, limit })
+      // Call Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('email-list', {
+        body: { folder, page, limit }
       });
-      
-      if (!response.ok) {
-        console.error('❌ Email API error:', response.status, response.statusText);
-        throw new Error('Failed to get emails');
+
+      if (error) {
+        console.error('❌ Error fetching emails:', error);
+        return { emails: [], total: 0 };
       }
       
-      const data = await response.json();
-      console.log('📬 Email API response:', data);
-      // Convert API response to EmailType
-      const emails: EmailType[] = (data.emails || []).map((email: any) => ({
-        id: email.id,
-        uid: email.id,
-        folder: email.folder,
-        from: email.from || { address: 'unknown@email.com', name: 'Unknown' },
-        to: email.to || [],
+      console.log('📬 Email response:', { count: data?.emails?.length || 0 });
+      
+      // Transform emails to match expected format
+      const transformedEmails = (data?.emails || []).map((email: any) => ({
+        id: email.uid || email.id,
+        uid: email.uid || email.id,
+        folder: folder,
+        subject: email.subject || 'No subject',
+        from: parseEmailAddress(email.from),
+        to: Array.isArray(email.to) ? email.to.map((addr: string) => parseEmailAddress(addr)) : [],
         cc: email.cc || [],
-        subject: email.subject || '',
         date: email.date,
-        text: email.text || email.body,
+        text: email.body || email.text,
         html: email.html,
-        snippet: email.snippet || '',
+        textAsHtml: email.body ? `<pre>${email.body}</pre>` : undefined,
+        preview: email.preview || email.snippet,
         flags: email.flags || [],
         attachments: email.attachments || []
       }));
       
       return {
-        emails,
-        total: data.total || 0
+        emails: transformedEmails,
+        total: data?.total || transformedEmails.length
       };
     } catch (error) {
       console.error('Error getting emails:', error);
@@ -220,38 +144,36 @@ class IONOSEmailService {
     }
   }
 
-  // Get single email
+  // Get single email from Supabase
   async getEmail(uid: string, folder: string = 'INBOX'): Promise<EmailType | null> {
     try {
-      const url = this.backendUrl === 'mixed'
-        ? 'https://us-central1-umzugsapp.cloudfunctions.net/readEmail'
-        : this.backendUrl 
-        ? `${this.backendUrl}/readEmail` 
-        : `${this.baseUrl}/read`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, folder })
+      console.log('📧 Fetching single email from Supabase:', { uid, folder });
+      
+      const { data, error } = await supabase.functions.invoke('email-read', {
+        body: { uid, folder }
       });
+
+      if (error) {
+        console.error('❌ Error fetching email:', error);
+        return null;
+      }
       
-      if (!response.ok) throw new Error('Failed to get email');
-      
-      const data = await response.json();
-      if (!data.email) return null;
+      if (!data?.email) return null;
       
       const email = data.email;
       // Convert to EmailType
       return {
-        id: email.id,
-        uid: email.id,
-        folder: email.folder,
-        from: email.from || { address: 'unknown@email.com', name: 'Unknown' },
-        to: email.to || [],
+        id: email.uid || email.id,
+        uid: email.uid || email.id,
+        folder: email.folder || folder,
+        from: parseEmailAddress(email.from),
+        to: Array.isArray(email.to) ? email.to.map((addr: string) => parseEmailAddress(addr)) : [],
         cc: email.cc || [],
         subject: email.subject || '',
         date: email.date,
         text: email.text || email.body,
         html: email.html,
+        textAsHtml: email.textAsHtml || (email.body ? `<pre>${email.body}</pre>` : undefined),
         snippet: email.snippet || '',
         flags: email.flags || [],
         attachments: email.attachments || []
@@ -262,114 +184,156 @@ class IONOSEmailService {
     }
   }
 
-  // Send email
+  // Send email via Supabase
   async sendEmail(to: string, subject: string, content: string, attachments?: any[]): Promise<boolean> {
     try {
-      const url = this.backendUrl === 'mixed'
-        ? 'https://europe-west3-umzugsapp.cloudfunctions.net/sendEmail'
-        : this.backendUrl 
-        ? `${this.backendUrl}/sendEmail` 
-        : '/api/send-email';
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      console.log('📧 Sending email via Supabase...');
+      
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: {
           to,
           subject,
           content,
           html: content,
           attachments
-        })
+        }
       });
+
+      if (error) {
+        console.error('❌ Error sending email:', error);
+        return false;
+      }
       
-      if (!response.ok) throw new Error('Failed to send email');
-      
-      const data = await response.json();
-      return data.success || false;
+      return data?.success || false;
     } catch (error) {
       console.error('Error sending email:', error);
       return false;
     }
   }
 
-  // Mark as read
+  // Mark as read via Supabase
   async markAsRead(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
-      // markEmailAsRead function doesn't exist in Firebase Functions
-      // For now, just return true to prevent errors
-      console.log('⚠️ markAsRead is not implemented in Firebase Functions');
-      return true;
+      const { data, error } = await supabase.functions.invoke('email-mark-read', {
+        body: { uid, folder, read: true }
+      });
+
+      if (error) {
+        console.error('❌ Error marking as read:', error);
+        return false;
+      }
+      
+      return data?.success || false;
     } catch (error) {
       console.error('Error marking as read:', error);
       return false;
     }
   }
 
-  // Mark as unread
+  // Mark as unread via Supabase
   async markAsUnread(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
-      // markEmailAsUnread function doesn't exist in Firebase Functions
-      console.log('⚠️ markAsUnread is not implemented in Firebase Functions');
-      return true;
+      const { data, error } = await supabase.functions.invoke('email-mark-read', {
+        body: { uid, folder, read: false }
+      });
+
+      if (error) {
+        console.error('❌ Error marking as unread:', error);
+        return false;
+      }
+      
+      return data?.success || false;
     } catch (error) {
       console.error('Error marking as unread:', error);
       return false;
     }
   }
 
-  // Delete email
+  // Delete email via Supabase
   async deleteEmail(uid: string, folder: string = 'INBOX'): Promise<boolean> {
     try {
-      // deleteEmail function doesn't exist in Firebase Functions
-      console.log('⚠️ deleteEmail is not implemented in Firebase Functions');
-      return false; // Return false as we can't actually delete
+      const { data, error } = await supabase.functions.invoke('email-delete', {
+        body: { uid, folder }
+      });
+
+      if (error) {
+        console.error('❌ Error deleting email:', error);
+        return false;
+      }
+      
+      return data?.success || false;
     } catch (error) {
       console.error('Error deleting email:', error);
       return false;
     }
   }
 
-  // Move email
+  // Move email via Supabase
   async moveEmail(uid: string, fromFolder: string, toFolder: string): Promise<boolean> {
     try {
-      // moveEmail function doesn't exist in Firebase Functions
-      console.log('⚠️ moveEmail is not implemented in Firebase Functions');
-      return false; // Return false as we can't actually move
+      const { data, error } = await supabase.functions.invoke('email-move', {
+        body: { uid, fromFolder, toFolder }
+      });
+
+      if (error) {
+        console.error('❌ Error moving email:', error);
+        return false;
+      }
+      
+      return data?.success || false;
     } catch (error) {
       console.error('Error moving email:', error);
       return false;
     }
   }
 
-  // Star/unstar email
+  // Star/unstar email via Supabase
   async toggleStar(uid: string, folder: string = 'INBOX', starred: boolean): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/star`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: uid, folder, starred })
+      const { data, error } = await supabase.functions.invoke('email-star', {
+        body: { uid, folder, starred }
       });
+
+      if (error) {
+        console.error('❌ Error toggling star:', error);
+        return false;
+      }
       
-      return response.ok;
+      return data?.success || false;
     } catch (error) {
       console.error('Error toggling star:', error);
       return false;
     }
   }
 
-  // Search emails
+  // Search emails via Supabase
   async searchEmails(query: string, folder: string = 'INBOX'): Promise<EmailType[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/search`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, folder })
+      const { data, error } = await supabase.functions.invoke('email-search', {
+        body: { query, folder }
       });
+
+      if (error) {
+        console.error('❌ Error searching emails:', error);
+        return [];
+      }
       
-      if (!response.ok) throw new Error('Failed to search emails');
-      
-      const data = await response.json();
-      return data.emails || [];
+      // Transform search results
+      return (data?.emails || []).map((email: any) => ({
+        id: email.uid || email.id,
+        uid: email.uid || email.id,
+        folder: email.folder || folder,
+        from: parseEmailAddress(email.from),
+        to: Array.isArray(email.to) ? email.to.map((addr: string) => parseEmailAddress(addr)) : [],
+        cc: email.cc || [],
+        subject: email.subject || '',
+        date: email.date,
+        text: email.text || email.body,
+        html: email.html,
+        snippet: email.snippet || '',
+        flags: email.flags || [],
+        attachments: email.attachments || []
+      }));
     } catch (error) {
       console.error('Error searching emails:', error);
       return [];
@@ -378,11 +342,11 @@ class IONOSEmailService {
 
   // Event handlers (for compatibility)
   on(event: string, callback: Function) {
-    console.log('Event listeners not implemented in IONOS service');
+    console.log('Event listeners not implemented in Supabase service');
   }
 
   off(event: string, callback: Function) {
-    console.log('Event listeners not implemented in IONOS service');
+    console.log('Event listeners not implemented in Supabase service');
   }
 
   disconnect() {
