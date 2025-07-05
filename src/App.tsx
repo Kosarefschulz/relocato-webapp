@@ -52,6 +52,7 @@ import { EmailTestDashboard } from './components/EmailTestDashboard';
 import VisibilityFix from './components/VisibilityFix';
 import EmailDebugger from './components/EmailDebugger';
 import EmailTestIONOS from './components/EmailTestIONOS';
+import EmailTestPage from './components/EmailTestPage';
 import { AIAssistantChatV2 } from './components/AIAssistant';
 import { aiConfigService } from './services/ai/aiConfigService';
 import QuoteConfirmationPage from './pages/QuoteConfirmationPage';
@@ -286,6 +287,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/email-test-ionos" 
         element={<EmailTestIONOS />} 
+      />
+      
+      {/* Supabase Email Test */}
+      <Route 
+        path="/email-test-supabase" 
+        element={<EmailTestPage />} 
       />
       
       {/* Customer Import Page */}
