@@ -30,8 +30,7 @@ import {
   Link as LinkIcon
 } from '@mui/icons-material';
 import { Email } from '../types/email';
-import { collection, addDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabaseService } from '../services/supabaseService';
 
 interface Customer {
   id: string;
@@ -86,24 +85,39 @@ const EmailToCustomerDialog: React.FC<EmailToCustomerDialogProps> = ({
     }
   }, [open, email]);
 
-  // Load customers from Firestore
+  // Load customers from Supabase
   const loadCustomers = async () => {
     try {
       setLoading(true);
-      const customersRef = collection(db, 'customers');
-      const snapshot = await getDocs(customersRef);
-      const customersList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Customer));
-      setCustomers(customersList);
+      const customersList = await supabaseService.getCustomers();
+      setCustomers(customersList.map(c => ({
+        id: c.id,
+        name: c.name,
+        email: c.email || '',
+        phone: c.phone,
+        company: '', // Not mapped from Customer type
+        address: c.fromAddress || c.toAddress || '',
+        notes: c.notes || '',
+        createdAt: c.createdAt || new Date(),
+        emailIds: [] // Not implemented yet
+      })));
       
       // Try to find existing customer by email
       const existingCustomer = customersList.find(
-        c => c.email.toLowerCase() === email.from?.address?.toLowerCase()
+        c => c.email?.toLowerCase() === email.from?.address?.toLowerCase()
       );
       if (existingCustomer) {
-        setSelectedCustomer(existingCustomer);
+        setSelectedCustomer({
+          id: existingCustomer.id,
+          name: existingCustomer.name,
+          email: existingCustomer.email || '',
+          phone: existingCustomer.phone,
+          company: '',
+          address: existingCustomer.fromAddress || existingCustomer.toAddress || '',
+          notes: existingCustomer.notes || '',
+          createdAt: existingCustomer.createdAt || new Date(),
+          emailIds: []
+        });
       }
     } catch (error) {
       console.error('Error loading customers:', error);
@@ -119,25 +133,16 @@ const EmailToCustomerDialog: React.FC<EmailToCustomerDialogProps> = ({
     try {
       setSaving(true);
       
-      // Update customer with email ID
-      const customerRef = doc(db, 'customers', selectedCustomer.id);
-      const emailIds = selectedCustomer.emailIds || [];
-      emailIds.push(email.id);
+      // Note: Email-Customer linking not yet implemented with Supabase
+      console.log('📧 Email-Customer linking disabled (requires Supabase implementation)');
       
-      await updateDoc(customerRef, {
-        emailIds: emailIds,
-        lastEmailAt: new Date()
-      });
+      // TODO: Implement email-customer linking with Supabase
+      // This would require:
+      // 1. Creating an email_customer_links table in Supabase
+      // 2. Updating customer records with email references
+      // 3. Implementing proper many-to-many relationship
       
-      // Also store the link in the email collection
-      await addDoc(collection(db, 'emailCustomerLinks'), {
-        emailId: email.id,
-        customerId: selectedCustomer.id,
-        linkedAt: new Date(),
-        emailSubject: email.subject,
-        emailFrom: email.from?.address
-      });
-      
+      // For now, just navigate to customer
       onCustomerLinked?.(selectedCustomer.id);
       onClose();
     } catch (error) {
@@ -156,27 +161,33 @@ const EmailToCustomerDialog: React.FC<EmailToCustomerDialogProps> = ({
     try {
       setSaving(true);
       
-      // Create new customer
+      // Create new customer using Supabase
       const customerData = {
-        ...newCustomer,
-        createdAt: new Date(),
-        emailIds: [email.id],
-        lastEmailAt: new Date(),
-        source: 'email'
+        name: newCustomer.name,
+        email: newCustomer.email,
+        phone: newCustomer.phone,
+        fromAddress: newCustomer.address,
+        notes: `${newCustomer.notes}\n\nCreated from email: ${email.subject}`,
+        // Map other required fields with defaults
+        toAddress: '',
+        movingDate: '',
+        apartment: {
+          rooms: 0,
+          area: 0,
+          floor: 0,
+          hasElevator: false
+        },
+        services: [],
+        salesStatus: 'new',
+        status: 'active'
       };
       
-      const docRef = await addDoc(collection(db, 'customers'), customerData);
+      const customerId = await supabaseService.addCustomer(customerData);
       
-      // Store the link
-      await addDoc(collection(db, 'emailCustomerLinks'), {
-        emailId: email.id,
-        customerId: docRef.id,
-        linkedAt: new Date(),
-        emailSubject: email.subject,
-        emailFrom: email.from?.address
-      });
+      // TODO: Store email-customer link in Supabase
+      console.log('📧 Email-Customer link would be stored (not implemented yet)');
       
-      onCustomerLinked?.(docRef.id);
+      onCustomerLinked?.(customerId);
       onClose();
     } catch (error) {
       console.error('Error creating customer:', error);

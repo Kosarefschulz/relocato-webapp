@@ -49,8 +49,7 @@ import {
 import { Email } from '../types/email';
 import { format } from 'date-fns';
 import EmailToCustomerDialog from './EmailToCustomerDialog';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabaseService } from '../services/supabaseService';
 import { useNavigate } from 'react-router-dom';
 
 interface EmailViewerProfessionalProps {
@@ -108,28 +107,53 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
     loadLinkedCustomer();
   }, [email.id]);
 
+  // Load email content if missing
+  useEffect(() => {
+    const loadEmailContent = async () => {
+      if (!email.html && !email.text && !email.textAsHtml && email.uid) {
+        try {
+          setLoadingContent(true);
+          console.log('📧 Loading missing email content for UID:', email.uid);
+          
+          // Try to load full email content using IONOS service
+          const { ionosEmailService } = await import('../services/emailServiceIONOS');
+          const ionosService = ionosEmailService;
+          const fullEmail = await ionosService.getEmail(String(email.uid), email.folder || 'INBOX');
+          
+          if (fullEmail && (fullEmail.html || fullEmail.text || fullEmail.textAsHtml)) {
+            // Update the email object with the loaded content
+            Object.assign(email, {
+              html: fullEmail.html,
+              text: fullEmail.text,
+              textAsHtml: fullEmail.textAsHtml
+            });
+            console.log('✅ Email content loaded successfully');
+          } else {
+            console.log('⚠️ No content found for email');
+          }
+        } catch (error) {
+          console.error('❌ Error loading email content:', error);
+        } finally {
+          setLoadingContent(false);
+        }
+      }
+    };
+
+    loadEmailContent();
+  }, [email.id, email.html, email.text, email.textAsHtml]);
+
   const loadLinkedCustomer = async () => {
     try {
       setLoadingCustomer(true);
       
-      // Check if email is linked to a customer
-      const linksQuery = query(
-        collection(db, 'emailCustomerLinks'),
-        where('emailId', '==', email.id)
-      );
-      const linksSnapshot = await getDocs(linksQuery);
+      // Note: Email-Customer linking not yet implemented with Supabase
+      // For now, we'll disable this functionality until proper implementation
+      console.log('📧 Email-Customer linking disabled (requires Supabase implementation)');
       
-      if (!linksSnapshot.empty) {
-        const link = linksSnapshot.docs[0].data();
-        const customerDoc = await getDoc(doc(db, 'customers', link.customerId));
-        
-        if (customerDoc.exists()) {
-          setLinkedCustomer({
-            id: customerDoc.id,
-            ...customerDoc.data()
-          });
-        }
-      }
+      // TODO: Implement email-customer linking with Supabase
+      // This would require creating an email_customer_links table in Supabase
+      // and implementing the appropriate queries
+      
     } catch (error) {
       console.error('Error loading linked customer:', error);
     } finally {
@@ -163,14 +187,12 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
 
   // Extract email content
   const getEmailContent = () => {
-    // Check if content is still loading (no html and no text)
-    if (!email.html && !email.text && !email.textAsHtml) {
-      setLoadingContent(true);
-      return { __html: '<div style="text-align: center; padding: 20px;">Loading email content...</div>' };
+    // Check if content is still loading
+    if (loadingContent) {
+      return { __html: '<div style="text-align: center; padding: 20px; color: #666;"><div style="margin-bottom: 10px;">⏳</div>Loading email content...</div>' };
     }
     
-    setLoadingContent(false);
-    
+    // Return available content
     if (email.html) {
       return { __html: email.html };
     }
@@ -180,7 +202,9 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
     if (email.text) {
       return { __html: email.text.replace(/\n/g, '<br>') };
     }
-    return { __html: '<p>No content available</p>' };
+    
+    // No content available
+    return { __html: '<div style="text-align: center; padding: 20px; color: #999;"><div style="margin-bottom: 10px;">📧</div>No content available for this email</div>' };
   };
 
   return (
