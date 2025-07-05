@@ -133,6 +133,21 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
           }
         } catch (error) {
           console.error('❌ Error loading email content:', error);
+          // Fallback: Display email metadata if content loading fails
+          if (!email.text && !email.html && !email.textAsHtml) {
+            const fallbackContent = `
+              <div style="padding: 20px;">
+                <h3>Email Details</h3>
+                <p><strong>From:</strong> ${email.from?.name || email.from?.address || 'Unknown'}</p>
+                <p><strong>To:</strong> ${Array.isArray(email.to) ? email.to.map(t => t.name || t.address).join(', ') : 'Unknown'}</p>
+                <p><strong>Subject:</strong> ${email.subject || 'No subject'}</p>
+                <p><strong>Date:</strong> ${email.date ? new Date(email.date).toLocaleString() : 'Unknown'}</p>
+                <hr />
+                <p style="color: #666; font-style: italic;">Email content could not be loaded due to server issues. This may be a temporary problem.</p>
+              </div>
+            `;
+            Object.assign(email, { textAsHtml: fallbackContent });
+          }
         } finally {
           setLoadingContent(false);
         }
