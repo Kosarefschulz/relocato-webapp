@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
       secure: false, // true for 465, false for other ports
       auth: {
         user: 'bielefeld@relocato.de',
-        pass: 'Bicm1308!'
+        pass: 'Bicm1308'
       },
       tls: {
         rejectUnauthorized: false,
