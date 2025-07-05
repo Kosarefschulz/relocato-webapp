@@ -62,7 +62,7 @@
     "api/email/star.js": {
       "maxDuration": 10
     },
-    "api/email-imap.ts": {
+    "api/email-imap.js": {
       "maxDuration": 30
     }
   },

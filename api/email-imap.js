@@ -1,6 +1,5 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import * as Imap from 'imap';
-import { simpleParser } from 'mailparser';
+const Imap = require('imap');
+const { simpleParser } = require('mailparser');
 
 // Enable CORS
 const corsHeaders = {
@@ -9,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).setHeader('Access-Control-Allow-Origin', '*').end();
@@ -54,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       default:
         return res.status(400).json({ error: 'Invalid operation' });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('IMAP Error:', error);
     return res.status(500).json({ 
       success: false, 
@@ -64,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-async function listEmails(config: any, folder: string, page: number, limit: number, res: VercelResponse) {
+async function listEmails(config, folder, page, limit, res) {
   return new Promise((resolve, reject) => {
     const imap = new Imap(config);
     const emails: any[] = [];
@@ -100,7 +99,7 @@ async function listEmails(config: any, folder: string, page: number, limit: numb
         });
 
         f.on('message', (msg, seqno) => {
-          const emailData: any = { seqno };
+          const emailData = { seqno };
 
           msg.on('body', (stream, info) => {
             let buffer = '';
@@ -164,7 +163,7 @@ async function listEmails(config: any, folder: string, page: number, limit: numb
   });
 }
 
-async function readEmail(config: any, folder: string, uid: string, res: VercelResponse) {
+async function readEmail(config, folder, uid, res) {
   return new Promise((resolve, reject) => {
     const imap = new Imap(config);
 
@@ -176,7 +175,7 @@ async function readEmail(config: any, folder: string, uid: string, res: VercelRe
         }
 
         const f = imap.fetch(uid, { bodies: '', markSeen: true });
-        let email: any = null;
+        let email = null;
 
         f.on('message', (msg, seqno) => {
           msg.on('body', (stream, info) => {
@@ -193,7 +192,7 @@ async function readEmail(config: any, folder: string, uid: string, res: VercelRe
                   name: parsed.from.text,
                   address: parsed.from.value[0].address
                 } : { name: 'Unknown', address: 'unknown@unknown.com' },
-                to: parsed.to ? parsed.to.value.map((t: any) => ({
+                to: parsed.to ? parsed.to.value.map((t) => ({
                   name: t.name || '',
                   address: t.address
                 })) : [],
@@ -202,7 +201,7 @@ async function readEmail(config: any, folder: string, uid: string, res: VercelRe
                 text: parsed.text || '',
                 html: parsed.html || '',
                 body: parsed.text || parsed.html || '',
-                attachments: parsed.attachments ? parsed.attachments.map((a: any) => ({
+                attachments: parsed.attachments ? parsed.attachments.map((a) => ({
                   filename: a.filename,
                   size: a.size,
                   contentType: a.contentType
@@ -248,7 +247,7 @@ async function readEmail(config: any, folder: string, uid: string, res: VercelRe
   });
 }
 
-async function listFolders(config: any, res: VercelResponse) {
+async function listFolders(config, res) {
   return new Promise((resolve, reject) => {
     const imap = new Imap(config);
 
@@ -277,8 +276,8 @@ async function listFolders(config: any, res: VercelResponse) {
   });
 }
 
-function parseFolders(boxes: any, parentPath = '', level = 0): any[] {
-  const folders: any[] = [];
+function parseFolders(boxes, parentPath = '', level = 0) {
+  const folders = [];
 
   for (const [name, box] of Object.entries(boxes)) {
     const path = parentPath ? `${parentPath}/${name}` : name;
@@ -303,7 +302,7 @@ function parseFolders(boxes: any, parentPath = '', level = 0): any[] {
   return folders;
 }
 
-function detectSpecialUse(name: string, attribs: string[]): string | null {
+function detectSpecialUse(name, attribs) {
   const lowerName = name.toLowerCase();
   
   if (lowerName === 'inbox') return 'inbox';
@@ -315,7 +314,7 @@ function detectSpecialUse(name: string, attribs: string[]): string | null {
   return null;
 }
 
-function parseEmailAddress(addressStr: string): { name: string; address: string } {
+function parseEmailAddress(addressStr) {
   if (!addressStr) return { name: '', address: '' };
   
   const match = addressStr.match(/^"?([^"<]*)"?\s*<?([^>]*)>?$/);
