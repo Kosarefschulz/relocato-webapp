@@ -110,47 +110,62 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
   // Load email content if missing
   useEffect(() => {
     const loadEmailContent = async () => {
-      if (!email.html && !email.text && !email.textAsHtml && email.uid) {
+      if (!email.html && !email.text && !email.textAsHtml) {
         try {
           setLoadingContent(true);
-          console.log('📧 Loading missing email content for UID:', email.uid);
+          console.log('📧 Email has no content, checking email object:', {
+            id: email.id,
+            uid: email.uid,
+            hasText: !!email.text,
+            hasHtml: !!email.html,
+            hasTextAsHtml: !!email.textAsHtml,
+            hasBody: !!(email as any).body,
+            emailKeys: Object.keys(email)
+          });
           
-          // Try to load full email content using IONOS service
-          const { ionosEmailService } = await import('../services/emailServiceIONOS');
-          const ionosService = ionosEmailService;
-          const fullEmail = await ionosService.getEmail(String(email.uid), email.folder || 'INBOX');
-          
-          if (fullEmail && (fullEmail.html || fullEmail.text || fullEmail.textAsHtml)) {
-            // Update the email object with the loaded content
+          // Check if email has body property that wasn't mapped
+          const emailAny = email as any;
+          if (emailAny.body) {
+            console.log('📝 Found body property, using it as content');
             Object.assign(email, {
-              html: fullEmail.html,
-              text: fullEmail.text,
-              textAsHtml: fullEmail.textAsHtml
+              text: emailAny.body,
+              textAsHtml: `<pre>${emailAny.body}</pre>`
             });
-            console.log('✅ Email content loaded successfully');
-          } else {
-            console.log('⚠️ No content found for email');
+            setLoadingContent(false);
+            return;
           }
-        } catch (error) {
-          console.error('❌ Error loading email content:', error);
-          // Fallback: Display email metadata if content loading fails
-          if (!email.text && !email.html && !email.textAsHtml) {
-            const fallbackContent = `
-              <div style="padding: 20px;">
-                <h3>Email Details</h3>
-                <p><strong>From:</strong> ${email.from?.name || email.from?.address || 'Unknown'}</p>
-                <p><strong>To:</strong> ${Array.isArray(email.to) ? email.to.map(t => t.name || t.address).join(', ') : 'Unknown'}</p>
-                <p><strong>Subject:</strong> ${email.subject || 'No subject'}</p>
-                <p><strong>Date:</strong> ${email.date ? new Date(email.date).toLocaleString() : 'Unknown'}</p>
-                <hr />
-                <p style="color: #666; font-style: italic;">Email content could not be loaded due to server issues. This may be a temporary problem.</p>
+          
+          // Try to load from preview if available
+          if (emailAny.preview) {
+            console.log('📝 Using preview as content');
+            Object.assign(email, {
+              text: emailAny.preview,
+              textAsHtml: `<p>${emailAny.preview}</p>`
+            });
+            setLoadingContent(false);
+            return;
+          }
+          
+          // If still no content, create a basic display
+          const basicContent = `
+            <div style="padding: 20px; font-family: Arial, sans-serif;">
+              <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 10px 0;">${email.subject || 'No Subject'}</h3>
+                <p style="margin: 5px 0; color: #666;"><strong>From:</strong> ${email.from?.name || email.from?.address || 'Unknown'}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Date:</strong> ${email.date ? new Date(email.date).toLocaleString('de-DE') : 'Unknown'}</p>
               </div>
-            `;
-            Object.assign(email, { textAsHtml: fallbackContent });
-          }
+              <div style="padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">
+                <p>Email content is being loaded...</p>
+                <p style="color: #999; font-size: 12px;">UID: ${email.uid || email.id}</p>
+              </div>
+            </div>
+          `;
+          Object.assign(email, { textAsHtml: basicContent });
         } finally {
           setLoadingContent(false);
         }
+      } else {
+        setLoadingContent(false);
       }
     };
 

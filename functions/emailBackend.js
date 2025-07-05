@@ -102,34 +102,46 @@ exports.listEmails = functions.https.onRequest(handleCors(async (req, res) => {
           const end = Math.max(1, totalCount - ((page - 1) * limit));
           
           const fetch = imap.seq.fetch(`${start}:${end}`, {
-            bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
+            bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)', 'TEXT'],
             struct: false
           });
           
           fetch.on('message', (msg, seqno) => {
             let header = '';
+            let body = '';
             let uid = null;
             let flags = [];
+            let emailInfo = {
+              id: uid || seqno,
+              seqno: seqno,
+              flags: flags
+            };
             
             msg.on('body', (stream, info) => {
+              let buffer = '';
               stream.on('data', (chunk) => {
-                header += chunk.toString('utf8');
+                buffer += chunk.toString('utf8');
+              });
+              stream.on('end', () => {
+                if (info.which === 'TEXT') {
+                  body = buffer;
+                } else {
+                  header = buffer;
+                }
               });
             });
             
             msg.once('attributes', (attrs) => {
               uid = attrs.uid;
+              emailInfo.id = uid;
+              emailInfo.uid = uid;
               flags = attrs.flags || [];
+              emailInfo.flags = flags;
             });
             
-            msg.once('end', () => {
+            msg.once('end', async () => {
+              // Parse header
               const lines = header.split('\r\n');
-              const emailInfo = {
-                id: uid || seqno,
-                seqno: seqno,
-                flags: flags
-              };
-              
               lines.forEach(line => {
                 if (line.startsWith('From: ')) {
                   emailInfo.from = line.substring(6);
@@ -141,6 +153,20 @@ exports.listEmails = functions.https.onRequest(handleCors(async (req, res) => {
                   emailInfo.date = line.substring(6);
                 }
               });
+              
+              // Parse body
+              if (body) {
+                try {
+                  const parsed = await simpleParser(body);
+                  emailInfo.text = parsed.text;
+                  emailInfo.html = parsed.html;
+                  emailInfo.textAsHtml = parsed.textAsHtml;
+                } catch (e) {
+                  // If parsing fails, use raw body
+                  emailInfo.text = body;
+                  emailInfo.textAsHtml = `<pre>${body}</pre>`;
+                }
+              }
               
               emails.push(emailInfo);
             });
