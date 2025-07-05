@@ -201,13 +201,19 @@ module.exports = async function handler(req, res) {
               hasBody: !!emailData.email.body
             });
             // Ensure we have the right structure
+            // Note: Supabase returns 'body' field with raw MIME content
+            const emailBody = emailData.email.body || '';
+            const emailText = emailData.email.text || emailBody;
+            const emailHtml = emailData.email.html || (emailBody ? `<pre>${emailBody}</pre>` : '');
+            
             return res.status(200).json({
               success: true,
               email: {
                 ...emailData.email,
-                text: emailData.email.text || emailData.email.body || '',
-                html: emailData.email.html || (emailData.email.body ? `<pre>${emailData.email.body}</pre>` : ''),
-                body: emailData.email.body || emailData.email.text || ''
+                text: emailText,
+                html: emailHtml,
+                textAsHtml: emailHtml,
+                body: emailBody
               }
             });
           } else if (emailError) {

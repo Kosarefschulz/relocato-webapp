@@ -30,6 +30,65 @@ function decodeMimeString(str: string): string {
   });
 }
 
+// Parse MIME multipart body
+function parseMimeBody(mimeBody: string): { text?: string; html?: string } {
+  const result: { text?: string; html?: string } = {};
+  
+  // Check for multipart boundary
+  const boundaryMatch = mimeBody.match(/--([^\r\n]+)/);
+  if (!boundaryMatch) {
+    // Not multipart, return as is
+    return { text: mimeBody };
+  }
+  
+  const boundary = boundaryMatch[1];
+  const parts = mimeBody.split(new RegExp(`--${boundary}`));
+  
+  for (const part of parts) {
+    // Skip empty parts
+    if (!part.trim() || part.trim() === '--') continue;
+    
+    // Find content type
+    const contentTypeMatch = part.match(/Content-Type:\s*([^;\r\n]+)/i);
+    if (!contentTypeMatch) continue;
+    
+    const contentType = contentTypeMatch[1].toLowerCase();
+    
+    // Find content transfer encoding
+    const encodingMatch = part.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
+    const encoding = encodingMatch ? encodingMatch[1].toLowerCase() : '7bit';
+    
+    // Extract body (after double CRLF)
+    const bodyMatch = part.match(/\r\n\r\n([\s\S]+)$/);
+    if (!bodyMatch) continue;
+    
+    let content = bodyMatch[1].trim();
+    
+    // Decode based on transfer encoding
+    if (encoding === 'base64') {
+      try {
+        content = atob(content.replace(/\s/g, ''));
+      } catch (e) {
+        console.error('Base64 decode error:', e);
+      }
+    } else if (encoding === 'quoted-printable') {
+      content = content.replace(/=\r\n/g, '');
+      content = content.replace(/=([0-9A-F]{2})/gi, (m, hex) => 
+        String.fromCharCode(parseInt(hex, 16))
+      );
+    }
+    
+    // Store based on content type
+    if (contentType.includes('text/plain')) {
+      result.text = content;
+    } else if (contentType.includes('text/html')) {
+      result.html = content;
+    }
+  }
+  
+  return result;
+}
+
 // Simple IMAP class (same as in email-list)
 class SimpleIMAP {
   private conn: Deno.Conn | null = null;
@@ -107,11 +166,15 @@ class SimpleIMAP {
     const bodyMatch = response.match(/BODY\[TEXT\]\s*{(\d+)}\r\n([\s\S]*?)(?=\r\n\)|\r\n\* )/);
     if (bodyMatch) {
       email.body = bodyMatch[2];
-      email.text = bodyMatch[2];
       
-      // Simple HTML detection
-      if (email.body.includes('<html') || email.body.includes('<body')) {
-        email.html = email.body;
+      // Parse MIME body to extract text and HTML parts
+      const parsed = parseMimeBody(email.body);
+      email.text = parsed.text || email.body;
+      email.html = parsed.html;
+      
+      // If no HTML but we have text, create simple HTML
+      if (!email.html && email.text) {
+        email.html = `<pre>${email.text}</pre>`;
       }
     }
     
