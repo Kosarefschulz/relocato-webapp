@@ -450,9 +450,14 @@ const ElementLibrary: React.FC<ElementLibraryProps> = ({ onAddElement }) => {
             {AVAILABLE_VARIABLES.map((variable) => (
               <ListItem
                 key={variable.name}
-                selected={selectedVariable === variable.name}
                 onClick={() => setSelectedVariable(variable.name)}
-                sx={{ cursor: 'pointer' }}
+                sx={{ 
+                  cursor: 'pointer',
+                  backgroundColor: selectedVariable === variable.name ? 'action.selected' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  }
+                }}
               >
                 <ListItemText
                   primary={variable.displayName}
