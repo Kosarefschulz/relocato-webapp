@@ -6,6 +6,30 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+// Decode MIME encoded strings (e.g., =?utf-8?q?text?=)
+function decodeMimeString(str: string): string {
+  if (!str) return str;
+  
+  // Handle encoded-word format: =?charset?encoding?encoded-text?=
+  return str.replace(/=\?([^?]+)\?([BQ])\?([^?]+)\?=/gi, (match, charset, encoding, encodedText) => {
+    try {
+      if (encoding.toUpperCase() === 'Q') {
+        // Quoted-Printable decoding
+        let decoded = encodedText.replace(/_/g, ' ');
+        decoded = decoded.replace(/=([0-9A-F]{2})/gi, (m, hex) => String.fromCharCode(parseInt(hex, 16)));
+        return decoded;
+      } else if (encoding.toUpperCase() === 'B') {
+        // Base64 decoding
+        const buffer = Uint8Array.from(atob(encodedText), c => c.charCodeAt(0));
+        return new TextDecoder(charset).decode(buffer);
+      }
+    } catch (e) {
+      console.error('Failed to decode MIME string:', e);
+    }
+    return match;
+  });
+}
+
 // Simple IMAP class (same as in email-list)
 class SimpleIMAP {
   private conn: Deno.Conn | null = null;
@@ -69,7 +93,7 @@ class SimpleIMAP {
       // Parse Subject
       const subjectMatch = headers.match(/Subject: (.+)/i);
       if (subjectMatch) {
-        email.subject = subjectMatch[1].trim();
+        email.subject = decodeMimeString(subjectMatch[1].trim());
       }
       
       // Parse Date
