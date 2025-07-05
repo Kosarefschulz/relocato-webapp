@@ -66,8 +66,16 @@
       "maxDuration": 30
     },
     "api/email-bridge.js": {
-      "maxDuration": 30,
-      "runtime": "nodejs20.x"
+      "maxDuration": 30
+    },
+    "api/email-proxy.js": {
+      "maxDuration": 10
+    },
+    "api/email-direct.js": {
+      "maxDuration": 10
+    },
+    "api/test-imap.js": {
+      "maxDuration": 10
     }
   },
   "env": {
