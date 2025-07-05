@@ -34,55 +34,86 @@ function decodeMimeString(str: string): string {
 function parseMimeBody(mimeBody: string): { text?: string; html?: string } {
   const result: { text?: string; html?: string } = {};
   
-  // Check for multipart boundary
-  const boundaryMatch = mimeBody.match(/--([^\r\n]+)/);
-  if (!boundaryMatch) {
-    // Not multipart, return as is
+  // First check if this is a multipart message by looking for Content-Type header
+  const contentTypeMatch = mimeBody.match(/Content-Type:\s*([^;\r\n]+)(?:;\s*(.+?))?(?:\r\n|$)/i);
+  if (!contentTypeMatch) {
+    // No Content-Type header, treat as plain text
     return { text: mimeBody };
   }
   
+  const mainContentType = contentTypeMatch[1].toLowerCase().trim();
+  const contentTypeParams = contentTypeMatch[2] || '';
+  
+  // Extract boundary from Content-Type header
+  const boundaryMatch = contentTypeParams.match(/boundary=["']?([^"'\r\n]+)["']?/i);
+  
+  if (!mainContentType.includes('multipart') || !boundaryMatch) {
+    // Not multipart, check if it's text or html
+    if (mainContentType.includes('text/html')) {
+      // Extract body after headers
+      const bodyMatch = mimeBody.match(/\r\n\r\n([\s\S]+)$/);
+      return { html: bodyMatch ? bodyMatch[1] : mimeBody };
+    } else {
+      // Plain text or other
+      const bodyMatch = mimeBody.match(/\r\n\r\n([\s\S]+)$/);
+      return { text: bodyMatch ? bodyMatch[1] : mimeBody };
+    }
+  }
+  
   const boundary = boundaryMatch[1];
-  const parts = mimeBody.split(new RegExp(`--${boundary}`));
+  // Split by boundary, being careful with regex special characters
+  const escapedBoundary = boundary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = mimeBody.split(new RegExp(`--${escapedBoundary}(?:--)?`));
   
   for (const part of parts) {
     // Skip empty parts
-    if (!part.trim() || part.trim() === '--') continue;
+    if (!part.trim()) continue;
     
-    // Find content type
-    const contentTypeMatch = part.match(/Content-Type:\s*([^;\r\n]+)/i);
-    if (!contentTypeMatch) continue;
+    // Find content type in this part
+    const partContentTypeMatch = part.match(/Content-Type:\s*([^;\r\n]+)/i);
+    if (!partContentTypeMatch) continue;
     
-    const contentType = contentTypeMatch[1].toLowerCase();
+    const partContentType = partContentTypeMatch[1].toLowerCase().trim();
     
     // Find content transfer encoding
     const encodingMatch = part.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
-    const encoding = encodingMatch ? encodingMatch[1].toLowerCase() : '7bit';
+    const encoding = encodingMatch ? encodingMatch[1].toLowerCase().trim() : '7bit';
     
-    // Extract body (after double CRLF)
-    const bodyMatch = part.match(/\r\n\r\n([\s\S]+)$/);
+    // Extract body (after double CRLF or double LF)
+    const bodyMatch = part.match(/(?:\r\n\r\n|\n\n)([\s\S]+)$/);
     if (!bodyMatch) continue;
     
-    let content = bodyMatch[1].trim();
+    let content = bodyMatch[1];
+    
+    // Remove any trailing boundary markers
+    content = content.replace(/\r?\n--[^\r\n]+--\s*$/, '');
     
     // Decode based on transfer encoding
     if (encoding === 'base64') {
       try {
-        content = atob(content.replace(/\s/g, ''));
+        // Remove all whitespace from base64
+        const cleanBase64 = content.replace(/[\s\r\n]/g, '');
+        const decoded = atob(cleanBase64);
+        // Convert to proper UTF-8
+        const bytes = Uint8Array.from(decoded, c => c.charCodeAt(0));
+        content = new TextDecoder('utf-8').decode(bytes);
       } catch (e) {
         console.error('Base64 decode error:', e);
       }
     } else if (encoding === 'quoted-printable') {
-      content = content.replace(/=\r\n/g, '');
+      // Handle soft line breaks
+      content = content.replace(/=\r?\n/g, '');
+      // Decode hex sequences
       content = content.replace(/=([0-9A-F]{2})/gi, (m, hex) => 
         String.fromCharCode(parseInt(hex, 16))
       );
     }
     
     // Store based on content type
-    if (contentType.includes('text/plain')) {
-      result.text = content;
-    } else if (contentType.includes('text/html')) {
-      result.html = content;
+    if (partContentType.includes('text/plain') && !result.text) {
+      result.text = content.trim();
+    } else if (partContentType.includes('text/html') && !result.html) {
+      result.html = content.trim();
     }
   }
   
@@ -165,16 +196,43 @@ class SimpleIMAP {
     // Extract body
     const bodyMatch = response.match(/BODY\[TEXT\]\s*{(\d+)}\r\n([\s\S]*?)(?=\r\n\)|\r\n\* )/);
     if (bodyMatch) {
-      email.body = bodyMatch[2];
+      const rawBody = bodyMatch[2];
+      email.body = rawBody;
       
-      // Parse MIME body to extract text and HTML parts
-      const parsed = parseMimeBody(email.body);
-      email.text = parsed.text || email.body;
-      email.html = parsed.html;
+      // Check if the body already contains MIME headers (Content-Type, etc)
+      // If it does, we need to parse it differently
+      if (rawBody.match(/^Content-Type:/im)) {
+        // Body includes headers, parse as complete MIME message
+        const parsed = parseMimeBody(rawBody);
+        email.text = parsed.text || '';
+        email.html = parsed.html || '';
+      } else {
+        // Check if we have Content-Type from main headers
+        const mainContentTypeMatch = response.match(/Content-Type:\s*([^;\r\n]+)(?:;\s*(.+?))?(?:\r\n|$)/i);
+        if (mainContentTypeMatch && mainContentTypeMatch[1].toLowerCase().includes('multipart')) {
+          // It's multipart but headers might be in the HEADER section
+          // Try to parse the body as multipart
+          const parsed = parseMimeBody(rawBody);
+          email.text = parsed.text || rawBody;
+          email.html = parsed.html || '';
+        } else {
+          // Simple message, body is the content
+          email.text = rawBody;
+          email.html = '';
+        }
+      }
       
-      // If no HTML but we have text, create simple HTML
+      // If we have text but no HTML, create simple HTML
       if (!email.html && email.text) {
-        email.html = `<pre>${email.text}</pre>`;
+        // Escape HTML entities and convert newlines
+        const escapedText = email.text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+          .replace(/\n/g, '<br>\n');
+        email.html = `<div style="font-family: Arial, sans-serif; white-space: pre-wrap;">${escapedText}</div>`;
       }
     }
     
