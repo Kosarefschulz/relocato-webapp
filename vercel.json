@@ -94,6 +94,9 @@
     },
     "api/email-send-smtp.js": {
       "maxDuration": 10
+    },
+    "api/email-send-ionos.js": {
+      "maxDuration": 10
     }
   },
   "env": {

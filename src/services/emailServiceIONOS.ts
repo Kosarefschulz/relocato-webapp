@@ -256,7 +256,7 @@ class IONOSEmailService {
       console.log('📧 Sending email via Vercel SMTP...');
       
       // Try Vercel SMTP first
-      const response = await fetch('/api/email-send-smtp', {
+      const response = await fetch('/api/email-send-ionos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
