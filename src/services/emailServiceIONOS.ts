@@ -279,7 +279,7 @@ class IONOSEmailService {
       console.log('⚠️ Vercel SMTP failed, trying Supabase...');
       
       // Fall back to Supabase
-      const { data, error } = await supabase.functions.invoke('email-send-and-store', {
+      const { data, error } = await supabase.functions.invoke('send-email', {
         body: {
           to,
           subject,

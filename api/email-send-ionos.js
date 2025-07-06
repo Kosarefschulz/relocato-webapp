@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { to, subject, text, html, content } = req.body;
+    const { to, subject, text, html, content, attachments } = req.body;
 
     if (!to || !subject) {
       return res.status(400).json({
@@ -58,14 +58,26 @@ module.exports = async function handler(req, res) {
       // Continue anyway, sometimes verify fails but send works
     }
 
-    // Send email
-    const info = await transporter.sendMail({
+    // Prepare mail options
+    const mailOptions = {
       from: '"Relocato Bielefeld" <bielefeld@relocato.de>',
       to: to,
       subject: subject,
       text: emailText,
       html: emailHtml
-    });
+    };
+
+    // Add attachments if provided
+    if (attachments && attachments.length > 0) {
+      mailOptions.attachments = attachments.map(att => ({
+        filename: att.filename,
+        content: att.content,
+        encoding: att.encoding || 'base64'
+      }));
+    }
+
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
 
     console.log('✅ Email sent:', info);
 
