@@ -39,7 +39,20 @@ serve(async (req) => {
     }
 
     console.log('Connecting to IONOS SMTP...')
-    await client.connectTLS(connectConfig)
+    console.log('Connection config:', {
+      hostname: connectConfig.hostname,
+      port: connectConfig.port,
+      username: connectConfig.username,
+      hasPassword: !!connectConfig.password
+    })
+    
+    try {
+      await client.connectTLS(connectConfig)
+      console.log('✅ Connected to SMTP server')
+    } catch (connectError) {
+      console.error('❌ SMTP connection failed:', connectError)
+      throw new Error(`SMTP connection failed: ${connectError.message}`)
+    }
 
     // Prepare email data
     const emailData: any = {
@@ -61,7 +74,23 @@ serve(async (req) => {
     }
 
     // Send email
-    await client.send(emailData)
+    console.log('📧 Sending email with data:', {
+      from: emailData.from,
+      to: emailData.to,
+      subject: emailData.subject,
+      hasContent: !!emailData.content,
+      hasHtml: !!emailData.html,
+      attachmentsCount: emailData.attachments?.length || 0
+    })
+    
+    try {
+      await client.send(emailData)
+      console.log('✅ Email sent via SMTP')
+    } catch (sendError) {
+      console.error('❌ SMTP send failed:', sendError)
+      throw new Error(`SMTP send failed: ${sendError.message}`)
+    }
+    
     await client.close()
 
     console.log('✅ Email sent successfully!')
