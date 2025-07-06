@@ -1,4 +1,4 @@
--- COMPLETE MIGRATIONS FOR EMAIL SYSTEM
+-- FIXED MIGRATIONS FOR EMAIL SYSTEM
 -- Execute this in Supabase SQL Editor: https://supabase.com/dashboard/project/kmxipuaqierjqaikuimi/sql
 
 -- 1. Create email_customer_links table
@@ -16,6 +16,12 @@ CREATE INDEX IF NOT EXISTS idx_email_customer_links_customer_id ON public.email_
 
 ALTER TABLE public.email_customer_links ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view all email-customer links" ON public.email_customer_links;
+DROP POLICY IF EXISTS "Users can create email-customer links" ON public.email_customer_links;
+DROP POLICY IF EXISTS "Users can delete email-customer links" ON public.email_customer_links;
+
+-- Create new policies
 CREATE POLICY "Users can view all email-customer links" ON public.email_customer_links
   FOR SELECT TO authenticated USING (true);
 
@@ -45,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.emails (
   size INTEGER,
   message_id TEXT,
   in_reply_to TEXT,
-  "references" TEXT[],
+  email_references TEXT[], -- renamed from "references"
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(uid, folder)
@@ -60,6 +66,13 @@ CREATE INDEX IF NOT EXISTS idx_emails_message_id ON public.emails(message_id);
 
 ALTER TABLE public.emails ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view all emails" ON public.emails;
+DROP POLICY IF EXISTS "Users can insert emails" ON public.emails;
+DROP POLICY IF EXISTS "Users can update emails" ON public.emails;
+DROP POLICY IF EXISTS "Users can delete emails" ON public.emails;
+
+-- Create new policies
 CREATE POLICY "Users can view all emails" ON public.emails
   FOR SELECT TO authenticated USING (true);
 
@@ -88,17 +101,24 @@ CREATE INDEX IF NOT EXISTS idx_settings_key ON public.settings(key);
 
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their own settings" ON public.settings;
+DROP POLICY IF EXISTS "Users can create their own settings" ON public.settings;
+DROP POLICY IF EXISTS "Users can update their own settings" ON public.settings;
+DROP POLICY IF EXISTS "Users can delete their own settings" ON public.settings;
+
+-- Create new policies
 CREATE POLICY "Users can view their own settings" ON public.settings
-  FOR SELECT TO authenticated USING (user_id = auth.uid());
+  FOR SELECT TO authenticated USING (user_id = auth.uid() OR user_id IS NULL);
 
 CREATE POLICY "Users can create their own settings" ON public.settings
-  FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+  FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid() OR user_id IS NULL);
 
 CREATE POLICY "Users can update their own settings" ON public.settings
-  FOR UPDATE TO authenticated USING (user_id = auth.uid());
+  FOR UPDATE TO authenticated USING (user_id = auth.uid() OR user_id IS NULL);
 
 CREATE POLICY "Users can delete their own settings" ON public.settings
-  FOR DELETE TO authenticated USING (user_id = auth.uid());
+  FOR DELETE TO authenticated USING (user_id = auth.uid() OR user_id IS NULL);
 
 -- 4. Create user_presence table
 CREATE TABLE IF NOT EXISTS public.user_presence (
@@ -118,16 +138,22 @@ CREATE INDEX IF NOT EXISTS idx_user_presence_last_seen ON public.user_presence(l
 
 ALTER TABLE public.user_presence ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view all presence" ON public.user_presence;
+DROP POLICY IF EXISTS "Users can insert their own presence" ON public.user_presence;
+DROP POLICY IF EXISTS "Users can update their own presence" ON public.user_presence;
+
+-- Create new policies
 CREATE POLICY "Users can view all presence" ON public.user_presence
   FOR SELECT TO authenticated USING (true);
 
 CREATE POLICY "Users can insert their own presence" ON public.user_presence
-  FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+  FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid() OR user_id IS NULL);
 
 CREATE POLICY "Users can update their own presence" ON public.user_presence
-  FOR UPDATE TO authenticated USING (user_id = auth.uid());
+  FOR UPDATE TO authenticated USING (user_id = auth.uid() OR user_id IS NULL);
 
--- 5. Create update function
+-- 5. Create update function (only if it doesn't exist)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -156,3 +182,4 @@ GRANT ALL ON public.settings TO authenticated;
 GRANT ALL ON public.user_presence TO authenticated;
 
 -- Done! Your email system database is now ready.
+-- Note: The 'references' column has been renamed to 'email_references' to avoid PostgreSQL keyword conflict.
