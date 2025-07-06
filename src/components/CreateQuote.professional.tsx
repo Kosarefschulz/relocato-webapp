@@ -12,7 +12,7 @@ import {
   GetApp as GetAppIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { sendEmail } from '../services/emailService';
+import { ionosEmailService } from '../services/emailServiceIONOS';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
@@ -263,7 +263,12 @@ const CreateQuote: React.FC = () => {
         }]
       };
       
-      const sent = await sendEmail(emailData);
+      const sent = await ionosEmailService.sendEmail(
+        emailData.to,
+        emailData.subject,
+        emailData.content,
+        emailData.attachments
+      );
       
       if (sent) {
         setSuccess(true);

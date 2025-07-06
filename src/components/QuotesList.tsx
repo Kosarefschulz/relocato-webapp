@@ -26,6 +26,7 @@ import {
 import { Quote, Customer, Invoice } from '../types';
 import { databaseService } from '../config/database.config';
 import { generatePDF, generateInvoicePDF } from '../services/pdfService';
+import { ionosEmailService } from '../services/emailServiceIONOS';
 import { supabaseEmailService } from '../services/supabaseEmailService';
 import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
 import { tokenService } from '../services/tokenService';
@@ -235,12 +236,68 @@ const QuotesList: React.FC = () => {
         reader.readAsDataURL(pdfBlob);
       });
       
-      const sent = await supabaseEmailService.sendQuoteEmail(
-        quote.customerId,
+      const pdfFilename = `Umzugsangebot_${customer.name.replace(/\s+/g, '_')}.pdf`;
+      
+      // Generate email HTML content
+      const mockCalculation = {
+        volumeBase: 0,
+        volumeRange: '',
+        basePrice: quote.price || 0,
+        floorSurcharge: 0,
+        distanceSurcharge: 0,
+        totalPrice: quote.price || 0,
+        finalPrice: quote.price || 0,
+        movingService: 0,
+        packingService: 0,
+        unpackingService: 0,
+        manualTotal: quote.price || 0,
+        boxesPrice: 0,
+        parkingZonePrice: quote.parkingZonePrice || 0,
+        storagePrice: quote.storagePrice || 0,
+        furnitureAssemblyPrice: quote.furnitureAssemblyPrice || 0,
+        furnitureDisassemblyPrice: quote.furnitureDisassemblyPrice || 0,
+        priceBreakdown: {
+          base: quote.price || 0,
+          floors: 0,
+          distance: 0,
+          packing: 0,
+          boxes: 0,
+          parkingZone: quote.parkingZonePrice || 0,
+          storage: quote.storagePrice || 0,
+          furnitureAssembly: quote.furnitureAssemblyPrice || 0,
+          furnitureDisassembly: quote.furnitureDisassemblyPrice || 0,
+          cleaning: 0,
+          clearance: 0,
+          renovation: 0,
+          total: quote.price || 0,
+          tax: (quote.price || 0) * 0.19,
+          packingMaterials: 0,
+          piano: 0,
+          heavyItems: 0
+        }
+      };
+      
+      const quoteEmailContent = generateQuoteEmailHTMLSync({
+        customer: customer,
+        calculation: mockCalculation,
+        quoteDetails: {
+          volume: quote.volume || 0,
+          distance: quote.distance || 0
+        },
+        confirmationToken: quote.confirmationToken || token,
+        companyName: 'RELOCATO® Bielefeld'
+      });
+      
+      // Send email with IONOS service
+      const sent = await ionosEmailService.sendEmail(
         customer.email,
-        customer.name,
-        quote,
-        pdfBase64
+        `Ihr Umzugsangebot von RELOCATO®`,
+        quoteEmailContent,
+        [{
+          filename: pdfFilename,
+          content: pdfBase64.split(',')[1], // Remove data:application/pdf;base64, prefix
+          encoding: 'base64'
+        }]
       );
       
       if (sent) {
@@ -357,18 +414,26 @@ const QuotesList: React.FC = () => {
               reader.readAsDataURL(pdfBlob);
             });
             
-            await supabaseEmailService.sendEmail({
-              to: customer.email,
-              subject: `Rechnung ${invoiceNumber} - ${customer.name}`,
-              content: `Sehr geehrte/r ${customer.name},\n\nanbei finden Sie Ihre Rechnung ${invoiceNumber}.\n\nVielen Dank für Ihr Vertrauen!`,
-              customerId: quote.customerId,
-              templateType: 'invoice',
-              attachments: [{
+            const invoiceEmailContent = `
+              <h2>Sehr geehrte/r ${customer.name},</h2>
+              <p>anbei erhalten Sie Ihre Rechnung für die Umzugsdienstleistung.</p>
+              <p><strong>Rechnungsnummer:</strong> ${invoiceNumber}</p>
+              <p><strong>Rechnungsbetrag:</strong> €${savedInvoice.totalPrice.toFixed(2)} (inkl. MwSt.)</p>
+              <p><strong>Zahlungsziel:</strong> ${new Date(savedInvoice.dueDate).toLocaleDateString('de-DE')}</p>
+              <p>Bitte überweisen Sie den Betrag unter Angabe der Rechnungsnummer auf unser Konto.</p>
+              <p>Mit freundlichen Grüßen<br>Ihr Relocato Team</p>
+            `;
+            
+            await ionosEmailService.sendEmail(
+              customer.email,
+              `Ihre Rechnung ${invoiceNumber} von Relocato`,
+              invoiceEmailContent,
+              [{
                 filename: `Rechnung_${invoiceNumber}.pdf`,
-                content: invoicePdfBase64,
-                contentType: 'application/pdf'
+                content: invoicePdfBase64.split(',')[1],
+                encoding: 'base64'
               }]
-            });
+            );
           }
         } catch (error) {
           console.error('Error sending invoice email:', error);

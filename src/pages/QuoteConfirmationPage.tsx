@@ -41,7 +41,7 @@ import { tokenService } from '../services/tokenService';
 import { motion } from 'framer-motion';
 import SignatureModal from '../components/SignatureModal';
 import { SignatureData } from '../services/pdfSignatureService';
-import { supabaseEmailService } from '../services/supabaseEmailService';
+import { ionosEmailService } from '../services/emailServiceIONOS';
 import { notificationService } from '../services/notificationService';
 import { unifiedDatabaseService as unifiedService } from '../services/unifiedDatabaseService';
 
@@ -194,16 +194,37 @@ const QuoteConfirmationPage: React.FC = () => {
       // Send confirmation email
       try {
         console.log('📧 Sende Bestätigungsmail...');
-        await supabaseEmailService.sendConfirmationEmail(
-          quote.customerId,
+        const confirmationEmailContent = `
+          <h2>Vielen Dank für Ihre Bestätigung!</h2>
+          <p>Sehr geehrte/r ${customerName || quote.customerName || 'Kunde'},</p>
+          <p>wir haben Ihre Bestätigung für den Umzugsauftrag erhalten.</p>
+          
+          <h3>Details Ihrer Bestätigung:</h3>
+          <ul>
+            <li><strong>Umzugsdatum:</strong> ${updatedQuote.moveDate || 'Nach Absprache'}</li>
+            <li><strong>Von:</strong> ${updatedQuote.moveFrom || 'Wird noch mitgeteilt'}</li>
+            <li><strong>Nach:</strong> ${updatedQuote.moveTo || 'Wird noch mitgeteilt'}</li>
+            <li><strong>Preis:</strong> €${updatedQuote.price?.toFixed(2) || '0.00'}</li>
+          </ul>
+          
+          <p>Wir werden uns in Kürze mit Ihnen in Verbindung setzen, um die weiteren Details zu besprechen.</p>
+          
+          <p>Mit freundlichen Grüßen<br>
+          Ihr RELOCATO® Team</p>
+          
+          <hr>
+          <p style="font-size: 12px; color: #666;">
+            RELOCATO® Bielefeld<br>
+            Albrechtstraße 27, 33605 Bielefeld<br>
+            Tel: (0521) 1200551-0<br>
+            E-Mail: bielefeld@relocato.de
+          </p>
+        `;
+        
+        await ionosEmailService.sendEmail(
           customerEmail || '',
-          customerName || quote.customerName || 'Kunde',
-          {
-            moveDate: updatedQuote.moveDate,
-            moveFrom: updatedQuote.moveFrom,
-            moveTo: updatedQuote.moveTo,
-            price: updatedQuote.price
-          }
+          'Ihre Umzugsbestätigung - RELOCATO®',
+          confirmationEmailContent
         );
         console.log('✅ Bestätigungsmail gesendet');
       } catch (emailError) {
