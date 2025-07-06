@@ -14,9 +14,13 @@ async function makeRequest(url, path, data = {}) {
   const protocol = isHttps ? https : http;
   
   return new Promise((resolve, reject) => {
+    const urlParts = url.replace(/^https?:\/\//, '').split(':');
+    const hostname = urlParts[0];
+    const port = urlParts[1] ? parseInt(urlParts[1]) : (isHttps ? 443 : 80);
+    
     const options = {
-      hostname: url.replace(/^https?:\/\//, '').split(':')[0],
-      port: url.includes(':') ? url.split(':').pop() : (isHttps ? 443 : 80),
+      hostname: hostname,
+      port: port,
       path: path,
       method: data ? 'POST' : 'GET',
       headers: {

@@ -270,8 +270,8 @@ class IONOSEmailService {
     try {
       console.log('📧 Sending email via Vercel SMTP...');
       
-      // Try Vercel SMTP first
-      const response = await fetch('/api/email-send-ionos', {
+      // Try Vercel SMTP first - try both endpoints
+      let response = await fetch('/api/send-email-direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -282,6 +282,22 @@ class IONOSEmailService {
           attachments
         })
       });
+      
+      // If direct endpoint fails, try the original one
+      if (!response.ok) {
+        console.log('⚠️ Direct endpoint failed, trying email-send-ionos...');
+        response = await fetch('/api/email-send-ionos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to,
+            subject,
+            content,
+            html: content,
+            attachments
+          })
+        });
+      }
 
       if (response.ok) {
         const data = await response.json();
