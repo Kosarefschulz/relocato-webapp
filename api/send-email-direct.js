@@ -53,15 +53,32 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    // Send email
-    const info = await transporter.sendMail({
+    // Prepare mail options
+    const mailOptions = {
       from: `"Relocato Bielefeld" <${IONOS_EMAIL}>`,
       to: Array.isArray(to) ? to.join(', ') : to,
       subject: subject,
       text: emailText,
-      html: emailHtml,
-      attachments: attachments || []
-    });
+      html: emailHtml
+    };
+
+    // Handle attachments properly
+    if (attachments && attachments.length > 0) {
+      mailOptions.attachments = attachments.map(att => {
+        // Handle base64 encoded content
+        if (att.content && typeof att.content === 'string') {
+          return {
+            filename: att.filename,
+            content: Buffer.from(att.content, 'base64'),
+            encoding: 'base64'
+          };
+        }
+        return att;
+      });
+    }
+
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
 
     console.log('✅ Email sent successfully:', info.messageId);
 
@@ -75,11 +92,30 @@ module.exports = async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Email sending failed:', error);
+    console.error('Full error details:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
+    
+    // More detailed error response
+    let errorMessage = error.message;
+    if (error.code === 'EAUTH') {
+      errorMessage = 'SMTP authentication failed. Please check credentials.';
+    } else if (error.code === 'ECONNECTION') {
+      errorMessage = 'Failed to connect to SMTP server.';
+    } else if (error.responseCode === 554) {
+      errorMessage = 'Email rejected by server. Check recipient address and content.';
+    }
     
     return res.status(500).json({
       success: false,
-      error: error.message,
+      error: errorMessage,
       code: error.code,
+      response: error.response,
+      responseCode: error.responseCode,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }

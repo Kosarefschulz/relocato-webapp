@@ -253,13 +253,26 @@ const CreateQuote: React.FC = () => {
         companyName: isWertvoll ? 'wertvoll' : 'RELOCATO® Bielefeld'
       });
       
+      // Convert PDF Blob to base64
+      const reader = new FileReader();
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = reader.result as string;
+          // Remove the data:application/pdf;base64, prefix
+          resolve(base64.split(',')[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
+      
       const emailData = {
         to: customer.email,
         subject: `Ihr Umzugsangebot von ${isWertvoll ? 'wertvoll' : 'RELOCATO®'}`,
         content: emailContent,
         attachments: [{
           filename: `Umzugsangebot_${customer.name.replace(/\s+/g, '_')}.pdf`,
-          content: pdfBlob
+          content: pdfBase64,
+          encoding: 'base64'
         }]
       };
       

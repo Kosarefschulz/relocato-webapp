@@ -305,6 +305,9 @@ class IONOSEmailService {
           console.log('✅ Email sent via Vercel SMTP');
           return true;
         }
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('❌ Vercel SMTP error:', errorData);
       }
       
       console.log('⚠️ Vercel SMTP failed, trying Supabase...');
@@ -321,8 +324,18 @@ class IONOSEmailService {
       });
 
       if (error) {
-        console.error('❌ Error sending email:', error);
+        console.error('❌ Supabase email error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         return false;
+      }
+      
+      if (!data?.success) {
+        console.error('❌ Supabase email failed:', data);
       }
       
       return data?.success || false;

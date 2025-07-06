@@ -69,11 +69,21 @@ module.exports = async function handler(req, res) {
 
     // Add attachments if provided
     if (attachments && attachments.length > 0) {
-      mailOptions.attachments = attachments.map(att => ({
-        filename: att.filename,
-        content: att.content,
-        encoding: att.encoding || 'base64'
-      }));
+      mailOptions.attachments = attachments.map(att => {
+        // Handle base64 encoded content
+        if (att.content && typeof att.content === 'string' && att.content.length > 0) {
+          return {
+            filename: att.filename,
+            content: Buffer.from(att.content, 'base64'),
+            encoding: 'base64'
+          };
+        }
+        return {
+          filename: att.filename,
+          content: att.content,
+          encoding: att.encoding || 'base64'
+        };
+      });
     }
 
     // Send email
