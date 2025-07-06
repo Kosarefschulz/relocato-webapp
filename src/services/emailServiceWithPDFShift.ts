@@ -121,9 +121,8 @@ export const sendQuoteEmailWithPDFShift = async (
     };
     
     // E-Mail über Backend senden
-    const API_URL = process.env.REACT_APP_API_URL || 'https://api.ruempel-schmiede.com';
-    
-    const response = await fetch(`${API_URL}/api/send-email`, {
+    // Verwende relative URL für Vercel API Routes
+    const response = await fetch('/api/send-email-direct', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

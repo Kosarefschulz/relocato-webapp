@@ -34,9 +34,9 @@ module.exports = async function handler(req, res) {
       hasPassword: !!IONOS_PASSWORD
     });
 
-    // Get the actual content
-    const emailText = text || content || 'No content';
-    const emailHtml = html || `<div style="font-family: Arial, sans-serif;">${emailText.replace(/\n/g, '<br>')}</div>`;
+    // Get the actual content - handle when content is HTML
+    const emailHtml = html || content || `<div style="font-family: Arial, sans-serif;">${text || 'No content'}</div>`;
+    const emailText = text || (typeof content === 'string' && !content.includes('<') ? content : 'Please view HTML version');
 
     // Create transporter
     const transporter = nodemailer.createTransport({
