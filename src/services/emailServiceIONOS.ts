@@ -3,6 +3,7 @@
 // Import types from email.ts
 import { Email as EmailType, Folder } from '../types/email';
 import { supabase } from '../config/supabase';
+import { emailPersistenceService } from './emailPersistenceService';
 
 // Helper function to map folder names to specialUse
 function mapSpecialUse(name: string, specialUse?: string): 'inbox' | 'sent' | 'drafts' | 'trash' | 'spam' | null {
@@ -142,7 +143,7 @@ class IONOSEmailService {
         const data = await response.json();
         if (data.success && data.emails) {
           console.log('✅ Got emails from Vercel IMAP:', { count: data.emails.length });
-          return this.transformEmailResponse(data, folder);
+          return await this.transformEmailResponse(data, folder);
         }
       }
       
@@ -166,11 +167,11 @@ class IONOSEmailService {
         }
         
         console.log('📬 IMAP Email response:', { count: imapData?.emails?.length || 0 });
-        return this.transformEmailResponse(imapData, folder);
+        return await this.transformEmailResponse(imapData, folder);
       }
       
       console.log('📬 Database Email response:', { count: data?.emails?.length || 0 });
-      return this.transformEmailResponse(data, folder);
+      return await this.transformEmailResponse(data, folder);
     } catch (error) {
       console.error('Error getting emails:', error);
       return { emails: [], total: 0 };
@@ -194,7 +195,7 @@ class IONOSEmailService {
         if (data.success && data.email) {
           console.log('✅ Got email from Vercel IMAP');
           const email = data.email;
-          return {
+          const emailData: EmailType = {
             id: email.uid || email.id,
             uid: email.uid || email.id,
             folder: email.folder || folder,
@@ -210,6 +211,13 @@ class IONOSEmailService {
             flags: email.flags || [],
             attachments: email.attachments || []
           };
+          
+          // Save email to database in the background
+          emailPersistenceService.saveEmail(emailData, folder).catch(error => {
+            console.error('Error persisting email:', error);
+          });
+          
+          return emailData;
         }
       }
       
@@ -228,7 +236,7 @@ class IONOSEmailService {
       
       const email = data.email;
       // Convert to EmailType
-      return {
+      const emailData: EmailType = {
         id: email.uid || email.id,
         uid: email.uid || email.id,
         folder: email.folder || folder,
@@ -244,6 +252,13 @@ class IONOSEmailService {
         flags: email.flags || [],
         attachments: email.attachments || []
       };
+      
+      // Save email to database in the background
+      emailPersistenceService.saveEmail(emailData, folder).catch(error => {
+        console.error('Error persisting email:', error);
+      });
+      
+      return emailData;
     } catch (error) {
       console.error('Error getting email:', error);
       return null;
@@ -492,7 +507,7 @@ class IONOSEmailService {
   }
 
   // Helper method to transform email response
-  private transformEmailResponse(data: any, folder: string): { emails: EmailType[], total: number } {
+  private async transformEmailResponse(data: any, folder: string): Promise<{ emails: EmailType[], total: number }> {
     const transformedEmails = (data?.emails || []).map((email: any) => ({
       id: email.uid || email.id,
       uid: email.uid || email.id,
@@ -509,6 +524,13 @@ class IONOSEmailService {
       flags: email.flags || [],
       attachments: email.attachments || []
     }));
+    
+    // Save emails to database in the background
+    if (transformedEmails.length > 0) {
+      emailPersistenceService.saveEmails(transformedEmails, folder).catch(error => {
+        console.error('Error persisting emails:', error);
+      });
+    }
     
     return {
       emails: transformedEmails,

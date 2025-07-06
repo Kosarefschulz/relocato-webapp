@@ -4,6 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
@@ -13,15 +14,15 @@ serve(async (req) => {
 
   try {
     const { folder = 'INBOX', page = 1, limit = 50 } = await req.json()
-
-    // Initialize Supabase client
+    
+    // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log(`📧 Fetching emails from database (${folder})...`)
+    console.log(`📊 Fetching emails from database for folder: ${folder}, page: ${page}, limit: ${limit}`)
 
-    // Calculate offset for pagination
+    // Calculate offset
     const offset = (page - 1) * limit
 
     // Get total count
@@ -30,7 +31,7 @@ serve(async (req) => {
       .select('*', { count: 'exact', head: true })
       .eq('folder', folder)
 
-    // Fetch emails
+    // Get emails
     const { data: emails, error } = await supabase
       .from('emails')
       .select('*')
@@ -38,28 +39,38 @@ serve(async (req) => {
       .order('date', { ascending: false })
       .range(offset, offset + limit - 1)
 
-    if (error) throw error
+    if (error) {
+      console.error('Database error:', error)
+      throw error
+    }
 
-    // Transform to match expected format
+    // Transform to expected format
     const transformedEmails = (emails || []).map(email => ({
-      id: email.id,
-      uid: email.id,
+      id: email.uid,
+      uid: email.uid,
       from: {
-        name: email.from_name || '',
-        address: email.from_email
+        address: email.from_address,
+        name: email.from_name || ''
       },
-      to: [{
-        address: email.to_email
-      }],
-      subject: email.subject || '(Kein Betreff)',
+      to: email.to_addresses || [],
+      cc: email.cc_addresses || [],
+      bcc: email.bcc_addresses || [],
+      subject: email.subject || '',
       date: email.date,
-      body: email.body_text || '',
-      text: email.body_text || '',
-      html: email.body_html,
-      flags: email.is_read ? ['\\Seen'] : [],
+      flags: email.flags || [],
+      text: email.text_content,
+      html: email.html_content,
+      body: email.text_content || '', // For compatibility
+      attachments: email.attachments || [],
+      size: email.size,
+      messageId: email.message_id,
+      inReplyTo: email.in_reply_to,
+      references: email.references,
       folder: email.folder,
-      preview: (email.body_text || '').substring(0, 100)
+      preview: (email.text_content || '').substring(0, 100)
     }))
+
+    console.log(`✅ Found ${transformedEmails.length} emails in database`)
 
     return new Response(
       JSON.stringify({ 
@@ -75,7 +86,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    console.error('Database error:', error)
+    console.error('Error fetching emails from database:', error)
     return new Response(
       JSON.stringify({ 
         success: false, 

@@ -63,6 +63,7 @@ import { ionosEmailService as emailService } from '../services/emailServiceIONOS
 // Firebase imports entfernt - nicht mehr benötigt
 import { Email, Folder, EmailFolder } from '../types/email';
 import { format, isToday, isYesterday } from 'date-fns';
+import { decodeMimeString } from '../utils/mimeParser';
 
 interface EmailClientProfessionalProps {
   onError?: (error: string) => void;
@@ -624,7 +625,7 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
                               whiteSpace: 'nowrap'
                             }}
                           >
-                            {email.subject || '(No subject)'}
+                            {decodeMimeString(email.subject) || '(No subject)'}
                           </Typography>
                           <Typography
                             component="span"

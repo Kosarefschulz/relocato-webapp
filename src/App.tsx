@@ -59,6 +59,8 @@ import SystemHealthMonitor from './components/SystemHealthMonitor';
 import PhoenixDashboard from './components/PhoenixEngine/PhoenixDashboard';
 import GenesisEye from './components/PhoenixEngine/GenesisEye';
 import EmailDebug from './components/EmailDebug';
+import EmailTestTool from './pages/EmailTestTool';
+import EmailDebugTest from './pages/EmailDebugTest';
 import { AIAssistantChatV2 } from './components/AIAssistant';
 import { aiConfigService } from './services/ai/aiConfigService';
 import QuoteConfirmationPage from './pages/QuoteConfirmationPage';
@@ -305,6 +307,18 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/email-test-complete" 
         element={<EmailTestComplete />} 
+      />
+      
+      {/* Email Test Tool */}
+      <Route 
+        path="/email-test-tool" 
+        element={<EmailTestTool />} 
+      />
+      
+      {/* Email Debug Test */}
+      <Route 
+        path="/email-debug-test" 
+        element={<EmailDebugTest />} 
       />
       
       {/* System Health Monitor */}

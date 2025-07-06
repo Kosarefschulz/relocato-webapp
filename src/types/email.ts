@@ -20,7 +20,7 @@ export interface Email {
   folder?: string;
   messageId?: string;
   inReplyTo?: string;
-  references?: string;
+  references?: string | string[];
   from?: EmailAddress;
   to?: EmailAddress[];
   cc?: EmailAddress[];
@@ -37,6 +37,7 @@ export interface Email {
   labels?: string[];
   thread?: string;
   importance?: 'high' | 'normal' | 'low';
+  size?: number;
 }
 
 export interface Folder {

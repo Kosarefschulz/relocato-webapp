@@ -51,6 +51,8 @@ import { format } from 'date-fns';
 import EmailToCustomerDialog from './EmailToCustomerDialog';
 import { supabaseService } from '../services/supabaseService';
 import { useNavigate } from 'react-router-dom';
+import { emailCustomerLinkService } from '../services/emailCustomerLinkService';
+import { processEmailContent, decodeMimeString } from '../utils/mimeParser';
 
 interface EmailViewerProfessionalProps {
   email: Email;
@@ -175,15 +177,8 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
   const loadLinkedCustomer = async () => {
     try {
       setLoadingCustomer(true);
-      
-      // Note: Email-Customer linking not yet implemented with Supabase
-      // For now, we'll disable this functionality until proper implementation
-      console.log('📧 Email-Customer linking disabled (requires Supabase implementation)');
-      
-      // TODO: Implement email-customer linking with Supabase
-      // This would require creating an email_customer_links table in Supabase
-      // and implementing the appropriate queries
-      
+      const customer = await emailCustomerLinkService.getLinkedCustomer(email.id);
+      setLinkedCustomer(customer);
     } catch (error) {
       console.error('Error loading linked customer:', error);
     } finally {
@@ -192,9 +187,14 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
   };
 
   // Handle customer linked
-  const handleCustomerLinked = (customerId: string) => {
-    loadLinkedCustomer();
-    navigate(`/customer-details/${customerId}`);
+  const handleCustomerLinked = async (customerId: string) => {
+    try {
+      await emailCustomerLinkService.linkEmailToCustomer(email.id, customerId);
+      await loadLinkedCustomer();
+      navigate(`/customer-details/${customerId}`);
+    } catch (error) {
+      console.error('Error linking customer:', error);
+    }
   };
 
   // Handle print
@@ -222,19 +222,14 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
       return { __html: '<div style="text-align: center; padding: 20px; color: #666;"><div style="margin-bottom: 10px;">⏳</div>Loading email content...</div>' };
     }
     
-    // Return available content
-    if (email.html) {
-      return { __html: email.html };
-    }
-    if (email.textAsHtml) {
-      return { __html: email.textAsHtml };
-    }
-    if (email.text) {
-      return { __html: email.text.replace(/\n/g, '<br>') };
-    }
+    // Process email content with MIME parser
+    const processedContent = processEmailContent({
+      html: email.html,
+      text: email.text,
+      textAsHtml: email.textAsHtml
+    });
     
-    // No content available
-    return { __html: '<div style="text-align: center; padding: 20px; color: #999;"><div style="margin-bottom: 10px;">📧</div>No content available for this email</div>' };
+    return { __html: processedContent };
   };
 
   return (
@@ -274,7 +269,7 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
         </Box>
         
         <Typography variant="h5" gutterBottom>
-          {email.subject || '(No subject)'}
+          {decodeMimeString(email.subject) || '(No subject)'}
         </Typography>
         
         {/* Labels */}
@@ -391,6 +386,20 @@ const EmailViewerProfessional: React.FC<EmailViewerProfessionalProps> = ({
                     onClick={() => navigate(`/customer-details/${linkedCustomer.id}`)}
                   >
                     Kunde anzeigen
+                  </Button>
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={async () => {
+                      try {
+                        await emailCustomerLinkService.unlinkEmailFromCustomer(email.id, linkedCustomer.id);
+                        setLinkedCustomer(null);
+                      } catch (error) {
+                        console.error('Error unlinking customer:', error);
+                      }
+                    }}
+                  >
+                    Verknüpfung lösen
                   </Button>
                 </CardActions>
               </Card>

@@ -29,7 +29,7 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'https://umzugsapp.vercel.app',
+      target: 'https://relocato-webapp-83zh.vercel.app',
       changeOrigin: true,
       secure: true,
       headers: {

@@ -86,6 +86,8 @@
     "prebuild": "node scripts/optimizeLogo.js",
     "build": "GENERATE_SOURCEMAP=false node --max_old_space_size=8192 node_modules/.bin/craco build",
     "test": "craco test",
+    "test:email": "node scripts/test-email-vercel.js",
+    "test:email:local": "node scripts/test-email-vercel.js http://localhost:3000",
     "eject": "react-scripts eject",
     "demo": "node switch-to-demo.js && npm start",
     "firebase": "node switch-to-firebase.js && npm start",
