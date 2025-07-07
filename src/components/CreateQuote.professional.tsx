@@ -13,7 +13,7 @@ import {
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { ionosEmailService } from '../services/emailServiceIONOS';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
@@ -181,7 +181,7 @@ const CreateQuote: React.FC = () => {
         confirmationToken: token
       };
       
-      await googleSheetsService.addQuote(quote);
+      await databaseService.addQuote(quote);
       console.log('💰 Angebot erfolgreich erstellt und lokal gespeichert:', quote);
       
       // Google Sheets Integration Info

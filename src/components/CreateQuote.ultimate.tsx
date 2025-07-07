@@ -30,7 +30,7 @@ import { generatePDF } from '../services/pdfService';
 import { sendEmailViaSMTP } from '../services/smtpEmailService';
 import { sendQuoteEmailWithPDFShift } from '../services/emailServiceWithPDFShift';
 import { sendEmail } from '../services/emailService';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import { tokenService } from '../services/tokenService';
@@ -230,7 +230,7 @@ const CreateQuote: React.FC = () => {
       await sendEmailWithFallback(customer, calculation, quoteDetails, token);
 
       // In Google Sheets speichern
-      await googleSheetsService.addQuote(quoteData);
+      await databaseService.addQuote(quoteData);
 
       setSuccess(true);
       

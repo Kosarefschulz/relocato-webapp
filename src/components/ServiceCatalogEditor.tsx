@@ -99,7 +99,7 @@ const ServiceCatalogEditor: React.FC<ServiceCatalogEditorProps> = ({
   };
 
   const handleDeleteService = async (serviceId: string) => {
-    if (!confirm('Möchten Sie diese Leistung wirklich löschen?')) return;
+    if (!window.confirm('Möchten Sie diese Leistung wirklich löschen?')) return;
 
     try {
       setLoading(true);

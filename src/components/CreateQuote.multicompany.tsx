@@ -35,7 +35,7 @@ import {
 import { Customer, Quote } from '../types';
 import { CompanyType, COMPANY_CONFIGS } from '../types/company';
 import { sendEmail } from '../services/emailService';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { quoteCalculationService, QuoteDetails, QuoteCalculation } from '../services/quoteCalculation';
 import { generateEmailHTML } from '../services/htmlEmailTemplate';
 import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
@@ -168,7 +168,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
         distance: quoteDetails.distance || 0
       };
       
-      const savedQuote = await googleSheetsService.addQuote(quote);
+      const savedQuote = await databaseService.addQuote(quote);
       if (savedQuote) {
         setSuccess(true);
         setTimeout(() => {
@@ -284,7 +284,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
       
       const sent = await sendEmail(emailData);
       if (sent) {
-        await googleSheetsService.addQuote({
+        await databaseService.addQuote({
           id: quoteId,
           customerId: customer.id,
           customerName: customer.name,

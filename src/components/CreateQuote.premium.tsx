@@ -29,7 +29,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Customer } from '../types';
-import { databaseService as googleSheetsService } from '../config/database.config';
+import { databaseService } from '../config/database.config';
 import { quoteCalculationService } from '../services/quoteCalculation';
 import DarkModeToggle from './DarkModeToggle';
 
@@ -140,7 +140,7 @@ const CreateQuote: React.FC = () => {
 
   const loadCustomers = async () => {
     try {
-      const customersData = await googleSheetsService.getCustomers();
+      const customersData = await databaseService.getCustomers();
       setCustomers(customersData);
     } catch (error) {
       console.error('Fehler beim Laden der Kunden:', error);
@@ -228,7 +228,7 @@ const CreateQuote: React.FC = () => {
         status: 'draft' as const,
       };
 
-      await googleSheetsService.addQuote(quote);
+      await databaseService.addQuote(quote);
       setSnackbar({ open: true, message: 'Angebot erfolgreich erstellt!', severity: 'success' });
       
       setTimeout(() => {

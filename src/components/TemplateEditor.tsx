@@ -138,7 +138,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
   };
 
   const handleDeleteBlock = async (blockId: string) => {
-    if (!confirm('Möchten Sie diesen Block wirklich löschen?')) return;
+    if (!window.confirm('Möchten Sie diesen Block wirklich löschen?')) return;
 
     try {
       await pdfTemplateService.deleteContentBlock(blockId);

@@ -179,7 +179,7 @@ const PDFTemplateManager: React.FC = () => {
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
-    if (!confirm('Möchten Sie diese Vorlage wirklich löschen?')) return;
+    if (!window.confirm('Möchten Sie diese Vorlage wirklich löschen?')) return;
     
     try {
       setLoading(true);
