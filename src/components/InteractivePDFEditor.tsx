@@ -71,6 +71,7 @@ import { TemplateContentBlock, ContentBlockType, PDFTemplate, CompanyBranding } 
 import { pdfTemplateService } from '../services/pdfTemplateService';
 import { PDFPreview } from './PDFPreview';
 import ContentBlockEditor from './ContentBlockEditor';
+import DraggableResizableBlock from './DraggableResizableBlock';
 
 interface InteractivePDFEditorProps {
   template: PDFTemplate;
@@ -580,34 +581,27 @@ const InteractivePDFEditor: React.FC<InteractivePDFEditorProps> = ({
                 transformOrigin: 'top center',
               }}
             >
-              {/* Visual representation of blocks */}
-              {pageBlocks.filter(b => b.isVisible).map((block) => (
-                <Box
+              {/* Visual representation of blocks with drag and resize */}
+              {pageBlocks.map((block) => (
+                <DraggableResizableBlock
                   key={block.id}
-                  onClick={() => handleEditBlock(block)}
-                  sx={{
-                    position: 'absolute',
-                    left: block.xPosition || 20,
-                    top: block.yPosition || (block.position * 50 + 20),
-                    width: block.width || 'calc(100% - 40px)',
-                    minHeight: block.height || 40,
-                    border: '1px dashed',
-                    borderColor: selectedBlock?.id === block.id ? 'primary.main' : 'grey.400',
-                    backgroundColor: selectedBlock?.id === block.id
-                      ? alpha(theme.palette.primary.main, 0.1)
-                      : 'transparent',
-                    p: 1,
-                    cursor: 'pointer',
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                    },
+                  block={block}
+                  pageWidth={210} // A4 width in mm
+                  pageHeight={297} // A4 height in mm
+                  scale={zoomLevel / 100}
+                  isSelected={selectedBlock?.id === block.id}
+                  onSelect={setSelectedBlock}
+                  onUpdate={(blockId, updates) => {
+                    const newBlocks = blocks.map(b =>
+                      b.id === blockId ? { ...b, ...updates } : b
+                    );
+                    setBlocks(newBlocks);
+                    addToHistory(newBlocks);
                   }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    {block.name}
-                  </Typography>
-                </Box>
+                  onEdit={handleEditBlock}
+                  onDelete={handleDeleteBlock}
+                  onToggleVisibility={handleToggleVisibility}
+                />
               ))}
             </Paper>
           </Box>
