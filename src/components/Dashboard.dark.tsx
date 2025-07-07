@@ -14,8 +14,8 @@ import {
   alpha,
   Card,
   useMediaQuery,
-  Grid,
 } from '@mui/material';
+import Grid from './GridCompat';
 import { 
   Search as SearchIcon,
   Description as DescriptionIcon,

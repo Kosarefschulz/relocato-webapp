@@ -17,7 +17,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Grid,
   Card,
   CardContent,
   CardActions,
@@ -33,6 +32,7 @@ import {
   FormControlLabel,
   Tooltip
 } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Add as AddIcon,
   Edit as EditIcon,

@@ -10,7 +10,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Grid,
   Box,
   Typography,
   Switch,
@@ -36,6 +35,7 @@ import {
   ColorLens as ColorIcon
 } from '@mui/icons-material';
 import { ChromePicker } from 'react-color';
+import Grid from './GridCompat';
 import {
   TemplateContentBlock,
   ContentBlockType,

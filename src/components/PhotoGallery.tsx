@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardMedia,
   CardContent,
@@ -22,6 +21,7 @@ import {
   ImageListItem,
   ImageListItemBar
 } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Search as SearchIcon,
   Close as CloseIcon,

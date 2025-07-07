@@ -6,7 +6,6 @@ import {
   DialogActions,
   Button,
   TextField,
-  Grid,
   Box,
   Typography,
   IconButton,
@@ -23,6 +22,7 @@ import {
   Divider,
   Alert
 } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Add as AddIcon,
   Edit as EditIcon,

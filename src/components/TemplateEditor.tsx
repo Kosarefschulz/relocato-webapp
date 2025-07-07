@@ -13,7 +13,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Grid,
   Typography,
   IconButton,
   List,
@@ -29,6 +28,7 @@ import {
   Tooltip,
   Alert
 } from '@mui/material';
+import Grid from './GridCompat';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
