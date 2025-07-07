@@ -38,6 +38,7 @@ import QuoteTemplateManager from './components/QuoteTemplateManager';
 import EmailTemplateManager from './components/EmailTemplateManager';
 import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
+import PDFTemplateManager from './components/PDFTemplateManager';
 // Import test utils for development
 import './utils/emailTestUtils';
 import './utils/addCustomersFromScreenshots';
@@ -239,6 +240,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/templates" 
         element={<QuoteTemplateManager />} 
+      />
+      
+      {/* PDF Templates */}
+      <Route 
+        path="/pdf-templates" 
+        element={<PDFTemplateManager />} 
       />
       
       <Route 

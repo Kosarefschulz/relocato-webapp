@@ -10,6 +10,7 @@ import {
   ManageSearch as ManageSearchIcon,
   SmartToy as AIIcon,
   Speed as SpeedIcon,
+  Description as DescriptionIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import DuplicateCustomerManager from '../components/DuplicateCustomerManager';
@@ -132,6 +133,16 @@ const AdminToolsPage: React.FC = () => {
             sx={{ width: { xs: '100%', sm: 'auto' } }}
           >
             Real-time Dashboard
+          </Button>
+          <Button
+            variant="contained"
+            color="info"
+            size="large"
+            startIcon={<DescriptionIcon />}
+            onClick={() => navigate('/pdf-templates')}
+            sx={{ width: { xs: '100%', sm: 'auto' } }}
+          >
+            PDF-Vorlagen verwalten
           </Button>
         </Box>
       </Box>

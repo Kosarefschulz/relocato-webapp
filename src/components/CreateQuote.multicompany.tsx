@@ -42,6 +42,7 @@ import { generateQuoteEmailHTMLSync } from '../services/quoteEmailTemplate';
 import { generatePDF } from '../services/pdfService';
 import { generateWertvollPDF } from '../services/pdfServiceWertvoll';
 import { generateRuempelschmiedePDF } from '../services/pdfServiceRuempelschmiede';
+import { pdfServiceWithTemplates } from '../services/pdfServiceWithTemplates';
 import { tokenService } from '../services/tokenService';
 
 const CreateQuoteMultiCompany: React.FC = () => {
@@ -106,6 +107,7 @@ const CreateQuoteMultiCompany: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [calculation, setCalculation] = useState<QuoteCalculation | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [useTemplates, setUseTemplates] = useState(false);
   
   // Kalkulation aktualisieren
   useEffect(() => {
@@ -221,17 +223,36 @@ const CreateQuoteMultiCompany: React.FC = () => {
         company: selectedCompany
       };
       
-      // Generate PDF based on selected company
+      // Generate PDF based on selected company and template preference
       let pdfBlob;
-      switch (selectedCompany) {
-        case 'wertvoll':
-          pdfBlob = await generateWertvollPDF(customer, quoteData);
-          break;
-        case 'ruempelschmiede':
-          pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
-          break;
-        default:
-          pdfBlob = await generatePDF(customer, quoteData);
+      if (useTemplates) {
+        try {
+          pdfBlob = await pdfServiceWithTemplates.generateQuotePDF(customer, quoteData, true);
+        } catch (err) {
+          console.error('Template PDF generation failed, falling back to legacy:', err);
+          // Fallback to legacy generation
+          switch (selectedCompany) {
+            case 'wertvoll':
+              pdfBlob = await generateWertvollPDF(customer, quoteData);
+              break;
+            case 'ruempelschmiede':
+              pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
+              break;
+            default:
+              pdfBlob = await generatePDF(customer, quoteData);
+          }
+        }
+      } else {
+        switch (selectedCompany) {
+          case 'wertvoll':
+            pdfBlob = await generateWertvollPDF(customer, quoteData);
+            break;
+          case 'ruempelschmiede':
+            pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
+            break;
+          default:
+            pdfBlob = await generatePDF(customer, quoteData);
+        }
       }
       
       const companyConfig = COMPANY_CONFIGS[selectedCompany];
@@ -324,17 +345,36 @@ const CreateQuoteMultiCompany: React.FC = () => {
         company: selectedCompany
       };
       
-      // Generate PDF based on selected company
+      // Generate PDF based on selected company and template preference
       let pdfBlob;
-      switch (selectedCompany) {
-        case 'wertvoll':
-          pdfBlob = await generateWertvollPDF(customer, quoteData);
-          break;
-        case 'ruempelschmiede':
-          pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
-          break;
-        default:
-          pdfBlob = await generatePDF(customer, quoteData);
+      if (useTemplates) {
+        try {
+          pdfBlob = await pdfServiceWithTemplates.generateQuotePDF(customer, quoteData, true);
+        } catch (err) {
+          console.error('Template PDF generation failed, falling back to legacy:', err);
+          // Fallback to legacy generation
+          switch (selectedCompany) {
+            case 'wertvoll':
+              pdfBlob = await generateWertvollPDF(customer, quoteData);
+              break;
+            case 'ruempelschmiede':
+              pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
+              break;
+            default:
+              pdfBlob = await generatePDF(customer, quoteData);
+          }
+        }
+      } else {
+        switch (selectedCompany) {
+          case 'wertvoll':
+            pdfBlob = await generateWertvollPDF(customer, quoteData);
+            break;
+          case 'ruempelschmiede':
+            pdfBlob = await generateRuempelschmiedePDF(customer, quoteData);
+            break;
+          default:
+            pdfBlob = await generatePDF(customer, quoteData);
+        }
       }
       
       const url = URL.createObjectURL(pdfBlob);
@@ -436,6 +476,19 @@ const CreateQuoteMultiCompany: React.FC = () => {
               Rümpel Schmiede ist Ihr Partner für professionelle Entrümpelungen mit Festpreisgarantie.
             </Alert>
           )}
+          
+          {/* Template Toggle */}
+          <Box sx={{ mt: 2 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={useTemplates}
+                  onChange={(e) => setUseTemplates(e.target.checked)}
+                />
+              }
+              label="PDF-Vorlagen verwenden (falls vorhanden)"
+            />
+          </Box>
         </Box>
       </Paper>
       
