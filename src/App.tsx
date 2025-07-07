@@ -39,6 +39,7 @@ import EmailTemplateManager from './components/EmailTemplateManager';
 import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
 import PDFTemplateManager from './components/PDFTemplateManager';
+import VolumeScanner from './components/VolumeScanner';
 // Import test utils for development
 import './utils/emailTestUtils';
 import './utils/addCustomersFromScreenshots';
@@ -134,6 +135,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/new-customer" 
         element={<NewCustomer />} 
+      />
+      
+      {/* Volume Scanner */}
+      <Route 
+        path="/volume-scanner/:customerId" 
+        element={<VolumeScanner />} 
       />
       
       {/* Dashboard */}

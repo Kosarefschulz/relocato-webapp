@@ -1,7 +1,7 @@
 // Automatisch generiertes Logo
 // Original war zu groß (296.06 KB)
 // Verwende vereinfachtes Logo mit extrahierter Farbe: #273443
-// Generiert am: 2025-07-07T11:25:46.360Z
+// Generiert am: 2025-07-07T14:15:50.316Z
 
 export const ruempelSchmiedeLogoSVG = `<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
   <rect width="200" height="150" fill="#273443" rx="10"/>

@@ -23,7 +23,8 @@ import {
   Email as EmailIcon,
   CalendarToday as CalendarIcon,
   LocationOn as LocationIcon,
-  Home as HomeIcon
+  Home as HomeIcon,
+  ThreeDRotation as ScannerIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { databaseService as googleSheetsService } from '../config/database.config';
@@ -150,8 +151,16 @@ const CustomerDetails: React.FC = () => {
           variant="contained"
           startIcon={<EditIcon />}
           onClick={handleEdit}
+          sx={{ mr: 2 }}
         >
           Bearbeiten
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<ScannerIcon />}
+          onClick={() => navigate(`/volume-scanner/${customer.id}`)}
+        >
+          Volumen scannen
         </Button>
       </Box>
 
