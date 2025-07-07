@@ -38,7 +38,8 @@ import {
   Preview as PreviewIcon,
   Settings as SettingsIcon,
   Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon
+  VisibilityOff as VisibilityOffIcon,
+  Brush as BrushIcon
 } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
@@ -52,6 +53,7 @@ import {
 } from '../types/pdfTemplate';
 import { pdfTemplateService } from '../services/pdfTemplateService';
 import ContentBlockEditor from './ContentBlockEditor';
+import InteractivePDFEditor from './InteractivePDFEditor';
 
 interface TemplateEditorProps {
   template: PDFTemplate;
@@ -75,6 +77,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
   const [blockEditorOpen, setBlockEditorOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showInteractiveEditor, setShowInteractiveEditor] = useState(false);
 
   useEffect(() => {
     loadContentBlocks();
@@ -409,13 +412,22 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
               <Typography variant="h6">
                 Inhaltsblöcke
               </Typography>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddBlock}
-              >
-                Block hinzufügen
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<BrushIcon />}
+                  onClick={() => setShowInteractiveEditor(true)}
+                >
+                  Visueller Editor
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={handleAddBlock}
+                >
+                  Block hinzufügen
+                </Button>
+              </Box>
             </Box>
 
             <DragDropContext onDragEnd={handleDragEnd}>
@@ -641,6 +653,22 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
               console.error(err);
             }
           }}
+        />
+      )}
+
+      {/* Interactive PDF Editor */}
+      {showInteractiveEditor && (
+        <InteractivePDFEditor
+          template={{ ...editedTemplate, contentBlocks }}
+          companyBranding={branding}
+          onSave={async (updatedTemplate) => {
+            setEditedTemplate(updatedTemplate);
+            setContentBlocks(updatedTemplate.contentBlocks || []);
+            setShowInteractiveEditor(false);
+            // Save the template
+            await handleSave();
+          }}
+          onClose={() => setShowInteractiveEditor(false)}
         />
       )}
     </Dialog>
