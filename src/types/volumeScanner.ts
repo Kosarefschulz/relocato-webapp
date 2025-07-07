@@ -67,6 +67,62 @@ export interface ScanSession {
       lng: number;
     };
   };
+  
+  arSession?: ARSession;
+}
+
+// AR Types
+export interface ARSession {
+  id: string;
+  startTime: Date;
+  endTime?: Date;
+  measurements: ARMeasurement[];
+  detections: FurnitureDetection[];
+  detectedPlanes: ARPlane[];
+  roomDimensions?: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  capturedImages: string[];
+}
+
+export interface ARMeasurement {
+  id: string;
+  type: 'distance' | 'area' | 'volume';
+  points: ARPoint[];
+  value: number;
+  unit: 'cm' | 'm';
+  confidence: number;
+  timestamp: Date;
+}
+
+export interface ARPoint {
+  x: number;
+  y: number;
+  z: number;
+  screenX?: number;
+  screenY?: number;
+}
+
+export interface ARPlane {
+  id: string;
+  type: 'horizontal' | 'vertical';
+  center: ARPoint;
+  extent: { width: number; height: number };
+  transform: number[];
+}
+
+export interface FurnitureDetection {
+  id: string;
+  type: string;
+  boundingBox: {
+    center: ARPoint;
+    size: { width: number; height: number; depth: number };
+  };
+  confidence: number;
+  volume: number;
+  imageUrl?: string;
 }
 
 export interface RoomScan {

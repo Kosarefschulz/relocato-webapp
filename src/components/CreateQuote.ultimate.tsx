@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, InputAdornment, FormControlLabel, Switch, Divider, Tab, Tabs, Chip, Alert, CircularProgress, Slider, Dialog, DialogTitle, DialogContent, DialogActions, Stepper, Step, StepLabel, Badge, Tooltip, Fade, Zoom } from '@mui/material';
+import { Container, Paper, Typography, Box, TextField, Button, IconButton, Card, CardContent, InputAdornment, FormControlLabel, Switch, Divider, Tab, Tabs, Chip, Alert, CircularProgress, Slider, Dialog, DialogTitle, DialogContent, DialogActions, Stepper, Step, StepLabel, Badge, Tooltip, Fade, Zoom, LinearProgress } from '@mui/material';
 import Grid from './GridCompat';
 import { 
   ArrowBack as ArrowBackIcon,
@@ -37,6 +37,8 @@ import { tokenService } from '../services/tokenService';
 import { generateQRCode } from '../services/qrCodeService';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { volumeScannerIntegration, VolumeScannerQuoteData } from '../services/volumeScannerIntegration';
+import { ThreeDRotation as ScanIcon } from '@mui/icons-material';
 
 interface ServiceOption {
   id: string;
@@ -100,6 +102,8 @@ const CreateQuote: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [scanData, setScanData] = useState<VolumeScannerQuoteData | null>(null);
+  const [loadingScanData, setLoadingScanData] = useState(false);
 
   const steps = ['Kundendaten', 'Services wählen', 'Kalkulation', 'Vorschau'];
 
@@ -122,12 +126,73 @@ const CreateQuote: React.FC = () => {
     return icons[serviceId] || <HomeIcon />;
   };
 
+  const getAvailableServices = (): ServiceOption[] => [
+    { id: 'packing', name: 'Verpackungsservice', description: 'Professionelle Verpackung aller Gegenstände', icon: 'packing', basePrice: 400, priceType: 'fixed' },
+    { id: 'boxes', name: 'Umzugskartons', description: 'Bereitstellung von Kartons', icon: 'boxes', basePrice: 5, priceType: 'per_item' },
+    { id: 'cleaning', name: 'Endreinigung', description: 'Professionelle Reinigung der alten Wohnung', icon: 'cleaning', basePrice: 60, priceType: 'per_hour' },
+    { id: 'clearance', name: 'Entrümpelung', description: 'Entsorgung nicht benötigter Gegenstände', icon: 'clearance', basePrice: 50, priceType: 'by_volume' },
+    { id: 'renovation', name: 'Renovierung', description: 'Kleine Renovierungsarbeiten', icon: 'renovation', basePrice: 45, priceType: 'per_hour' },
+    { id: 'piano', name: 'Klaviertransport', description: 'Spezialtransport für Klaviere', icon: 'piano', basePrice: 350, priceType: 'fixed' },
+    { id: 'heavy', name: 'Schwergut', description: 'Transport schwerer Gegenstände (>100kg)', icon: 'heavy', basePrice: 100, priceType: 'per_item' },
+    { id: 'materials', name: 'Verpackungsmaterial', description: 'Luftpolsterfolie, Decken, etc.', icon: 'materials', basePrice: 150, priceType: 'fixed' },
+    { id: 'parking', name: 'Halteverbot', description: 'Einrichtung von Halteverbotszonen', icon: 'parking', basePrice: 100, priceType: 'fixed' },
+    { id: 'storage', name: 'Zwischenlagerung', description: 'Temporäre Lagerung der Möbel', icon: 'storage', basePrice: 200, priceType: 'fixed' },
+    { id: 'assembly', name: 'Möbelmontage', description: 'Aufbau der Möbel am Zielort', icon: 'assembly', basePrice: 150, priceType: 'fixed' },
+    { id: 'disassembly', name: 'Möbeldemontage', description: 'Abbau der Möbel vor dem Umzug', icon: 'disassembly', basePrice: 150, priceType: 'fixed' }
+  ];
+
   // Automatische Kalkulation
+  useEffect(() => {
+    if (customer.id) {
+      updateCalculation();
+      loadScanData();
+    }
+  }, [customer.id]);
+
   useEffect(() => {
     if (customer.id) {
       updateCalculation();
     }
   }, [customer, quoteDetails, selectedServices, expressService, discount, useManualPrice, manualTotalPrice]);
+
+  const loadScanData = async () => {
+    if (!customer.id) return;
+    
+    setLoadingScanData(true);
+    try {
+      const data = await volumeScannerIntegration.getCustomerScanData(customer.id);
+      if (data) {
+        setScanData(data);
+        
+        // Apply scan data to quote if not already customized
+        if (quoteDetails.volume === quoteCalculationService.getStandardVolume()) {
+          const scanQuoteDetails = volumeScannerIntegration.convertToQuoteDetails(data);
+          setQuoteDetails(prev => ({
+            ...prev,
+            ...scanQuoteDetails
+          }));
+          
+          // Auto-select recommended services
+          const recommendedServices = volumeScannerIntegration.getRecommendedServices(data);
+          const newServices = getAvailableServices().filter(s => 
+            recommendedServices.includes(s.id)
+          );
+          setSelectedServices(newServices.map(s => ({
+            ...s,
+            selected: true,
+            quantity: s.priceType === 'per_item' ? 1 : undefined,
+            hours: s.priceType === 'per_hour' ? 2 : undefined,
+            volume: s.priceType === 'by_volume' ? 5 : undefined,
+            price: s.basePrice
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading scan data:', error);
+    } finally {
+      setLoadingScanData(false);
+    }
+  };
 
   const updateCalculation = () => {
     // Services in QuoteDetails übertragen
@@ -914,6 +979,41 @@ const CreateQuote: React.FC = () => {
                   Umzugsdetails & Kalkulation
                 </Typography>
                 
+                {/* Volume Scanner Data */}
+                {scanData && (
+                  <Alert 
+                    severity={scanData.confidence > 0.8 ? "success" : "info"} 
+                    sx={{ mb: 3 }}
+                    icon={<ScanIcon />}
+                  >
+                    <Typography variant="subtitle1" gutterBottom>
+                      <strong>AR/Foto-Scan vorhanden!</strong>
+                    </Typography>
+                    <Typography variant="body2">
+                      Gescanntes Volumen: {scanData.totalVolume.toFixed(2)} m³ ({scanData.itemCount} Gegenstände)
+                    </Typography>
+                    {scanData.specialItems.pianos > 0 && (
+                      <Typography variant="body2" color="warning.main">
+                        ⚠️ {scanData.specialItems.pianos} Klavier(e) erkannt
+                      </Typography>
+                    )}
+                    {scanData.confidence < 0.8 && (
+                      <Typography variant="body2" color="text.secondary">
+                        Scan-Genauigkeit: {Math.round(scanData.confidence * 100)}%
+                      </Typography>
+                    )}
+                  </Alert>
+                )}
+
+                {loadingScanData && (
+                  <Box sx={{ mb: 3, textAlign: 'center' }}>
+                    <CircularProgress size={24} />
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Lade Scan-Daten...
+                    </Typography>
+                  </Box>
+                )}
+
                 <Grid container spacing={3} sx={{ mb: 4 }}>
                   <Grid item xs={12} md={6}>
                     <TextField
@@ -922,7 +1022,20 @@ const CreateQuote: React.FC = () => {
                       type="number"
                       value={quoteDetails.volume}
                       onChange={(e) => setQuoteDetails({...quoteDetails, volume: Number(e.target.value)})}
-                      helperText={`Standard: 20 m³ (85% aller Umzüge) • Bei ${customer.apartment?.area || 50} m²: ca. ${quoteCalculationService.estimateVolumeFromArea(customer.apartment?.area || 50)} m³`}
+                      helperText={
+                        scanData 
+                          ? `Scan-basiert: ${scanData.totalVolume.toFixed(2)} m³ • Manuell anpassbar`
+                          : `Standard: 20 m³ (85% aller Umzüge) • Bei ${customer.apartment?.area || 50} m²: ca. ${quoteCalculationService.estimateVolumeFromArea(customer.apartment?.area || 50)} m³`
+                      }
+                      InputProps={{
+                        endAdornment: scanData && (
+                          <InputAdornment position="end">
+                            <Tooltip title="Volumen basiert auf Scan-Daten">
+                              <ScanIcon color="primary" />
+                            </Tooltip>
+                          </InputAdornment>
+                        )
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>

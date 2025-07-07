@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Container,
   Paper,
@@ -35,7 +35,8 @@ import {
   ListItemAvatar,
   Avatar,
   Divider,
-  LinearProgress
+  LinearProgress,
+  Tooltip
 } from '@mui/material';
 import Grid from './GridCompat';
 import {
@@ -54,7 +55,8 @@ import {
   PhotoLibrary as PhotoIcon,
   NavigateNext as NextIcon,
   Warning as WarningIcon,
-  Info as InfoIcon
+  Info as InfoIcon,
+  PhoneIphone as PhoneIcon
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -62,10 +64,12 @@ import {
   RoomType, 
   ScannedItem, 
   FURNITURE_DIMENSIONS,
-  calculateVolume
+  calculateVolume,
+  ARSession
 } from '../types/volumeScanner';
 import { Customer } from '../types';
 import { volumeScannerService } from '../services/volumeScannerService';
+import { arBridgeService } from '../services/arBridgeService';
 import { supabase } from '../config/supabase';
 
 const VolumeScanner: React.FC = () => {
@@ -82,9 +86,13 @@ const VolumeScanner: React.FC = () => {
   const [sessionId] = useState(`session_${Date.now()}`);
   const [currentRoom, setCurrentRoom] = useState<RoomType>('living_room');
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
+  const [arSession, setArSession] = useState<ARSession | null>(null);
+  const [arCapabilities, setArCapabilities] = useState(arBridgeService.getCapabilities());
   
   // Current item being scanned
-  const [scanMode, setScanMode] = useState<'photo' | 'manual'>('photo');
+  const [scanMode, setScanMode] = useState<'photo' | 'manual' | 'ar'>(
+    arBridgeService.isARAvailable() ? 'ar' : 'photo'
+  );
   const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
   const [furnitureType, setFurnitureType] = useState<FurnitureType>('sofa');
   const [customName, setCustomName] = useState('');
@@ -100,12 +108,69 @@ const VolumeScanner: React.FC = () => {
 
   const steps = ['Raum auswählen', 'Möbel scannen', 'Überprüfung'];
 
-  // Load customer data
+  // Load customer data and check AR capabilities
   React.useEffect(() => {
     if (customerId) {
       loadCustomer();
     }
+    checkARCapabilities();
   }, [customerId]);
+
+  // Listen for AR session updates
+  useEffect(() => {
+    const handleARSession = (session: any) => {
+      console.log('Received AR session:', session);
+      setArSession(session);
+      
+      // Convert AR data to scanned items
+      if (session.measurements) {
+        session.measurements.forEach((measurement: any) => {
+          const item = arBridgeService.convertMeasurementToFurniture(measurement);
+          setScannedItems(prev => [...prev, {
+            ...item,
+            customerId: customerId!,
+            sessionId,
+            roomName: currentRoom,
+            scanMethod: 'ar' as const,
+            photos: [],
+            isFragile: false,
+            requiresDisassembly: false,
+            packingMaterials: [],
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }]);
+        });
+      }
+      
+      if (session.detections) {
+        session.detections.forEach((detection: any) => {
+          const item = arBridgeService.convertDetectionToFurniture(detection);
+          setScannedItems(prev => [...prev, {
+            ...item,
+            customerId: customerId!,
+            sessionId,
+            roomName: currentRoom,
+            scanMethod: 'ar' as const,
+            photos: [],
+            isFragile: false,
+            requiresDisassembly: false,
+            packingMaterials: [],
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }]);
+        });
+      }
+    };
+
+    arBridgeService.on('session', handleARSession);
+    arBridgeService.on('ar_ready', (caps) => {
+      setArCapabilities(caps);
+    });
+
+    return () => {
+      arBridgeService.off('session', handleARSession);
+    };
+  }, [customerId, sessionId, currentRoom]);
 
   const loadCustomer = async () => {
     try {
@@ -121,6 +186,45 @@ const VolumeScanner: React.FC = () => {
       console.error('Error loading customer:', err);
       setError('Kunde konnte nicht geladen werden');
     }
+  };
+
+  const checkARCapabilities = () => {
+    const caps = arBridgeService.getCapabilities();
+    setArCapabilities(caps);
+    console.log('AR Capabilities:', caps);
+  };
+
+  const handleStartARScan = async () => {
+    if (!arBridgeService.isARAvailable()) {
+      setError('AR ist auf diesem Gerät nicht verfügbar');
+      return;
+    }
+
+    try {
+      await arBridgeService.startARScan(
+        `ar_${sessionId}_${Date.now()}`,
+        getRoomName(currentRoom)
+      );
+    } catch (err) {
+      console.error('Error starting AR scan:', err);
+      setError('Fehler beim Starten des AR-Scans');
+    }
+  };
+
+  const getRoomName = (room: RoomType): string => {
+    const roomNames: Record<RoomType, string> = {
+      living_room: 'Wohnzimmer',
+      bedroom: 'Schlafzimmer',
+      kitchen: 'Küche',
+      bathroom: 'Bad',
+      office: 'Büro',
+      dining_room: 'Esszimmer',
+      basement: 'Keller',
+      attic: 'Dachboden',
+      garage: 'Garage',
+      other: 'Sonstiges'
+    };
+    return roomNames[room] || room;
   };
 
   const handlePhotoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -399,7 +503,37 @@ const VolumeScanner: React.FC = () => {
             
             <Divider sx={{ my: 3 }} />
             
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              {arCapabilities?.available && (
+                <Tooltip 
+                  title={arCapabilities.hasLiDAR 
+                    ? "AR-Scan mit LiDAR für präzise 3D-Messungen" 
+                    : "AR-Scan für 3D-Messungen"
+                  }
+                >
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<PhoneIcon />}
+                    endIcon={<ARIcon />}
+                    onClick={handleStartARScan}
+                    sx={{ 
+                      background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+                      color: 'white'
+                    }}
+                  >
+                    AR-Scan (iPhone)
+                    {arCapabilities.hasLiDAR && (
+                      <Chip
+                        label="LiDAR"
+                        size="small"
+                        sx={{ ml: 1, backgroundColor: 'rgba(255,255,255,0.3)' }}
+                      />
+                    )}
+                  </Button>
+                </Tooltip>
+              )}
+              
               <Button
                 variant="contained"
                 startIcon={<CameraIcon />}
@@ -439,12 +573,35 @@ const VolumeScanner: React.FC = () => {
                       {index > 0 && <Divider />}
                       <ListItem>
                         <ListItemAvatar>
-                          <Avatar>
-                            <FurnitureIcon />
+                          <Avatar sx={{ 
+                            bgcolor: item.scanMethod === 'ar' ? 'secondary.main' : 
+                                    item.scanMethod === 'photo' ? 'primary.main' : 
+                                    'grey.500' 
+                          }}>
+                            {item.scanMethod === 'ar' ? <ARIcon /> : 
+                             item.scanMethod === 'photo' ? <CameraIcon /> :
+                             <FurnitureIcon />}
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText
-                          primary={item.customName}
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              {item.customName}
+                              {item.scanMethod === 'ar' && (
+                                <Chip 
+                                  label="AR" 
+                                  size="small" 
+                                  color="secondary"
+                                  sx={{ height: 20 }}
+                                />
+                              )}
+                              {item.confidence && item.confidence < 0.8 && (
+                                <Tooltip title={`Konfidenz: ${Math.round(item.confidence * 100)}%`}>
+                                  <WarningIcon color="warning" fontSize="small" />
+                                </Tooltip>
+                              )}
+                            </Box>
+                          }
                           secondary={`${item.dimensions.length} × ${item.dimensions.width} × ${item.dimensions.height} cm • ${item.volumeM3.toFixed(2)} m³`}
                         />
                         <ListItemSecondaryAction>
