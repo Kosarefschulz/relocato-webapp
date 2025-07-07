@@ -1,21 +1,7 @@
 // Vercel Serverless Function für E-Mail-Versand
-// Diese Funktion sendet E-Mails über SMTP
+// Diese Funktion sendet E-Mails direkt über IONOS SMTP
 
 const nodemailer = require('nodemailer');
-const admin = require('firebase-admin');
-
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-  if (serviceAccount.project_id) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID
-    });
-  }
-}
-
-const db = admin.apps.length > 0 ? admin.firestore() : null;
 
 export default async function handler(req, res) {
   // CORS Headers
@@ -51,22 +37,33 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get email credentials from environment
-    const emailUser = process.env.IONOS_EMAIL_USER || process.env.REACT_APP_EMAIL_USERNAME || process.env.SMTP_USER;
-    const emailPass = process.env.IONOS_EMAIL_PASS || process.env.REACT_APP_EMAIL_PASSWORD || process.env.SMTP_PASS;
+    // Get email credentials from environment with fallback
+    const emailUser = process.env.IONOS_EMAIL || 'bielefeld@relocato.de';
+    const emailPass = process.env.IONOS_PASSWORD || 'Bicm1308';
+    const smtpHost = process.env.IONOS_SMTP_HOST || 'smtp.ionos.de';
+    const smtpPort = parseInt(process.env.IONOS_SMTP_PORT || '587');
+    
+    console.log('📧 Sending email via IONOS SMTP...');
+    console.log('Configuration:', {
+      host: smtpHost,
+      port: smtpPort,
+      user: emailUser,
+      to: to,
+      subject: subject
+    });
     
     // Create transporter
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.ionos.de',
-      port: parseInt(process.env.SMTP_PORT || '587'),
+      host: smtpHost,
+      port: smtpPort,
       secure: false,
       auth: {
         user: emailUser,
         pass: emailPass,
       },
       tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2'
       }
     });
 
@@ -77,8 +74,8 @@ export default async function handler(req, res) {
       subject,
       html: emailHtml,
       cc,
-      bcc,
-      replyTo: replyTo || emailUser || 'bielefeld@relocato.de',
+      bcc: bcc || 'bielefeld@relocato.de', // Always BCC to have a copy
+      replyTo: replyTo || emailUser,
       attachments: attachments?.map(att => {
         // Handle base64 encoded content
         if (att.content && typeof att.content === 'string' && att.content.length > 0) {
@@ -99,25 +96,6 @@ export default async function handler(req, res) {
     // Send email
     const info = await transporter.sendMail(mailOptions);
     console.log('✅ Email sent successfully:', info.messageId);
-
-    // Store sent email in Firestore if database is available
-    if (db) {
-      try {
-        await db.collection('emailClient').add({
-          folder: 'Sent',
-          from: mailOptions.from,
-          to,
-          cc,
-          bcc,
-          subject,
-          html: emailHtml,
-          sentAt: admin.firestore.FieldValue.serverTimestamp(),
-          messageId: info.messageId
-        });
-      } catch (dbError) {
-        console.log('Failed to store email in Firestore:', dbError.message);
-      }
-    }
     
     const response = {
       success: true,
@@ -128,9 +106,21 @@ export default async function handler(req, res) {
     res.status(200).json(response);
   } catch (error) {
     console.error('Send email error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
+    
     res.status(500).json({
       success: false,
-      error: error.message || 'Internal server error'
+      error: error.message || 'Internal server error',
+      details: {
+        code: error.code,
+        response: error.response
+      }
     });
   }
 }
