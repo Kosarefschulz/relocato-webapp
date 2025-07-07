@@ -281,9 +281,14 @@ export class PDFTemplateService {
 
   async updateBranding(companyType: CompanyType, branding: Partial<CompanyBranding>): Promise<CompanyBranding> {
     try {
-      const updateData: any = {
-        company_type: companyType
-      };
+      // First check if branding exists
+      const { data: existingBranding } = await supabase
+        .from('company_branding')
+        .select('id')
+        .eq('company_type', companyType)
+        .single();
+
+      const updateData: any = {};
       
       if (branding.logoUrl !== undefined) updateData.logo_url = branding.logoUrl;
       if (branding.letterheadUrl !== undefined) updateData.letterhead_url = branding.letterheadUrl;
@@ -294,15 +299,34 @@ export class PDFTemplateService {
       if (branding.headerSettings !== undefined) updateData.header_settings = branding.headerSettings;
       if (branding.footerSettings !== undefined) updateData.footer_settings = branding.footerSettings;
 
-      const { data, error } = await supabase
-        .from('company_branding')
-        .upsert(updateData)
-        .select()
-        .single();
+      let result;
+      if (existingBranding) {
+        // Update existing branding
+        const { data, error } = await supabase
+          .from('company_branding')
+          .update(updateData)
+          .eq('company_type', companyType)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = data;
+      } else {
+        // Create new branding
+        const { data, error } = await supabase
+          .from('company_branding')
+          .insert({
+            company_type: companyType,
+            ...updateData
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = data;
+      }
 
-      if (error) throw error;
-
-      return this.mapBranding(data);
+      return this.mapBranding(result);
     } catch (error) {
       console.error('Error updating branding:', error);
       throw error;
