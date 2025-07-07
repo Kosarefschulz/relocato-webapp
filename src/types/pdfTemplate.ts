@@ -1,5 +1,6 @@
 import { CompanyType } from './company';
 
+export type { CompanyType };
 export type TemplateType = 'quote' | 'invoice' | 'contract' | 'receipt';
 
 export type ContentBlockType = 

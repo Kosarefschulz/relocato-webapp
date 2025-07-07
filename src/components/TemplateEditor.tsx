@@ -613,12 +613,25 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
           }}
           onSave={async (block) => {
             try {
-              let saved;
+              let saved: TemplateContentBlock;
               if (block.id) {
                 saved = await pdfTemplateService.updateContentBlock(block.id, block);
                 setContentBlocks(contentBlocks.map(b => b.id === saved.id ? saved : b));
               } else {
-                saved = await pdfTemplateService.createContentBlock(block);
+                saved = await pdfTemplateService.createContentBlock({
+                  templateId: template.id,
+                  blockType: block.blockType || 'custom',
+                  name: block.name || 'Neuer Block',
+                  position: block.position || contentBlocks.length,
+                  pageNumber: block.pageNumber || 1,
+                  settings: block.settings || {},
+                  content: block.content || {},
+                  isVisible: block.isVisible !== undefined ? block.isVisible : true,
+                  ...(block.xPosition !== undefined && { xPosition: block.xPosition }),
+                  ...(block.yPosition !== undefined && { yPosition: block.yPosition }),
+                  ...(block.width !== undefined && { width: block.width }),
+                  ...(block.height !== undefined && { height: block.height })
+                });
                 setContentBlocks([...contentBlocks, saved]);
               }
               setBlockEditorOpen(false);

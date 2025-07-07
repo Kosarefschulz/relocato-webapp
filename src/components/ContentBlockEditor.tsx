@@ -97,6 +97,19 @@ const ContentBlockEditor: React.FC<ContentBlockEditorProps> = ({
     });
   };
 
+  const handleDataChange = (field: string, value: any) => {
+    setEditedBlock({
+      ...editedBlock,
+      content: {
+        ...editedBlock.content,
+        data: {
+          ...editedBlock.content?.data,
+          [field]: value
+        }
+      }
+    });
+  };
+
   const handleAddService = (serviceId: string) => {
     if (!selectedServices.includes(serviceId)) {
       setSelectedServices([...selectedServices, serviceId]);
@@ -207,8 +220,8 @@ const ContentBlockEditor: React.FC<ContentBlockEditorProps> = ({
               <TextField
                 fullWidth
                 label="Überschrift"
-                value={editedBlock.content?.title || ''}
-                onChange={(e) => handleContentChange('title', e.target.value)}
+                value={(editedBlock.content?.data?.title as string) || ''}
+                onChange={(e) => handleDataChange('title', e.target.value)}
                 sx={{ mb: 2 }}
               />
             </Grid>
@@ -275,8 +288,8 @@ const ContentBlockEditor: React.FC<ContentBlockEditorProps> = ({
               <TextField
                 fullWidth
                 label="Überschrift"
-                value={editedBlock.content?.title || 'Allgemeine Geschäftsbedingungen'}
-                onChange={(e) => handleContentChange('title', e.target.value)}
+                value={(editedBlock.content?.data?.title as string) || 'Allgemeine Geschäftsbedingungen'}
+                onChange={(e) => handleDataChange('title', e.target.value)}
                 sx={{ mb: 2 }}
               />
             </Grid>
@@ -300,16 +313,16 @@ const ContentBlockEditor: React.FC<ContentBlockEditorProps> = ({
               <TextField
                 fullWidth
                 label="Linke Beschriftung"
-                value={editedBlock.content?.leftLabel || 'Ort, Datum'}
-                onChange={(e) => handleContentChange('leftLabel', e.target.value)}
+                value={(editedBlock.content?.data?.leftLabel as string) || 'Ort, Datum'}
+                onChange={(e) => handleDataChange('leftLabel', e.target.value)}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Rechte Beschriftung"
-                value={editedBlock.content?.rightLabel || 'Unterschrift'}
-                onChange={(e) => handleContentChange('rightLabel', e.target.value)}
+                value={(editedBlock.content?.data?.rightLabel as string) || 'Unterschrift'}
+                onChange={(e) => handleDataChange('rightLabel', e.target.value)}
               />
             </Grid>
           </Grid>

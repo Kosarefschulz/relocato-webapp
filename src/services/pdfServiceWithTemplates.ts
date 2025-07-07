@@ -136,13 +136,19 @@ export class PDFServiceWithTemplates {
   ): Promise<Blob> {
     const companyType = quote.company as CompanyType;
 
+    // Ensure quote has an id for functions that require it
+    const quoteWithId = {
+      ...quote,
+      id: quote.id || `temp-${Date.now()}`
+    };
+
     switch (companyType) {
       case 'wertvoll':
-        return await generateWertvollPDF(customer, quote);
+        return await generateWertvollPDF(customer, quoteWithId as any);
       case 'ruempelschmiede':
-        return await generateRuempelschmiedePDF(customer, quote);
+        return await generateRuempelschmiedePDF(customer, quoteWithId as any);
       default:
-        return await generateLegacyPDF(customer, quote);
+        return await generateLegacyPDF(customer, quoteWithId as any);
     }
   }
 

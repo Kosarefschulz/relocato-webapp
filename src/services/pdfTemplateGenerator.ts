@@ -98,10 +98,10 @@ export class PDFTemplateGenerator {
     // Render based on block type
     switch (blockType) {
       case 'logo':
-        await this.renderLogo(x, y, width, height, data.branding);
+        await this.renderLogo(x, y, width || 50, height || 50, data.branding);
         break;
       case 'header':
-        this.renderHeader(x, y, width, content, data);
+        this.renderHeader(x, y, width || (this.pageWidth - this.margins.left - this.margins.right), content, data);
         break;
       case 'footer':
         this.renderFooter(content, data);
@@ -113,19 +113,19 @@ export class PDFTemplateGenerator {
         this.renderCustomerInfo(x, y, data.customer, content);
         break;
       case 'service_list':
-        this.renderServiceList(x, y, width, data.services || [], content);
+        this.renderServiceList(x, y, width || (this.pageWidth - this.margins.left - this.margins.right), data.services || [], content);
         break;
       case 'pricing_table':
-        this.renderPricingTable(x, y, width, data, content);
+        this.renderPricingTable(x, y, width || (this.pageWidth - this.margins.left - this.margins.right), data, content);
         break;
       case 'terms':
-        this.renderTerms(x, y, width, content);
+        this.renderTerms(x, y, width || (this.pageWidth - this.margins.left - this.margins.right), content);
         break;
       case 'signature':
-        this.renderSignatureBlock(x, y, width, content);
+        this.renderSignatureBlock(x, y, width || (this.pageWidth - this.margins.left - this.margins.right), content);
         break;
       case 'custom':
-        this.renderCustomBlock(x, y, width, content, data);
+        this.renderCustomBlock(x, y, width || (this.pageWidth - this.margins.left - this.margins.right), content, data);
         break;
     }
 
@@ -159,7 +159,7 @@ export class PDFTemplateGenerator {
     }
   }
 
-  private async renderLogo(x: number, y: number, width?: number, height?: number, branding?: CompanyBranding) {
+  private async renderLogo(x: number, y: number, width: number, height: number, branding?: CompanyBranding) {
     if (!this.doc || !branding?.logoUrl) return;
 
     try {
@@ -177,14 +177,15 @@ export class PDFTemplateGenerator {
     }
   }
 
-  private renderHeader(x: number, y: number, width?: number, content: any, data: PDFGenerationData) {
+  private renderHeader(x: number, y: number, width: number, content: any, data: PDFGenerationData) {
     if (!this.doc) return;
 
     const text = this.processTemplate(content.template || content.text || '', data);
     const lines = this.doc.splitTextToSize(text, width || this.pageWidth - this.margins.left - this.margins.right);
     
+    const doc = this.doc; // Capture reference for TypeScript
     lines.forEach((line: string, index: number) => {
-      this.doc.text(line, x, y + (index * 5));
+      doc.text(line, x, y + (index * 5));
     });
   }
 
@@ -249,8 +250,9 @@ export class PDFTemplateGenerator {
     if (customer.address || customer.toAddress) {
       const address = customer.address || customer.toAddress;
       const addressLines = this.doc.splitTextToSize(address, 80);
+      const doc = this.doc; // Capture reference for TypeScript
       addressLines.forEach((line: string) => {
-        this.doc.text(line, x, currentY);
+        doc.text(line, x, currentY);
         currentY += lineHeight;
       });
     }
@@ -281,11 +283,12 @@ export class PDFTemplateGenerator {
 
     // Services
     this.doc.setFont('helvetica', 'normal');
+    const doc = this.doc; // Capture reference for TypeScript
     services.forEach(service => {
       const text = `• ${service.serviceName}${service.quantity ? ` (${service.quantity} ${service.unit || ''})` : ''}`;
-      const lines = this.doc.splitTextToSize(text, width || 150);
+      const lines = doc.splitTextToSize(text, width || 150);
       lines.forEach((line: string) => {
-        this.doc.text(line, x + 5, currentY);
+        doc.text(line, x + 5, currentY);
         currentY += lineHeight;
       });
     });
@@ -311,11 +314,12 @@ export class PDFTemplateGenerator {
     const items = content.items || [];
     let subtotal = 0;
 
+    const doc = this.doc; // Capture reference for TypeScript
     items.forEach((item: any) => {
-      this.doc.text(item.description || item.name, x + 2, currentY + 5);
-      this.doc.text(String(item.quantity || '1'), x + tableWidth - 40, currentY + 5, { align: 'center' });
+      doc.text(item.description || item.name, x + 2, currentY + 5);
+      doc.text(String(item.quantity || '1'), x + tableWidth - 40, currentY + 5, { align: 'center' });
       const price = item.price || 0;
-      this.doc.text(`€ ${price.toFixed(2)}`, x + tableWidth - 2, currentY + 5, { align: 'right' });
+      doc.text(`€ ${price.toFixed(2)}`, x + tableWidth - 2, currentY + 5, { align: 'right' });
       subtotal += price;
       currentY += 8;
     });
@@ -360,8 +364,9 @@ export class PDFTemplateGenerator {
     const termsText = content.text || content.template || '';
     const lines = this.doc.splitTextToSize(termsText, width || this.pageWidth - this.margins.left - this.margins.right);
     
+    const doc = this.doc; // Capture reference for TypeScript
     lines.forEach((line: string) => {
-      this.doc.text(line, x, currentY);
+      doc.text(line, x, currentY);
       currentY += 5;
     });
   }
@@ -393,8 +398,9 @@ export class PDFTemplateGenerator {
 
     const lines = this.doc.splitTextToSize(text, width || this.pageWidth - this.margins.left - this.margins.right);
     
+    const doc = this.doc; // Capture reference for TypeScript
     lines.forEach((line: string, index: number) => {
-      this.doc.text(line, x, y + (index * 5));
+      doc.text(line, x, y + (index * 5));
     });
   }
 
