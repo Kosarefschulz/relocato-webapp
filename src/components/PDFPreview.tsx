@@ -12,7 +12,7 @@ import { generatePDFFromTemplate } from '../services/pdfTemplateGenerator';
 interface PDFPreviewProps {
   template: PDFTemplate;
   contentBlocks: TemplateContentBlock[];
-  companyBranding?: CompanyBranding;
+  companyBranding?: CompanyBranding | null;
   sampleData?: {
     customer?: any;
     quote?: any;
@@ -47,8 +47,7 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({
       const pdfjsLib = await import('pdfjs-dist');
       
       // Set worker
-      const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
       // Generate PDF blob
       const pdfBlob = await generatePDFFromTemplate(

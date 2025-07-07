@@ -242,7 +242,7 @@ const InteractivePDFEditor: React.FC<InteractivePDFEditorProps> = ({
   };
 
   // Block Templates
-  const blockTemplates: { type: ContentBlockType; name: string; icon: JSX.Element }[] = [
+  const blockTemplates: { type: ContentBlockType; name: string; icon: React.ReactElement }[] = [
     { type: 'header', name: 'Kopfzeile', icon: <TextIcon /> },
     { type: 'footer', name: 'Fußzeile', icon: <TextIcon /> },
     { type: 'logo', name: 'Logo', icon: <ImageIcon /> },
@@ -280,9 +280,12 @@ const InteractivePDFEditor: React.FC<InteractivePDFEditorProps> = ({
       position: blocks.length,
       pageNumber: currentPage,
       settings: {
-        fontSize: 12,
-        fontFamily: 'Helvetica',
-        textColor: '#000000',
+        font: {
+          family: 'Helvetica',
+          size: 12,
+          weight: 'normal'
+        },
+        color: '#000000',
         backgroundColor: 'transparent',
         alignment: 'left'
       },
@@ -628,16 +631,25 @@ const InteractivePDFEditor: React.FC<InteractivePDFEditorProps> = ({
 
       {/* Block Editor Dialog */}
       {selectedBlock && (
-        <ContentBlockEditor
+        <Dialog
           open={showBlockEditor}
-          block={selectedBlock}
-          services={[]} // TODO: Load from service catalog
           onClose={() => {
             setShowBlockEditor(false);
             setSelectedBlock(null);
           }}
-          onSave={handleSaveBlock}
-        />
+          maxWidth="md"
+          fullWidth
+        >
+          <ContentBlockEditor
+            block={selectedBlock}
+            services={[]} // TODO: Load from service catalog
+            onClose={() => {
+              setShowBlockEditor(false);
+              setSelectedBlock(null);
+            }}
+            onSave={handleSaveBlock}
+          />
+        </Dialog>
       )}
 
       {/* Preview Dialog */}

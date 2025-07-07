@@ -660,13 +660,13 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
       {showInteractiveEditor && (
         <InteractivePDFEditor
           template={{ ...editedTemplate, contentBlocks }}
-          companyBranding={branding}
+          companyBranding={branding || undefined}
           onSave={async (updatedTemplate) => {
             setEditedTemplate(updatedTemplate);
             setContentBlocks(updatedTemplate.contentBlocks || []);
             setShowInteractiveEditor(false);
             // Save the template
-            await handleSave();
+            onSave(updatedTemplate);
           }}
           onClose={() => setShowInteractiveEditor(false)}
         />

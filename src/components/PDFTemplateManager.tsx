@@ -46,7 +46,8 @@ import {
   Palette as PaletteIcon,
   BusinessCenter as ServicesIcon,
   Description as TemplateIcon,
-  Preview as PreviewIcon
+  Preview as PreviewIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { CompanyType, COMPANY_CONFIGS } from '../types/company';
 import { 
@@ -560,12 +561,29 @@ const PDFTemplateManager: React.FC = () => {
 
       {/* PDF Preview Dialog */}
       {previewTemplate && (
-        <PDFPreview
-          template={previewTemplate}
-          branding={branding}
-          services={services}
+        <Dialog
+          open={true}
           onClose={() => setPreviewTemplate(null)}
-        />
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogTitle>
+            PDF Vorschau
+            <IconButton
+              onClick={() => setPreviewTemplate(null)}
+              sx={{ position: 'absolute', right: 8, top: 8 }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            <PDFPreview
+              template={previewTemplate}
+              contentBlocks={previewTemplate.contentBlocks || []}
+              companyBranding={branding || undefined}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </Container>
   );

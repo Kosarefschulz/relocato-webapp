@@ -129,7 +129,7 @@ export interface TemplateVariable {
 
 export interface PDFGenerationData {
   template: PDFTemplate;
-  branding: CompanyBranding;
+  branding: CompanyBranding | null;
   customer: any;
   quote?: any;
   invoice?: any;

@@ -105,16 +105,7 @@ export class PDFServiceWithTemplates {
     // Prepare generation data
     const data: PDFGenerationData = {
       template,
-      branding: branding || {
-        id: '',
-        companyType: template.companyType,
-        primaryColor: '#000000',
-        secondaryColor: '#666666',
-        accentColor: '#0066CC',
-        fontFamily: 'Helvetica',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
+      branding: branding || null,
       customer,
       quote: quote || undefined,
       invoice: invoice || undefined,

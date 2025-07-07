@@ -98,7 +98,7 @@ export class PDFTemplateGenerator {
     // Render based on block type
     switch (blockType) {
       case 'logo':
-        await this.renderLogo(x, y, width || 50, height || 50, data.branding);
+        await this.renderLogo(x, y, width || 50, height || 50, data.branding || undefined);
         break;
       case 'header':
         this.renderHeader(x, y, width || (this.pageWidth - this.margins.left - this.margins.right), content, data);
@@ -199,7 +199,7 @@ export class PDFTemplateGenerator {
     this.doc.text(text, this.pageWidth / 2, footerY, { align: 'center' });
   }
 
-  private renderCompanyInfo(x: number, y: number, branding: CompanyBranding, content: any) {
+  private renderCompanyInfo(x: number, y: number, branding: CompanyBranding | null | undefined, content: any) {
     if (!this.doc) return;
 
     const companyData = content.data || {};
@@ -463,7 +463,7 @@ export class PDFTemplateGenerator {
       const { template, branding } = data;
 
       // If letterhead is provided, use pdf-lib for better background image support
-      if (branding.letterheadUrl) {
+      if (branding?.letterheadUrl) {
         return await this.generateWithPDFLib(data);
       }
 
@@ -482,7 +482,7 @@ export class PDFTemplateGenerator {
     const pdfDoc = await PDFDocument.create();
     
     // Add letterhead as background if provided
-    if (branding.letterheadUrl) {
+    if (branding?.letterheadUrl) {
       try {
         const letterheadBytes = await fetch(branding.letterheadUrl).then(res => res.arrayBuffer());
         const letterheadImage = await pdfDoc.embedPng(new Uint8Array(letterheadBytes));
@@ -511,3 +511,23 @@ export class PDFTemplateGenerator {
 }
 
 export const pdfTemplateGenerator = new PDFTemplateGenerator();
+
+// Export function for PDFPreview component
+export const generatePDFFromTemplate = async (
+  template: PDFTemplate,
+  contentBlocks: TemplateContentBlock[],
+  companyBranding?: CompanyBranding | null,
+  sampleData?: any
+): Promise<Blob> => {
+  const data: PDFGenerationData = {
+    template: { ...template, contentBlocks },
+    branding: companyBranding || null,
+    customer: sampleData?.customer || {},
+    quote: sampleData?.quote,
+    invoice: sampleData?.invoice,
+    services: [],
+    variables: {}
+  };
+  
+  return pdfTemplateGenerator.generatePDF(data);
+};
