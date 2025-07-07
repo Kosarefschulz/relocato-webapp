@@ -6,7 +6,6 @@ import {
   DialogActions,
   Button,
   TextField,
-  Grid,
   Box,
   Typography,
   InputAdornment,
@@ -27,6 +26,7 @@ import {
   Image as ImageIcon
 } from '@mui/icons-material';
 import { ChromePicker } from 'react-color';
+import Grid from './GridCompat';
 import { CompanyType } from '../types/company';
 import { CompanyBranding } from '../types/pdfTemplate';
 import { pdfTemplateService } from '../services/pdfTemplateService';
