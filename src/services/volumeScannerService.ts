@@ -7,31 +7,61 @@ class VolumeScannerService {
   async uploadPhotos(files: File[], itemId: string): Promise<string[]> {
     const urls: string[] = [];
     
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const fileName = `scans/${itemId}/photo_${Date.now()}_${i}.jpg`;
+    try {
+      // First check if bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
       
-      const { data, error } = await supabase.storage
-        .from('furniture-scans')
-        .upload(fileName, file, {
-          contentType: 'image/jpeg',
-          upsert: false
-        });
-      
-      if (error) {
-        console.error('Error uploading photo:', error);
-        continue;
+      if (bucketsError) {
+        console.error('Error listing buckets:', bucketsError);
+        throw new Error('Storage-Service nicht verfügbar');
       }
       
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('furniture-scans')
-        .getPublicUrl(fileName);
+      const bucketExists = buckets?.some(bucket => bucket.name === 'furniture-scans');
       
-      urls.push(publicUrl);
+      if (!bucketExists) {
+        console.error('Storage bucket "furniture-scans" does not exist');
+        throw new Error('Storage-Bucket nicht konfiguriert. Bitte wenden Sie sich an den Administrator.');
+      }
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const fileName = `scans/${itemId}/photo_${Date.now()}_${i}.${fileExt}`;
+        
+        // File is already a Blob/File object
+        const fileBlob = file;
+        
+        const { data, error } = await supabase.storage
+          .from('furniture-scans')
+          .upload(fileName, fileBlob, {
+            contentType: file.type || 'image/jpeg',
+            upsert: false,
+            cacheControl: '3600'
+          });
+        
+        if (error) {
+          console.error('Error uploading photo:', error);
+          // Continue with other uploads instead of failing completely
+          continue;
+        }
+        
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('furniture-scans')
+          .getPublicUrl(fileName);
+        
+        urls.push(publicUrl);
+      }
+      
+      if (urls.length === 0 && files.length > 0) {
+        throw new Error('Keine Fotos konnten hochgeladen werden');
+      }
+      
+      return urls;
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
     }
-    
-    return urls;
   }
 
   // Save scan session
