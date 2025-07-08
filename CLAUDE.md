@@ -23,6 +23,11 @@
   - Realtime Subscriptions
   - Storage für Dokumente und Bilder
 
+### Supabase Access Token
+- Service Role Key: `sbp_61d622f70f2d7c18c14719897bf6d16755606a9e`
+- Verwendung: Für administrative Aufgaben wie Storage Bucket Erstellung
+- WICHTIG: Dieser Token hat volle Admin-Rechte, nur für Backend/Admin-Tasks verwenden!
+
 ## Wichtige Hinweise
 - KEINE Firebase-Abhängigkeiten mehr im Projekt
 - Alle E-Mail-Funktionen laufen über Supabase Edge Functions
