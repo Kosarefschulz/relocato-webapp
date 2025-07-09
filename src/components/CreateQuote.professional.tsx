@@ -176,8 +176,10 @@ const CreateQuote: React.FC = () => {
         status: 'draft' as const,
         volume: quoteDetails.volume,
         distance: quoteDetails.distance,
-        calculation: finalCalculation,
-        details: updatedQuoteDetails,
+        services: {
+          calculation: finalCalculation,
+          details: updatedQuoteDetails
+        },
         confirmationToken: token
       };
       
@@ -228,27 +230,27 @@ const CreateQuote: React.FC = () => {
       const isWertvoll = customer.company?.toLowerCase().includes('wertvoll') || false;
       
       console.log('📄 Generiere PDF mit finalCalculation:', {
-        basePrice: quote.calculation.basePrice,
-        finalPrice: quote.calculation.finalPrice,
+        basePrice: quote.services?.calculation?.basePrice,
+        finalPrice: quote.services?.calculation?.finalPrice,
         manualUsed: manualTotalPrice > 0
       });
       
       const pdfBlob = isWertvoll 
         ? await generateWertvollProfessionalPDF(customer, quote)
-        : await generatePDF(customer, quote, generateEmailHTML(customer, quote.calculation, quote.details));
+        : await generatePDF(customer, quote, generateEmailHTML(customer, quote.services?.calculation, quote.services?.details));
       
       // E-Mail senden mit dem neuen Template inkl. QR-Code und Bestätigungslink
       // WICHTIG: Verwende calculation aus dem quote Objekt, nicht die alte calculation Variable
       console.log('📧 Generiere E-Mail mit finalCalculation:', {
-        basePrice: quote.calculation.basePrice,
-        finalPrice: quote.calculation.finalPrice,
+        basePrice: quote.services?.calculation?.basePrice,
+        finalPrice: quote.services?.calculation?.finalPrice,
         manualUsed: manualTotalPrice > 0
       });
       
       const emailContent = generateQuoteEmailHTMLSync({
         customer,
-        calculation: quote.calculation, // Verwende immer calculation aus quote
-        quoteDetails: quote.details,
+        calculation: quote.services?.calculation, // Verwende immer calculation aus quote
+        quoteDetails: quote.services?.details,
         confirmationToken: quote.confirmationToken,
         companyName: isWertvoll ? 'wertvoll' : 'RELOCATO® Bielefeld'
       });
