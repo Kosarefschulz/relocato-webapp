@@ -48,6 +48,7 @@ import {
   CalendarToday as CalendarIcon,
   AttachMoney as MoneyIcon,
   CheckCircle as CheckIcon,
+  ThreeDRotation as ScannerIcon,
   Cancel as CancelIcon
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -555,6 +556,25 @@ const CustomerDetails: React.FC = () => {
                     sx={{ minHeight: { xs: 44, sm: 36 } }}
                   >
                     Fotos hinzufügen
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ScannerIcon />}
+                    onClick={() => navigate(`/volume-scanner/${customer.id}`)}
+                    size="small"
+                    fullWidth={isMobile}
+                    sx={{ 
+                      minHeight: { xs: 44, sm: 36 },
+                      bgcolor: alpha(theme.palette.primary.main, 0.08),
+                      borderColor: theme.palette.primary.main,
+                      color: theme.palette.primary.main,
+                      '&:hover': {
+                        bgcolor: alpha(theme.palette.primary.main, 0.12),
+                        borderColor: theme.palette.primary.dark
+                      }
+                    }}
+                  >
+                    Volumen scannen
                   </Button>
                 </Stack>
               </Box>
