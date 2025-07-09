@@ -73,6 +73,7 @@ import TrelloImportPage from './pages/TrelloImportPage';
 import DebugShareLinksPage from './pages/DebugShareLinksPage';
 import RealtimeDashboard from './components/RealtimeDashboard';
 import QuoteLayoutEditor from './components/QuoteLayoutEditor/QuoteLayoutEditor';
+import WhatsAppClient from './components/WhatsAppClient';
 
 
 export const AuthContext = React.createContext<{
@@ -293,6 +294,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/email-client" 
         element={<EmailClientWrapper />} 
+      />
+
+      {/* WhatsApp Client */}
+      <Route 
+        path="/whatsapp" 
+        element={<WhatsAppClient />} 
       />
       <Route 
         path="/email" 

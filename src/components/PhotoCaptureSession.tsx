@@ -31,7 +31,7 @@ import {
   Delete as DeleteIcon,
   Save as SaveIcon
 } from '@mui/icons-material';
-import { blobStorageService } from '../services/blobStorageService';
+import { supabase } from '../config/supabase';
 
 interface PhotoCaptureSessionProps {
   open: boolean;
@@ -132,12 +132,56 @@ const PhotoCaptureSession: React.FC<PhotoCaptureSessionProps> = ({
     setError('');
     
     try {
-      // Firebase Storage is disabled - show informative error
-      setError('Foto-Upload ist derzeit deaktiviert. Firebase Storage wurde durch Supabase ersetzt. Bitte verwenden Sie alternative Upload-Methoden.');
-      console.warn('Photo upload attempted but Firebase Storage is disabled');
+      // Check if bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error('Error listing buckets:', bucketsError);
+        throw new Error('Storage-Service nicht verfügbar');
+      }
+      
+      const bucketExists = buckets?.some(bucket => bucket.name === 'furniture-scans');
+      
+      if (!bucketExists) {
+        throw new Error('Storage-Bucket nicht konfiguriert. Bitte wenden Sie sich an den Administrator.');
+      }
+      
+      let uploadedCount = 0;
+      const totalPhotos = capturedPhotos.length;
+      
+      for (const photo of capturedPhotos) {
+        const fileExt = photo.file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const fileName = `customers/${customerId}/${photo.category}_${Date.now()}_${photo.id}.${fileExt}`;
+        
+        const { data, error } = await supabase.storage
+          .from('furniture-scans')
+          .upload(fileName, photo.file, {
+            contentType: photo.file.type || 'image/jpeg',
+            upsert: false,
+            cacheControl: '3600'
+          });
+        
+        if (error) {
+          console.error('Error uploading photo:', error);
+          // Continue with other uploads
+          continue;
+        }
+        
+        uploadedCount++;
+        setUploadProgress((uploadedCount / totalPhotos) * 100);
+      }
+      
+      if (uploadedCount === 0) {
+        throw new Error('Keine Fotos konnten hochgeladen werden');
+      }
+      
+      // Success - close dialog and refresh
+      onPhotosUploaded();
+      setCapturedPhotos([]);
+      onClose();
     } catch (error) {
       console.error('Fehler beim Upload:', error);
-      setError('Foto-Upload ist nicht verfügbar.');
+      setError(error instanceof Error ? error.message : 'Fehler beim Hochladen der Fotos');
     } finally {
       setUploading(false);
       setUploadProgress(0);

@@ -13,7 +13,8 @@ import {
   PhotoLibrary as PhotoIcon,
   TrendingUp as SalesIcon,
   AdminPanelSettings as AdminIcon,
-  Email as EmailIcon
+  Email as EmailIcon,
+  WhatsApp as WhatsAppIcon
 } from '@mui/icons-material';
 import MobileLayout from './MobileLayout';
 import SyncStatus from './SyncStatus';
@@ -92,6 +93,14 @@ const Dashboard: React.FC = () => {
       path: '/email-client',
       color: 'info.main',
       gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+    },
+    {
+      title: 'WhatsApp',
+      description: 'WhatsApp Nachrichten',
+      icon: <WhatsAppIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
+      path: '/whatsapp',
+      color: 'success.main',
+      gradient: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)'
     }
   ];
 

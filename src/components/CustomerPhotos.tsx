@@ -32,8 +32,21 @@ import {
   CameraAlt as CameraIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
-import { StoredPhoto } from '../services/googleDriveService';
-import { blobStorageService } from '../services/blobStorageService';
+import { supabase } from '../config/supabase';
+
+// StoredPhoto interface for compatibility
+interface StoredPhoto {
+  id: string;
+  customerId: string;
+  url: string;
+  category: string;
+  description: string;
+  createdAt: string;
+  metadata?: {
+    size: number;
+    contentType: string;
+  };
+}
 import { useAnalytics } from '../hooks/useAnalytics';
 import PhotoCaptureSession from './PhotoCaptureSession';
 
@@ -96,15 +109,46 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
   const loadPhotos = async () => {
     try {
       setLoading(true);
-      // Firebase Storage is disabled - return empty array
-      const firebasePhotos = await blobStorageService.loadPhotos(customer.id);
-      setPhotos(firebasePhotos); // Will be empty array from disabled service
-      if (firebasePhotos.length === 0) {
-        console.log('ℹ️ Keine Fotos verfügbar - Firebase Storage ist deaktiviert');
+      
+      // List files from Supabase Storage
+      const { data: files, error } = await supabase.storage
+        .from('furniture-scans')
+        .list(`customers/${customer.id}`, {
+          limit: 100,
+          offset: 0
+        });
+      
+      if (error) {
+        console.error('Error loading photos:', error);
+        setPhotos([]);
+        return;
       }
+      
+      // Convert to StoredPhoto format
+      const storagePhotos: StoredPhoto[] = (files || []).map(file => {
+        const category = file.name.split('_')[0] || 'Sonstiges';
+        const publicUrl = supabase.storage
+          .from('furniture-scans')
+          .getPublicUrl(`customers/${customer.id}/${file.name}`).data.publicUrl;
+        
+        return {
+          id: file.name,
+          customerId: customer.id,
+          url: publicUrl,
+          category: PHOTO_CATEGORIES.includes(category) ? category : 'Sonstiges',
+          description: '',
+          createdAt: file.created_at || new Date().toISOString(),
+          metadata: {
+            size: file.metadata?.size || 0,
+            contentType: file.metadata?.mimetype || 'image/jpeg'
+          }
+        };
+      });
+      
+      setPhotos(storagePhotos);
     } catch (error) {
       console.error('Fehler beim Laden der Fotos:', error);
-      setError('Foto-System ist derzeit nicht verfügbar.');
+      setError('Fehler beim Laden der Fotos.');
     } finally {
       setLoading(false);
     }
@@ -123,13 +167,43 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     setError('');
 
     try {
-      // Firebase Storage is disabled
-      setError('Foto-Upload ist derzeit deaktiviert. Firebase Storage wurde durch Supabase ersetzt. Upload-Funktionalität wird in Zukunft wieder verfügbar sein.');
-      console.warn(`Upload attempted but Firebase Storage is disabled for ${uploadFiles.length} files`);
+      let uploadedCount = 0;
+      const totalFiles = uploadFiles.length;
       
+      for (const file of uploadFiles) {
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const fileName = `customers/${customer.id}/${uploadCategory || 'Sonstiges'}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        
+        const { data, error } = await supabase.storage
+          .from('furniture-scans')
+          .upload(fileName, file, {
+            contentType: file.type || 'image/jpeg',
+            upsert: false,
+            cacheControl: '3600'
+          });
+        
+        if (error) {
+          console.error('Error uploading file:', error);
+          continue;
+        }
+        
+        uploadedCount++;
+        setUploadProgress((uploadedCount / totalFiles) * 100);
+      }
+      
+      if (uploadedCount === 0) {
+        throw new Error('Keine Dateien konnten hochgeladen werden');
+      }
+      
+      // Success - reload photos
+      await loadPhotos();
+      setShowUploadDialog(false);
+      setUploadFiles([]);
+      setUploadCategory('');
+      setUploadDescription('');
     } catch (error) {
       console.error('Fehler beim Upload:', error);
-      setError('Foto-Upload ist nicht verfügbar.');
+      setError(error instanceof Error ? error.message : 'Fehler beim Hochladen der Fotos');
     } finally {
       setUploading(false);
     }
@@ -139,12 +213,20 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
     if (window.confirm('Möchten Sie dieses Foto wirklich löschen?')) {
       try {
         setLoading(true);
-        // Firebase Storage is disabled
-        setError('Foto-Löschung ist derzeit deaktiviert. Firebase Storage wurde durch Supabase ersetzt.');
-        console.warn(`Delete attempted but Firebase Storage is disabled for photo: ${photoId}`);
+        
+        const { error } = await supabase.storage
+          .from('furniture-scans')
+          .remove([`customers/${customer.id}/${photoId}`]);
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Success - reload photos
+        await loadPhotos();
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
-        setError('Foto-Löschung ist nicht verfügbar.');
+        setError('Fehler beim Löschen des Fotos.');
       } finally {
         setLoading(false);
       }
@@ -161,6 +243,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
       acc[category] = {
         value: category,
         label: category,
+        icon: getCategoryIcon(category),
         photos: categoryPhotos
       };
     }
@@ -250,8 +333,8 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                   <CardMedia
                     component="img"
                     height="400"
-                    image={photo.webViewLink || photo.webContentLink || photo.thumbnailLink || photo.base64Thumbnail}
-                    alt={photo.fileName}
+                    image={photo.url}
+                    alt={photo.id}
                     loading="lazy"
                     sx={{ 
                       cursor: 'pointer', 
@@ -275,8 +358,8 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                           size="small"
                           onClick={() => {
                             const link = document.createElement('a');
-                            link.href = photo.webContentLink || photo.webViewLink || photo.thumbnailLink || photo.base64Thumbnail || '';
-                            link.download = photo.fileName;
+                            link.href = photo.url;
+                            link.download = photo.id;
                             link.click();
                           }}
                           title="Herunterladen"
@@ -299,7 +382,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                       </Typography>
                     )}
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(photo.uploadDate).toLocaleDateString('de-DE')}
+                      {new Date(photo.createdAt).toLocaleDateString('de-DE')}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -464,8 +547,8 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
           {selectedPhoto && (
             <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
               <img
-                src={selectedPhoto.webContentLink || selectedPhoto.webViewLink || selectedPhoto.thumbnailLink || selectedPhoto.base64Thumbnail}
-                alt={selectedPhoto.fileName}
+                src={selectedPhoto.url}
+                alt={selectedPhoto.id}
                 style={{ 
                   maxWidth: '100%', 
                   maxHeight: '90vh', 
@@ -486,7 +569,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                 color: 'white', 
                 p: 2 
               }}>
-                <Typography variant="h6">{selectedPhoto.fileName}</Typography>
+                <Typography variant="h6">{selectedPhoto.id}</Typography>
                 <Typography variant="body2">
                   {getCategoryIcon(selectedPhoto.category)} {' '}
                   {selectedPhoto.category}
@@ -495,7 +578,7 @@ const CustomerPhotos: React.FC<CustomerPhotosProps> = ({ customer }) => {
                   <Typography variant="body2" sx={{ mt: 1 }}>{selectedPhoto.description}</Typography>
                 )}
                 <Typography variant="caption">
-                  Hochgeladen am {new Date(selectedPhoto.uploadDate).toLocaleDateString('de-DE', {
+                  Hochgeladen am {new Date(selectedPhoto.createdAt).toLocaleDateString('de-DE', {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric',

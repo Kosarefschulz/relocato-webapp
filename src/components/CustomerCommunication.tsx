@@ -24,7 +24,9 @@ import {
   CircularProgress,
   Alert,
   Stack,
-  useTheme
+  useTheme,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Email as EmailIcon,
@@ -35,7 +37,10 @@ import {
   Add as AddIcon,
   AttachFile as AttachFileIcon,
   OpenInNew as OpenInNewIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  WhatsApp as WhatsAppIcon,
+  Check as CheckIcon,
+  DoneAll as DoneAllIcon
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import emailHistoryService, { EmailRecord } from '../services/emailHistoryService';
@@ -44,6 +49,8 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
+import { whatsappService, WhatsAppMessage } from '../services/whatsappService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CustomerCommunicationProps {
   customer: Customer;
@@ -61,21 +68,27 @@ interface LinkedEmail {
 const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState(0);
   const [emailRecords, setEmailRecords] = useState<EmailRecord[]>([]);
   const [linkedEmails, setLinkedEmails] = useState<LinkedEmail[]>([]);
+  const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [whatsappComposeOpen, setWhatsappComposeOpen] = useState(false);
   const [newEmail, setNewEmail] = useState({
     to: customer.email || '',
     subject: '',
     content: ''
   });
+  const [newWhatsAppMessage, setNewWhatsAppMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     loadEmailHistory();
     loadLinkedEmails();
+    loadWhatsAppMessages();
   }, [customer.id]);
 
   const loadEmailHistory = () => {
@@ -114,6 +127,15 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
       setLinkedEmails(emails);
     } catch (err) {
       console.error('Fehler beim Laden verknüpfter E-Mails:', err);
+    }
+  };
+
+  const loadWhatsAppMessages = async () => {
+    try {
+      const messages = await whatsappService.getCustomerMessages(customer.id);
+      setWhatsappMessages(messages);
+    } catch (err) {
+      console.error('Fehler beim Laden der WhatsApp-Nachrichten:', err);
     }
   };
 
@@ -157,6 +179,44 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
     }
   };
 
+  const handleSendWhatsApp = async () => {
+    if (!newWhatsAppMessage.trim() || !customer.phone) {
+      setError('Bitte Nachricht eingeben und Telefonnummer prüfen');
+      return;
+    }
+
+    setSending(true);
+    setError('');
+
+    try {
+      // Format phone number for WhatsApp (remove spaces, add country code if needed)
+      let phoneNumber = customer.phone.replace(/\s/g, '');
+      if (!phoneNumber.startsWith('+')) {
+        phoneNumber = '+49' + phoneNumber.replace(/^0/, ''); // Assume German number
+      }
+
+      await whatsappService.sendTextMessage(phoneNumber, newWhatsAppMessage);
+      
+      setWhatsappComposeOpen(false);
+      setNewWhatsAppMessage('');
+      
+      // Link message to customer
+      setTimeout(async () => {
+        const messages = await whatsappService.getCustomerMessages(customer.id);
+        const latestMessage = messages[0];
+        if (latestMessage && user) {
+          await whatsappService.linkToCustomer(latestMessage.id!, customer.id, user.uid);
+        }
+        loadWhatsAppMessages();
+      }, 1000);
+    } catch (err) {
+      console.error('Fehler beim WhatsApp-Versand:', err);
+      setError('Fehler beim WhatsApp-Versand');
+    } finally {
+      setSending(false);
+    }
+  };
+
   const getTemplateTypeLabel = (type: string) => {
     switch (type) {
       case 'quote_email': return 'Angebot per E-Mail';
@@ -189,29 +249,12 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6">
-          E-Mail-Kommunikation
-        </Typography>
-        <Box>
-          <Tooltip title="Aktualisieren">
-            <IconButton onClick={() => {
-              loadEmailHistory();
-              loadLinkedEmails();
-            }} size="small">
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setComposeOpen(true)}
-            sx={{ ml: 1 }}
-          >
-            Neue E-Mail
-          </Button>
-        </Box>
+      {/* Header with Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+          <Tab label="E-Mail" icon={<EmailIcon />} iconPosition="start" />
+          <Tab label="WhatsApp" icon={<WhatsAppIcon />} iconPosition="start" />
+        </Tabs>
       </Box>
 
       {error && (
@@ -219,6 +262,34 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
           {error}
         </Alert>
       )}
+
+      {/* E-Mail Tab */}
+      {activeTab === 0 && (
+        <Box>
+          {/* Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6">
+              E-Mail-Kommunikation
+            </Typography>
+            <Box>
+              <Tooltip title="Aktualisieren">
+                <IconButton onClick={() => {
+                  loadEmailHistory();
+                  loadLinkedEmails();
+                }} size="small">
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setComposeOpen(true)}
+                sx={{ ml: 1 }}
+              >
+                Neue E-Mail
+              </Button>
+            </Box>
+          </Box>
 
       {/* Linked Emails from Email Client */}
       {linkedEmails.length > 0 && (
@@ -362,6 +433,115 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
           ))}
         </List>
       )}
+        </Box>
+      )}
+
+      {/* WhatsApp Tab */}
+      {activeTab === 1 && (
+        <Box>
+          {/* Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6">
+              WhatsApp-Kommunikation
+            </Typography>
+            <Box>
+              <Tooltip title="Aktualisieren">
+                <IconButton onClick={loadWhatsAppMessages} size="small">
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
+              <Button
+                variant="contained"
+                startIcon={<WhatsAppIcon />}
+                onClick={() => setWhatsappComposeOpen(true)}
+                sx={{ ml: 1 }}
+                disabled={!customer.phone}
+              >
+                Neue Nachricht
+              </Button>
+            </Box>
+          </Box>
+
+          {!customer.phone ? (
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <WhatsAppIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+              <Typography color="text.secondary">
+                Keine Telefonnummer hinterlegt
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Bitte fügen Sie eine Telefonnummer zum Kundenprofil hinzu
+              </Typography>
+            </Paper>
+          ) : whatsappMessages.length === 0 ? (
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <WhatsAppIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+              <Typography color="text.secondary">
+                Noch keine WhatsApp-Nachrichten
+              </Typography>
+              <Button
+                variant="outlined"
+                startIcon={<WhatsAppIcon />}
+                onClick={() => setWhatsappComposeOpen(true)}
+                sx={{ mt: 2 }}
+              >
+                Erste Nachricht senden
+              </Button>
+            </Paper>
+          ) : (
+            <List sx={{ bgcolor: 'background.paper' }}>
+              {whatsappMessages.map((message, index) => (
+                <React.Fragment key={message.id}>
+                  {index > 0 && <Divider />}
+                  <ListItem
+                    sx={{
+                      py: 2,
+                      '&:hover': {
+                        bgcolor: 'action.hover'
+                      }
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: 'success.main' }}>
+                        <WhatsAppIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="subtitle1">
+                            {message.direction === 'outbound' ? 'Sie' : message.from_name || message.from_number}
+                          </Typography>
+                          {message.direction === 'outbound' && (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              {message.status === 'read' ? (
+                                <DoneAllIcon sx={{ fontSize: 16, color: 'info.main' }} />
+                              ) : message.status === 'delivered' ? (
+                                <DoneAllIcon sx={{ fontSize: 16 }} />
+                              ) : (
+                                <CheckIcon sx={{ fontSize: 16 }} />
+                              )}
+                            </Box>
+                          )}
+                        </Box>
+                      }
+                      secondary={
+                        <Box>
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                            {message.text_content || `[${message.message_type}]`}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {format(new Date(message.timestamp), 'dd.MM.yyyy HH:mm', { locale: de })} Uhr
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                </React.Fragment>
+              ))}
+            </List>
+          )}
+        </Box>
+      )}
 
       {/* Compose Dialog */}
       <Dialog open={composeOpen} onClose={() => setComposeOpen(false)} maxWidth="sm" fullWidth>
@@ -400,6 +580,40 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
             variant="contained"
             startIcon={sending ? <CircularProgress size={16} /> : <SendIcon />}
             disabled={sending}
+          >
+            Senden
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* WhatsApp Compose Dialog */}
+      <Dialog open={whatsappComposeOpen} onClose={() => setWhatsappComposeOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Neue WhatsApp-Nachricht an {customer.name}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Telefonnummer: {customer.phone}
+          </Typography>
+          <TextField
+            fullWidth
+            label="Nachricht"
+            value={newWhatsAppMessage}
+            onChange={(e) => setNewWhatsAppMessage(e.target.value)}
+            margin="normal"
+            multiline
+            rows={4}
+            placeholder="Schreiben Sie Ihre Nachricht..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setWhatsappComposeOpen(false)} disabled={sending}>
+            Abbrechen
+          </Button>
+          <Button
+            onClick={handleSendWhatsApp}
+            variant="contained"
+            color="success"
+            startIcon={sending ? <CircularProgress size={16} /> : <WhatsAppIcon />}
+            disabled={sending || !newWhatsAppMessage.trim()}
           >
             Senden
           </Button>
