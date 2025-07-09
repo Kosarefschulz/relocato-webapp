@@ -33,6 +33,8 @@ import {
 } from '@mui/icons-material';
 import { Customer } from '../types';
 import { supabase } from '../config/supabase';
+import { useAnalytics } from '../hooks/useAnalytics';
+import PhotoCaptureSession from './PhotoCaptureSession';
 
 // StoredPhoto interface for compatibility
 interface StoredPhoto {
@@ -47,8 +49,6 @@ interface StoredPhoto {
     contentType: string;
   };
 }
-import { useAnalytics } from '../hooks/useAnalytics';
-import PhotoCaptureSession from './PhotoCaptureSession';
 
 const PHOTO_CATEGORIES = [
   'Eingang',
