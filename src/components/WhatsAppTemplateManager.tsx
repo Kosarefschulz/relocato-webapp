@@ -12,7 +12,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondary,
+  ListItemSecondaryAction,
   Chip,
   IconButton,
   Alert,
@@ -23,10 +23,10 @@ import {
   Card,
   CardContent,
   CardActions,
-  Grid,
   Tooltip,
   Badge
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import {
   Add as AddIcon,
   Send as SendIcon,

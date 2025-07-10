@@ -133,14 +133,29 @@ export function processEmailContent(email: {
 }): string {
   // Priority: HTML > textAsHtml > text
   if (email.html) {
+    // Check if content is quoted-printable encoded
+    if (email.html.includes('=3D') || email.html.includes('=C3=') || email.html.includes('=E2=')) {
+      const decoded = decodeQuotedPrintable(email.html);
+      return sanitizeHtml(decoded);
+    }
     return sanitizeHtml(email.html);
   }
   
   if (email.textAsHtml) {
+    // Check if content is quoted-printable encoded
+    if (email.textAsHtml.includes('=3D') || email.textAsHtml.includes('=C3=') || email.textAsHtml.includes('=E2=')) {
+      const decoded = decodeQuotedPrintable(email.textAsHtml);
+      return sanitizeHtml(decoded);
+    }
     return sanitizeHtml(email.textAsHtml);
   }
   
   if (email.text) {
+    // Check if content is quoted-printable encoded
+    if (email.text.includes('=3D') || email.text.includes('=C3=') || email.text.includes('=E2=')) {
+      const decoded = decodeQuotedPrintable(email.text);
+      return textToHtml(decoded);
+    }
     return textToHtml(email.text);
   }
   

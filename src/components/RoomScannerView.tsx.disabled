@@ -12,7 +12,6 @@ import {
   ListItemIcon,
   ListItemText,
   Chip,
-  Grid,
   Card,
   CardContent,
   LinearProgress,
@@ -26,7 +25,7 @@ import {
   Info as InfoIcon,
   Weekend as FurnitureIcon,
   SquareFoot as VolumeIcon,
-  Door as DoorIcon,
+  MeetingRoom as DoorIcon,
   Window as WindowIcon,
   Download as DownloadIcon,
   Share as ShareIcon,
@@ -74,7 +73,7 @@ const RoomScannerView: React.FC = () => {
   useEffect(() => {
     // Check if running in native app
     const checkNativeApp = () => {
-      if (window.ReactNativeWebView || (window as any).isNativeApp) {
+      if ((window as any).ReactNativeWebView || (window as any).isNativeApp) {
         setIsNativeApp(true);
       }
     };
@@ -102,7 +101,7 @@ const RoomScannerView: React.FC = () => {
   const startScan = () => {
     if (isNativeApp) {
       // Send message to native app
-      window.ReactNativeWebView?.postMessage(JSON.stringify({
+      (window as any).ReactNativeWebView?.postMessage(JSON.stringify({
         type: 'startRoomScan',
         customerId
       }));
@@ -116,7 +115,7 @@ const RoomScannerView: React.FC = () => {
   const downloadModel = () => {
     if (scanData?.exportPath) {
       // Trigger download
-      window.ReactNativeWebView?.postMessage(JSON.stringify({
+      (window as any).ReactNativeWebView?.postMessage(JSON.stringify({
         type: 'downloadModel',
         path: scanData.exportPath
       }));
@@ -130,7 +129,7 @@ Volumen: ${scanData.roomVolume.toFixed(2)} m³
 Möbel: ${scanData.summary.furnitureCount} Stück
 Maße: ${scanData.dimensions.length.toFixed(1)}m × ${scanData.dimensions.width.toFixed(1)}m × ${scanData.dimensions.height.toFixed(1)}m`;
 
-      window.ReactNativeWebView?.postMessage(JSON.stringify({
+      (window as any).ReactNativeWebView?.postMessage(JSON.stringify({
         type: 'share',
         text,
         title: 'RELOCATO Raumscan'
