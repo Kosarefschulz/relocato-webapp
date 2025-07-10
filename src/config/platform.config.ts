@@ -28,14 +28,14 @@ export async function getPlatformServices() {
       databaseService: unifiedDatabaseService,
       authService,
       emailService: { sendEmail }, // Wrap in object to match expected interface
-      platform: 'firebase' as const,
+      platform: 'supabase' as const,
     };
   }
 }
 
 // Export platform check
 export const isVercelPlatform = () => USE_VERCEL;
-export const isFirebasePlatform = () => !USE_VERCEL;
+export const isFirebasePlatform = () => false; // Firebase is no longer supported
 
 // Platform-specific configurations
 export const platformConfig = {
@@ -43,17 +43,14 @@ export const platformConfig = {
     apiUrl: process.env.REACT_APP_API_URL || '/api',
     authRedirectUrl: process.env.REACT_APP_AUTH_REDIRECT_URL || window.location.origin,
   },
-  firebase: {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  // Firebase config removed - no longer supported
+  supabase: {
+    url: process.env.REACT_APP_SUPABASE_URL,
+    anonKey: process.env.REACT_APP_SUPABASE_ANON_KEY,
   },
 };
 
 // Get current platform config
 export const getCurrentPlatformConfig = () => {
-  return USE_VERCEL ? platformConfig.vercel : platformConfig.firebase;
+  return USE_VERCEL ? platformConfig.vercel : platformConfig.supabase;
 };

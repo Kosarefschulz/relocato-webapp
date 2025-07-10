@@ -149,7 +149,7 @@ const CustomerDetails: React.FC = () => {
       // Lade alle Daten parallel
       const [customersData, quotesData, invoicesData, emailsData] = await Promise.all([
         googleSheetsService.getCustomers(),
-        googleSheetsService.getQuotes().then(quotes => quotes.filter(q => q.customerId === customerId)),
+        googleSheetsService.getQuotesByCustomerId(customerId),
         googleSheetsService.getInvoices().then(invoices => invoices.filter(i => i.customerId === customerId)),
         'getEmailHistory' in googleSheetsService ? (googleSheetsService as any).getEmailHistory(customerId) : Promise.resolve([])
       ]);

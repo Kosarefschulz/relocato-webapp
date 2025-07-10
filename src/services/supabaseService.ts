@@ -64,11 +64,11 @@ export class SupabaseService {
           .eq('id', customerId)
           .eq('is_deleted', false);
       } else {
-        // If it's not a UUID, search by firebase_id or customer_number
+        // If it's not a UUID, search by customer_number
         query = supabase
           .from('customers')
           .select('*')
-          .or(`firebase_id.eq.${customerId},customer_number.eq.${customerId}`)
+          .eq('customer_number', customerId)
           .eq('is_deleted', false);
       }
       
@@ -112,7 +112,7 @@ export class SupabaseService {
       const { error } = await supabase
         .from('customers')
         .update(supabaseUpdates)
-        .or(`id.eq.${customerId},firebase_id.eq.${customerId}`);
+        .eq('id', customerId);
 
       if (error) throw error;
     } catch (error) {
@@ -126,7 +126,7 @@ export class SupabaseService {
       const { error } = await supabase
         .from('customers')
         .update({ is_deleted: true })
-        .or(`id.eq.${customerId},firebase_id.eq.${customerId}`);
+        .eq('id', customerId);
 
       if (error) throw error;
     } catch (error) {
@@ -174,7 +174,7 @@ export class SupabaseService {
       const { data, error } = await supabase
         .from('quotes')
         .select('*')
-        .or(`id.eq.${quoteId},firebase_id.eq.${quoteId}`)
+        .eq('id', quoteId)
         .eq('is_deleted', false)
         .single();
 
@@ -231,7 +231,7 @@ export class SupabaseService {
         customerQuery = supabase
           .from('customers')
           .select('id')
-          .or(`firebase_id.eq.${quote.customerId},customer_number.eq.${quote.customerId}`)
+          .eq('customer_number', quote.customerId)
           .eq('is_deleted', false);
       }
       
@@ -252,6 +252,23 @@ export class SupabaseService {
         status: supabaseQuote.status,
         supabaseQuote
       });
+
+      // Remove firebase_id check - no longer needed
+
+      // Check if a quote with the same confirmation_token already exists
+      if (supabaseQuote.confirmation_token) {
+        const { data: existingTokenQuote } = await supabase
+          .from('quotes')
+          .select('id')
+          .eq('confirmation_token', supabaseQuote.confirmation_token)
+          .single();
+        
+        if (existingTokenQuote) {
+          console.warn(`⚠️ Quote with confirmation_token already exists, generating new token`);
+          // Generate a new token with timestamp to ensure uniqueness
+          supabaseQuote.confirmation_token = `${supabaseQuote.confirmation_token}_${Date.now()}`;
+        }
+      }
 
       const { data, error } = await supabase
         .from('quotes')
@@ -279,12 +296,42 @@ export class SupabaseService {
 
   async updateQuote(quoteId: string, updates: Partial<Quote>): Promise<void> {
     try {
-      const supabaseUpdates = this.mapLocalQuoteToSupabase(updates as Quote, true);
+      // For partial updates, map only the provided fields
+      const supabaseUpdates: any = {};
+      
+      // Map each field individually if present
+      if (updates.status !== undefined) supabaseUpdates.status = updates.status;
+      if (updates.customerName !== undefined) supabaseUpdates.customer_name = updates.customerName;
+      if (updates.price !== undefined) supabaseUpdates.price = Number(updates.price);
+      if (updates.services !== undefined) supabaseUpdates.services = updates.services;
+      if (updates.fromAddress !== undefined) supabaseUpdates.from_address = updates.fromAddress;
+      if (updates.toAddress !== undefined) supabaseUpdates.to_address = updates.toAddress;
+      if (updates.movingDate !== undefined) supabaseUpdates.moving_date = updates.movingDate;
+      if (updates.apartment !== undefined) supabaseUpdates.apartment = updates.apartment;
+      if (updates.notes !== undefined) supabaseUpdates.notes = updates.notes;
+      if (updates.items !== undefined) supabaseUpdates.items = updates.items;
+      if (updates.packagingServices !== undefined) supabaseUpdates.packaging_services = updates.packagingServices;
+      if (updates.discount !== undefined) supabaseUpdates.discount = Number(updates.discount) || 0;
+      if (updates.subtotal !== undefined) supabaseUpdates.subtotal = Number(updates.subtotal) || 0;
+      if (updates.customServices !== undefined) supabaseUpdates.custom_services = updates.customServices;
+      if (updates.sentAt !== undefined) supabaseUpdates.sent_at = updates.sentAt;
+      if (updates.acceptedAt !== undefined) supabaseUpdates.accepted_at = updates.acceptedAt;
+      if (updates.rejectedAt !== undefined) supabaseUpdates.rejected_at = updates.rejectedAt;
+      if (updates.emailOpenedAt !== undefined) supabaseUpdates.email_opened_at = updates.emailOpenedAt;
+      if (updates.emailSent !== undefined) supabaseUpdates.email_sent = updates.emailSent;
+      if (updates.confirmedAt !== undefined) supabaseUpdates.confirmed_at = updates.confirmedAt;
+      if (updates.transportFloor !== undefined) supabaseUpdates.transport_floor = updates.transportFloor;
+      if (updates.haltezonePrice !== undefined) supabaseUpdates.haltezone_price = Number(updates.haltezonePrice) || 0;
+      if (updates.disposalPrice !== undefined) supabaseUpdates.disposal_price = Number(updates.disposalPrice) || 0;
+      if (updates.customPrices !== undefined) supabaseUpdates.custom_prices = updates.customPrices;
+      
+      // Always update the updated_at timestamp
+      supabaseUpdates.updated_at = new Date().toISOString();
       
       const { error } = await supabase
         .from('quotes')
         .update(supabaseUpdates)
-        .or(`id.eq.${quoteId},firebase_id.eq.${quoteId}`);
+        .eq('id', quoteId);
 
       if (error) throw error;
     } catch (error) {
@@ -298,7 +345,7 @@ export class SupabaseService {
       const { error } = await supabase
         .from('quotes')
         .update({ is_deleted: true })
-        .or(`id.eq.${quoteId},firebase_id.eq.${quoteId}`);
+        .eq('id', quoteId);
 
       if (error) throw error;
     } catch (error) {
@@ -329,7 +376,7 @@ export class SupabaseService {
       const { data, error } = await supabase
         .from('invoices')
         .select('*')
-        .or(`id.eq.${invoiceId},firebase_id.eq.${invoiceId}`)
+        .eq('id', invoiceId)
         .eq('is_deleted', false)
         .single();
 
@@ -366,7 +413,7 @@ export class SupabaseService {
       const { error } = await supabase
         .from('invoices')
         .update(supabaseUpdates)
-        .or(`id.eq.${invoiceId},firebase_id.eq.${invoiceId}`);
+        .eq('id', invoiceId);
 
       if (error) throw error;
     } catch (error) {
@@ -693,7 +740,7 @@ export class SupabaseService {
   // Mapping functions
   private mapSupabaseCustomerToLocal(data: any): Customer {
     return {
-      id: data.firebase_id || data.id,
+      id: data.id,
       customerNumber: data.customer_number,
       name: data.name,
       email: data.email,
@@ -758,7 +805,7 @@ export class SupabaseService {
 
     if (!isUpdate) {
       supabaseCustomer.customer_number = customer.customerNumber;
-      supabaseCustomer.firebase_id = customer.id;
+      // firebase_id no longer used
     }
 
     return supabaseCustomer;
@@ -766,7 +813,7 @@ export class SupabaseService {
 
   private mapSupabaseQuoteToLocal(data: any): Quote {
     return {
-      id: data.firebase_id || data.id,
+      id: data.id,
       customerId: data.customer_id,
       customerName: data.customer_name,
       status: data.status,
@@ -826,7 +873,7 @@ export class SupabaseService {
 
     if (!isUpdate) {
       supabaseQuote.customer_id = quote.customerId;
-      supabaseQuote.firebase_id = quote.id;
+      // firebase_id no longer used - Supabase will generate its own UUID
     }
 
     // Remove undefined values to avoid Supabase issues
@@ -841,7 +888,7 @@ export class SupabaseService {
 
   private mapSupabaseInvoiceToLocal(data: any): Invoice {
     return {
-      id: data.firebase_id || data.id,
+      id: data.id,
       customerId: data.customer_id,
       quoteId: data.quote_id,
       customerName: data.customer_name || '',
@@ -875,7 +922,7 @@ export class SupabaseService {
       supabaseInvoice.customer_id = invoice.customerId;
       supabaseInvoice.quote_id = invoice.quoteId;
       supabaseInvoice.invoice_number = invoice.invoiceNumber;
-      supabaseInvoice.firebase_id = invoice.id;
+      // firebase_id no longer used
     }
 
     return supabaseInvoice;

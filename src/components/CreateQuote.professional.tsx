@@ -79,6 +79,7 @@ const CreateQuote: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [calculation, setCalculation] = useState<QuoteCalculation | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false); // Prevent double-saving
   
   // Kalkulation aktualisieren
   useEffect(() => {
@@ -117,7 +118,14 @@ const CreateQuote: React.FC = () => {
   const saveQuote = async () => {
     if (!calculation) return;
     
+    // Prevent double-saving
+    if (isSaving) {
+      console.warn('⚠️ Quote is already being saved, preventing duplicate save');
+      return;
+    }
+    
     try {
+      setIsSaving(true);
       console.log('💰 Speichere Angebot...');
       
       // Erstelle eine frische calculation mit dem aktuellen manuellen Preis
@@ -157,7 +165,11 @@ const CreateQuote: React.FC = () => {
         manualPrice: manualTotalPrice > 0 ? manualTotalPrice : 'nicht eingegeben'
       });
       
-      const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Generate a more unique quote ID to prevent conflicts
+      const timestamp = Date.now();
+      const randomPart = Math.random().toString(36).substr(2, 9);
+      const uniqueId = crypto.getRandomValues(new Uint8Array(4)).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), '');
+      const quoteId = `quote_${timestamp}_${randomPart}_${uniqueId}`;
       const token = tokenService.generateQuoteToken({ id: quoteId } as any);
       
       // Ensure we use the correct customer ID (Firebase ID, not customer number)
@@ -196,6 +208,8 @@ const CreateQuote: React.FC = () => {
     } catch (err) {
       console.error('Fehler beim Speichern:', err);
       throw err;
+    } finally {
+      setIsSaving(false);
     }
   };
 

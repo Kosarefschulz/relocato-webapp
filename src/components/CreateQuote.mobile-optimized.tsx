@@ -129,7 +129,11 @@ const CreateQuote: React.FC = () => {
     try {
       console.log('💰 Speichere Angebot...');
       
-      const quoteId = `quote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Generate a more unique quote ID to prevent conflicts
+      const timestamp = Date.now();
+      const randomPart = Math.random().toString(36).substr(2, 9);
+      const uniqueId = crypto.getRandomValues(new Uint8Array(4)).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), '');
+      const quoteId = `quote_${timestamp}_${randomPart}_${uniqueId}`;
       const token = tokenService.generateQuoteToken({ id: quoteId } as any);
       
       const quote = {

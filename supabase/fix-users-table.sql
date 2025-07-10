@@ -10,9 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   last_login_at TIMESTAMPTZ,
-  preferences JSONB DEFAULT '{}'::jsonb,
-  firebase_id VARCHAR(255) UNIQUE
-); -- Diese schließende Klammer fehlte!
+  preferences JSONB DEFAULT '{}'::jsonb
+);
 
 -- RLS deaktivieren
 ALTER TABLE IF EXISTS users DISABLE ROW LEVEL SECURITY;

@@ -51,7 +51,7 @@ export default async function handler(req, res) {
             SELECT q.*, c.name as customer_name 
             FROM quotes q
             JOIN customers c ON q.customer_id = c.id
-            WHERE c.firebase_id = $1 OR c.id::text = $1
+            WHERE c.id::text = $1
             ORDER BY q.created_at DESC
           `;
           params = [customerId];
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
         
         // Transform database rows to match frontend format
         const quotes = rows.map(row => ({
-          id: row.firebase_id || row.id,
+          id: row.id,
           customerId: row.customer_id,
           customerName: row.customer_name,
           price: parseFloat(row.price),
@@ -94,7 +94,7 @@ export default async function handler(req, res) {
         
         // Get customer ID from firebase_id
         const { rows: customerRows } = await pool.query(
-          'SELECT id FROM customers WHERE firebase_id = $1 OR id::text = $1',
+          'SELECT id FROM customers WHERE id::text = $1',
           [quote.customerId]
         );
         

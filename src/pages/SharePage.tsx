@@ -228,18 +228,30 @@ const SharePage: React.FC = () => {
         name: customer.name
       });
 
-      // Find the specific quote - check multiple statuses
+      // Find the specific quote by ID
       const acceptedQuote = quotes.find((q: any) => 
-        q.id === shareLink.quoteId && (q.status === 'accepted' || q.status === 'confirmed')
+        q.id === shareLink.quoteId
       );
 
       if (!acceptedQuote) {
+        // Try to find quote that belongs to this customer
+        const customerQuotes = quotes.filter((q: any) => 
+          q.customerId === customer?.id || 
+          q.customerId === shareLink.customerId ||
+          q.customerId === customer?.customerNumber
+        );
+        
         console.error('❌ Angebot nicht gefunden:', {
           quoteId: shareLink.quoteId,
+          customerId: customer?.id,
+          customerNumber: customer?.customerNumber,
+          shareLinkCustomerId: shareLink.customerId,
           totalQuotes: quotes.length,
-          quotesForCustomer: quotes.filter((q: any) => 
-            q.customerId === shareLink.customerId
-          ).map((q: any) => ({ id: q.id, status: q.status }))
+          customerQuotes: customerQuotes.map((q: any) => ({ 
+            id: q.id, 
+            customerId: q.customerId,
+            status: q.status 
+          }))
         });
         setError('Angebot nicht gefunden');
         setLoading(false);

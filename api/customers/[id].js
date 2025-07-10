@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       case 'GET':
         // Get single customer
         const { rows } = await pool.query(
-          'SELECT * FROM customers WHERE id = $1 OR firebase_id = $1',
+          'SELECT * FROM customers WHERE id = $1',
           [id]
         );
         
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
         
         const row = rows[0];
         const customer = {
-          id: row.firebase_id || row.id,
+          id: row.id,
           customerNumber: row.customer_number,
           name: row.name,
           email: row.email,
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
             priority = COALESCE($18, priority),
             source = COALESCE($19, source),
             updated_at = CURRENT_TIMESTAMP
-          WHERE id = $1 OR firebase_id = $1
+          WHERE id = $1
           RETURNING *
         `;
         
@@ -148,7 +148,7 @@ export default async function handler(req, res) {
         }
         
         const { rowCount } = await pool.query(
-          'DELETE FROM customers WHERE id = $1 OR firebase_id = $1',
+          'DELETE FROM customers WHERE id = $1',
           [id]
         );
         

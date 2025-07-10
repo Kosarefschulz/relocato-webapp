@@ -12,17 +12,16 @@ import { unifiedDatabaseService } from '../services/unifiedDatabaseService';
 
 /**
  * Database provider configuration
- * Can be 'firebase', 'supabase', or 'sheets'
- * Firebase is disabled, so defaulting to 'supabase'
+ * Only 'supabase' or 'sheets' are supported
+ * Firebase is no longer supported
  */
 export const DATABASE_PROVIDER = process.env.REACT_APP_DATABASE_PROVIDER || 'supabase';
 
 /**
  * Legacy configuration for backward compatibility
- * Set to true to use Firebase as primary database
- * Set to false to use Google Sheets + localStorage
+ * Always false since Firebase is no longer supported
  */
-export const USE_FIREBASE_PRIMARY = DATABASE_PROVIDER !== 'sheets';
+export const USE_FIREBASE_PRIMARY = false;
 
 /**
  * Export the service to use based on configuration

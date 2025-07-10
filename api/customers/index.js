@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         
         // Transform database rows to match frontend format
         const customers = rows.map(row => ({
-          id: row.firebase_id || row.id,
+          id: row.id,
           customerNumber: row.customer_number,
           name: row.name,
           email: row.email,
