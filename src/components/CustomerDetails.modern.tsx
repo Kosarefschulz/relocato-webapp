@@ -557,6 +557,7 @@ const CustomerDetails: React.FC = () => {
                   >
                     Fotos hinzufügen
                   </Button>
+                  {/* AR ROOM SCAN - TEMPORÄR DEAKTIVIERT
                   <Button
                     variant="outlined"
                     startIcon={<ScannerIcon />}
@@ -576,6 +577,7 @@ const CustomerDetails: React.FC = () => {
                   >
                     Volumen scannen
                   </Button>
+                  */}
                 </Stack>
               </Box>
             )}
