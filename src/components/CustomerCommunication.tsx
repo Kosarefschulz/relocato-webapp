@@ -51,6 +51,7 @@ import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 import { whatsappService, WhatsAppMessage } from '../services/whatsappService';
 import { useAuth } from '../contexts/AuthContext';
+import WhatsAppTemplateManager from './WhatsAppTemplateManager';
 
 interface CustomerCommunicationProps {
   customer: Customer;
@@ -84,6 +85,7 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
   const [newWhatsAppMessage, setNewWhatsAppMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [showTemplates, setShowTemplates] = useState(false);
 
   useEffect(() => {
     loadEmailHistory();
@@ -451,6 +453,14 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
                 </IconButton>
               </Tooltip>
               <Button
+                variant="outlined"
+                onClick={() => setShowTemplates(!showTemplates)}
+                sx={{ ml: 1 }}
+                disabled={!customer.phone}
+              >
+                {showTemplates ? 'Nachrichten' : 'Templates'}
+              </Button>
+              <Button
                 variant="contained"
                 startIcon={<WhatsAppIcon />}
                 onClick={() => setWhatsappComposeOpen(true)}
@@ -472,6 +482,11 @@ const CustomerCommunication: React.FC<CustomerCommunicationProps> = ({ customer 
                 Bitte fügen Sie eine Telefonnummer zum Kundenprofil hinzu
               </Typography>
             </Paper>
+          ) : showTemplates ? (
+            <WhatsAppTemplateManager 
+              customer={customer} 
+              onTemplateSent={loadWhatsAppMessages}
+            />
           ) : whatsappMessages.length === 0 ? (
             <Paper sx={{ p: 3, textAlign: 'center' }}>
               <WhatsAppIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />

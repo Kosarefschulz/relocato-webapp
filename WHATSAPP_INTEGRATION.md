@@ -133,10 +133,65 @@ psql -f supabase/storage-whatsapp.sql
 
 - In Kundendetails → Kommunikation Tab
 - WhatsApp-Tab zeigt alle Nachrichten des Kunden
-- "Neue Nachricht" Button zum Senden
+- "Templates" Button zeigt verfügbare Nachrichtenvorlagen
+- "Neue Nachricht" Button für freie Textnachrichten
 - Automatische Verknüpfung mit Kundenprofil
 
-### 3. API Usage
+### 3. Template-Nachrichten
+
+#### Verfügbare Templates (Beispiele für Umzugsunternehmen):
+
+1. **Angebot versandt** (`umzug_angebot_versandt`)
+   - Benachrichtigung wenn Angebot fertig ist
+   - Parameter: Kundenname, Umzugsdatum, Angebotsnummer, Preis
+
+2. **Termin-Erinnerung** (`umzug_termin_erinnerung`)
+   - Automatische Erinnerung vor Umzugstermin
+   - Parameter: Kundenname, Datum, Uhrzeit, Adressen
+
+3. **Willkommensnachricht** (`umzug_willkommen`)
+   - Nach Erstanfrage
+   - Parameter: Kundenname
+
+4. **Umzug abgeschlossen** (`umzug_abgeschlossen`)
+   - Dankesnachricht mit Bewertungslink
+   - Parameter: Kundenname, Rechnungsnummer
+
+5. **Zahlungserinnerung** (`umzug_zahlungserinnerung`)
+   - Freundliche Mahnung
+   - Parameter: Kundenname, Rechnungsnummer, Betrag, Fälligkeitsdatum
+
+6. **Status Update** (`umzug_status_update`)
+   - Updates während des Umzugs
+   - Parameter: Kundenname, Status, Ankunftszeit
+
+#### Template-Manager Features:
+
+- Übersicht aller genehmigten Templates
+- Vorschau mit Platzhaltern
+- Parameter-Eingabe vor dem Versand
+- Kategorisierung (Marketing, Utility, Authentication)
+- Sprachauswahl
+
+### 4. Template einreichen bei 360dialog
+
+1. **Login** bei https://app.360dialog.io/
+2. Navigate zu **Message Templates**
+3. Klick auf **Create Template**
+4. Fülle aus:
+   - Template Name (z.B. `umzug_angebot_versandt`)
+   - Category (UTILITY für Transaktional, MARKETING für Werbung)
+   - Language: German (DE)
+   - Components: Header, Body, Footer, Buttons
+5. **Submit for Review**
+6. Warte auf Genehmigung (meist 24-48h)
+
+**Wichtig**: 
+- Verwende klare Platzhalter {{1}}, {{2}} etc.
+- Keine werblichen Inhalte in UTILITY Templates
+- Buttons müssen einen klaren Call-to-Action haben
+
+### 5. API Usage
 
 ```typescript
 import { whatsappService } from './services/whatsappService';
