@@ -104,9 +104,13 @@ export interface Quote {
   distance?: number;
   // Umzugsinformationen
   moveDate?: string;
+  movingDate?: string; // Alternative zu moveDate
   moveFrom?: string;
   moveTo?: string;
+  fromAddress?: string; // Alternative zu moveFrom
+  toAddress?: string; // Alternative zu moveTo
   notes?: string;
+  apartment?: any; // Apartment Details
   // Service-Details
   services?: Record<string, any>;
   packingRequested?: boolean;
@@ -126,6 +130,22 @@ export interface Quote {
   heavyItemsCount?: number;
   packingMaterials?: boolean;
   manualBasePrice?: number;
+  // Erweiterte Service-Details
+  items?: any[]; // Umzugsgegenstände
+  packagingServices?: any; // Verpackungsdienstleistungen
+  discount?: number; // Rabatt
+  subtotal?: number; // Zwischensumme
+  customServices?: any[]; // Benutzerdefinierte Services
+  transportFloor?: string; // Stockwerk für Transport
+  haltezonePrice?: number; // Haltezone Preis
+  disposalPrice?: number; // Entsorgung Preis
+  customPrices?: any; // Benutzerdefinierte Preise
+  // Email und Versand
+  sentAt?: Date | string; // Wann wurde das Angebot gesendet
+  acceptedAt?: Date | string; // Wann wurde es akzeptiert
+  rejectedAt?: Date | string; // Wann wurde es abgelehnt
+  emailOpenedAt?: Date | string; // Wann wurde die Email geöffnet
+  emailSent?: boolean; // Wurde die Email gesendet
   // Versionierung
   version?: number;
   parentQuoteId?: string; // Verweis auf ursprüngliches Angebot

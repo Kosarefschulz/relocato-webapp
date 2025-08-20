@@ -11,6 +11,12 @@ const rateLimit = require('express-rate-limit');
 // Load environment variables
 dotenv.config();
 
+// Add startup logging
+console.log('🚀 Starting Email Backend Server...');
+console.log('📁 Working Directory:', process.cwd());
+console.log('🔧 Node Version:', process.version);
+console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
+
 // Import routes
 const emailRoutes = require('./routes/emailRoutes');
 const folderRoutes = require('./routes/folderRoutes');
@@ -91,7 +97,17 @@ app.set('io', io);
 
 // Start server
 const PORT = process.env.PORT || 5000;
+
+// Add error handling for server startup
 httpServer.listen(PORT, () => {
-  console.log(`Email server running on port ${PORT}`);
-  console.log(`WebSocket server ready`);
+  console.log('✅ Email server running on port', PORT);
+  console.log('🔌 WebSocket server ready');
+  console.log('🌐 Frontend URL:', process.env.FRONTEND_URL || 'http://localhost:3000');
+  console.log('📊 Rate limiting:', process.env.RATE_LIMIT_MAX_REQUESTS || 100, 'requests per', (parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000 / 60, 'minutes');
+}).on('error', (err) => {
+  console.error('❌ Server failed to start:', err.message);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Please use a different port.`);
+  }
+  process.exit(1);
 });

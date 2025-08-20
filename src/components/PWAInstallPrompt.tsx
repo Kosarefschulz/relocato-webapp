@@ -36,7 +36,9 @@ const PWAInstallPrompt: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showPrompt, setShowPrompt] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
-  const [notificationPermission, setNotificationPermission] = useState(Notification.permission);
+  const [notificationPermission, setNotificationPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const [installAvailable, setInstallAvailable] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -84,7 +86,7 @@ const PWAInstallPrompt: React.FC = () => {
       setShowPrompt(false);
       // Show notification prompt after install
       setTimeout(() => {
-        if (Notification.permission === 'default') {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
           setShowNotificationPrompt(true);
         }
       }, 2000);

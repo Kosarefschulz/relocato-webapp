@@ -50,19 +50,25 @@ const NotificationCenter: React.FC = () => {
       
       // Zeige Browser-Benachrichtigung für neue High-Priority Notifications
       const highPriorityNew = newNotifications.filter(n => n.priority === 'high');
-      if (highPriorityNew.length > 0 && Notification.permission === 'granted') {
+      if (typeof Notification !== 'undefined' && highPriorityNew.length > 0 && Notification.permission === 'granted') {
         highPriorityNew.forEach(notification => {
-          new Notification(notification.title, {
-            body: notification.message,
-            icon: '/logo192.png'
-          });
+          try {
+            new Notification(notification.title, {
+              body: notification.message,
+              icon: '/logo192.png'
+            });
+          } catch (error) {
+            console.log('Failed to show notification:', error);
+          }
         });
       }
     });
 
     // Browser-Benachrichtigungen anfragen
-    if (Notification.permission === 'default') {
-      Notification.requestPermission();
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission().catch(error => {
+        console.log('Failed to request notification permission:', error);
+      });
     }
 
     return () => unsubscribe();

@@ -168,11 +168,21 @@ class PWAManager {
 
   // Notification Methods
   private async requestNotificationPermission() {
+    // Check if Notification API is available
+    if (typeof Notification === 'undefined' || !('Notification' in window)) {
+      console.log('[PWA] Notifications not supported on this device');
+      return;
+    }
+    
     if (Notification.permission === 'default') {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        console.log('[PWA] Notification permission granted');
-        this.setupPushSubscription();
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          console.log('[PWA] Notification permission granted');
+          this.setupPushSubscription();
+        }
+      } catch (error) {
+        console.log('[PWA] Failed to request notification permission:', error);
       }
     }
   }
