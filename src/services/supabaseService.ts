@@ -105,6 +105,11 @@ export class SupabaseService {
     }
   }
 
+  // Alias für addCustomer für bessere Kompatibilität
+  async createCustomer(customer: Omit<Customer, 'id'>): Promise<string> {
+    return this.addCustomer(customer);
+  }
+
   async updateCustomer(customerId: string, updates: Partial<Customer>): Promise<void> {
     try {
       const supabaseUpdates = this.mapLocalCustomerToSupabase(updates as Customer, true);

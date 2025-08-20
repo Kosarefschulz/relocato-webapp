@@ -18,7 +18,7 @@ firebase deploy --only functions
 2. **Klicken Sie auf "Funktion erstellen"**
 
 3. **Grundeinstellungen**:
-   - Name: `checkAndParseEmails`
+   - Name: `Q`
    - Region: `europe-west1`
    - Trigger-Typ: `Cloud Pub/Sub`
    - Neues Thema erstellen: `email-check-schedule`

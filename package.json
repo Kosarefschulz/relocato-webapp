@@ -43,7 +43,7 @@
     "@vercel/blob": "^1.1.1",
     "@vercel/kv": "^3.0.0",
     "@vercel/postgres": "^0.10.0",
-    "axios": "^1.9.0",
+    "axios": "^1.11.0",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.17.0",
@@ -111,12 +111,11 @@
     "migrate:all": "node migration/vercel/migrate-all.js",
     "db:setup": "psql $POSTGRES_URL -f migration/vercel/vercel-schema.sql",
     "switch:vercel": "node scripts/switch-to-vercel.js && npm start",
-    "switch:supabase": "npm start",
+    "switch:supabase": "REACT_APP_DATABASE_PROVIDER=supabase npm start",
     "debug:sharelinks": "ts-node src/scripts/debugShareLinks.ts",
     "supabase:schema": "npx supabase db push --db-url $SUPABASE_DB_URL < src/scripts/supabase-schema.sql",
     "supabase:migrate": "ts-node src/scripts/migrate-to-supabase.ts",
-    "supabase:test": "node src/scripts/test-supabase.js",
-    "switch:supabase": "REACT_APP_DATABASE_PROVIDER=supabase npm start"
+    "supabase:test": "node src/scripts/test-supabase.js"
   },
   "eslintConfig": {
     "extends": [

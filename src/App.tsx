@@ -6,6 +6,7 @@ import { User } from './services/authService';
 import { authService } from './services/authService';
 import { usePageTracking } from './hooks/useAnalytics';
 import { autoSyncService } from './services/autoSyncService';
+import { lexwareSyncService } from './services/lexwareSyncService';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import SimpleAuth from './components/SimpleAuth';
@@ -432,6 +433,17 @@ function App() {
       autoSyncService.startAutoSync(5); // Alle 5 Minuten
     }
     
+    // LEXWARE AUTO-SYNC - IMMER AKTIV!
+    console.log('🚀 Starte automatische Lexware Synchronisation...');
+    lexwareSyncService.startAutoSync(5); // Alle 5 Minuten automatisch
+    
+    // Führe sofort erste Synchronisation durch
+    lexwareSyncService.performSync().then(() => {
+      console.log('✅ Erste Lexware Synchronisation abgeschlossen');
+    }).catch(error => {
+      console.error('❌ Fehler bei der ersten Lexware Synchronisation:', error);
+    });
+    
     // Prüfe AI Config
     checkAIConfig();
     
@@ -460,6 +472,7 @@ function App() {
     // Cleanup bei Unmount
     return () => {
       autoSyncService.stopAutoSync();
+      lexwareSyncService.stopAutoSync(); // Stoppe Lexware Sync beim Beenden
       window.removeEventListener('showOnlineUsersChanged', handleShowOnlineUsersChange);
     };
   }, []);

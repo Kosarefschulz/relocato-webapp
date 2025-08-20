@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "gpt5-server": {
+      "command": "node",
+      "args": ["/Users/sergejschulz/Desktop/main/umzugs-webapp/mcp-servers/gpt5-server/build/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}"
+      }
+    }
+  }
+}

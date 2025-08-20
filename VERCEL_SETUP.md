@@ -21,23 +21,16 @@ REACT_APP_IMAP_SERVER=mail.ionos.de
 REACT_APP_IMAP_PORT=993
 REACT_APP_SMTP_SERVER=mail.ionos.de
 REACT_APP_SMTP_PORT=465
-REACT_APP_EMAIL_USERNAME=bielefeld@relocato.de
-REACT_APP_EMAIL_PASSWORD=Bicm1308
-
-# Alternative SMTP-Konfiguration (aus EMAIL_SETUP.md)
-SMTP_HOST=smtp.ionos.de
-SMTP_PORT=587
-SMTP_USER=bielefeld@relocato.de
-SMTP_PASS=Bicm1308
-SMTP_FROM=bielefeld@relocato.de
+REACT_APP_EMAIL_USERNAME=[bielefeld@relocato.de]
+REACT_APP_EMAIL_PASSWORD=[Bicm1308]
 ```
 
 ### Google Services (Optional)
 ```
-REACT_APP_GOOGLE_SHEETS_API_KEY=AIzaSyDCeOBZw96klWFkolRQMnhr5DG4Ol2eMjY
-REACT_APP_GOOGLE_SHEETS_ID=178tpFCNqmnDZxkzOfgWQCS6BW7wn2rYyTB3hZh8H7PU
-REACT_APP_SENDGRID_API_KEY=[dein-sendgrid-api-key-falls-vorhanden]
-REACT_APP_SENDGRID_FROM_EMAIL=bielefeld@relocato.de
+REACT_APP_GOOGLE_SHEETS_API_KEY=[dein-google-sheets-api-key]
+REACT_APP_GOOGLE_SHEETS_ID=[deine-spreadsheet-id]
+REACT_APP_SENDGRID_API_KEY=[dein-sendgrid-api-key]
+REACT_APP_SENDGRID_FROM_EMAIL=[deine-email@company.com]
 ```
 
 ### Backend Configuration
