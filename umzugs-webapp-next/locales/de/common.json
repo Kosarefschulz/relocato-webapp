@@ -1,0 +1,48 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "customers": "Kunden",
+    "quotes": "Angebote",
+    "calendar": "Kalender",
+    "documents": "Dokumente",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "close": "Schließen",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "date": {
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "tomorrow": "Morgen",
+    "week": "Woche",
+    "month": "Monat",
+    "year": "Jahr"
+  },
+  "status": {
+    "pending": "Ausstehend",
+    "inProgress": "In Bearbeitung",
+    "completed": "Abgeschlossen",
+    "cancelled": "Storniert",
+    "active": "Aktiv",
+    "inactive": "Inaktiv"
+  }
+}
