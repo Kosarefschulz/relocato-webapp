@@ -1,0 +1,16 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back",
+  "stats": {
+    "customers": "Customers",
+    "quotes": "Quotes",
+    "revenue": "Revenue",
+    "orders": "Orders"
+  },
+  "charts": {
+    "revenue_development": "Revenue Development",
+    "orders_per_month": "Orders per Month"
+  },
+  "upcoming_moves": "Upcoming Moves",
+  "recent_quotes": "Recent Quotes"
+}

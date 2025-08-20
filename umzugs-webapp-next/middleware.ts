@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createMiddlewareClient } from '@supabase/supabase-js';
 
 // Öffentliche Routen, die keine Authentifizierung benötigen
 const publicRoutes = ['/login', '/register', '/forgot-password', '/api/auth'];
@@ -34,73 +33,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(newUrl);
   }
 
-  // Authentifizierung prüfen für geschützte Routen
-  const isPublicRoute = publicRoutes.some(route => pathname.includes(route));
-  
-  if (!isPublicRoute) {
-    try {
-      // Supabase Client für Middleware erstellen
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
-      if (!supabaseUrl || !supabaseAnonKey) {
-        console.error('Supabase environment variables not configured');
-        return res;
-      }
-
-      const supabase = createMiddlewareClient(
-        supabaseUrl,
-        supabaseAnonKey,
-        {
-          cookies: {
-            get: (name: string) => {
-              const cookie = request.cookies.get(name);
-              return cookie?.value;
-            },
-            set: (name: string, value: string) => {
-              res.cookies.set({
-                name,
-                value,
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                path: '/',
-              });
-            },
-            remove: (name: string) => {
-              res.cookies.set({
-                name,
-                value: '',
-                maxAge: 0,
-              });
-            },
-          },
-        }
-      );
-
-      // Session prüfen
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        // Nicht authentifiziert - zur Login-Seite umleiten
-        const redirectUrl = new URL(`/${locale}/login`, request.url);
-        redirectUrl.searchParams.set('redirectTo', pathname);
-        return NextResponse.redirect(redirectUrl);
-      }
-
-      // Benutzerrolle prüfen (optional)
-      const userRole = session.user?.user_metadata?.role;
-      
-      // Admin-Routen schützen
-      if (pathname.includes('/admin') && userRole !== 'admin') {
-        return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
-      }
-    } catch (error) {
-      console.error('Middleware authentication error:', error);
-      // Bei Fehlern weitermachen
-      return res;
-    }
-  }
+  // TODO: Authentifizierung über Client-Side implementieren
+  // Middleware wird vorerst nur für Locale-Handling verwendet
+  // Auth-Prüfung erfolgt in den Layout-Komponenten
 
   // Response Headers für Sicherheit setzen
   res.headers.set('X-Frame-Options', 'DENY');

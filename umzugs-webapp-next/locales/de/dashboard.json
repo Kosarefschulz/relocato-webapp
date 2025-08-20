@@ -1,0 +1,16 @@
+{
+  "title": "Dashboard",
+  "welcome": "Willkommen zurück",
+  "stats": {
+    "customers": "Kunden",
+    "quotes": "Angebote",
+    "revenue": "Umsatz",
+    "orders": "Aufträge"
+  },
+  "charts": {
+    "revenue_development": "Umsatzentwicklung",
+    "orders_per_month": "Aufträge pro Monat"
+  },
+  "upcoming_moves": "Anstehende Umzüge",
+  "recent_quotes": "Neue Angebote"
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Grid2 as Grid, Card, CardContent, Typography, Box, Paper } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Box, Paper } from '@mui/material';
 import { People, Description, Euro, TrendingUp, CalendarMonth, Assignment } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -33,7 +33,7 @@ export default function DashboardPage() {
       <Grid container spacing={3}>
         {/* Statistics Cards */}
         {stats.map((stat) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={stat.title}>
+          <Grid item xs={12} sm={6} md={3} key={stat.title}>
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -67,7 +67,7 @@ export default function DashboardPage() {
         ))}
 
         {/* Charts */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Umsatzentwicklung
@@ -85,7 +85,7 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Aufträge pro Monat
@@ -104,7 +104,7 @@ export default function DashboardPage() {
         </Grid>
 
         {/* Recent Activities */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Anstehende Umzüge
@@ -142,7 +142,7 @@ export default function DashboardPage() {
         </Grid>
 
         {/* Recent Quotes */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Neue Angebote
