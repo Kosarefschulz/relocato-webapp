@@ -219,36 +219,11 @@ export default function CustomerDetailPage() {
       date: customer.movingDate || '2025-08-22',
       expirationDate: '2025-09-21', // 30 Tage später
       status: customer.status === 'reached' ? 'angenommen' : 'offen' as const,
-      lineItems: [
-        {
-          position: 1,
-          description: 'Transport und Verladung',
-          quantity: 1,
-          unit: 'Pausch.',
-          unitPrice: 2400.00,
-          totalPrice: 2400.00
-        },
-        {
-          position: 2,
-          description: 'Büroumzug-Service (Spezialverpackung)',
-          quantity: 1,
-          unit: 'Pausch.',
-          unitPrice: 800.00,
-          totalPrice: 800.00
-        },
-        {
-          position: 3,
-          description: 'Feuchtigkeitsschäden - Schutzmaßnahmen',
-          quantity: 1,
-          unit: 'Pausch.',
-          unitPrice: 411.65,
-          totalPrice: 411.65
-        }
-      ],
-      subtotal: 3611.65,
-      vatAmount: 686.21, // 19% von 3611.65
-      totalAmount: 4297.86,
-      notes: 'Feuchtigkeitsschäden erfordern spezielle Schutzmaßnahmen. Umzug von Bielefeld nach Gütersloh mit professioneller Büroausstattung.'
+      lineItems: generateRealisticLineItems(customer), // Nutze die individuellen Templates!
+      subtotal: customer.latestQuoteAmount || 2000,
+      vatAmount: Math.round((customer.latestQuoteAmount || 2000) * 0.19 * 100) / 100,
+      totalAmount: Math.round((customer.latestQuoteAmount || 2000) * 1.19 * 100) / 100,
+      notes: `Individuelles Angebot für ${customer.name} basierend auf Kundenanforderungen.`
     };
 
     return quoteDetails;
@@ -356,6 +331,8 @@ export default function CustomerDetailPage() {
         return getTessaPhilipUmzug(basePrice);
       case 'LW-10176': // A. Bührdel
         return getABuehrdelUmzug(basePrice);
+      case 'LW-10140': // Stefan Döring
+        return getStefanDoeringUmzug(basePrice);
       case 'LW-10175': // Weiterer Kunde
       case 'LW-10174': // Weiterer Kunde
       case 'LW-10173': // Weiterer Kunde
@@ -442,6 +419,12 @@ export default function CustomerDetailPage() {
     { position: 2, name: 'Möbelmontage Premium', description: 'Aufbau komplette Einbauküche, 2. OG mit Aufzug', quantity: 6, unitName: 'Std', unitPrice: { grossAmount: 60.00 }, totalPrice: 360.00 },
     { position: 3, name: 'Klaviertransport', description: 'Spezialtransport Klavier mit Fachpersonal', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 280.00 }, totalPrice: 280.00 },
     { position: 4, name: 'Verpackungsservice', description: 'Einpacken empfindlicher Gegenstände', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 160.00 }, totalPrice: 160.00 }
+  ];
+
+  const getStefanDoeringUmzug = (basePrice: number) => [
+    { position: 1, name: 'Wohnungsauflösung - Komplettservice', description: 'Wohnungsauflösung mit Entrümpelung', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 450.00 }, totalPrice: 450.00 },
+    { position: 2, name: 'Entsorgung Hausrat', description: 'Fachgerechte Entsorgung nicht benötigter Gegenstände', quantity: 8, unitName: 'Std', unitPrice: { grossAmount: 35.00 }, totalPrice: 280.00 },
+    { position: 3, name: 'Endreinigung', description: 'Besenreine Übergabe der Wohnung', quantity: 2, unitName: 'Std', unitPrice: { grossAmount: 30.00 }, totalPrice: 60.00 }
   ];
 
   const getStandardFirmenumzug = (basePrice: number) => [
