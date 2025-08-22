@@ -17,16 +17,14 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
   TextField,
   InputAdornment,
   Paper,
-  Alert
+  Alert,
+  Chip,
+  Avatar,
+  Badge,
+  Fab
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -44,280 +42,578 @@ import {
   Dashboard as DashboardIcon,
   Notifications as NotificationsIcon,
   Sync as SyncIcon,
-  CheckCircle as CheckCircleIcon
+  CheckCircle as CheckCircleIcon,
+  Star as StarIcon,
+  AutoAwesome as AIIcon,
+  Bolt as BoltIcon
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#1976d2',
+      main: '#c1bdb3', // Silver
+      light: '#e8e6e0',
+      dark: '#a09c94',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#5f5b6b', // Davys Gray
+      light: '#7a7687',
+      dark: '#4a465a',
+    },
+    background: {
+      default: '#323031', // Jet
+      paper: '#3d3b3c', // Jet-2
+    },
+    text: {
+      primary: '#c1bdb3', // Silver
+      secondary: '#7f7979', // Gray
+    },
+    divider: 'rgba(193, 189, 179, 0.12)',
+  },
+  typography: {
+    fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
+    h4: { fontWeight: 800, letterSpacing: '-0.02em', color: '#c1bdb3' },
+    h5: { fontWeight: 700, letterSpacing: '-0.01em', color: '#c1bdb3' },
+    h6: { fontWeight: 600, letterSpacing: '-0.01em', color: '#c1bdb3' },
+  },
+  shape: { borderRadius: 20 },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(61, 59, 60, 0.8)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(193, 189, 179, 0.1)',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(61, 59, 60, 0.9)',
+          backdropFilter: 'blur(20px)',
+        },
+      },
     },
   },
 });
 
-const Dashboard: React.FC = () => {
+const ModernDashboard: React.FC = () => {
   const router = useRouter();
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const dashboardItems = [
     {
       title: 'Kunde suchen',
-      description: 'Bestehenden Kunden finden',
+      description: 'KI-gestützte Kundensuche',
       icon: <SearchIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/search-customer',
-      color: '#667eea',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      color: '#c1bdb3',
+      gradient: 'linear-gradient(135deg, #c1bdb3 0%, #7f7979 100%)',
+      glow: '0 20px 40px -12px rgba(193, 189, 179, 0.4)',
+      badge: 'AI',
+      badgeColor: '#c1bdb3'
     },
     {
       title: 'Neuer Kunde',
-      description: 'Kunden anlegen',
+      description: 'Schnell Kunden erfassen',
       icon: <AddIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/new-customer',
-      color: '#43e97b',
-      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+      color: '#5f5b6b',
+      gradient: 'linear-gradient(135deg, #5f5b6b 0%, #c1bdb3 100%)',
+      glow: '0 20px 40px -12px rgba(95, 91, 107, 0.4)',
+      badge: 'QUICK',
+      badgeColor: '#5f5b6b'
     },
     {
       title: 'Angebote',
-      description: 'Angebote verwalten',
+      description: 'Intelligente Angebotserstellung',
       icon: <DescriptionIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/quotes',
-      color: '#fa709a',
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+      color: '#7f7979',
+      gradient: 'linear-gradient(135deg, #7f7979 0%, #c1bdb3 100%)',
+      glow: '0 20px 40px -12px rgba(127, 121, 121, 0.4)',
+      count: 12
     },
     {
       title: 'Buchhaltung',
-      description: 'Rechnungen & Zahlungen',
+      description: 'Automatisierte Rechnungen',
       icon: <ReceiptIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/accounting',
-      color: '#f093fb',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      color: '#c1bdb3',
+      gradient: 'linear-gradient(135deg, #3d3b3c 0%, #7f7979 100%)',
+      glow: '0 20px 40px -12px rgba(193, 189, 179, 0.3)',
+      count: 5
     },
     {
       title: 'Kalender',
-      description: 'Termine',
+      description: 'Smart Terminplanung',
       icon: <CalendarIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/calendar',
-      color: '#4facfe',
-      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+      color: '#7f7979',
+      gradient: 'linear-gradient(135deg, #5f5b6b 0%, #c1bdb3 100%)',
+      glow: '0 20px 40px -12px rgba(127, 121, 121, 0.4)',
+      count: 3
     },
     {
       title: 'Vertrieb',
-      description: 'Verkauf',
+      description: 'Sales Analytics',
       icon: <SalesIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/sales',
-      color: '#fa709a',
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+      color: '#5f5b6b',
+      gradient: 'linear-gradient(135deg, #c1bdb3 0%, #5f5b6b 100%)',
+      glow: '0 20px 40px -12px rgba(95, 91, 107, 0.4)',
+      badge: 'PRO',
+      badgeColor: '#5f5b6b'
     },
     {
       title: 'Admin Tools',
-      description: 'Verwaltung',
+      description: 'System Management',
       icon: <AdminIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/admin-tools',
-      color: '#ffecd2',
-      gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+      color: '#3d3b3c',
+      gradient: 'linear-gradient(135deg, #323031 0%, #5f5b6b 100%)',
+      glow: '0 20px 40px -12px rgba(61, 59, 60, 0.5)',
+      badge: 'ADMIN',
+      badgeColor: '#323031'
     },
     {
       title: 'E-Mail',
-      description: 'E-Mails',
+      description: 'Unified Inbox',
       icon: <EmailIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/email-client',
-      color: '#a8edea',
-      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+      color: '#7f7979',
+      gradient: 'linear-gradient(135deg, #7f7979 0%, #c1bdb3 100%)',
+      glow: '0 20px 40px -12px rgba(127, 121, 121, 0.4)',
+      count: 7
     },
     {
       title: 'WhatsApp',
-      description: 'WhatsApp Nachrichten',
+      description: 'Business Messaging',
       icon: <WhatsAppIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/whatsapp',
-      color: '#25D366',
-      gradient: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)'
+      color: '#5f5b6b',
+      gradient: 'linear-gradient(135deg, #5f5b6b 0%, #3d3b3c 100%)',
+      glow: '0 20px 40px -12px rgba(95, 91, 107, 0.4)',
+      count: 2
     }
-  ];
-
-  const navigationItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Kunden', icon: <PeopleIcon />, path: '/customers' },
-    { text: 'Angebote', icon: <DescriptionIcon />, path: '/quotes' },
-    { text: 'Kalender', icon: <CalendarIcon />, path: '/calendar' },
-    { text: 'E-Mail', icon: <EmailIcon />, path: '/email-client' },
   ];
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex' }}>
-        {/* Top App Bar */}
-        <AppBar position="fixed" sx={{ zIndex: muiTheme.zIndex.drawer + 1 }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={() => setDrawerOpen(!drawerOpen)}
-              sx={{ mr: 2 }}
+      
+      {/* Sophisticated Dark Background */}
+      <Box sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #323031 0%, #3d3b3c 50%, #5f5b6b 100%)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 80%, rgba(193, 189, 179, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(95, 91, 107, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(127, 121, 121, 0.1) 0%, transparent 50%)
+          `,
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(45deg, rgba(50, 48, 49, 0.8) 0%, rgba(61, 59, 60, 0.6) 50%, rgba(95, 91, 107, 0.4) 100%)',
+          backdropFilter: 'blur(1px)',
+        }
+      }}>
+        
+        {/* Floating Header */}
+        <Box sx={{ position: 'relative', zIndex: 10 }}>
+          <Container maxWidth="lg" sx={{ pt: 4 }}>
+            <motion.div
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              RELOCATO® CRM
-            </Typography>
-            <IconButton color="inherit" sx={{ mr: 1 }}>
-              <NotificationsIcon />
-            </IconButton>
-            <IconButton color="inherit">
-              <SyncIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-
-        {/* Navigation Drawer */}
-        <Drawer
-          variant="temporary"
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          sx={{
-            width: 240,
-            '& .MuiDrawer-paper': { width: 240, boxSizing: 'border-box' },
-          }}
-        >
-          <Toolbar />
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" gutterBottom>
-              Navigation
-            </Typography>
-          </Box>
-          <List>
-            {navigationItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
-                <Link href={item.path} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                  <ListItemButton onClick={() => setDrawerOpen(false)}>
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
-                  </ListItemButton>
-                </Link>
-              </ListItem>
-            ))}
-          </List>
-        </Drawer>
+              <Paper 
+                elevation={0}
+                sx={{
+                  p: 4,
+                  mb: 4,
+                  background: 'linear-gradient(135deg, rgba(61, 59, 60, 0.3) 0%, rgba(95, 91, 107, 0.2) 100%)',
+                  backdropFilter: 'blur(20px)',
+                  borderRadius: 5,
+                  border: '1px solid rgba(193, 189, 179, 0.15)',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+                }}
+              >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography 
+                      variant="h4" 
+                      sx={{ 
+                        fontWeight: 900,
+                        background: 'linear-gradient(135deg, #c1bdb3 0%, #e8e6e0 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        color: 'transparent',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                        mb: 1
+                      }}
+                    >
+                      Willkommen zurück! 👋
+                    </Typography>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        color: '#7f7979',
+                        fontSize: '1.1rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      {new Date().toLocaleDateString('de-DE', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <IconButton 
+                      sx={{ 
+                        backgroundColor: 'rgba(193, 189, 179, 0.1)',
+                        color: '#c1bdb3',
+                        borderRadius: 3,
+                        border: '1px solid rgba(193, 189, 179, 0.2)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(193, 189, 179, 0.2)',
+                          transform: 'scale(1.1)',
+                          boxShadow: '0 8px 25px rgba(193, 189, 179, 0.3)',
+                        }
+                      }}
+                    >
+                      <Badge badgeContent={4} sx={{ '& .MuiBadge-badge': { backgroundColor: '#c1bdb3', color: '#323031' } }}>
+                        <NotificationsIcon />
+                      </Badge>
+                    </IconButton>
+                    
+                    <IconButton 
+                      sx={{ 
+                        backgroundColor: 'rgba(95, 91, 107, 0.2)',
+                        color: '#5f5b6b',
+                        borderRadius: 3,
+                        border: '1px solid rgba(95, 91, 107, 0.3)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(95, 91, 107, 0.3)',
+                          transform: 'scale(1.1)',
+                          boxShadow: '0 8px 25px rgba(95, 91, 107, 0.4)',
+                        }
+                      }}
+                    >
+                      <SyncIcon />
+                    </IconButton>
+                    
+                    <Avatar 
+                      sx={{ 
+                        background: 'linear-gradient(135deg, #c1bdb3 0%, #7f7979 100%)',
+                        color: '#323031',
+                        border: '2px solid rgba(193, 189, 179, 0.3)',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        boxShadow: '0 8px 25px rgba(193, 189, 179, 0.3)',
+                        '&:hover': {
+                          transform: 'scale(1.1) rotate(5deg)',
+                          boxShadow: '0 12px 35px rgba(193, 189, 179, 0.4)',
+                        }
+                      }}
+                    >
+                      RS
+                    </Avatar>
+                  </Box>
+                </Box>
+              </Paper>
+            </motion.div>
+          </Container>
+        </Box>
 
         {/* Main Content */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Toolbar />
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, pb: 6 }}>
           
-          <Container maxWidth="lg">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+          {/* Modern Search Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Paper 
+              elevation={0}
+              sx={{
+                p: 2,
+                mb: 4,
+                background: 'linear-gradient(135deg, rgba(61, 59, 60, 0.4) 0%, rgba(95, 91, 107, 0.3) 100%)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: 4,
+                border: '1px solid rgba(193, 189, 179, 0.15)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              }}
             >
-              <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 'bold' }}>
-                Willkommen zurück!
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                {`Hier ist Ihre Übersicht für heute, ${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}`}
-              </Typography>
-            </motion.div>
-            
-            {/* Smart Search */}
-            <Box sx={{ mb: 4 }}>
               <TextField
                 fullWidth
                 variant="outlined"
-                placeholder="🔍 Smart Search - Kunden, Angebote, oder fragen Sie einfach..."
+                placeholder="🤖 KI-Search: Fragen Sie mich alles über Ihre Kunden, Angebote..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon color="primary" />
+                      <AIIcon sx={{ color: '#c1bdb3' }} />
                     </InputAdornment>
                   ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
+                  sx: {
+                    backgroundColor: 'rgba(61, 59, 60, 0.8)',
                     borderRadius: 3,
-                    backgroundColor: 'background.paper',
+                    border: '1px solid rgba(193, 189, 179, 0.2)',
+                    color: '#c1bdb3',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      border: '2px solid #c1bdb3',
+                    },
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(61, 59, 60, 0.9)',
+                      borderColor: 'rgba(193, 189, 179, 0.3)',
+                    },
+                    '& input::placeholder': {
+                      color: '#7f7979',
+                    }
                   }
                 }}
               />
-            </Box>
+            </Paper>
+          </motion.div>
 
-            {/* Accepted Quotes Preview */}
-            <Paper sx={{ p: 3, mb: 4, borderRadius: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <CheckCircleIcon color="success" />
-                <Typography variant="h6">
-                  Angenommene Angebote (3)
-                </Typography>
+          {/* Accepted Quotes - Modern Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <Paper 
+              elevation={0}
+              sx={{
+                p: 3,
+                mb: 4,
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: 4,
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                <Box 
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #c1bdb3 0%, #7f7979 100%)',
+                    color: '#323031',
+                    boxShadow: '0 8px 25px rgba(193, 189, 179, 0.3)'
+                  }}
+                >
+                  <CheckCircleIcon />
+                </Box>
+                <Box>
+                  <Typography variant="h6" sx={{ color: '#c1bdb3', fontWeight: 700 }}>
+                    Angenommene Angebote
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#7f7979' }}>
+                    Aktive Aufträge bereit zur Bearbeitung
+                  </Typography>
+                </Box>
+                <Chip 
+                  label="3 AKTIV" 
+                  size="small" 
+                  sx={{
+                    ml: 'auto',
+                    background: 'linear-gradient(135deg, #c1bdb3 0%, #7f7979 100%)',
+                    color: '#323031',
+                    border: '1px solid rgba(193, 189, 179, 0.3)',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 12px rgba(193, 189, 179, 0.3)',
+                  }}
+                />
               </Box>
-              <Alert severity="success" sx={{ mb: 2 }}>
-                3 Angebote wurden angenommen und warten auf Bearbeitung
-              </Alert>
+              
               <Grid container spacing={2}>
                 {[
-                  { name: 'Familie Müller', date: '25.08.2025', price: '€1,250' },
-                  { name: 'Schmidt GmbH', date: '27.08.2025', price: '€2,100' },
-                  { name: 'Familie Weber', date: '30.08.2025', price: '€890' }
+                  { name: 'Familie Müller', date: '25.08.2025', price: '€1,250', urgent: true },
+                  { name: 'Schmidt GmbH', date: '27.08.2025', price: '€2,100', urgent: false },
+                  { name: 'Familie Weber', date: '30.08.2025', price: '€890', urgent: false }
                 ].map((quote, i) => (
                   <Grid item xs={12} sm={4} key={i}>
-                    <Card sx={{ border: '1px solid', borderColor: 'success.main' }}>
-                      <CardContent>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          {quote.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {quote.date}
-                        </Typography>
-                        <Typography variant="h6" color="success.main">
-                          {quote.price}
-                        </Typography>
-                      </CardContent>
-                    </Card>
+                    <motion.div
+                      whileHover={{ y: -4, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Card 
+                        sx={{ 
+                          background: 'rgba(255, 255, 255, 0.9)',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: 3,
+                          border: quote.urgent ? '2px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.3)',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          '&::before': quote.urgent ? {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: 4,
+                            background: 'linear-gradient(90deg, #ef4444, #f87171)',
+                          } : {}
+                        }}
+                      >
+                        <CardContent>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                            <Typography variant="subtitle1" fontWeight="bold">
+                              {quote.name}
+                            </Typography>
+                            {quote.urgent && (
+                              <Chip 
+                                label="URGENT" 
+                                size="small" 
+                                color="error"
+                                sx={{ fontSize: '0.7rem', height: 20 }}
+                              />
+                            )}
+                          </Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            {quote.date}
+                          </Typography>
+                          <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700 }}>
+                            {quote.price}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   </Grid>
                 ))}
               </Grid>
             </Paper>
-            
-            {/* Dashboard Grid */}
-            <Grid container spacing={isMobile ? 2 : 3}>
+          </motion.div>
+          
+          {/* Modern Dashboard Grid */}
+          <Grid container spacing={3}>
+            <AnimatePresence>
               {dashboardItems.map((item, index) => (
                 <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: 0.4 + (index * 0.1),
+                      ease: "easeOut"
+                    }}
+                    whileHover={{ 
+                      y: -8, 
+                      scale: 1.02,
+                      transition: { duration: 0.2 }
+                    }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <Card 
                       elevation={0}
                       sx={{ 
                         cursor: 'pointer',
-                        transition: 'all 0.3s',
                         height: '100%',
-                        border: '1px solid',
-                        borderColor: 'divider',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: 4,
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
                         overflow: 'hidden',
+                        position: 'relative',
+                        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                         '&:hover': {
-                          transform: isMobile ? 'none' : 'translateY(-8px)',
-                          boxShadow: isMobile ? muiTheme.shadows[2] : muiTheme.shadows[8],
-                          borderColor: item.color,
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          borderColor: 'rgba(255, 255, 255, 0.4)',
+                          boxShadow: item.glow,
                           '& .icon-box': {
+                            transform: 'scale(1.1) rotate(5deg)',
+                            boxShadow: `0 20px 40px ${item.color}40`,
+                          },
+                          '& .card-title': {
+                            color: 'white',
+                          },
+                          '& .floating-badge': {
                             transform: 'scale(1.1)',
                           }
-                        },
-                        '&:active': isMobile ? {
-                          transform: 'scale(0.98)',
-                          transition: 'transform 0.1s'
-                        } : {}
+                        }
                       }}
                       onClick={() => router.push(item.path)}
                     >
+                      {/* Floating Badge */}
+                      {(item.badge || item.count) && (
+                        <Box
+                          className="floating-badge"
+                          sx={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            zIndex: 10,
+                            transition: 'transform 0.3s ease',
+                          }}
+                        >
+                          {item.badge ? (
+                            <Chip 
+                              label={item.badge}
+                              size="small"
+                              sx={{
+                                backgroundColor: item.badgeColor || item.color,
+                                color: 'white',
+                                fontWeight: 700,
+                                fontSize: '0.7rem',
+                                height: 24,
+                                boxShadow: `0 4px 12px ${item.color}40`,
+                              }}
+                            />
+                          ) : (
+                            <Badge 
+                              badgeContent={item.count} 
+                              color="error"
+                              sx={{
+                                '& .MuiBadge-badge': {
+                                  backgroundColor: '#ef4444',
+                                  color: 'white',
+                                  fontWeight: 700,
+                                  boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)',
+                                }
+                              }}
+                            >
+                              <StarIcon sx={{ color: 'rgba(255, 255, 255, 0.6)' }} />
+                            </Badge>
+                          )}
+                        </Box>
+                      )}
+
                       <CardContent sx={{ 
                         height: '100%',
                         display: 'flex',
@@ -325,42 +621,66 @@ const Dashboard: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         textAlign: 'center',
-                        p: isMobile ? 3 : 4
+                        p: 4,
+                        position: 'relative'
                       }}>
+                        
+                        {/* Modern Icon Box */}
                         <Box 
                           className="icon-box"
                           sx={{ 
-                            width: { xs: 70, sm: 80, md: 100 },
-                            height: { xs: 70, sm: 80, md: 100 },
-                            borderRadius: '50%',
+                            width: { xs: 80, sm: 90, md: 110 },
+                            height: { xs: 80, sm: 90, md: 110 },
+                            borderRadius: '30px',
                             background: item.gradient,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            mb: { xs: 2, sm: 3 },
-                            transition: 'transform 0.3s',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                            color: 'white'
+                            mb: 3,
+                            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            boxShadow: `0 15px 35px ${item.color}30`,
+                            color: 'white',
+                            position: 'relative',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: -2,
+                              left: -2,
+                              right: -2,
+                              bottom: -2,
+                              background: item.gradient,
+                              borderRadius: '32px',
+                              opacity: 0,
+                              transition: 'opacity 0.3s ease',
+                              zIndex: -1
+                            }
                           }}
                         >
                           {item.icon}
                         </Box>
+                        
                         <Typography 
+                          className="card-title"
                           variant="h6" 
                           sx={{ 
                             fontWeight: 700,
                             mb: 1,
-                            fontSize: isMobile ? '1.1rem' : '1.25rem'
+                            fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.3rem' },
+                            color: 'white',
+                            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                            transition: 'color 0.3s ease'
                           }}
                         >
                           {item.title}
                         </Typography>
+                        
                         <Typography 
                           variant="body2" 
-                          color="text.secondary"
                           sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.875rem', md: '0.95rem' },
-                            display: { xs: 'none', sm: 'block' }
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' },
+                            lineHeight: 1.4,
+                            textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                           }}
                         >
                           {item.description}
@@ -370,37 +690,33 @@ const Dashboard: React.FC = () => {
                   </motion.div>
                 </Grid>
               ))}
-            </Grid>
+            </AnimatePresence>
+          </Grid>
+        </Container>
 
-            {/* Migration Success Message */}
-            <Paper sx={{ mt: 4, p: 3, borderRadius: 3, background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', color: 'white' }}>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-                ✅ Next.js 15.5 Migration Erfolgreich!
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="h6">🚀 Turbopack</Typography>
-                  <Typography variant="body2">40% schnellere Builds</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="h6">⚡ React 19</Typography>
-                  <Typography variant="body2">Server Components</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="h6">🔒 TypeScript</Typography>
-                  <Typography variant="body2">Strict Mode</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="h6">📱 Responsive</Typography>
-                  <Typography variant="body2">Mobile-optimiert</Typography>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Container>
-        </Box>
+        {/* Elegant Floating Action Button */}
+        <Fab
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: 'linear-gradient(135deg, #c1bdb3 0%, #5f5b6b 100%)',
+            color: '#323031',
+            boxShadow: '0 15px 35px rgba(193, 189, 179, 0.4)',
+            border: '1px solid rgba(193, 189, 179, 0.3)',
+            '&:hover': {
+              transform: 'scale(1.15) rotate(10deg)',
+              boxShadow: '0 20px 45px rgba(193, 189, 179, 0.6)',
+              background: 'linear-gradient(135deg, #e8e6e0 0%, #c1bdb3 100%)',
+            }
+          }}
+          onClick={() => router.push('/new-customer')}
+        >
+          <AddIcon sx={{ fontWeight: 'bold' }} />
+        </Fab>
       </Box>
     </ThemeProvider>
   );
 };
 
-export default Dashboard;
+export default ModernDashboard;
