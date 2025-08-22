@@ -631,8 +631,8 @@ const ModernDashboard: React.FC = () => {
                           className="floating-badge"
                           sx={{
                             position: 'absolute',
-                            top: 12,
-                            right: 12,
+                            top: { xs: 8, sm: 12, md: 16 }, // Mehr Abstand vom Rand
+                            right: { xs: 8, sm: 12, md: 16 }, // Mehr Abstand vom Rand
                             zIndex: 10,
                             transition: 'transform 0.3s ease',
                           }}
@@ -676,8 +676,10 @@ const ModernDashboard: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         textAlign: 'center',
-                        p: 4,
-                        position: 'relative'
+                        p: { xs: 3, sm: 4, md: 5 }, // Mehr Padding für größere Cards
+                        pt: { xs: 4, sm: 5, md: 6 }, // Extra Padding oben für Badges
+                        position: 'relative',
+                        minHeight: { xs: 180, sm: 200, md: 220 } // Mindesthöhe für vollständige Anzeige
                       }}>
                         
                         {/* Einfache Icons ohne Umrandung */}
