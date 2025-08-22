@@ -65,10 +65,12 @@ import {
   Assignment,
   Receipt,
   EventNote,
-  Label
+  Label,
+  PhotoLibrary
 } from '@mui/icons-material';
 import { Customer, Quote, Invoice } from '../types';
 import { databaseService } from '../config/database.config';
+import CustomerPhotoGallery from './CustomerPhotoGallery';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -446,6 +448,7 @@ const CustomerDetailView: React.FC = () => {
           <Tab icon={<Info />} label="Übersicht" />
           <Tab icon={<Assignment />} label="Angebote" />
           <Tab icon={<Receipt />} label="Rechnungen" />
+          <Tab icon={<PhotoLibrary />} label="Fotos" />
           <Tab icon={<Message />} label="Kommunikation" />
           <Tab icon={<Timeline />} label="Aktivitäten" />
         </Tabs>
@@ -653,6 +656,10 @@ const CustomerDetailView: React.FC = () => {
       </TabPanel>
 
       <TabPanel value={tabValue} index={3}>
+        {customerId && <CustomerPhotoGallery customerId={customerId} />}
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={4}>
         <Paper elevation={2} sx={{ p: 3 }}>
           <Typography variant="h6" sx={{ mb: 3 }}>Kommunikationshistorie</Typography>
           
@@ -662,7 +669,7 @@ const CustomerDetailView: React.FC = () => {
         </Paper>
       </TabPanel>
 
-      <TabPanel value={tabValue} index={4}>
+      <TabPanel value={tabValue} index={5}>
         <Paper elevation={2} sx={{ p: 3 }}>
           <Typography variant="h6" sx={{ mb: 3 }}>Aktivitäten</Typography>
           
