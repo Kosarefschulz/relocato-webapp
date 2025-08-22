@@ -516,10 +516,10 @@ const ModernDashboard: React.FC = () => {
                     >
                       <Card 
                         sx={{ 
-                          background: 'rgba(255, 255, 255, 0.9)',
-                          backdropFilter: 'blur(10px)',
+                          background: 'rgba(221, 226, 198, 0.6)', // Transparenter organic background
+                          backdropFilter: 'blur(15px)',
                           borderRadius: 3,
-                          border: quote.urgent ? '2px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.3)',
+                          border: quote.urgent ? '2px solid #a72608' : '1px solid rgba(187, 197, 170, 0.4)',
                           cursor: 'pointer',
                           position: 'relative',
                           overflow: 'hidden',
@@ -530,13 +530,13 @@ const ModernDashboard: React.FC = () => {
                             left: 0,
                             right: 0,
                             height: 4,
-                            background: 'linear-gradient(90deg, #ef4444, #f87171)',
+                            background: 'linear-gradient(90deg, #a72608, #bbc5aa)',
                           } : {}
                         }}
                       >
                         <CardContent>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                            <Typography variant="subtitle1" fontWeight="bold">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ color: '#090c02' }}>
                               {quote.name}
                             </Typography>
                             <Chip 
@@ -554,10 +554,10 @@ const ModernDashboard: React.FC = () => {
                               />
                             )}
                           </Box>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          <Typography variant="body2" sx={{ color: '#bbc5aa', mb: 1 }}>
                             {quote.date}
                           </Typography>
-                          <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700 }}>
+                          <Typography variant="h6" sx={{ color: '#a72608', fontWeight: 700 }}>
                             {quote.price}
                           </Typography>
                         </CardContent>
