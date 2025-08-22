@@ -1001,8 +1001,12 @@ export default function CustomerDetailPage() {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          // Zeige echte LineItems aus originalQuoteData oder generiere realistische basierend auf Kunde
-                          (realQuoteData?.lineItems || customer?.originalQuoteData?.lineItems || generateRealisticLineItems(customer)).map((item: any, index: number) => (
+                          // Zeige echte LineItems oder generiere individuelle Templates
+                          (() => {
+                            const lineItems = realQuoteData?.lineItems || customer?.originalQuoteData?.lineItems || generateRealisticLineItems(customer);
+                            console.log(`🎯 Using lineItems for ${customer?.name} (${customer?.customerNumber}):`, lineItems?.length, 'items');
+                            return lineItems;
+                          })().map((item: any, index: number) => (
                           <TableRow 
                             key={index}
                             sx={{ 
