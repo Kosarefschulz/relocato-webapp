@@ -516,14 +516,14 @@ const ModernDashboard: React.FC = () => {
                     >
                       <Card 
                         sx={{ 
-                          background: 'rgba(221, 226, 198, 0.3)', // Stärkerer Milchglas-Effekt
-                          backdropFilter: 'blur(25px)', // Verstärkter Blur wie andere Bereiche
-                          borderRadius: 4,
-                          border: quote.urgent ? '2px solid rgba(167, 38, 8, 0.4)' : '1px solid rgba(187, 197, 170, 0.3)',
+                          background: 'transparent', // Komplett transparent - nur Schrift sichtbar
+                          backdropFilter: 'none', // Kein Blur
+                          borderRadius: 0, // Keine Rundung
+                          border: 'none', // Keine Umrandung
                           cursor: 'pointer',
                           position: 'relative',
-                          overflow: 'hidden',
-                          boxShadow: '0 8px 32px rgba(9, 12, 2, 0.08)', // Subtiler Schatten
+                          overflow: 'visible', // Sichtbarer Content
+                          boxShadow: 'none', // Kein Schatten
                           '&::before': quote.urgent ? {
                             content: '""',
                             position: 'absolute',
@@ -537,7 +537,10 @@ const ModernDashboard: React.FC = () => {
                       >
                         <CardContent>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ color: '#090c02' }}>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ 
+                              color: '#090c02',
+                              textShadow: '0 2px 4px rgba(230, 238, 214, 0.8)' // Text-Schatten für bessere Lesbarkeit
+                            }}>
                               {quote.name}
                             </Typography>
                             <Chip 
@@ -558,7 +561,11 @@ const ModernDashboard: React.FC = () => {
                           <Typography variant="body2" sx={{ color: '#bbc5aa', mb: 1 }}>
                             {quote.date}
                           </Typography>
-                          <Typography variant="h6" sx={{ color: '#a72608', fontWeight: 700 }}>
+                          <Typography variant="h6" sx={{ 
+                            color: '#a72608', 
+                            fontWeight: 700,
+                            textShadow: '0 2px 4px rgba(230, 238, 214, 0.9)' // Verstärkter Schatten für Preise
+                          }}>
                             {quote.price}
                           </Typography>
                         </CardContent>
