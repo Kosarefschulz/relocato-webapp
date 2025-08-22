@@ -9,13 +9,14 @@ class LexwareService {
   
   constructor() {
     // Versuche API Key aus verschiedenen Quellen zu laden
-    this.apiKey = process.env.REACT_APP_LEXWARE_API_KEY || 
-                  localStorage.getItem('lexware-api-key') || 
+    this.apiKey = process.env.NEXT_PUBLIC_LEXWARE_API_KEY || 
+                  process.env.REACT_APP_LEXWARE_API_KEY ||
+                  (typeof window !== 'undefined' ? localStorage.getItem('lexware-api-key') : null) || 
                   '';
                   
     // Wenn kein API Key gefunden, nutze den aus dem MCP Server
     if (!this.apiKey) {
-      console.warn('⚠️ Kein Lexware API Key gefunden. Bitte REACT_APP_LEXWARE_API_KEY setzen oder in den Einstellungen hinterlegen.');
+      console.warn('⚠️ Kein Lexware API Key gefunden. Bitte NEXT_PUBLIC_LEXWARE_API_KEY setzen oder in den Einstellungen hinterlegen.');
     }
   }
   
@@ -32,7 +33,9 @@ class LexwareService {
    */
   setApiKey(key: string) {
     this.apiKey = key;
-    localStorage.setItem('lexware-api-key', key);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lexware-api-key', key);
+    }
   }
   
   /**

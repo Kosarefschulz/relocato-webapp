@@ -59,6 +59,7 @@ import {
 import { Customer } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabaseService } from '@/lib/services/supabase';
+import { lexwareSyncService } from '@/lib/services/lexwareSyncService';
 import { useToast } from '@/components/ui/Toaster';
 
 const theme = createTheme({
@@ -274,6 +275,22 @@ const CustomerCard: React.FC<{
         
         {/* Status and Service Chips */}
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+          {/* Lexware Import Badge */}
+          {customer.salesNotes?.some(note => note.content?.includes('Lexware ID:')) && (
+            <Chip
+              label="LEXWARE"
+              size="small"
+              sx={{
+                background: 'linear-gradient(135deg, #bbc5aa 0%, #e6eed6 100%)',
+                color: '#090c02',
+                fontWeight: 700,
+                fontSize: '0.7rem',
+                border: '1px solid rgba(187, 197, 170, 0.4)',
+                boxShadow: '0 2px 8px rgba(187, 197, 170, 0.3)',
+              }}
+            />
+          )}
+
           {customer.status && (
             <Chip
               label={customer.status}
@@ -411,6 +428,7 @@ const CustomersPage: React.FC = () => {
   
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'status'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -418,6 +436,7 @@ const CustomersPage: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
+  const [syncStats, setSyncStats] = useState({ total: 0, imported: 0, errors: 0 });
 
   // Filter and sort customers
   const filteredAndSortedCustomers = useMemo(() => {
@@ -473,13 +492,23 @@ const CustomersPage: React.FC = () => {
     return filtered;
   }, [customers, searchTerm, sortBy, sortOrder, filterStatus]);
 
-  // Load customers from Supabase
+  // Load customers from Supabase and sync with Lexware
   const loadCustomers = useCallback(async () => {
     try {
       setLoading(true);
       await supabaseService.initialize();
-      const data = await supabaseService.getCustomers();
-      setCustomers(data);
+      
+      // Lade erst existierende Kunden
+      const existingCustomers = await supabaseService.getCustomers();
+      setCustomers(existingCustomers);
+      
+      // Dann starte automatische Lexware-Synchronisation
+      await performLexwareSync();
+      
+      // Lade Kunden erneut nach Sync
+      const updatedCustomers = await supabaseService.getCustomers();
+      setCustomers(updatedCustomers);
+      
     } catch (error) {
       console.error('Error loading customers:', error);
       addToast({
@@ -492,9 +521,94 @@ const CustomersPage: React.FC = () => {
     }
   }, [addToast]);
 
+  // Automatische Lexware Synchronisation
+  const performLexwareSync = useCallback(async () => {
+    try {
+      setSyncing(true);
+      setSyncStats({ total: 0, imported: 0, errors: 0 });
+      
+      console.log('🔄 Starte automatische Lexware-Synchronisation...');
+      
+      // Prüfe Lexware API Key
+      if (!process.env.NEXT_PUBLIC_LEXWARE_API_KEY) {
+        console.warn('⚠️ Lexware API Key nicht konfiguriert');
+        addToast({
+          type: 'warning',
+          title: 'Lexware API Key fehlt',
+          message: 'Bitte konfigurieren Sie den Lexware API Key',
+        });
+        return;
+      }
+
+      // Führe Synchronisation durch
+      await lexwareSyncService.performSync();
+      
+      const syncStatus = lexwareSyncService.getSyncStatus();
+      
+      addToast({
+        type: 'success',
+        title: '✅ Lexware Sync erfolgreich',
+        message: `Kunden automatisch synchronisiert - Letzte Sync: ${syncStatus.lastSyncTime?.toLocaleTimeString('de-DE') || 'Jetzt'}`,
+      });
+      
+      console.log('✅ Automatische Lexware-Synchronisation abgeschlossen');
+      
+    } catch (error) {
+      console.error('❌ Lexware Sync Fehler:', error);
+      addToast({
+        type: 'error',
+        title: 'Lexware Sync Fehler',
+        message: 'Synchronisation fehlgeschlagen - Kunden werden trotzdem angezeigt',
+      });
+    } finally {
+      setSyncing(false);
+    }
+  }, [addToast]);
+
+  // Manuelle Sync-Funktion
+  const handleManualSync = useCallback(async () => {
+    setSyncing(true);
+    
+    try {
+      addToast({
+        type: 'info',
+        title: '🔄 Synchronisiere mit Lexware...',
+        message: 'Neue Kunden werden importiert',
+      });
+      
+      await performLexwareSync();
+      
+      // Lade Kunden neu nach manueller Sync
+      const updatedCustomers = await supabaseService.getCustomers();
+      setCustomers(updatedCustomers);
+      
+    } catch (error) {
+      console.error('Manual sync error:', error);
+    } finally {
+      setSyncing(false);
+    }
+  }, [performLexwareSync]);
+
   useEffect(() => {
     loadCustomers();
-  }, [loadCustomers]);
+    
+    // Starte automatische Lexware-Synchronisation alle 5 Minuten
+    if (process.env.NEXT_PUBLIC_LEXWARE_API_KEY) {
+      console.log('🚀 Starte automatische Lexware-Synchronisation...');
+      lexwareSyncService.startAutoSync(5); // Alle 5 Minuten
+      
+      addToast({
+        type: 'info',
+        title: '🔄 Auto-Sync aktiviert',
+        message: 'Lexware wird alle 5 Minuten automatisch synchronisiert',
+      });
+    }
+
+    // Cleanup beim Verlassen der Komponente
+    return () => {
+      lexwareSyncService.stopAutoSync();
+    };
+  }, [loadCustomers, addToast]);
 
   const handleCustomerClick = (customer: Customer) => {
     router.push(`/customers/${customer.id}`);
@@ -677,25 +791,50 @@ const CustomersPage: React.FC = () => {
                 </Typography>
               </Box>
               
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => router.push('/new-customer')}
-                size="large"
-                sx={{
-                  background: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
-                  color: '#e6eed6',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  boxShadow: '0 8px 25px rgba(167, 38, 8, 0.3)',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    boxShadow: '0 12px 35px rgba(167, 38, 8, 0.4)',
-                  }
-                }}
-              >
-                Neuer Kunde
-              </Button>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                {/* Lexware Sync Button */}
+                <Button
+                  variant="outlined"
+                  startIcon={syncing ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}><SyncIcon /></motion.div> : <SyncIcon />}
+                  onClick={handleManualSync}
+                  disabled={syncing}
+                  sx={{
+                    borderColor: '#bbc5aa',
+                    color: '#090c02',
+                    fontWeight: 600,
+                    '&:hover': {
+                      borderColor: '#a72608',
+                      backgroundColor: 'rgba(167, 38, 8, 0.1)',
+                    },
+                    '&:disabled': {
+                      borderColor: '#bbc5aa',
+                      color: '#bbc5aa',
+                    }
+                  }}
+                >
+                  {syncing ? 'Synchronisiere...' : 'Lexware Sync'}
+                </Button>
+
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => router.push('/new-customer')}
+                  size="large"
+                  sx={{
+                    background: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
+                    color: '#e6eed6',
+                    fontWeight: 600,
+                    borderRadius: 3,
+                    boxShadow: '0 8px 25px rgba(167, 38, 8, 0.3)',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      boxShadow: '0 12px 35px rgba(167, 38, 8, 0.4)',
+                    }
+                  }}
+                >
+                  Neuer Kunde
+                </Button>
+              </Box>
             </Box>
           </motion.div>
 
@@ -713,11 +852,29 @@ const CustomersPage: React.FC = () => {
               borderRadius: 4,
               border: '1px solid rgba(187, 197, 170, 0.4)',
             }}>
+              {/* Sync Status Indicator */}
+              {syncing && (
+                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <LinearProgress 
+                    sx={{ 
+                      flex: 1, 
+                      borderRadius: 2,
+                      '& .MuiLinearProgress-bar': {
+                        background: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)'
+                      }
+                    }} 
+                  />
+                  <Typography variant="body2" sx={{ color: '#090c02', fontWeight: 600 }}>
+                    🔄 Lexware Synchronisation läuft...
+                  </Typography>
+                </Box>
+              )}
+
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    placeholder="🤖 KI-Suche: Namen, E-Mail, Telefon, Adresse, Notizen, Firmen..."
+                    placeholder="🤖 KI-Suche: Namen, E-Mail, Telefon, Adresse, Notizen, Firmen... (inkl. Lexware Kunden)"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     InputProps={{
@@ -726,11 +883,26 @@ const CustomersPage: React.FC = () => {
                           <SearchIcon sx={{ color: '#a72608' }} />
                         </InputAdornment>
                       ),
-                      endAdornment: searchTerm && (
+                      endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton size="small" onClick={() => setSearchTerm('')}>
-                            <ClearIcon />
-                          </IconButton>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {searchTerm && (
+                              <IconButton size="small" onClick={() => setSearchTerm('')}>
+                                <ClearIcon />
+                              </IconButton>
+                            )}
+                            <Chip 
+                              label="LEXWARE" 
+                              size="small" 
+                              sx={{
+                                backgroundColor: '#bbc5aa',
+                                color: '#090c02',
+                                fontSize: '0.7rem',
+                                height: 24,
+                                fontWeight: 600
+                              }}
+                            />
+                          </Box>
                         </InputAdornment>
                       ),
                       sx: {
@@ -746,7 +918,7 @@ const CustomersPage: React.FC = () => {
                   />
                 </Grid>
                 
-                <Grid item xs={12} md={3}>
+                <Grid item xs={12} md={2}>
                   <Button
                     fullWidth
                     variant="outlined"
@@ -762,6 +934,23 @@ const CustomersPage: React.FC = () => {
                   >
                     Filter: {filterStatus === 'all' ? 'Alle' : filterStatus}
                   </Button>
+                </Grid>
+
+                <Grid item xs={12} md={2}>
+                  <Box sx={{ 
+                    p: 1, 
+                    textAlign: 'center',
+                    background: 'rgba(187, 197, 170, 0.3)',
+                    borderRadius: 2,
+                    border: '1px solid rgba(187, 197, 170, 0.4)'
+                  }}>
+                    <Typography variant="caption" sx={{ color: '#090c02', fontWeight: 600, display: 'block' }}>
+                      LEXWARE SYNC
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#a72608', fontWeight: 700 }}>
+                      {customers.filter(c => c.salesNotes?.some(note => note.content?.includes('Lexware ID:'))).length} Importiert
+                    </Typography>
+                  </Box>
                 </Grid>
                 
                 <Grid item xs={12} md={3}>
