@@ -285,7 +285,7 @@ const ModernDashboard: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: -30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              transition={{ duration: 2.5, ease: "easeOut" }}
             >
               <Paper 
                 elevation={0}
@@ -398,7 +398,7 @@ const ModernDashboard: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 2.0, delay: 1.0, ease: "easeOut" }}
           >
             <Paper 
               elevation={0}
@@ -456,7 +456,7 @@ const ModernDashboard: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 1.8, delay: 1.5, ease: "easeOut" }}
           >
             <Paper 
               elevation={0}
@@ -569,19 +569,22 @@ const ModernDashboard: React.FC = () => {
               {dashboardItems.map((item, index) => (
                 <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
                   <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ 
-                      duration: 0.6, 
-                      delay: 0.4 + (index * 0.1),
-                      ease: "easeOut"
+                      duration: 1.5, 
+                      delay: 2.0 + (index * 0.3),
+                      ease: [0.25, 0.46, 0.45, 0.94]
                     }}
                     whileHover={{ 
-                      y: -8, 
-                      scale: 1.02,
+                      y: -12, 
+                      scale: 1.03,
+                      transition: { duration: 0.8, ease: "easeOut" }
+                    }}
+                    whileTap={{ 
+                      scale: 0.97,
                       transition: { duration: 0.2 }
                     }}
-                    whileTap={{ scale: 0.98 }}
                   >
                     <Card 
                       elevation={0}
@@ -594,20 +597,23 @@ const ModernDashboard: React.FC = () => {
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         overflow: 'hidden',
                         position: 'relative',
-                        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                        transition: 'all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                         '&:hover': {
-                          background: 'rgba(255, 255, 255, 0.15)',
-                          borderColor: 'rgba(255, 255, 255, 0.4)',
+                          background: 'rgba(221, 226, 198, 0.95)',
+                          borderColor: 'rgba(167, 38, 8, 0.4)',
                           boxShadow: item.glow,
                           '& .icon-box': {
-                            transform: 'scale(1.1) rotate(5deg)',
-                            boxShadow: `0 20px 40px ${item.color}40`,
+                            transform: 'scale(1.15) rotate(8deg)',
+                            boxShadow: `0 25px 50px ${item.color}50`,
+                            transition: 'all 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                           },
                           '& .card-title': {
-                            color: 'white',
+                            color: '#090c02',
+                            transition: 'color 0.8s ease',
                           },
                           '& .floating-badge': {
-                            transform: 'scale(1.1)',
+                            transform: 'scale(1.2) rotate(-5deg)',
+                            transition: 'transform 0.8s ease',
                           }
                         }
                       }}
@@ -668,7 +674,7 @@ const ModernDashboard: React.FC = () => {
                         position: 'relative'
                       }}>
                         
-                        {/* Modern Icon Box */}
+                        {/* Elegant Slow-Motion Icon Box */}
                         <Box 
                           className="icon-box"
                           sx={{ 
@@ -680,22 +686,23 @@ const ModernDashboard: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             mb: 3,
-                            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            transition: 'all 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
                             boxShadow: `0 15px 35px ${item.color}30`,
-                            color: 'white',
+                            color: '#e6eed6',
                             position: 'relative',
                             '&::before': {
                               content: '""',
                               position: 'absolute',
-                              top: -2,
-                              left: -2,
-                              right: -2,
-                              bottom: -2,
+                              top: -3,
+                              left: -3,
+                              right: -3,
+                              bottom: -3,
                               background: item.gradient,
-                              borderRadius: '32px',
+                              borderRadius: '35px',
                               opacity: 0,
-                              transition: 'opacity 0.3s ease',
-                              zIndex: -1
+                              transition: 'opacity 1.0s ease-in-out',
+                              zIndex: -1,
+                              filter: 'blur(10px)',
                             }
                           }}
                         >
@@ -709,9 +716,9 @@ const ModernDashboard: React.FC = () => {
                             fontWeight: 700,
                             mb: 1,
                             fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.3rem' },
-                            color: 'white',
-                            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                            transition: 'color 0.3s ease'
+                            color: '#090c02',
+                            textShadow: '0 2px 4px rgba(230, 238, 214, 0.8)',
+                            transition: 'all 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                           }}
                         >
                           {item.title}
@@ -748,10 +755,12 @@ const ModernDashboard: React.FC = () => {
             color: '#e6eed6',
             boxShadow: '0 15px 35px rgba(167, 38, 8, 0.4)',
             border: '1px solid rgba(187, 197, 170, 0.3)',
+            transition: 'all 1.0s cubic-bezier(0.16, 1, 0.3, 1)',
             '&:hover': {
-              transform: 'scale(1.15) rotate(10deg)',
-              boxShadow: '0 20px 45px rgba(167, 38, 8, 0.6)',
+              transform: 'scale(1.2) rotate(15deg)',
+              boxShadow: '0 25px 55px rgba(167, 38, 8, 0.6)',
               background: 'linear-gradient(135deg, #d4471c 0%, #d1dbbf 100%)',
+              transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
             }
           }}
           onClick={() => router.push('/new-customer')}
