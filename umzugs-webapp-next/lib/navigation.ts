@@ -1,4 +1,4 @@
-import { createSharedPathnamesNavigation } from 'next-intl/navigation';
+import { createNavigation } from 'next-intl/navigation';
 import type { Locale } from './i18n';
 
 export const locales = ['de', 'en'] as const;
@@ -74,11 +74,11 @@ export type Routes = typeof routes;
 
 // Navigation Hooks erstellen
 export const { Link, redirect, usePathname, useRouter } = 
-  createSharedPathnamesNavigation({ locales, localePrefix });
+  createNavigation({ locales, localePrefix });
 
 // Typsichere Link-Komponente
 import NextLink from 'next/link';
-import { ComponentProps } from 'react';
+import React, { ComponentProps } from 'react';
 
 type TypedLinkProps = Omit<ComponentProps<typeof NextLink>, 'href'> & {
   href: string | { pathname: string; query?: Record<string, string | number> };
@@ -92,7 +92,7 @@ export function TypedLink({ href, locale, ...props }: TypedLinkProps) {
   
   const localizedHref = locale ? `/${locale}${finalHref}` : finalHref;
   
-  return <NextLink href={localizedHref} {...props} />;
+  return React.createElement(NextLink, { href: localizedHref, ...props });
 }
 
 // Utility functions für Navigation
