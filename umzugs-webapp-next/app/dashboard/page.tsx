@@ -516,13 +516,14 @@ const ModernDashboard: React.FC = () => {
                     >
                       <Card 
                         sx={{ 
-                          background: 'rgba(221, 226, 198, 0.6)', // Transparenter organic background
-                          backdropFilter: 'blur(15px)',
-                          borderRadius: 3,
-                          border: quote.urgent ? '2px solid #a72608' : '1px solid rgba(187, 197, 170, 0.4)',
+                          background: 'rgba(221, 226, 198, 0.3)', // Stärkerer Milchglas-Effekt
+                          backdropFilter: 'blur(25px)', // Verstärkter Blur wie andere Bereiche
+                          borderRadius: 4,
+                          border: quote.urgent ? '2px solid rgba(167, 38, 8, 0.4)' : '1px solid rgba(187, 197, 170, 0.3)',
                           cursor: 'pointer',
                           position: 'relative',
                           overflow: 'hidden',
+                          boxShadow: '0 8px 32px rgba(9, 12, 2, 0.08)', // Subtiler Schatten
                           '&::before': quote.urgent ? {
                             content: '""',
                             position: 'absolute',
@@ -530,7 +531,7 @@ const ModernDashboard: React.FC = () => {
                             left: 0,
                             right: 0,
                             height: 4,
-                            background: 'linear-gradient(90deg, #a72608, #bbc5aa)',
+                            background: 'linear-gradient(90deg, rgba(167, 38, 8, 0.6), rgba(187, 197, 170, 0.6))',
                           } : {}
                         }}
                       >
