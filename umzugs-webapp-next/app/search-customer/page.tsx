@@ -614,8 +614,8 @@ const CustomersPage: React.FC = () => {
       const localResponse = await fetch('/api/customers');
       const localResult = await localResponse.json();
       
-      // Lade echte Lexware-Kunden (die sind aus Angeboten/Kontakten)
-      const lexwareResponse = await fetch('/api/lexware/customers');
+      // Lade Kunden direkt aus Lexware-ANGEBOTEN (nicht Kontakte)
+      const lexwareResponse = await fetch('/api/lexware/quotes-customers');
       const lexwareResult = await lexwareResponse.json();
       
       let allCustomers: Customer[] = [];
