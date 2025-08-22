@@ -482,32 +482,32 @@ const ModernDashboard: React.FC = () => {
                   <CheckCircleIcon />
                 </Box>
                 <Box>
-                  <Typography variant="h6" sx={{ color: '#c1bdb3', fontWeight: 700 }}>
-                    Angenommene Angebote
+                  <Typography variant="h6" sx={{ color: '#090c02', fontWeight: 700 }}>
+                    Angenommene Lexware-Angebote
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#7f7979' }}>
-                    Aktive Aufträge bereit zur Bearbeitung
+                  <Typography variant="body2" sx={{ color: '#bbc5aa' }}>
+                    Echte Kunden aus Ihrem Lexware-System
                   </Typography>
                 </Box>
                 <Chip 
-                  label="3 AKTIV" 
+                  label="3 LEXWARE" 
                   size="small" 
                   sx={{
                     ml: 'auto',
-                    background: 'linear-gradient(135deg, #c1bdb3 0%, #7f7979 100%)',
-                    color: '#323031',
-                    border: '1px solid rgba(193, 189, 179, 0.3)',
+                    background: 'linear-gradient(135deg, #bbc5aa 0%, #e6eed6 100%)',
+                    color: '#090c02',
+                    border: '1px solid rgba(187, 197, 170, 0.4)',
                     fontWeight: 700,
-                    boxShadow: '0 4px 12px rgba(193, 189, 179, 0.3)',
+                    fontSize: '0.7rem'
                   }}
                 />
               </Box>
               
               <Grid container spacing={2}>
                 {[
-                  { name: 'Familie Müller', date: '25.08.2025', price: '€1,250', urgent: true },
-                  { name: 'Schmidt GmbH', date: '27.08.2025', price: '€2,100', urgent: false },
-                  { name: 'Familie Weber', date: '30.08.2025', price: '€890', urgent: false }
+                  { name: 'Goldbeck West GmbH', date: '22.08.2025', price: '€3.611,65', urgent: true, status: 'ANGENOMMEN' },
+                  { name: 'Alexander Betz', date: '21.08.2025', price: '€3.855,60', urgent: false, status: 'OFFEN' },
+                  { name: 'A. Bührdel', date: '21.08.2025', price: '€2.300,00', urgent: false, status: 'ANGENOMMEN' }
                 ].map((quote, i) => (
                   <Grid item xs={12} sm={4} key={i}>
                     <motion.div
@@ -539,12 +539,18 @@ const ModernDashboard: React.FC = () => {
                             <Typography variant="subtitle1" fontWeight="bold">
                               {quote.name}
                             </Typography>
+                            <Chip 
+                              label={quote.status} 
+                              size="small" 
+                              color={quote.status === 'ANGENOMMEN' ? 'success' : 'warning'}
+                              sx={{ fontSize: '0.7rem', height: 20, fontWeight: 600 }}
+                            />
                             {quote.urgent && (
                               <Chip 
                                 label="URGENT" 
                                 size="small" 
                                 color="error"
-                                sx={{ fontSize: '0.7rem', height: 20 }}
+                                sx={{ fontSize: '0.7rem', height: 20, ml: 1 }}
                               />
                             )}
                           </Box>
