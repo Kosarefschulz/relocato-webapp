@@ -25,6 +25,7 @@ import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
 import CustomersList from './components/CustomersList';
 import CustomerDetails from './components/CustomerDetails';
+import CustomerDetailView from './components/CustomerDetailView';
 import InvoicesList from './components/InvoicesList';
 import SalesPage from './pages/SalesPage';
 import CalendarView from './components/CalendarView';
@@ -122,6 +123,10 @@ function AppRoutes({ user }: { user: User | null }) {
         path="/search-customer" 
         element={<CustomerSearch />} 
       />
+      <Route 
+        path="/customer-search" 
+        element={<CustomerSearch />} 
+      />
       
       {/* Create Quote */}
       <Route 
@@ -159,8 +164,8 @@ function AppRoutes({ user }: { user: User | null }) {
       
       {/* Customer Details */}
       <Route 
-        path="/customer/:id" 
-        element={<CustomerDetails />} 
+        path="/customer/:customerId" 
+        element={<CustomerDetailView />} 
       />
       <Route 
         path="/customer-details/:customerId" 

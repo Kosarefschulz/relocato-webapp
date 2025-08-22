@@ -124,6 +124,31 @@ const CustomerCard: React.FC<{
     });
   };
 
+  // Extrahiere Preis aus Notizen (sucht nach Euro-Beträgen)
+  const extractPriceFromNotes = (notes?: string): string | null => {
+    if (!notes) return null;
+    
+    // Suche nach Euro-Beträgen in verschiedenen Formaten
+    const priceRegex = /(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)\s*€|€\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/g;
+    const matches = notes.match(priceRegex);
+    
+    if (matches && matches.length > 0) {
+      // Nimm den ersten gefundenen Preis
+      const priceMatch = matches[0];
+      return priceMatch;
+    }
+    
+    // Suche nach Angebotsnummern mit Preisen
+    const quoteRegex = /Angebotsnummer:\s*[\w\d-]+.*?(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/;
+    const quoteMatch = notes.match(quoteRegex);
+    
+    if (quoteMatch && quoteMatch[1]) {
+      return `€${quoteMatch[1]}`;
+    }
+    
+    return null;
+  };
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'active':
@@ -227,6 +252,31 @@ const CustomerCard: React.FC<{
                   {formatDate(customer.movingDate)}
                 </Typography>
               </Box>
+
+              {/* Preis-Anzeige für Lexware-Kunden */}
+              {customer.salesNotes?.some(note => note.content?.includes('Lexware ID:')) && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                  <EuroIcon fontSize="small" sx={{ color: '#a72608' }} />
+                  <Typography variant="h6" sx={{ 
+                    color: '#a72608', 
+                    fontWeight: 700,
+                    fontSize: '1.1rem'
+                  }}>
+                    {extractPriceFromNotes(customer.notes) || 
+                     customer.latestQuoteAmount ? 
+                      `€${customer.latestQuoteAmount?.toLocaleString('de-DE')}` :
+                      customer.totalRevenue ? 
+                        `€${customer.totalRevenue.toLocaleString('de-DE')} (Umsatz)` :
+                        '€ Preis auf Anfrage'
+                    }
+                  </Typography>
+                  {customer.volume && (
+                    <Typography variant="caption" sx={{ color: '#bbc5aa' }}>
+                      ({customer.volume}m³)
+                    </Typography>
+                  )}
+                </Box>
+              )}
             </Box>
           </Box>
           
@@ -431,8 +481,8 @@ const CustomersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'date' | 'status'>('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'status'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // Neueste zuerst
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -473,8 +523,18 @@ const CustomersPage: React.FC = () => {
           bValue = b.name.toLowerCase();
           break;
         case 'date':
-          aValue = new Date(a.movingDate || '').getTime();
-          bValue = new Date(b.movingDate || '').getTime();
+          // Für Lexware-Kunden: Nutze das neueste Quote/Invoice-Datum
+          if (a.salesNotes?.some(note => note.content?.includes('Lexware ID:'))) {
+            aValue = a.createdAt ? new Date(a.createdAt).getTime() : new Date(a.movingDate || '').getTime();
+          } else {
+            aValue = new Date(a.movingDate || '').getTime();
+          }
+          
+          if (b.salesNotes?.some(note => note.content?.includes('Lexware ID:'))) {
+            bValue = b.createdAt ? new Date(b.createdAt).getTime() : new Date(b.movingDate || '').getTime();
+          } else {
+            bValue = new Date(b.movingDate || '').getTime();
+          }
           break;
         case 'status':
           aValue = a.status || '';

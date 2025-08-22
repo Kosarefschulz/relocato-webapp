@@ -15,21 +15,54 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Server-seitige Lexware API Anfrage (umgeht CORS)
-    const response = await fetch(`${LEXWARE_API_URL}/contacts`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${LEXWARE_API_KEY}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'Relocato-CRM/1.0'
-      },
-      // Weitere Parameter für Kunden
-      ...({
-        redirect: 'follow',
-        cache: 'no-cache'
-      })
-    });
+    // Teste verschiedene Lexware API Endpoints für echte Kunden
+    let response;
+    let apiEndpoint = '';
+    
+    // Versuche verschiedene API-Pfade
+    const endpointsToTry = [
+      '/contacts?role=customer&size=100', // Standard Kunden
+      '/contacts?size=100', // Alle Kontakte
+      '/customers', // Direkte Kunden-API
+      '/contacts?filter=active', // Nur aktive
+      '/invoices', // Rechnungen (enthält Kundendaten)
+      '/quotations' // Angebote (enthält Kundendaten)
+    ];
+
+    for (const endpoint of endpointsToTry) {
+      try {
+        console.log(`🔍 Trying Lexware API endpoint: ${endpoint}`);
+        
+        response = await fetch(`${LEXWARE_API_URL}${endpoint}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${LEXWARE_API_KEY}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'Relocato-CRM/1.0'
+          }
+        });
+
+        console.log(`📡 Response ${endpoint}: ${response.status} ${response.statusText}`);
+        
+        if (response.ok) {
+          apiEndpoint = endpoint;
+          break;
+        }
+      } catch (error) {
+        console.log(`❌ Failed ${endpoint}:`, error instanceof Error ? error.message : 'Unknown error');
+        continue;
+      }
+    }
+
+    if (!response || !response.ok) {
+      return NextResponse.json({
+        success: false,
+        error: 'No working Lexware API endpoint found',
+        testedEndpoints: endpointsToTry,
+        lastStatus: response?.status || 'No response'
+      }, { status: 400 });
+    }
 
     console.log(`📡 Lexware API Response: ${response.status} ${response.statusText}`);
 

@@ -69,6 +69,16 @@ export interface Customer {
   salesNotes?: SalesNote[]; // Vertriebsnotizen
   notReachedCount?: number; // Anzahl der erfolglosen Kontaktversuche
   lastNotReachedAt?: Date | string; // Zeitpunkt des letzten erfolglosen Versuchs
+  // Lexware Pricing Data
+  latestQuoteAmount?: number; // Letzter Angebotspreis
+  totalRevenue?: number; // Gesamtumsatz aus Rechnungen
+  quotes?: Array<{
+    id: string;
+    amount: number;
+    date: string;
+    status: string;
+    type: 'quote' | 'invoice';
+  }>;
 }
 
 export interface SalesNote {

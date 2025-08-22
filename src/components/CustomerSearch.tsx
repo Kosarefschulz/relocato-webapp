@@ -86,10 +86,10 @@ const CustomerSearch: React.FC = () => {
 
   const handleSelectCustomer = (customer: Customer) => {
     try {
-      navigate('/create-quote', { state: { customer } });
+      navigate(`/customer/${customer.id}`);
     } catch (error) {
       console.error('Navigation error:', error);
-      setError('Fehler beim Navigieren zur Angebotserstellung');
+      setError('Fehler beim Navigieren zur Kundendetails');
     }
   };
 
