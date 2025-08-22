@@ -610,12 +610,12 @@ const CustomersPage: React.FC = () => {
       
       console.log('📋 Loading all customers including real Lexware data...');
       
-      // Lade NUR echte Lexware-Kunden aus ANGEBOTEN (korrekte voucherlist API!)
-      const lexwareResponse = await fetch('/api/lexware/quotations-list');
+      // Lade Lexware-Kunden aus PDF-basierten Daten (verhindert Rate Limiting)
+      const lexwareResponse = await fetch('/api/lexware/quotes-customers');
       const lexwareResult = await lexwareResponse.json();
       
       if (lexwareResult.success) {
-        const lexwareCustomers = lexwareResult.quotations.map(mapLexwareCustomerToLocal);
+        const lexwareCustomers = lexwareResult.customers.map(mapLexwareCustomerToLocal);
         setCustomers(lexwareCustomers);
         
         console.log(`✅ Loaded ${lexwareResult.count} REAL Lexware quote customers!`);

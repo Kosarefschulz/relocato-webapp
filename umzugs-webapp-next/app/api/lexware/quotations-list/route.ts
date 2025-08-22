@@ -59,12 +59,12 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Step 2: Loading detailed quotation data...');
     const detailedQuotations = [];
 
-    for (const voucher of voucherData.content) { // ALLE Angebote, nicht nur 10
+    for (const voucher of voucherData.content.slice(0, 10)) { // Erste 10 für schnelle Antwort (6 Sekunden)
       try {
         console.log(`📋 Loading quotation details: ${voucher.id}`);
         
-        // Rate limiting: 1 RPS (konservativ um 429 zu vermeiden)
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Rate limiting: 1.5 RPS (schneller aber sicher)
+        await new Promise(resolve => setTimeout(resolve, 600));
         
         const quotationResponse = await fetch(
           `${LEXWARE_API_URL}/quotations/${voucher.id}`, 

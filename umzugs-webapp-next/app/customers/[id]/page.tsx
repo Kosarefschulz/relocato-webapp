@@ -60,6 +60,7 @@ import {
 import { Customer } from '@/types';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/Toaster';
+import { quotationCacheService } from '@/lib/services/quotationCache';
 
 const theme = createTheme({
   palette: {
@@ -99,31 +100,30 @@ export default function CustomerDetailPage() {
     try {
       setLoading(true);
       
-      // Lade Kunden aus der Lexware-API
-      const response = await fetch('/api/lexware/quotes-customers');
-      const result = await response.json();
+      // Nutze Cache-Service um Rate Limiting zu vermeiden
+      console.log('🔍 Loading customer from cache or API...');
+      const foundCustomer = await quotationCacheService.findCustomer(customerId);
       
-      if (result.success) {
-        const foundCustomer = result.customers.find((c: any) => c.id === customerId);
+      if (foundCustomer) {
+        setCustomer(foundCustomer);
+        setEditData(foundCustomer);
         
-        if (foundCustomer) {
-          setCustomer(foundCustomer);
-          setEditData(foundCustomer);
-        } else {
-          addToast({
-            type: 'error',
-            title: 'Kunde nicht gefunden',
-            message: 'Der gesuchte Kunde wurde nicht gefunden',
-          });
-          router.push('/search-customer');
-        }
+        const cacheStatus = quotationCacheService.getCacheStatus();
+        console.log(`✅ Customer loaded (Cache: ${cacheStatus.hasCache ? `${cacheStatus.remaining}s remaining` : 'fresh data'})`);
+      } else {
+        addToast({
+          type: 'error',
+          title: 'Kunde nicht gefunden',
+          message: 'Der gesuchte Kunde wurde nicht gefunden',
+        });
+        router.push('/search-customer');
       }
     } catch (error) {
       console.error('Error loading customer:', error);
       addToast({
         type: 'error',
         title: 'Fehler',
-        message: 'Kunde konnte nicht geladen werden',
+        message: 'Kunde konnte nicht geladen werden - möglicherweise Rate Limit erreicht',
       });
     } finally {
       setLoading(false);
