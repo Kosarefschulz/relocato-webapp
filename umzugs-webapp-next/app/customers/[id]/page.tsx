@@ -100,23 +100,35 @@ export default function CustomerDetailPage() {
     try {
       setLoading(true);
       
-      // Nutze Cache-Service um Rate Limiting zu vermeiden
-      console.log('🔍 Loading customer from cache or API...');
-      const foundCustomer = await quotationCacheService.findCustomer(customerId);
+      // Lade direkt aus der stabilen quotes-customers API
+      console.log('🔍 Loading customer directly from stable API...');
+      const response = await fetch('/api/lexware/quotes-customers');
+      const result = await response.json();
       
-      if (foundCustomer) {
-        setCustomer(foundCustomer);
-        setEditData(foundCustomer);
+      if (result.success) {
+        const foundCustomer = result.customers.find((c: any) => c.id === customerId);
         
-        const cacheStatus = quotationCacheService.getCacheStatus();
-        console.log(`✅ Customer loaded (Cache: ${cacheStatus.hasCache ? `${cacheStatus.remaining}s remaining` : 'fresh data'})`);
+        if (foundCustomer) {
+          console.log(`✅ Found customer: ${foundCustomer.name}`);
+        } else {
+          console.log(`❌ Customer ${customerId} not found in ${result.customers.length} customers`);
+          console.log('Available IDs:', result.customers.slice(0, 3).map((c: any) => c.id));
+        }
+        
+        if (foundCustomer) {
+          setCustomer(foundCustomer);
+          setEditData(foundCustomer);
+          console.log(`✅ Customer loaded: ${foundCustomer.name}`);
+        } else {
+          addToast({
+            type: 'error',
+            title: 'Kunde nicht gefunden',
+            message: `Kunde ${customerId} wurde nicht gefunden`,
+          });
+          router.push('/search-customer');
+        }
       } else {
-        addToast({
-          type: 'error',
-          title: 'Kunde nicht gefunden',
-          message: 'Der gesuchte Kunde wurde nicht gefunden',
-        });
-        router.push('/search-customer');
+        throw new Error(result.error || 'API error');
       }
     } catch (error) {
       console.error('Error loading customer:', error);
