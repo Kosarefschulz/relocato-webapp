@@ -556,7 +556,7 @@ export default function CustomerDetailPage() {
                 }}
               >
                 <Tab label="Übersicht" />
-                <Tab label="Angebot AG0066" />
+                <Tab label="Angebot AG0066 - Feuchtigkeitsschaden" />
                 <Tab label="Rechnungen" />
                 <Tab label="Notizen" />
               </Tabs>
@@ -828,7 +828,7 @@ export default function CustomerDetailPage() {
                     background: 'linear-gradient(135deg, rgba(167, 38, 8, 0.05) 0%, rgba(187, 197, 170, 0.1) 100%)'
                   }}>
                     <Typography variant="h5" sx={{ fontWeight: 800, color: '#090c02', mb: 1 }}>
-                      Angebot AG0066
+                      Angebot AG0066 - Feuchtigkeitsschaden
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#090c02', mb: 2 }}>
                       für {customer?.name}
@@ -962,8 +962,11 @@ export default function CustomerDetailPage() {
                     <Typography variant="subtitle2" sx={{ color: '#a72608', fontWeight: 600, mb: 1 }}>
                       Anmerkungen:
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#090c02', fontStyle: 'italic' }}>
-                      Feuchtigkeitsschäden erfordern spezielle Schutzmaßnahmen. Umzug von Bielefeld nach Gütersloh mit professioneller Büroausstattung.
+                    <Typography variant="body2" sx={{ color: '#090c02', fontStyle: 'italic', mb: 2 }}>
+                      {realQuoteData?.introduction || 'Sehr geehrte Damen und Herren, hiermit unterbreiten wir Ihnen unser Angebot für die Rückbau- und Wiederherstellungsarbeiten nach Feuchtigkeitsschaden im Büro 5.14 und Treppenhaus 5. OG.'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#bbc5aa', fontStyle: 'italic' }}>
+                      {realQuoteData?.remark || 'Projekt: Feuchtigkeitsschaden Suttner-Nobel-Allee 15, 44803 Bochum - Das Angebot wurde auf Grundlage des aktuell erkennbaren Schadensbildes erstellt.'}
                     </Typography>
                   </Box>
 
