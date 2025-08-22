@@ -51,49 +51,63 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
-      main: '#c1bdb3', // Silver
-      light: '#e8e6e0',
-      dark: '#a09c94',
+      main: '#a72608', // Rufous - Elegant rust red
+      light: '#d4471c',
+      dark: '#821e06',
     },
     secondary: {
-      main: '#5f5b6b', // Davys Gray
-      light: '#7a7687',
-      dark: '#4a465a',
+      main: '#bbc5aa', // Ash Gray - Natural green-gray
+      light: '#d1dbbf',
+      dark: '#a5af94',
     },
     background: {
-      default: '#323031', // Jet
-      paper: '#3d3b3c', // Jet-2
+      default: '#e6eed6', // Beige - Soft warm background
+      paper: '#dde2c6', // Beige-2 - Paper surface
     },
     text: {
-      primary: '#c1bdb3', // Silver
-      secondary: '#7f7979', // Gray
+      primary: '#090c02', // Smoky Black - Deep contrast
+      secondary: '#bbc5aa', // Ash Gray for secondary text
     },
-    divider: 'rgba(193, 189, 179, 0.12)',
+    success: {
+      main: '#bbc5aa',
+      light: '#d1dbbf',
+    },
+    warning: {
+      main: '#a72608',
+      light: '#d4471c',
+    },
+    error: {
+      main: '#a72608',
+      light: '#d4471c',
+    },
+    divider: 'rgba(9, 12, 2, 0.08)',
   },
   typography: {
     fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-    h4: { fontWeight: 800, letterSpacing: '-0.02em', color: '#c1bdb3' },
-    h5: { fontWeight: 700, letterSpacing: '-0.01em', color: '#c1bdb3' },
-    h6: { fontWeight: 600, letterSpacing: '-0.01em', color: '#c1bdb3' },
+    h4: { fontWeight: 800, letterSpacing: '-0.02em', color: '#090c02' },
+    h5: { fontWeight: 700, letterSpacing: '-0.01em', color: '#090c02' },
+    h6: { fontWeight: 600, letterSpacing: '-0.01em', color: '#090c02' },
   },
   shape: { borderRadius: 20 },
   components: {
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: 'rgba(61, 59, 60, 0.8)',
+          backgroundColor: 'rgba(221, 226, 198, 0.7)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(193, 189, 179, 0.1)',
+          border: '1px solid rgba(187, 197, 170, 0.3)',
+          boxShadow: '0 8px 32px rgba(9, 12, 2, 0.08)',
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: 'rgba(61, 59, 60, 0.9)',
+          backgroundColor: 'rgba(221, 226, 198, 0.8)',
           backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(187, 197, 170, 0.2)',
         },
       },
     },
@@ -112,31 +126,31 @@ const ModernDashboard: React.FC = () => {
       description: 'KI-gestützte Kundensuche',
       icon: <SearchIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/search-customer',
-      color: '#c1bdb3',
-      gradient: 'linear-gradient(135deg, #c1bdb3 0%, #7f7979 100%)',
-      glow: '0 20px 40px -12px rgba(193, 189, 179, 0.4)',
+      color: '#a72608',
+      gradient: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
+      glow: '0 20px 40px -12px rgba(167, 38, 8, 0.3)',
       badge: 'AI',
-      badgeColor: '#c1bdb3'
+      badgeColor: '#a72608'
     },
     {
       title: 'Neuer Kunde',
       description: 'Schnell Kunden erfassen',
       icon: <AddIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/new-customer',
-      color: '#5f5b6b',
-      gradient: 'linear-gradient(135deg, #5f5b6b 0%, #c1bdb3 100%)',
-      glow: '0 20px 40px -12px rgba(95, 91, 107, 0.4)',
+      color: '#bbc5aa',
+      gradient: 'linear-gradient(135deg, #bbc5aa 0%, #e6eed6 100%)',
+      glow: '0 20px 40px -12px rgba(187, 197, 170, 0.4)',
       badge: 'QUICK',
-      badgeColor: '#5f5b6b'
+      badgeColor: '#bbc5aa'
     },
     {
       title: 'Angebote',
       description: 'Intelligente Angebotserstellung',
       icon: <DescriptionIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/quotes',
-      color: '#7f7979',
-      gradient: 'linear-gradient(135deg, #7f7979 0%, #c1bdb3 100%)',
-      glow: '0 20px 40px -12px rgba(127, 121, 121, 0.4)',
+      color: '#dde2c6',
+      gradient: 'linear-gradient(135deg, #dde2c6 0%, #bbc5aa 100%)',
+      glow: '0 20px 40px -12px rgba(221, 226, 198, 0.4)',
       count: 12
     },
     {
@@ -144,9 +158,9 @@ const ModernDashboard: React.FC = () => {
       description: 'Automatisierte Rechnungen',
       icon: <ReceiptIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/accounting',
-      color: '#c1bdb3',
-      gradient: 'linear-gradient(135deg, #3d3b3c 0%, #7f7979 100%)',
-      glow: '0 20px 40px -12px rgba(193, 189, 179, 0.3)',
+      color: '#a72608',
+      gradient: 'linear-gradient(135deg, #a72608 0%, #dde2c6 100%)',
+      glow: '0 20px 40px -12px rgba(167, 38, 8, 0.3)',
       count: 5
     },
     {
@@ -154,9 +168,9 @@ const ModernDashboard: React.FC = () => {
       description: 'Smart Terminplanung',
       icon: <CalendarIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/calendar',
-      color: '#7f7979',
-      gradient: 'linear-gradient(135deg, #5f5b6b 0%, #c1bdb3 100%)',
-      glow: '0 20px 40px -12px rgba(127, 121, 121, 0.4)',
+      color: '#bbc5aa',
+      gradient: 'linear-gradient(135deg, #bbc5aa 0%, #e6eed6 100%)',
+      glow: '0 20px 40px -12px rgba(187, 197, 170, 0.4)',
       count: 3
     },
     {
@@ -164,31 +178,31 @@ const ModernDashboard: React.FC = () => {
       description: 'Sales Analytics',
       icon: <SalesIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/sales',
-      color: '#5f5b6b',
-      gradient: 'linear-gradient(135deg, #c1bdb3 0%, #5f5b6b 100%)',
-      glow: '0 20px 40px -12px rgba(95, 91, 107, 0.4)',
+      color: '#a72608',
+      gradient: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
+      glow: '0 20px 40px -12px rgba(167, 38, 8, 0.3)',
       badge: 'PRO',
-      badgeColor: '#5f5b6b'
+      badgeColor: '#a72608'
     },
     {
       title: 'Admin Tools',
       description: 'System Management',
       icon: <AdminIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/admin-tools',
-      color: '#3d3b3c',
-      gradient: 'linear-gradient(135deg, #323031 0%, #5f5b6b 100%)',
-      glow: '0 20px 40px -12px rgba(61, 59, 60, 0.5)',
+      color: '#090c02',
+      gradient: 'linear-gradient(135deg, #090c02 0%, #bbc5aa 100%)',
+      glow: '0 20px 40px -12px rgba(9, 12, 2, 0.4)',
       badge: 'ADMIN',
-      badgeColor: '#323031'
+      badgeColor: '#090c02'
     },
     {
       title: 'E-Mail',
       description: 'Unified Inbox',
       icon: <EmailIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/email-client',
-      color: '#7f7979',
-      gradient: 'linear-gradient(135deg, #7f7979 0%, #c1bdb3 100%)',
-      glow: '0 20px 40px -12px rgba(127, 121, 121, 0.4)',
+      color: '#dde2c6',
+      gradient: 'linear-gradient(135deg, #dde2c6 0%, #bbc5aa 100%)',
+      glow: '0 20px 40px -12px rgba(221, 226, 198, 0.4)',
       count: 7
     },
     {
@@ -196,9 +210,9 @@ const ModernDashboard: React.FC = () => {
       description: 'Business Messaging',
       icon: <WhatsAppIcon sx={{ fontSize: { xs: 36, sm: 40, md: 48 } }} />,
       path: '/whatsapp',
-      color: '#5f5b6b',
-      gradient: 'linear-gradient(135deg, #5f5b6b 0%, #3d3b3c 100%)',
-      glow: '0 20px 40px -12px rgba(95, 91, 107, 0.4)',
+      color: '#bbc5aa',
+      gradient: 'linear-gradient(135deg, #bbc5aa 0%, #a72608 100%)',
+      glow: '0 20px 40px -12px rgba(187, 197, 170, 0.4)',
       count: 2
     }
   ];
@@ -207,10 +221,10 @@ const ModernDashboard: React.FC = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       
-      {/* Sophisticated Dark Background */}
+      {/* Organic Natural Background */}
       <Box sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #323031 0%, #3d3b3c 50%, #5f5b6b 100%)',
+        background: 'linear-gradient(135deg, #e6eed6 0%, #dde2c6 50%, #bbc5aa 100%)',
         position: 'relative',
         '&::before': {
           content: '""',
@@ -220,9 +234,9 @@ const ModernDashboard: React.FC = () => {
           right: 0,
           bottom: 0,
           background: `
-            radial-gradient(circle at 20% 80%, rgba(193, 189, 179, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(95, 91, 107, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(127, 121, 121, 0.1) 0%, transparent 50%)
+            radial-gradient(circle at 20% 80%, rgba(187, 197, 170, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(167, 38, 8, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(230, 238, 214, 0.4) 0%, transparent 50%)
           `,
         },
         '&::after': {
@@ -232,7 +246,7 @@ const ModernDashboard: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'linear-gradient(45deg, rgba(50, 48, 49, 0.8) 0%, rgba(61, 59, 60, 0.6) 50%, rgba(95, 91, 107, 0.4) 100%)',
+          background: 'linear-gradient(45deg, rgba(230, 238, 214, 0.8) 0%, rgba(221, 226, 198, 0.6) 50%, rgba(187, 197, 170, 0.4) 100%)',
           backdropFilter: 'blur(1px)',
         }
       }}>
@@ -263,22 +277,23 @@ const ModernDashboard: React.FC = () => {
                       variant="h4" 
                       sx={{ 
                         fontWeight: 900,
-                        background: 'linear-gradient(135deg, #c1bdb3 0%, #e8e6e0 100%)',
+                        background: 'linear-gradient(135deg, #090c02 0%, #a72608 100%)',
                         backgroundClip: 'text',
                         WebkitBackgroundClip: 'text',
                         color: 'transparent',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                        textShadow: '0 2px 4px rgba(9, 12, 2, 0.2)',
                         mb: 1
                       }}
                     >
-                      Willkommen zurück! 👋
+                      Willkommen zurück! 🌿
                     </Typography>
                     <Typography 
                       variant="body1" 
                       sx={{ 
-                        color: '#7f7979',
+                        color: '#090c02',
                         fontSize: '1.1rem',
-                        fontWeight: 500
+                        fontWeight: 500,
+                        opacity: 0.8
                       }}
                     >
                       {new Date().toLocaleDateString('de-DE', { 
@@ -293,32 +308,32 @@ const ModernDashboard: React.FC = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <IconButton 
                       sx={{ 
-                        backgroundColor: 'rgba(193, 189, 179, 0.1)',
-                        color: '#c1bdb3',
+                        backgroundColor: 'rgba(187, 197, 170, 0.2)',
+                        color: '#090c02',
                         borderRadius: 3,
-                        border: '1px solid rgba(193, 189, 179, 0.2)',
+                        border: '1px solid rgba(187, 197, 170, 0.4)',
                         '&:hover': {
-                          backgroundColor: 'rgba(193, 189, 179, 0.2)',
+                          backgroundColor: 'rgba(187, 197, 170, 0.3)',
                           transform: 'scale(1.1)',
-                          boxShadow: '0 8px 25px rgba(193, 189, 179, 0.3)',
+                          boxShadow: '0 8px 25px rgba(187, 197, 170, 0.4)',
                         }
                       }}
                     >
-                      <Badge badgeContent={4} sx={{ '& .MuiBadge-badge': { backgroundColor: '#c1bdb3', color: '#323031' } }}>
+                      <Badge badgeContent={4} sx={{ '& .MuiBadge-badge': { backgroundColor: '#a72608', color: '#e6eed6' } }}>
                         <NotificationsIcon />
                       </Badge>
                     </IconButton>
                     
                     <IconButton 
                       sx={{ 
-                        backgroundColor: 'rgba(95, 91, 107, 0.2)',
-                        color: '#5f5b6b',
+                        backgroundColor: 'rgba(167, 38, 8, 0.1)',
+                        color: '#a72608',
                         borderRadius: 3,
-                        border: '1px solid rgba(95, 91, 107, 0.3)',
+                        border: '1px solid rgba(167, 38, 8, 0.3)',
                         '&:hover': {
-                          backgroundColor: 'rgba(95, 91, 107, 0.3)',
+                          backgroundColor: 'rgba(167, 38, 8, 0.2)',
                           transform: 'scale(1.1)',
-                          boxShadow: '0 8px 25px rgba(95, 91, 107, 0.4)',
+                          boxShadow: '0 8px 25px rgba(167, 38, 8, 0.3)',
                         }
                       }}
                     >
@@ -327,15 +342,15 @@ const ModernDashboard: React.FC = () => {
                     
                     <Avatar 
                       sx={{ 
-                        background: 'linear-gradient(135deg, #c1bdb3 0%, #7f7979 100%)',
-                        color: '#323031',
-                        border: '2px solid rgba(193, 189, 179, 0.3)',
+                        background: 'linear-gradient(135deg, #bbc5aa 0%, #a72608 100%)',
+                        color: '#e6eed6',
+                        border: '2px solid rgba(187, 197, 170, 0.4)',
                         cursor: 'pointer',
                         fontWeight: 700,
-                        boxShadow: '0 8px 25px rgba(193, 189, 179, 0.3)',
+                        boxShadow: '0 8px 25px rgba(187, 197, 170, 0.3)',
                         '&:hover': {
                           transform: 'scale(1.1) rotate(5deg)',
-                          boxShadow: '0 12px 35px rgba(193, 189, 179, 0.4)',
+                          boxShadow: '0 12px 35px rgba(167, 38, 8, 0.4)',
                         }
                       }}
                     >
@@ -694,20 +709,20 @@ const ModernDashboard: React.FC = () => {
           </Grid>
         </Container>
 
-        {/* Elegant Floating Action Button */}
+        {/* Organic Floating Action Button */}
         <Fab
           sx={{
             position: 'fixed',
             bottom: 24,
             right: 24,
-            background: 'linear-gradient(135deg, #c1bdb3 0%, #5f5b6b 100%)',
-            color: '#323031',
-            boxShadow: '0 15px 35px rgba(193, 189, 179, 0.4)',
-            border: '1px solid rgba(193, 189, 179, 0.3)',
+            background: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
+            color: '#e6eed6',
+            boxShadow: '0 15px 35px rgba(167, 38, 8, 0.4)',
+            border: '1px solid rgba(187, 197, 170, 0.3)',
             '&:hover': {
               transform: 'scale(1.15) rotate(10deg)',
-              boxShadow: '0 20px 45px rgba(193, 189, 179, 0.6)',
-              background: 'linear-gradient(135deg, #e8e6e0 0%, #c1bdb3 100%)',
+              boxShadow: '0 20px 45px rgba(167, 38, 8, 0.6)',
+              background: 'linear-gradient(135deg, #d4471c 0%, #d1dbbf 100%)',
             }
           }}
           onClick={() => router.push('/new-customer')}
