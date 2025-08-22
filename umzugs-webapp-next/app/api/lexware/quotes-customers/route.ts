@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
     };
 
     // Lade Angebote sortiert nach Datum (neueste zuerst)
-    const response = await fetch(`${LEXWARE_API_URL}/quotations?size=100&sort=voucherDate,DESC`, { 
+    console.log('🔍 Fetching quotations from Lexware API...');
+    const response = await fetch(`${LEXWARE_API_URL}/quotations?size=50&sort=voucherDate,DESC`, { 
       headers 
     });
 

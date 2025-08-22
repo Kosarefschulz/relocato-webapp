@@ -118,16 +118,41 @@ const CustomerDetailView: React.FC = () => {
   const loadCustomerData = async () => {
     try {
       setLoading(true);
+      setError('');
+      
+      console.log('🔍 Lade Kunde mit ID:', customerId);
       
       // Lade Kundendaten
       const customers = await databaseService.getCustomers();
-      const foundCustomer = customers.find(c => c.id === customerId);
+      console.log('📊 Gefundene Kunden:', customers.length);
+      console.log('🎯 Suche nach ID:', customerId);
+      
+      // Erweiterte Suche - auch nach customerNumber und anderen Feldern
+      let foundCustomer = customers.find(c => 
+        c.id === customerId || 
+        c.customerNumber === customerId ||
+        c.id.includes(customerId) ||
+        (customerId && c.id.toLowerCase().includes(customerId.toLowerCase()))
+      );
+      
+      // Falls nicht gefunden, versuche Lexware-ID Matching
+      if (!foundCustomer && customerId?.startsWith('lexware-')) {
+        const lexwareId = customerId.replace('lexware-', '');
+        foundCustomer = customers.find(c => 
+          c.id.includes(lexwareId) ||
+          c.customerNumber?.includes(lexwareId) ||
+          c.id === lexwareId
+        );
+        console.log('🔄 Lexware ID Suche:', lexwareId, foundCustomer ? 'GEFUNDEN' : 'NICHT GEFUNDEN');
+      }
       
       if (!foundCustomer) {
-        setError('Kunde nicht gefunden');
+        console.log('❌ Kunde nicht gefunden. Verfügbare IDs:', customers.map(c => c.id).slice(0, 5));
+        setError(`Kunde mit ID "${customerId}" nicht gefunden`);
         return;
       }
       
+      console.log('✅ Kunde gefunden:', foundCustomer.name);
       setCustomer(foundCustomer);
       
       // Lade Angebote und Rechnungen (simuliert)
@@ -137,7 +162,7 @@ const CustomerDetailView: React.FC = () => {
       
     } catch (err) {
       console.error('Fehler beim Laden der Kundendaten:', err);
-      setError('Fehler beim Laden der Kundendaten');
+      setError('Fehler beim Laden der Kundendaten: ' + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -191,9 +216,27 @@ const CustomerDetailView: React.FC = () => {
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
-        <Button onClick={() => navigate('/customer-search')} startIcon={<ArrowBack />}>
-          Zurück zur Suche
-        </Button>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Gesuchte ID: {customerId}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button 
+            onClick={() => navigate('/customer-search')} 
+            startIcon={<ArrowBack />}
+            variant="contained"
+          >
+            Zurück zur Suche
+          </Button>
+          <Button 
+            onClick={() => navigate('/customers')} 
+            startIcon={<Person />}
+            variant="outlined"
+          >
+            Alle Kunden anzeigen
+          </Button>
+        </Box>
       </Container>
     );
   }
