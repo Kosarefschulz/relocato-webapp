@@ -193,6 +193,55 @@ export default function CustomerDetailPage() {
     router.push(`/quotes/new?customerId=${customerId}`);
   };
 
+  // PDF aus Lexware laden
+  const handleDownloadPDF = async () => {
+    if (!customer) return;
+
+    try {
+      addToast({
+        type: 'info',
+        title: '📄 PDF wird geladen...',
+        message: `Lade PDF für ${customer.customerNumber} aus Lexware`,
+      });
+
+      console.log(`📄 Downloading PDF for customer: ${customer.name} (${customer.customerNumber})`);
+
+      // PDF von Lexware API laden
+      const response = await fetch(`/api/lexware/quote/${customer.customerNumber}/pdf`);
+      
+      if (!response.ok) {
+        throw new Error(`PDF API Error: ${response.status}`);
+      }
+
+      // PDF als Blob herunterladen
+      const pdfBlob = await response.blob();
+      
+      // Download auslösen
+      const url = window.URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Angebot_${customer.customerNumber}_${customer.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      addToast({
+        type: 'success',
+        title: '✅ PDF erfolgreich geladen',
+        message: `Angebot-PDF für ${customer.name} heruntergeladen`,
+      });
+
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      addToast({
+        type: 'error',
+        title: 'PDF-Download fehlgeschlagen',
+        message: 'PDF konnte nicht aus Lexware geladen werden',
+      });
+    }
+  };
+
   // Foto-Upload Handler
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -1221,6 +1270,7 @@ export default function CustomerDetailPage() {
                     <Button
                       variant="outlined"
                       startIcon={<DescriptionIcon />}
+                      onClick={handleDownloadPDF}
                       sx={{
                         borderColor: '#bbc5aa',
                         color: '#090c02',
@@ -1230,7 +1280,7 @@ export default function CustomerDetailPage() {
                         }
                       }}
                     >
-                      PDF erstellen
+                      PDF aus Lexware laden
                     </Button>
                     <Button
                       variant="contained"
