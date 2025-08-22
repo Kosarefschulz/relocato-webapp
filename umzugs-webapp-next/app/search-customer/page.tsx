@@ -493,27 +493,35 @@ const CustomersPage: React.FC = () => {
     return filtered;
   }, [customers, searchTerm, sortBy, sortOrder, filterStatus]);
 
-  // Load customers from Supabase and sync with Lexware
+  // Load customers via API
   const loadCustomers = useCallback(async () => {
     try {
       setLoading(true);
-      await supabaseService.initialize();
       
-      // Lade erst existierende Kunden
-      const existingCustomers = await supabaseService.getCustomers();
+      console.log('📋 Loading customers via API...');
       
-      // Da Lexware API nicht erreichbar ist, lade alle verfügbaren Demo-Kunden
-      const lexwareCustomers = await simulateLexwareImport();
-      const allCustomers = [...existingCustomers, ...lexwareCustomers];
+      // Lade Kunden über unsere API
+      const response = await fetch('/api/customers');
+      const result = await response.json();
       
-      console.log('📊 Lade Demo-Kunden da APIs nicht verfügbar sind');
-      
-      setCustomers(allCustomers);
-      
-      console.log(`📊 Gesamt: ${allCustomers.length} Kunden (${existingCustomers.length} lokal + ${lexwareCustomers.length} Lexware)`);
+      if (result.success) {
+        console.log(`✅ Loaded ${result.count} customers via API`);
+        
+        // Konvertiere API-Daten zu Frontend-Format
+        const customers = result.customers.map(mapApiCustomerToLocal);
+        setCustomers(customers);
+        
+        addToast({
+          type: 'success',
+          title: '✅ Kunden geladen',
+          message: `${result.count} Kunden erfolgreich geladen`,
+        });
+      } else {
+        throw new Error(result.error || 'API error');
+      }
       
     } catch (error) {
-      console.error('Error loading customers:', error);
+      console.error('Error loading customers via API:', error);
       addToast({
         type: 'error',
         title: 'Fehler',
@@ -523,6 +531,29 @@ const CustomersPage: React.FC = () => {
       setLoading(false);
     }
   }, [addToast]);
+
+  // Konvertiere API-Daten zu Frontend-Format
+  const mapApiCustomerToLocal = (apiCustomer: any): Customer => {
+    return {
+      id: apiCustomer.id,
+      name: apiCustomer.name,
+      email: apiCustomer.email,
+      phone: apiCustomer.phone,
+      movingDate: apiCustomer.moving_date,
+      fromAddress: apiCustomer.from_address,
+      toAddress: apiCustomer.to_address,
+      apartment: apiCustomer.apartment,
+      services: apiCustomer.services,
+      notes: apiCustomer.notes,
+      status: apiCustomer.status,
+      priority: apiCustomer.priority,
+      company: apiCustomer.company,
+      volume: apiCustomer.volume,
+      customerNumber: apiCustomer.customer_number,
+      salesNotes: apiCustomer.sales_notes,
+      createdAt: apiCustomer.created_at ? new Date(apiCustomer.created_at) : new Date(),
+    };
+  };
 
   // Automatische Lexware Synchronisation
   const performLexwareSync = useCallback(async () => {
@@ -745,7 +776,7 @@ const CustomersPage: React.FC = () => {
     return realLexwareCustomers;
   }, []);
 
-  // Manuelle Sync-Funktion
+  // Manuelle Sync-Funktion über API
   const handleManualSync = useCallback(async () => {
     setSyncing(true);
     
@@ -753,21 +784,43 @@ const CustomersPage: React.FC = () => {
       addToast({
         type: 'info',
         title: '🔄 Synchronisiere mit Lexware...',
-        message: 'Neue Kunden werden importiert',
+        message: 'Neue Kunden werden in die Datenbank geschrieben',
       });
       
-      await performLexwareSync();
+      // Rufe Lexware Sync API auf
+      const response = await fetch('/api/lexware/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      // Lade Kunden neu nach manueller Sync
-      const updatedCustomers = await supabaseService.getCustomers();
-      setCustomers(updatedCustomers);
+      const result = await response.json();
+      
+      if (result.success) {
+        addToast({
+          type: 'success',
+          title: '✅ Lexware Sync erfolgreich',
+          message: `${result.imported} Kunden aus Lexware in Datenbank geschrieben`,
+        });
+        
+        // Lade alle Kunden neu
+        await loadCustomers();
+      } else {
+        throw new Error(result.error || 'Sync failed');
+      }
       
     } catch (error) {
       console.error('Manual sync error:', error);
+      addToast({
+        type: 'error',
+        title: 'Sync Fehler',
+        message: 'Lexware-Synchronisation fehlgeschlagen',
+      });
     } finally {
       setSyncing(false);
     }
-  }, [performLexwareSync]);
+  }, [loadCustomers, addToast]);
 
   useEffect(() => {
     loadCustomers();
