@@ -92,7 +92,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const CustomerDetailView: React.FC = () => {
-  const { customerId } = useParams<{ customerId: string }>();
+  const params = useParams<{ customerId?: string; id?: string }>();
+  const customerId = params.customerId || params.id;
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);

@@ -162,7 +162,11 @@ function AppRoutes({ user }: { user: User | null }) {
         element={<CustomersList />} 
       />
       
-      {/* Customer Details */}
+      {/* Customer Details - Neue moderne Ansicht */}
+      <Route 
+        path="/customers/:customerId" 
+        element={<CustomerDetailView />} 
+      />
       <Route 
         path="/customer/:customerId" 
         element={<CustomerDetailView />} 
@@ -173,10 +177,6 @@ function AppRoutes({ user }: { user: User | null }) {
       />
       <Route 
         path="/edit-customer/:customerId" 
-        element={<CustomerDetails />} 
-      />
-      <Route 
-        path="/customers/:customerId" 
         element={<CustomerDetails />} 
       />
       
