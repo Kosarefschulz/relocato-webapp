@@ -205,16 +205,20 @@ export default function CustomerDetailPage() {
       .slice(0, 2);
   };
 
-  // Generiere Angebots-Details für Goldbeck West GmbH
+  // Generiere dynamische Angebots-Details basierend auf Kunde
   const getQuoteDetails = () => {
     if (!customer) return null;
 
+    // Dynamische Angebotsnummer basierend auf Customer Number
+    const quoteNumber = customer.customerNumber?.replace('LW-', 'AG') || 'AG0000';
+    const quoteId = customer.quotes?.[0]?.id || quoteNumber;
+
     const quoteDetails = {
-      id: 'AG0066',
-      quoteNumber: 'AG0066',
-      date: '2025-08-22',
-      expirationDate: '2025-09-21',
-      status: 'offen' as const,
+      id: quoteId,
+      quoteNumber: quoteNumber,
+      date: customer.movingDate || '2025-08-22',
+      expirationDate: '2025-09-21', // 30 Tage später
+      status: customer.status === 'reached' ? 'angenommen' : 'offen' as const,
       lineItems: [
         {
           position: 1,
@@ -348,10 +352,16 @@ export default function CustomerDetailPage() {
         return getGoldbeckFeuchtigkeitsschaden();
       case 'LW-10178': // Alexander Betz  
         return getAlexanderBetzUmzug(basePrice);
-      case 'LW-10177': // Tessa Philip (angenommen)
+      case 'LW-10177': // Tessa Philip
         return getTessaPhilipUmzug(basePrice);
+      case 'LW-10176': // A. Bührdel
+        return getABuehrdelUmzug(basePrice);
+      case 'LW-10175': // Weiterer Kunde
+      case 'LW-10174': // Weiterer Kunde
+      case 'LW-10173': // Weiterer Kunde
+        return getStandardFirmenumzug(basePrice);
       default:
-        // Fallback basierend auf Name
+        // Name-basierte Fallback-Erkennung
         break;
     }
 
@@ -425,6 +435,19 @@ export default function CustomerDetailPage() {
     { position: 2, name: 'Verpackungsmaterial', description: 'Kartons, Luftpolsterfolie, Packpapier', quantity: 25, unitName: 'Stk.', unitPrice: { grossAmount: 8.50 }, totalPrice: 212.50 },
     { position: 3, name: 'Möbelmontage', description: 'Demontage und Aufbau Schlafzimmer', quantity: 4, unitName: 'Std', unitPrice: { grossAmount: 45.00 }, totalPrice: 180.00 },
     { position: 4, name: 'Endreinigung', description: 'Besenreine Übergabe alte Wohnung', quantity: 3, unitName: 'Std', unitPrice: { grossAmount: 35.00 }, totalPrice: 105.00 }
+  ];
+
+  const getABuehrdelUmzug = (basePrice: number) => [
+    { position: 1, name: 'Wohnungsumzug - Komplettservice', description: 'Transport Gütersloh nach Bielefeld (3-Zimmer)', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 1500.00 }, totalPrice: 1500.00 },
+    { position: 2, name: 'Möbelmontage Premium', description: 'Aufbau komplette Einbauküche, 2. OG mit Aufzug', quantity: 6, unitName: 'Std', unitPrice: { grossAmount: 60.00 }, totalPrice: 360.00 },
+    { position: 3, name: 'Klaviertransport', description: 'Spezialtransport Klavier mit Fachpersonal', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 280.00 }, totalPrice: 280.00 },
+    { position: 4, name: 'Verpackungsservice', description: 'Einpacken empfindlicher Gegenstände', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 160.00 }, totalPrice: 160.00 }
+  ];
+
+  const getStandardFirmenumzug = (basePrice: number) => [
+    { position: 1, name: 'Büroumzug - Komplettservice', description: 'Professioneller Büroumzug mit Fachpersonal', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: basePrice * 0.6 }, totalPrice: basePrice * 0.6 },
+    { position: 2, name: 'IT-Equipment Transport', description: 'Spezialverpackung und Transport IT-Ausstattung', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: basePrice * 0.25 }, totalPrice: basePrice * 0.25 },
+    { position: 3, name: 'Büromöbel-Service', description: 'Demontage und Aufbau Büromöbel', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: basePrice * 0.15 }, totalPrice: basePrice * 0.15 }
   ];
 
   if (loading) {
