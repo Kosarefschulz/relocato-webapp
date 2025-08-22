@@ -493,44 +493,80 @@ const CustomersPage: React.FC = () => {
     return filtered;
   }, [customers, searchTerm, sortBy, sortOrder, filterStatus]);
 
-  // Load customers via API
+  // Load customers via API including real Lexware customers
   const loadCustomers = useCallback(async () => {
     try {
       setLoading(true);
       
-      console.log('📋 Loading customers via API...');
+      console.log('📋 Loading all customers including real Lexware data...');
       
-      // Lade Kunden über unsere API
-      const response = await fetch('/api/customers');
-      const result = await response.json();
+      // Lade lokale Kunden
+      const localResponse = await fetch('/api/customers');
+      const localResult = await localResponse.json();
       
-      if (result.success) {
-        console.log(`✅ Loaded ${result.count} customers via API`);
+      // Lade echte Lexware-Kunden
+      const lexwareResponse = await fetch('/api/lexware/customers');
+      const lexwareResult = await lexwareResponse.json();
+      
+      let allCustomers: Customer[] = [];
+      
+      // Kombiniere lokale und Lexware-Kunden
+      if (localResult.success) {
+        const localCustomers = localResult.customers.map(mapApiCustomerToLocal);
+        allCustomers = [...allCustomers, ...localCustomers];
+      }
+      
+      if (lexwareResult.success) {
+        const lexwareCustomers = lexwareResult.customers.map(mapLexwareCustomerToLocal);
+        allCustomers = [...allCustomers, ...lexwareCustomers];
         
-        // Konvertiere API-Daten zu Frontend-Format
-        const customers = result.customers.map(mapApiCustomerToLocal);
-        setCustomers(customers);
+        console.log(`✅ Loaded ${lexwareResult.count} REAL Lexware customers!`);
         
         addToast({
           type: 'success',
-          title: '✅ Kunden geladen',
-          message: `${result.count} Kunden erfolgreich geladen`,
+          title: '🔄 Echte Lexware-Kunden geladen!',
+          message: `${lexwareResult.count} echte Kunden aus Ihrer Lexware importiert`,
         });
-      } else {
-        throw new Error(result.error || 'API error');
       }
       
+      setCustomers(allCustomers);
+      
+      console.log(`📊 Total: ${allCustomers.length} customers (${localResult.count || 0} local + ${lexwareResult.count || 0} Lexware)`);
+      
     } catch (error) {
-      console.error('Error loading customers via API:', error);
+      console.error('Error loading customers:', error);
       addToast({
         type: 'error',
         title: 'Fehler',
-        message: 'Kunden konnten nicht geladen werden',
+        message: 'Fehler beim Laden der Kunden',
       });
     } finally {
       setLoading(false);
     }
   }, [addToast]);
+
+  // Konvertiere Lexware API-Daten zu Frontend-Format
+  const mapLexwareCustomerToLocal = (lexwareCustomer: any): Customer => {
+    return {
+      id: lexwareCustomer.id,
+      name: lexwareCustomer.name,
+      email: lexwareCustomer.email,
+      phone: lexwareCustomer.phone,
+      movingDate: lexwareCustomer.movingDate,
+      fromAddress: lexwareCustomer.fromAddress,
+      toAddress: lexwareCustomer.toAddress,
+      apartment: lexwareCustomer.apartment,
+      services: lexwareCustomer.services,
+      notes: lexwareCustomer.notes,
+      status: lexwareCustomer.status,
+      priority: lexwareCustomer.priority,
+      company: lexwareCustomer.company,
+      volume: lexwareCustomer.volume,
+      customerNumber: lexwareCustomer.customerNumber,
+      salesNotes: lexwareCustomer.salesNotes,
+      createdAt: new Date(),
+    };
+  };
 
   // Konvertiere API-Daten zu Frontend-Format
   const mapApiCustomerToLocal = (apiCustomer: any): Customer => {
