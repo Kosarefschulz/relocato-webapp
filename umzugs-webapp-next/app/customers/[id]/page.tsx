@@ -36,7 +36,8 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  CircularProgress
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -55,7 +56,9 @@ import {
   Person as PersonIcon,
   Add as AddIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
+  PhotoLibrary as PhotoLibraryIcon,
+  CloudUpload as CloudUploadIcon
 } from '@mui/icons-material';
 import { Customer } from '@/types';
 import { motion } from 'framer-motion';
@@ -91,6 +94,9 @@ export default function CustomerDetailPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [realQuoteData, setRealQuoteData] = useState<any>(null);
   const [loadingQuote, setLoadingQuote] = useState(false);
+  const [newNote, setNewNote] = useState('');
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     loadCustomer();
@@ -185,6 +191,100 @@ export default function CustomerDetailPage() {
 
   const handleCreateQuote = () => {
     router.push(`/quotes/new?customerId=${customerId}`);
+  };
+
+  // Foto-Upload Handler
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingPhoto(true);
+    
+    try {
+      const newPhotos: string[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Konvertiere zu Base64 für lokale Speicherung
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        
+        newPhotos.push(base64);
+      }
+      
+      setPhotos(prev => [...prev, ...newPhotos]);
+      
+      addToast({
+        type: 'success',
+        title: 'Fotos hochgeladen',
+        message: `${newPhotos.length} Foto(s) erfolgreich hinzugefügt`,
+      });
+      
+    } catch (error) {
+      console.error('Error uploading photos:', error);
+      addToast({
+        type: 'error',
+        title: 'Upload-Fehler',
+        message: 'Fotos konnten nicht hochgeladen werden',
+      });
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  // Foto löschen
+  const handlePhotoDelete = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+    addToast({
+      type: 'success',
+      title: 'Foto gelöscht',
+      message: 'Foto wurde entfernt',
+    });
+  };
+
+  // Notiz speichern
+  const handleSaveNote = async () => {
+    if (!newNote.trim()) return;
+
+    try {
+      const newNoteData = {
+        id: `note-${Date.now()}`,
+        content: newNote,
+        createdAt: new Date(),
+        createdBy: 'Benutzer',
+        type: 'Kundennotiz'
+      };
+
+      // Füge zur Customer-Datenstruktur hinzu
+      if (customer) {
+        const updatedCustomer = {
+          ...customer,
+          salesNotes: [...(customer.salesNotes || []), newNoteData]
+        };
+        setCustomer(updatedCustomer);
+      }
+
+      setNewNote('');
+      
+      addToast({
+        type: 'success',
+        title: 'Notiz gespeichert',
+        message: 'Neue Notiz wurde hinzugefügt',
+      });
+      
+    } catch (error) {
+      console.error('Error saving note:', error);
+      addToast({
+        type: 'error',
+        title: 'Speichern fehlgeschlagen',
+        message: 'Notiz konnte nicht gespeichert werden',
+      });
+    }
   };
 
   const formatDate = (date: string | Date) => {
@@ -1170,29 +1270,223 @@ export default function CustomerDetailPage() {
           )}
 
           {activeTab === 3 && (
-            <Card sx={{
-              background: 'rgba(221, 226, 198, 0.9)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(187, 197, 170, 0.4)',
-            }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: '#090c02', mb: 2 }}>
-                  Notizen & Lexware-Daten
-                </Typography>
-                {customer?.salesNotes?.map((note) => (
-                  <Paper key={note.id} sx={{ 
-                    p: 2, 
-                    mb: 1,
-                    backgroundColor: 'rgba(187, 197, 170, 0.2)',
-                    border: '1px solid rgba(187, 197, 170, 0.3)'
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.0, delay: 0.3 }}
+            >
+              <Grid container spacing={3}>
+                
+                {/* Foto-Upload Sektion */}
+                <Grid item xs={12} md={6}>
+                  <Card sx={{
+                    background: 'rgba(221, 226, 198, 0.9)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(187, 197, 170, 0.4)',
                   }}>
-                    <Typography variant="body2" sx={{ color: '#090c02', fontFamily: 'monospace' }}>
-                      {note.content}
-                    </Typography>
-                  </Paper>
-                ))}
-              </CardContent>
-            </Card>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ color: '#090c02', mb: 2, display: 'flex', alignItems: 'center' }}>
+                        <PhotoLibraryIcon sx={{ mr: 1, color: '#a72608' }} />
+                        Fotos
+                      </Typography>
+                      
+                      {/* Foto Upload Button */}
+                      <Button
+                        variant="outlined"
+                        component="label"
+                        fullWidth
+                        startIcon={uploadingPhoto ? <CircularProgress size={20} /> : <AddIcon />}
+                        disabled={uploadingPhoto}
+                        sx={{
+                          mb: 2,
+                          borderColor: '#bbc5aa',
+                          color: '#090c02',
+                          minHeight: 80,
+                          borderStyle: 'dashed',
+                          '&:hover': {
+                            borderColor: '#a72608',
+                            backgroundColor: 'rgba(167, 38, 8, 0.05)',
+                          }
+                        }}
+                      >
+                        {uploadingPhoto ? 'Foto wird hochgeladen...' : 'Foto hinzufügen'}
+                        <input
+                          type="file"
+                          hidden
+                          accept="image/*"
+                          multiple
+                          onChange={handlePhotoUpload}
+                        />
+                      </Button>
+
+                      {/* Foto-Galerie */}
+                      <Grid container spacing={1}>
+                        {photos.map((photo, index) => (
+                          <Grid item xs={6} sm={4} key={index}>
+                            <Card sx={{ 
+                              position: 'relative',
+                              '&:hover .delete-overlay': { opacity: 1 }
+                            }}>
+                              <img 
+                                src={photo} 
+                                alt={`Foto ${index + 1}`}
+                                style={{ 
+                                  width: '100%', 
+                                  height: 120, 
+                                  objectFit: 'cover',
+                                  borderRadius: 8
+                                }}
+                              />
+                              <Box 
+                                className="delete-overlay"
+                                sx={{
+                                  position: 'absolute',
+                                  top: 4,
+                                  right: 4,
+                                  opacity: 0,
+                                  transition: 'opacity 0.2s'
+                                }}
+                              >
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handlePhotoDelete(index)}
+                                  sx={{
+                                    backgroundColor: 'rgba(167, 38, 8, 0.8)',
+                                    color: '#e6eed6',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(167, 38, 8, 0.9)',
+                                    }
+                                  }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
+
+                      {photos.length === 0 && (
+                        <Typography variant="body2" sx={{ color: '#bbc5aa', textAlign: 'center', py: 2 }}>
+                          Noch keine Fotos hochgeladen
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Notizen Sektion */}
+                <Grid item xs={12} md={6}>
+                  <Card sx={{
+                    background: 'rgba(221, 226, 198, 0.9)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(187, 197, 170, 0.4)',
+                  }}>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ color: '#090c02', mb: 2, display: 'flex', alignItems: 'center' }}>
+                        <EditIcon sx={{ mr: 1, color: '#a72608' }} />
+                        Neue Notiz hinzufügen
+                      </Typography>
+                      
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={4}
+                        placeholder="Notiz hinzufügen..."
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                        sx={{
+                          mb: 2,
+                          '& .MuiOutlinedInput-root': {
+                            backgroundColor: 'rgba(230, 238, 214, 0.8)',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'rgba(187, 197, 170, 0.4)',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'rgba(167, 38, 8, 0.4)',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#a72608',
+                            }
+                          }
+                        }}
+                      />
+                      
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<SaveIcon />}
+                        onClick={handleSaveNote}
+                        disabled={!newNote.trim()}
+                        sx={{
+                          background: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
+                          color: '#e6eed6',
+                          '&:hover': {
+                            transform: 'scale(1.02)',
+                          },
+                          '&:disabled': {
+                            background: '#bbc5aa',
+                            color: '#090c02',
+                          }
+                        }}
+                      >
+                        Notiz speichern
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Bestehende Notizen */}
+                <Grid item xs={12}>
+                  <Card sx={{
+                    background: 'rgba(221, 226, 198, 0.9)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(187, 197, 170, 0.4)',
+                  }}>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ color: '#090c02', mb: 2, display: 'flex', alignItems: 'center' }}>
+                        <DescriptionIcon sx={{ mr: 1, color: '#a72608' }} />
+                        Notizen-Verlauf
+                      </Typography>
+                      
+                      {customer?.salesNotes && customer.salesNotes.length > 0 ? (
+                        customer.salesNotes.map((note, index) => (
+                          <Paper key={note.id || index} sx={{ 
+                            p: 2, 
+                            mb: 2,
+                            backgroundColor: 'rgba(187, 197, 170, 0.2)',
+                            border: '1px solid rgba(187, 197, 170, 0.3)',
+                            position: 'relative'
+                          }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                              <Typography variant="subtitle2" sx={{ color: '#a72608', fontWeight: 600 }}>
+                                {note.createdBy || 'System'} - {note.type || 'Notiz'}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: '#bbc5aa' }}>
+                                {new Date(note.createdAt).toLocaleDateString('de-DE', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" sx={{ color: '#090c02' }}>
+                              {note.content}
+                            </Typography>
+                          </Paper>
+                        ))
+                      ) : (
+                        <Typography variant="body2" sx={{ color: '#bbc5aa', textAlign: 'center', py: 3 }}>
+                          Noch keine Notizen vorhanden
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </motion.div>
           )}
 
           {/* Floating Action Buttons */}
