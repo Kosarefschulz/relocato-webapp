@@ -28,7 +28,15 @@ import {
   ThemeProvider,
   createTheme,
   CssBaseline,
-  Alert
+  Alert,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -79,6 +87,7 @@ export default function CustomerDetailPage() {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<Partial<Customer>>({});
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     loadCustomer();
@@ -180,6 +189,55 @@ export default function CustomerDetailPage() {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  // Generiere Angebots-Details für Goldbeck West GmbH
+  const getQuoteDetails = () => {
+    if (!customer) return null;
+
+    const quoteDetails = {
+      id: 'AG0066',
+      quoteNumber: 'AG0066',
+      date: '2025-08-22',
+      expirationDate: '2025-09-21',
+      status: 'offen' as const,
+      lineItems: [
+        {
+          position: 1,
+          description: 'Transport und Verladung',
+          quantity: 1,
+          unit: 'Pausch.',
+          unitPrice: 2400.00,
+          totalPrice: 2400.00
+        },
+        {
+          position: 2,
+          description: 'Büroumzug-Service (Spezialverpackung)',
+          quantity: 1,
+          unit: 'Pausch.',
+          unitPrice: 800.00,
+          totalPrice: 800.00
+        },
+        {
+          position: 3,
+          description: 'Feuchtigkeitsschäden - Schutzmaßnahmen',
+          quantity: 1,
+          unit: 'Pausch.',
+          unitPrice: 411.65,
+          totalPrice: 411.65
+        }
+      ],
+      subtotal: 3611.65,
+      vatAmount: 686.21, // 19% von 3611.65
+      totalAmount: 4297.86,
+      notes: 'Feuchtigkeitsschäden erfordern spezielle Schutzmaßnahmen. Umzug von Bielefeld nach Gütersloh mit professioneller Büroausstattung.'
+    };
+
+    return quoteDetails;
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
   };
 
   if (loading) {
@@ -402,10 +460,49 @@ export default function CustomerDetailPage() {
             </Box>
           </motion.div>
 
-          <Grid container spacing={3}>
-            
-            {/* Kontaktdaten */}
-            <Grid item xs={12} md={6}>
+          {/* Tab Navigation */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.0, delay: 0.2 }}
+          >
+            <Paper sx={{
+              mb: 3,
+              background: 'rgba(221, 226, 198, 0.9)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(187, 197, 170, 0.4)',
+            }}>
+              <Tabs 
+                value={activeTab} 
+                onChange={handleTabChange}
+                sx={{
+                  '& .MuiTab-root': {
+                    color: '#090c02',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    '&.Mui-selected': {
+                      color: '#a72608',
+                    }
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#a72608',
+                  }
+                }}
+              >
+                <Tab label="Übersicht" />
+                <Tab label="Angebot AG0066" />
+                <Tab label="Rechnungen" />
+                <Tab label="Notizen" />
+              </Tabs>
+            </Paper>
+          </motion.div>
+
+          {/* Tab Content */}
+          {activeTab === 0 && (
+            <Grid container spacing={3}>
+              
+              {/* Kontaktdaten */}
+              <Grid item xs={12} md={6}>
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -641,6 +738,239 @@ export default function CustomerDetailPage() {
               </motion.div>
             </Grid>
           </Grid>
+          )}
+
+          {/* Angebots-Tab - Lexoffice-ähnlich */}
+          {activeTab === 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.0, delay: 0.3 }}
+            >
+              <Card sx={{
+                background: 'rgba(221, 226, 198, 0.95)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(187, 197, 170, 0.4)',
+                borderRadius: 3,
+              }}>
+                <CardContent sx={{ p: 0 }}>
+                  
+                  {/* Angebots-Header */}
+                  <Box sx={{ 
+                    p: 3, 
+                    borderBottom: '1px solid rgba(187, 197, 170, 0.3)',
+                    background: 'linear-gradient(135deg, rgba(167, 38, 8, 0.05) 0%, rgba(187, 197, 170, 0.1) 100%)'
+                  }}>
+                    <Typography variant="h5" sx={{ fontWeight: 800, color: '#090c02', mb: 1 }}>
+                      Angebot AG0066
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#090c02', mb: 2 }}>
+                      für {customer?.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                      <Chip label="22.08.2025" icon={<CalendarIcon />} sx={{ color: '#090c02' }} />
+                      <Chip label="gültig bis 21.09.2025" variant="outlined" sx={{ color: '#bbc5aa' }} />
+                      <Chip label="OFFEN" color="warning" sx={{ fontWeight: 700 }} />
+                    </Box>
+                  </Box>
+
+                  {/* Positions-Tabelle wie Lexoffice */}
+                  <TableContainer>
+                    <Table sx={{ minWidth: 650 }}>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: 'rgba(187, 197, 170, 0.2)' }}>
+                          <TableCell sx={{ fontWeight: 700, color: '#090c02', width: 60 }}>Pos.</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#090c02' }}>Bezeichnung</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#090c02', textAlign: 'center', width: 100 }}>Menge</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#090c02', textAlign: 'right', width: 120 }}>Einzelpreis</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#090c02', textAlign: 'right', width: 120 }}>Gesamtpreis</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {[
+                          { pos: 1, desc: 'Transport und Verladung', qty: 1, unit: 'Pausch.', price: 2400.00 },
+                          { pos: 2, desc: 'Büroumzug-Service (Spezialverpackung)', qty: 1, unit: 'Pausch.', price: 800.00 },
+                          { pos: 3, desc: 'Feuchtigkeitsschäden - Schutzmaßnahmen', qty: 1, unit: 'Pausch.', price: 411.65 }
+                        ].map((item, index) => (
+                          <TableRow 
+                            key={index}
+                            sx={{ 
+                              backgroundColor: index % 2 === 0 ? 'rgba(230, 238, 214, 0.3)' : 'rgba(221, 226, 198, 0.3)',
+                              '&:hover': {
+                                backgroundColor: 'rgba(167, 38, 8, 0.05)',
+                              }
+                            }}
+                          >
+                            <TableCell sx={{ color: '#090c02', fontWeight: 600 }}>
+                              {item.pos}
+                            </TableCell>
+                            <TableCell sx={{ color: '#090c02' }}>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {item.desc}
+                              </Typography>
+                            </TableCell>
+                            <TableCell sx={{ color: '#090c02', textAlign: 'center' }}>
+                              {item.qty} {item.unit}
+                            </TableCell>
+                            <TableCell sx={{ color: '#090c02', textAlign: 'right', fontFamily: 'monospace' }}>
+                              €{item.price.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </TableCell>
+                            <TableCell sx={{ color: '#090c02', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
+                              €{(item.qty * item.price).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+
+                  {/* Summen-Bereich wie Lexoffice */}
+                  <Box sx={{ p: 3, borderTop: '1px solid rgba(187, 197, 170, 0.3)' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <Box sx={{ minWidth: 300 }}>
+                        
+                        {/* Zwischensumme */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body1" sx={{ color: '#090c02' }}>
+                            Zwischensumme (netto):
+                          </Typography>
+                          <Typography variant="body1" sx={{ color: '#090c02', fontFamily: 'monospace', fontWeight: 600 }}>
+                            €3.611,65
+                          </Typography>
+                        </Box>
+                        
+                        {/* MwSt */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                          <Typography variant="body1" sx={{ color: '#090c02' }}>
+                            MwSt (19%):
+                          </Typography>
+                          <Typography variant="body1" sx={{ color: '#090c02', fontFamily: 'monospace', fontWeight: 600 }}>
+                            €686,21
+                          </Typography>
+                        </Box>
+                        
+                        <Divider sx={{ mb: 2, borderColor: '#a72608', borderWidth: 2 }} />
+                        
+                        {/* Gesamtsumme */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                          <Typography variant="h6" sx={{ color: '#a72608', fontWeight: 800 }}>
+                            Gesamtsumme (brutto):
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            color: '#a72608', 
+                            fontFamily: 'monospace', 
+                            fontWeight: 800,
+                            fontSize: '1.5rem'
+                          }}>
+                            €4.297,86
+                          </Typography>
+                        </Box>
+                        
+                        <Typography variant="caption" sx={{ color: '#bbc5aa', fontStyle: 'italic' }}>
+                          Alle Preise inkl. 19% MwSt.
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* Angebots-Notizen */}
+                  <Box sx={{ 
+                    p: 3, 
+                    borderTop: '1px solid rgba(187, 197, 170, 0.3)',
+                    backgroundColor: 'rgba(230, 238, 214, 0.3)'
+                  }}>
+                    <Typography variant="subtitle2" sx={{ color: '#a72608', fontWeight: 600, mb: 1 }}>
+                      Anmerkungen:
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#090c02', fontStyle: 'italic' }}>
+                      Feuchtigkeitsschäden erfordern spezielle Schutzmaßnahmen. Umzug von Bielefeld nach Gütersloh mit professioneller Büroausstattung.
+                    </Typography>
+                  </Box>
+
+                  {/* Angebots-Aktionen */}
+                  <Box sx={{ 
+                    p: 3, 
+                    borderTop: '1px solid rgba(187, 197, 170, 0.3)',
+                    display: 'flex',
+                    gap: 2,
+                    justifyContent: 'flex-end'
+                  }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<DescriptionIcon />}
+                      sx={{
+                        borderColor: '#bbc5aa',
+                        color: '#090c02',
+                        '&:hover': {
+                          borderColor: '#a72608',
+                          backgroundColor: 'rgba(167, 38, 8, 0.1)',
+                        }
+                      }}
+                    >
+                      PDF erstellen
+                    </Button>
+                    <Button
+                      variant="contained"
+                      startIcon={<EuroIcon />}
+                      sx={{
+                        background: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
+                        color: '#e6eed6',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                        }
+                      }}
+                    >
+                      Rechnung erstellen
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Weitere Tabs können hier hinzugefügt werden */}
+          {activeTab === 2 && (
+            <Card sx={{
+              background: 'rgba(221, 226, 198, 0.9)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(187, 197, 170, 0.4)',
+            }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ color: '#090c02' }}>
+                  Rechnungen
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#bbc5aa' }}>
+                  Keine Rechnungen vorhanden
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 3 && (
+            <Card sx={{
+              background: 'rgba(221, 226, 198, 0.9)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(187, 197, 170, 0.4)',
+            }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ color: '#090c02', mb: 2 }}>
+                  Notizen & Lexware-Daten
+                </Typography>
+                {customer?.salesNotes?.map((note) => (
+                  <Paper key={note.id} sx={{ 
+                    p: 2, 
+                    mb: 1,
+                    backgroundColor: 'rgba(187, 197, 170, 0.2)',
+                    border: '1px solid rgba(187, 197, 170, 0.3)'
+                  }}>
+                    <Typography variant="body2" sx={{ color: '#090c02', fontFamily: 'monospace' }}>
+                      {note.content}
+                    </Typography>
+                  </Paper>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Floating Action Buttons */}
           <Box sx={{ position: 'fixed', bottom: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 2 }}>
