@@ -27,6 +27,34 @@ IMMER nur echte Daten aus Lexware-API oder echten Quellen verwenden.
 KEINE getDemoCustomers(), getMockData() oder ähnliche Funktionen erstellen.
 Nur echte Lexware-Angebots-Kunden aus /api/lexware/quotes-customers verwenden.
 
+## ANGEBOTSDATEN-INTEGRATION ZIEL:
+Das Hauptziel ist es, echte Angebotsdaten aus Lexware zu extrahieren:
+- Angebots-Positionen (LineItems) mit Bezeichnung, Menge, Einzelpreis
+- MwSt-Berechnungen und Gesamtsummen
+- Angebotsstatus (offen, angenommen, abgelehnt)
+- Angebotsnummern und Gültigkeitsdaten
+- Kundendaten aus Angeboten (nicht nur Kontakte)
+
+BEISPIEL AG0066 Goldbeck West GmbH:
+- 8 Positionen für Feuchtigkeitsschaden-Sanierung
+- Zwischensumme: €3.035,00 / MwSt: €576,65 / Gesamt: €3.611,65
+- Echte Beschreibungen wie "Büro 5.14 - Rückbau Deckenplatten"
+
+## LEXWARE API ANALYSE ERGEBNIS:
+Nach systematischer Prüfung aller 30 möglichen Endpoints sind verfügbar:
+✅ /ping - API Health Check
+✅ /contacts - Alle Kontakte (189 total)
+✅ /contacts?role=customer - Nur Kunden
+
+❌ NICHT VERFÜGBAR:
+- /quotations - Angebote-API (400/404 Fehler)
+- /invoices - Rechnungs-API (400/404 Fehler)  
+- /documents - Dokument-API (404 Fehler)
+- /orders, /projects, /items, /services (alle nicht zugänglich)
+
+FAZIT: Nur Kontakt-Daten verfügbar, KEINE Angebots-/Rechnungsdaten.
+Lösung: PDF-basierte Datenextraktion oder CSV-Import verwenden.
+
 ## Farbschema (Organic Natural)
 - Beige: #e6eed6 (Warmer Hintergrund)
 - Beige-2: #dde2c6 (Papier-Oberflächen)  
