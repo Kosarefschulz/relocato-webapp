@@ -2,7 +2,6 @@
 
 import { createTheme, ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
 import { deDE, enUS } from '@mui/material/locale';
-import { useLocale } from 'next-intl';
 import { useMemo } from 'react';
 
 const getDesignTokens = (mode: 'light' | 'dark') => ({
@@ -98,7 +97,8 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const locale = useLocale();
+  // Default to German locale for now
+  const locale = 'de';
   
   // Get theme mode from localStorage or system preference
   const mode = 'light'; // TODO: Implement dark mode toggle
