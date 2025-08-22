@@ -48,43 +48,74 @@ export async function GET(request: NextRequest) {
     const lexwareData = await response.json();
     console.log(`✅ Received ${lexwareData.content?.length || 0} customers from Lexware`);
 
-    // Konvertiere Lexware-Daten zu unserem Format
-    const customers = (lexwareData.content || []).map((lexCustomer: any) => ({
-      id: `lexware-${lexCustomer.id}`,
-      name: lexCustomer.company?.name || 
-            `${lexCustomer.person?.firstName || ''} ${lexCustomer.person?.lastName || ''}`.trim(),
-      email: lexCustomer.emailAddresses?.business?.[0] || 
-             lexCustomer.emailAddresses?.private?.[0] || '',
-      phone: lexCustomer.phoneNumbers?.mobile?.[0] || 
-             lexCustomer.phoneNumbers?.business?.[0] || 
-             lexCustomer.phoneNumbers?.private?.[0] || '',
-      company: lexCustomer.company?.name || '',
-      fromAddress: formatLexwareAddress(lexCustomer.addresses?.billing?.[0]),
-      toAddress: '', // Muss separat erfasst werden
-      movingDate: new Date().toISOString().split('T')[0], // Placeholder
-      apartment: {
-        rooms: 0,
-        area: 0,
-        floor: 0,
-        hasElevator: false
-      },
-      services: [],
-      notes: `Aus Lexware importiert: ${lexCustomer.note || 'Kunde aus Lexware-System'}`,
-      status: 'active',
-      priority: 'medium',
-      volume: null,
-      customerNumber: `LW-${lexCustomer.id}`,
-      salesNotes: [{
-        id: `lexware-import-${lexCustomer.id}`,
-        content: `Lexware ID: ${lexCustomer.id}`,
-        createdAt: new Date(),
-        createdBy: 'Lexware API Import',
-        type: 'other'
-      }],
-      source: 'lexware',
-      lexwareId: lexCustomer.id,
-      originalData: lexCustomer // Speichere Original-Daten für Referenz
-    }));
+    // Konvertiere Lexware-Daten zu unserem Format - nur die letzten 25
+    const customers = (lexwareData.content || [])
+      .slice(-25) // Nur die letzten 25 Kunden
+      .map((lexCustomer: any) => {
+        // Besseres Name-Mapping
+        let customerName = '';
+        
+        if (lexCustomer.company?.name) {
+          customerName = lexCustomer.company.name;
+        } else if (lexCustomer.person) {
+          const firstName = lexCustomer.person.firstName || '';
+          const lastName = lexCustomer.person.lastName || '';
+          const salutation = lexCustomer.person.salutation || '';
+          
+          if (firstName && lastName) {
+            customerName = `${salutation} ${firstName} ${lastName}`.trim();
+          } else if (lastName) {
+            customerName = `${salutation} ${lastName}`.trim();
+          } else if (firstName) {
+            customerName = firstName;
+          } else {
+            customerName = `Kunde #${lexCustomer.roles?.customer?.number || lexCustomer.id.slice(0, 8)}`;
+          }
+        } else {
+          customerName = `Kunde #${lexCustomer.roles?.customer?.number || lexCustomer.id.slice(0, 8)}`;
+        }
+
+        // Datum aus Lexware-Daten extrahieren (falls verfügbar)
+        const movingDate = lexCustomer.createdAt || 
+                          lexCustomer.updatedAt || 
+                          new Date().toISOString().split('T')[0];
+
+        return {
+          id: `lexware-${lexCustomer.id}`,
+          name: customerName,
+          email: lexCustomer.emailAddresses?.business?.[0] || 
+                 lexCustomer.emailAddresses?.private?.[0] || '',
+          phone: lexCustomer.phoneNumbers?.mobile?.[0] || 
+                 lexCustomer.phoneNumbers?.business?.[0] || 
+                 lexCustomer.phoneNumbers?.private?.[0] || '',
+          company: lexCustomer.company?.name || '',
+          fromAddress: formatLexwareAddress(lexCustomer.addresses?.billing?.[0]),
+          toAddress: '', // Wird bei Umzugsplanung erfasst
+          movingDate: movingDate,
+          apartment: {
+            rooms: 0,
+            area: 0,
+            floor: 0,
+            hasElevator: false
+          },
+          services: [],
+          notes: `Aus Lexware importiert${lexCustomer.note ? ': ' + lexCustomer.note : ''}`,
+          status: lexCustomer.archived ? 'cancelled' : 'active',
+          priority: 'medium',
+          volume: null,
+          customerNumber: `LW-${lexCustomer.roles?.customer?.number || lexCustomer.id.slice(0, 8)}`,
+          salesNotes: [{
+            id: `lexware-import-${lexCustomer.id}`,
+            content: `Lexware ID: ${lexCustomer.id}`,
+            createdAt: new Date(),
+            createdBy: 'Lexware API Import',
+            type: 'other'
+          }],
+          source: 'lexware',
+          lexwareId: lexCustomer.id,
+          originalData: lexCustomer
+        };
+      });
 
     return NextResponse.json({
       success: true,
