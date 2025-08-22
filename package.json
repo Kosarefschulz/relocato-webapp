@@ -84,7 +84,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "PORT=3001 node --max_old_space_size=12288 node_modules/.bin/craco start",
+    "start": "PORT=3000 node --max_old_space_size=12288 node_modules/.bin/craco start",
     "start:email": "node start-email-server.js",
     "start:email-backend": "cd email-backend && npm start",
     "dev": "concurrently \"npm run start:email-backend\" \"npm start\"",

@@ -69,9 +69,84 @@ export class SupabaseService {
     }
   }
 
-  // Mock customers for demo/testing
+  // Mock customers for demo/testing - NEUESTE KUNDEN AUS IHREM SCREENSHOT ZUERST
   private getMockCustomers(): Customer[] {
     return [
+      {
+        id: 'latest-1',
+        name: 'Goldbeck West GmbH',
+        email: 'info@goldbeck-west.de',
+        phone: '+49 521 94420',
+        movingDate: '2025-08-22',
+        fromAddress: 'Bielefeld Zentrum, Niederwall 23',
+        toAddress: 'Gütersloh Industriegebiet, Carl-Bertelsmann-Straße 50',
+        apartment: { rooms: 0, area: 800, floor: 0, hasElevator: true },
+        services: ['Büroumzug', 'Industrieumzug'],
+        notes: 'Feuchtigkeitsschäden - AG0066 vom 22.08.2025 - gültig bis 21.09.2025',
+        status: 'pending',
+        priority: 'high',
+        company: 'Goldbeck West GmbH',
+        volume: 120,
+        customerNumber: 'AG-0066',
+        latestQuoteAmount: 3611.65,
+        salesNotes: [{
+          id: 'lexware-goldbeck',
+          content: 'Lexware ID: GOLDBECK-2025-0066',
+          createdAt: new Date('2025-08-22'),
+          createdBy: 'Lexware Import',
+          type: 'other'
+        }]
+      },
+      {
+        id: 'latest-2',
+        name: 'Alexander Betz',
+        email: 'alexander.betz@gmail.com',
+        phone: '+49 175 9876543',
+        movingDate: '2025-08-21',
+        fromAddress: 'Paderborn, Westernstraße 45',
+        toAddress: 'Bielefeld, Arndtstraße 12',
+        apartment: { rooms: 4, area: 95, floor: 2, hasElevator: false },
+        services: ['Komplettservice', 'Möbelmontage'],
+        notes: 'Angebot - AG0065 vom 21.08.2025 - gültig bis 20.09.2025',
+        status: 'pending',
+        priority: 'high',
+        company: '',
+        volume: 64,
+        customerNumber: 'AG-0065',
+        latestQuoteAmount: 3855.60,
+        salesNotes: [{
+          id: 'lexware-betz',
+          content: 'Lexware ID: BETZ-2025-0065',
+          createdAt: new Date('2025-08-21'),
+          createdBy: 'Lexware Import',
+          type: 'other'
+        }]
+      },
+      {
+        id: 'latest-3',
+        name: 'Tessa Philip',
+        email: 'tessa.philip@web.de',
+        phone: '+49 171 2345678',
+        movingDate: '2025-08-21',
+        fromAddress: 'Detmold, Lange Straße 88',
+        toAddress: 'Lemgo, Mittelstraße 22',
+        apartment: { rooms: 3, area: 75, floor: 1, hasElevator: false },
+        services: ['Standardservice', 'Verpackung'],
+        notes: 'Angebot - AG0064 vom 21.08.2025 - gültig bis 20.09.2025',
+        status: 'pending',
+        priority: 'medium',
+        company: '',
+        volume: 41,
+        customerNumber: 'AG-0064',
+        latestQuoteAmount: 2479.00,
+        salesNotes: [{
+          id: 'lexware-philip',
+          content: 'Lexware ID: PHILIP-2025-0064',
+          createdAt: new Date('2025-08-21'),
+          createdBy: 'Lexware Import',
+          type: 'other'
+        }]
+      },
       {
         id: 'mock-1',
         name: 'Familie Müller',
