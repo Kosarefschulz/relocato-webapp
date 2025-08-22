@@ -221,38 +221,66 @@ const ModernDashboard: React.FC = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       
-      {/* Organic Natural Background */}
+      {/* Cinematic Video Background */}
       <Box sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #e6eed6 0%, #dde2c6 50%, #bbc5aa 100%)',
         position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `
-            radial-gradient(circle at 20% 80%, rgba(187, 197, 170, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(167, 38, 8, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(230, 238, 214, 0.4) 0%, transparent 50%)
-          `,
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(45deg, rgba(230, 238, 214, 0.8) 0%, rgba(221, 226, 198, 0.6) 50%, rgba(187, 197, 170, 0.4) 100%)',
-          backdropFilter: 'blur(1px)',
-        }
+        overflow: 'hidden',
       }}>
         
+        {/* Background Video */}
+        <Box
+          component="video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 1,
+          }}
+        >
+          <source src="/background-video.mp4" type="video/mp4" />
+        </Box>
+
+        {/* Video Overlay for better readability */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, rgba(230, 238, 214, 0.4) 0%, rgba(221, 226, 198, 0.5) 50%, rgba(187, 197, 170, 0.4) 100%)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 2,
+          }}
+        />
+        
+        {/* Additional subtle overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              radial-gradient(circle at 20% 80%, rgba(187, 197, 170, 0.2) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(167, 38, 8, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(230, 238, 214, 0.3) 0%, transparent 50%)
+            `,
+            zIndex: 3,
+          }}
+        />
+        
         {/* Floating Header */}
-        <Box sx={{ position: 'relative', zIndex: 10 }}>
+        <Box sx={{ position: 'relative', zIndex: 20 }}>
           <Container maxWidth="lg" sx={{ pt: 4 }}>
             <motion.div
               initial={{ opacity: 0, y: -30 }}
@@ -264,11 +292,11 @@ const ModernDashboard: React.FC = () => {
                 sx={{
                   p: 4,
                   mb: 4,
-                  background: 'linear-gradient(135deg, rgba(61, 59, 60, 0.3) 0%, rgba(95, 91, 107, 0.2) 100%)',
-                  backdropFilter: 'blur(20px)',
+                  background: 'linear-gradient(135deg, rgba(221, 226, 198, 0.85) 0%, rgba(187, 197, 170, 0.9) 100%)',
+                  backdropFilter: 'blur(25px)',
                   borderRadius: 5,
-                  border: '1px solid rgba(193, 189, 179, 0.15)',
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+                  border: '1px solid rgba(187, 197, 170, 0.4)',
+                  boxShadow: '0 25px 50px -12px rgba(9, 12, 2, 0.2)',
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -364,7 +392,7 @@ const ModernDashboard: React.FC = () => {
         </Box>
 
         {/* Main Content */}
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, pb: 6 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 20, pb: 6 }}>
           
           {/* Modern Search Bar */}
           <motion.div
@@ -377,11 +405,11 @@ const ModernDashboard: React.FC = () => {
               sx={{
                 p: 2,
                 mb: 4,
-                background: 'linear-gradient(135deg, rgba(61, 59, 60, 0.4) 0%, rgba(95, 91, 107, 0.3) 100%)',
-                backdropFilter: 'blur(20px)',
+                background: 'linear-gradient(135deg, rgba(221, 226, 198, 0.9) 0%, rgba(187, 197, 170, 0.85) 100%)',
+                backdropFilter: 'blur(25px)',
                 borderRadius: 4,
-                border: '1px solid rgba(193, 189, 179, 0.15)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                border: '1px solid rgba(187, 197, 170, 0.4)',
+                boxShadow: '0 15px 35px rgba(9, 12, 2, 0.15)',
               }}
             >
               <TextField
@@ -393,14 +421,14 @@ const ModernDashboard: React.FC = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <AIIcon sx={{ color: '#c1bdb3' }} />
+                      <AIIcon sx={{ color: '#a72608' }} />
                     </InputAdornment>
                   ),
                   sx: {
-                    backgroundColor: 'rgba(61, 59, 60, 0.8)',
+                    backgroundColor: 'rgba(230, 238, 214, 0.9)',
                     borderRadius: 3,
-                    border: '1px solid rgba(193, 189, 179, 0.2)',
-                    color: '#c1bdb3',
+                    border: '1px solid rgba(187, 197, 170, 0.4)',
+                    color: '#090c02',
                     '& .MuiOutlinedInput-notchedOutline': {
                       border: 'none',
                     },
@@ -408,15 +436,15 @@ const ModernDashboard: React.FC = () => {
                       border: 'none',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      border: '2px solid #c1bdb3',
+                      border: '2px solid #a72608',
                     },
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                    boxShadow: '0 8px 25px rgba(9, 12, 2, 0.1)',
                     '&:hover': {
-                      backgroundColor: 'rgba(61, 59, 60, 0.9)',
-                      borderColor: 'rgba(193, 189, 179, 0.3)',
+                      backgroundColor: 'rgba(230, 238, 214, 0.95)',
+                      borderColor: 'rgba(167, 38, 8, 0.3)',
                     },
                     '& input::placeholder': {
-                      color: '#7f7979',
+                      color: '#bbc5aa',
                     }
                   }
                 }}
@@ -715,6 +743,7 @@ const ModernDashboard: React.FC = () => {
             position: 'fixed',
             bottom: 24,
             right: 24,
+            zIndex: 30,
             background: 'linear-gradient(135deg, #a72608 0%, #bbc5aa 100%)',
             color: '#e6eed6',
             boxShadow: '0 15px 35px rgba(167, 38, 8, 0.4)',
