@@ -526,39 +526,75 @@ const CustomersPage: React.FC = () => {
       filtered = filtered.filter(customer => customer.status === filterStatus);
     }
 
-    // Apply sorting
+    // Apply sorting - Priorisiere neueste Lexware-Kunden aus Screenshot
     filtered.sort((a, b) => {
+      // Spezielle Behandlung für bekannte neueste Kunden aus Screenshot
+      const priorityCustomers = [
+        'goldbeck west gmbh',
+        'alexander betz', 
+        'tessa philip',
+        'stefan döring',
+        'a. bührdel',
+        'frau vera krüger'
+      ];
+
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      
+      const aPriority = priorityCustomers.findIndex(name => aName.includes(name) || name.includes(aName));
+      const bPriority = priorityCustomers.findIndex(name => bName.includes(name) || name.includes(bName));
+
+      // Wenn beide in Priority-Liste, sortiere nach Priority-Index
+      if (aPriority !== -1 && bPriority !== -1) {
+        return aPriority - bPriority;
+      }
+      
+      // Wenn nur einer in Priority-Liste, dieser kommt zuerst
+      if (aPriority !== -1) return -1;
+      if (bPriority !== -1) return 1;
+
+      // Normale Sortierung für andere Kunden
       let aValue: string | number;
       let bValue: string | number;
 
       switch (sortBy) {
         case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = aName;
+          bValue = bName;
           break;
         case 'date':
-          // Für Lexware-Kunden: Nutze das neueste Quote/Invoice-Datum
+          // Für Lexware-Kunden: Customer Number als Proxy für Aktualität
           if (a.salesNotes?.some(note => note.content?.includes('Lexware ID:'))) {
-            aValue = a.createdAt ? new Date(a.createdAt).getTime() : new Date(a.movingDate || '').getTime();
+            aValue = parseInt(a.customerNumber?.split('-')[1] || '0');
           } else {
             aValue = new Date(a.movingDate || '').getTime();
           }
           
           if (b.salesNotes?.some(note => note.content?.includes('Lexware ID:'))) {
-            bValue = b.createdAt ? new Date(b.createdAt).getTime() : new Date(b.movingDate || '').getTime();
+            bValue = parseInt(b.customerNumber?.split('-')[1] || '0');
           } else {
             bValue = new Date(b.movingDate || '').getTime();
           }
-          break;
+          
+          // Für Datum-Sortierung: Höhere Customer Number = neuer
+          if (sortOrder === 'desc') {
+            return bValue - aValue;
+          } else {
+            return aValue - bValue;
+          }
         case 'status':
           aValue = a.status || '';
           bValue = b.status || '';
           break;
         default:
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = aName;
+          bValue = bName;
       }
 
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
+      
       if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
       return 0;

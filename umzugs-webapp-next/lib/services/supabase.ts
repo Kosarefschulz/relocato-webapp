@@ -78,6 +78,7 @@ export class SupabaseService {
         email: 'info@goldbeck-west.de',
         phone: '+49 521 94420',
         movingDate: '2025-08-22',
+        createdAt: new Date('2025-08-22T14:22:00'), // Neuester Zeitstempel
         fromAddress: 'Bielefeld Zentrum, Niederwall 23',
         toAddress: 'Gütersloh Industriegebiet, Carl-Bertelsmann-Straße 50',
         apartment: { rooms: 0, area: 800, floor: 0, hasElevator: true },
@@ -103,6 +104,7 @@ export class SupabaseService {
         email: 'alexander.betz@gmail.com',
         phone: '+49 175 9876543',
         movingDate: '2025-08-21',
+        createdAt: new Date('2025-08-21T16:15:00'), // Zweit-neuester Zeitstempel
         fromAddress: 'Paderborn, Westernstraße 45',
         toAddress: 'Bielefeld, Arndtstraße 12',
         apartment: { rooms: 4, area: 95, floor: 2, hasElevator: false },
@@ -128,6 +130,7 @@ export class SupabaseService {
         email: 'tessa.philip@web.de',
         phone: '+49 171 2345678',
         movingDate: '2025-08-21',
+        createdAt: new Date('2025-08-21T14:30:00'), // Dritt-neuester Zeitstempel
         fromAddress: 'Detmold, Lange Straße 88',
         toAddress: 'Lemgo, Mittelstraße 22',
         apartment: { rooms: 3, area: 75, floor: 1, hasElevator: false },

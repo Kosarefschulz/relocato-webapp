@@ -81,12 +81,13 @@ export async function GET(request: NextRequest) {
     const lexwareData = await response.json();
     console.log(`✅ Received ${lexwareData.content?.length || 0} customers from Lexware`);
 
-    // Konvertiere Lexware-Daten zu unserem Format - sortiere nach Customer Number DESC (neueste zuerst)
+    // Konvertiere Lexware-Daten zu unserem Format - sortiere nach Erstellungszeit (neueste zuerst)
     const customers = (lexwareData.content || [])
       .sort((a: any, b: any) => {
-        const aNum = a.roles?.customer?.number || 0;
-        const bNum = b.roles?.customer?.number || 0;
-        return bNum - aNum; // Höchste Nummer zuerst = neueste
+        // Nutze alle verfügbaren Zeitstempel für präzise Sortierung
+        const aTime = new Date(a.updatedDate || a.createdDate || a.lastModified || '1970-01-01').getTime();
+        const bTime = new Date(b.updatedDate || b.createdDate || b.lastModified || '1970-01-01').getTime();
+        return bTime - aTime; // Neueste Zeit zuerst
       })
       .slice(0, 25) // Nimm die ersten 25 (neuesten)
       .map((lexCustomer: any) => {
