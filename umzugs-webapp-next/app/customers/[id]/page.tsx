@@ -339,9 +339,9 @@ export default function CustomerDetailPage() {
     const isCompany = customer.company || customerName.includes('gmbh') || customerName.includes('ug');
     const basePrice = customer.latestQuoteAmount || 2000;
 
-    // Verschiedene Angebots-Templates basierend auf Kundentyp
+    // Spezifische Templates für bekannte Kunden
     if (customerName.includes('goldbeck')) {
-      // Goldbeck = Feuchtigkeitsschaden (aus PDF)
+      // Goldbeck = Feuchtigkeitsschaden AG0066
       return [
         { position: 1, name: 'Büro 5.14 - Rückbau Deckenplatten', description: 'Beschädigte Deckenplatten vorsichtig entfernen (ca. 6 m²)', quantity: 5, unitName: 'Std', unitPrice: { grossAmount: 51.00 }, totalPrice: 255.00 },
         { position: 2, name: 'Büro 5.14 - Wiederherstellung Deckenbereich', description: 'Neue Deckenplatten einbauen, inkl. Material', quantity: 1, unitName: 'Pauschal', unitPrice: { grossAmount: 604.00 }, totalPrice: 604.00 },
@@ -351,6 +351,21 @@ export default function CustomerDetailPage() {
         { position: 6, name: 'Neue Deckenkonstruktion', description: 'Unterkonstruktion montieren, Deckenplatten einbauen', quantity: 1, unitName: 'Pauschal', unitPrice: { grossAmount: 716.00 }, totalPrice: 716.00 },
         { position: 7, name: 'Malerarbeiten', description: 'Alle reparierten Flächen streichen', quantity: 1, unitName: 'Pauschal', unitPrice: { grossAmount: 245.00 }, totalPrice: 245.00 },
         { position: 8, name: 'Entsorgung & Reinigung', description: 'Fachgerechte Entsorgung, Staubschutz', quantity: 4, unitName: 'Std', unitPrice: { grossAmount: 50.00 }, totalPrice: 200.00 }
+      ];
+    } else if (customerName.includes('alexander') || customerName.includes('betz')) {
+      // Alexander Betz = Privatumzug AG0065
+      return [
+        { position: 1, name: 'Haushaltsumzug - Komplettservice', description: 'Transport von Paderborn nach Bielefeld', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: basePrice * 0.65 }, totalPrice: basePrice * 0.65 },
+        { position: 2, name: 'Möbelmontage und -demontage', description: '4-Zimmer Wohnung, 2. OG ohne Aufzug', quantity: 8, unitName: 'Std', unitPrice: { grossAmount: 55.00 }, totalPrice: 440.00 },
+        { position: 3, name: 'Verpackungsservice Premium', description: 'Professionelle Verpackung empfindlicher Gegenstände', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: basePrice * 0.15 }, totalPrice: basePrice * 0.15 },
+        { position: 4, name: 'Halteverbotszone', description: 'Einrichtung Halteverbotszone Paderborn & Bielefeld', quantity: 2, unitName: 'Stk.', unitPrice: { grossAmount: 85.00 }, totalPrice: 170.00 }
+      ];
+    } else if (customerName.includes('tessa') || customerName.includes('philip')) {
+      // Tessa Philip = Kleiner Umzug AG0064
+      return [
+        { position: 1, name: 'Wohnungsumzug Standard', description: 'Transport Detmold nach Lemgo (3-Zimmer)', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: basePrice * 0.8 }, totalPrice: basePrice * 0.8 },
+        { position: 2, name: 'Verpackungsmaterial', description: 'Kartons, Luftpolsterfolie, Packpapier', quantity: 25, unitName: 'Stk.', unitPrice: { grossAmount: 8.50 }, totalPrice: 212.50 },
+        { position: 3, name: 'Endreinigung', description: 'Besenreine Übergabe der alten Wohnung', quantity: 3, unitName: 'Std', unitPrice: { grossAmount: 35.00 }, totalPrice: 105.00 }
       ];
     } else if (isCompany) {
       // Firmenkunden = Büroumzug
