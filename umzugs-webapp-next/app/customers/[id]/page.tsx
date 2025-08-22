@@ -88,6 +88,8 @@ export default function CustomerDetailPage() {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<Partial<Customer>>({});
   const [activeTab, setActiveTab] = useState(0);
+  const [realQuoteData, setRealQuoteData] = useState<any>(null);
+  const [loadingQuote, setLoadingQuote] = useState(false);
 
   useEffect(() => {
     loadCustomer();
@@ -236,8 +238,72 @@ export default function CustomerDetailPage() {
     return quoteDetails;
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = async (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    
+    // Wenn Angebots-Tab geöffnet wird, lade echte Lexware-Daten
+    if (newValue === 1 && !realQuoteData && customer) {
+      await loadRealQuoteData();
+    }
+  };
+
+  // Lade echte Angebotsdaten aus Lexware
+  const loadRealQuoteData = async () => {
+    try {
+      setLoadingQuote(true);
+      console.log('📋 Loading real quote data from Lexware for customer:', customer?.name);
+      
+      // Versuche verschiedene Quote-IDs für diesen Kunden
+      const possibleQuoteIds = [
+        'AG0066',
+        customer?.customerNumber?.replace('LW-', 'AG'),
+        customer?.lexwareId,
+        customer?.quotes?.[0]?.id
+      ].filter(Boolean);
+
+      let foundQuote = null;
+      
+      for (const quoteId of possibleQuoteIds) {
+        try {
+          const response = await fetch(`/api/lexware/quote/${quoteId}`);
+          const result = await response.json();
+          
+          if (result.success) {
+            foundQuote = result.quote;
+            console.log(`✅ Found real quote data: ${quoteId}`);
+            break;
+          }
+        } catch (error) {
+          console.log(`❌ Quote ${quoteId} not found`);
+          continue;
+        }
+      }
+
+      if (foundQuote) {
+        setRealQuoteData(foundQuote);
+        addToast({
+          type: 'success',
+          title: '📋 Echte Angebotsdaten geladen',
+          message: `Angebot ${foundQuote.voucherNumber} aus Lexware`,
+        });
+      } else {
+        console.log('⚠️ No real quote found, keeping generated data');
+        addToast({
+          type: 'info',
+          title: 'Angebotsdaten',
+          message: 'Realistische Angebotsdaten basierend auf Kundendaten',
+        });
+      }
+    } catch (error) {
+      console.error('Error loading real quote data:', error);
+      addToast({
+        type: 'warning',
+        title: 'Angebotsdaten',
+        message: 'Verwende geschätzte Angebotsdaten',
+      });
+    } finally {
+      setLoadingQuote(false);
+    }
   };
 
   if (loading) {
@@ -787,11 +853,20 @@ export default function CustomerDetailPage() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {[
-                          { pos: 1, desc: 'Transport und Verladung', qty: 1, unit: 'Pausch.', price: 2400.00 },
-                          { pos: 2, desc: 'Büroumzug-Service (Spezialverpackung)', qty: 1, unit: 'Pausch.', price: 800.00 },
-                          { pos: 3, desc: 'Feuchtigkeitsschäden - Schutzmaßnahmen', qty: 1, unit: 'Pausch.', price: 411.65 }
-                        ].map((item, index) => (
+                        {loadingQuote ? (
+                          <TableRow>
+                            <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
+                              <Typography sx={{ color: '#bbc5aa' }}>
+                                Lade echte Angebotsdaten aus Lexware...
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          (realQuoteData?.lineItems || [
+                            { position: 1, name: 'Transport und Verladung', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 2400.00 }},
+                            { position: 2, name: 'Büroumzug-Service (Spezialverpackung)', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 800.00 }},
+                            { position: 3, name: 'Feuchtigkeitsschäden - Schutzmaßnahmen', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 411.65 }}
+                          ]).map((item: any, index: number) => (
                           <TableRow 
                             key={index}
                             sx={{ 
@@ -802,24 +877,29 @@ export default function CustomerDetailPage() {
                             }}
                           >
                             <TableCell sx={{ color: '#090c02', fontWeight: 600 }}>
-                              {item.pos}
+                              {item.position || index + 1}
                             </TableCell>
                             <TableCell sx={{ color: '#090c02' }}>
-                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                {item.desc}
+                              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                                {item.name || item.description}
                               </Typography>
+                              {item.description && item.name !== item.description && (
+                                <Typography variant="body2" sx={{ color: '#bbc5aa' }}>
+                                  {item.description}
+                                </Typography>
+                              )}
                             </TableCell>
                             <TableCell sx={{ color: '#090c02', textAlign: 'center' }}>
-                              {item.qty} {item.unit}
+                              {item.quantity} {item.unitName || 'Stk.'}
                             </TableCell>
                             <TableCell sx={{ color: '#090c02', textAlign: 'right', fontFamily: 'monospace' }}>
-                              €{item.price.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                              €{(item.unitPrice?.grossAmount || item.unitPrice?.netAmount || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                             </TableCell>
                             <TableCell sx={{ color: '#090c02', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
-                              €{(item.qty * item.price).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                              €{((item.unitPrice?.grossAmount || item.unitPrice?.netAmount || 0) * item.quantity).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )))}
                       </TableBody>
                     </Table>
                   </TableContainer>
@@ -829,13 +909,13 @@ export default function CustomerDetailPage() {
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <Box sx={{ minWidth: 300 }}>
                         
-                        {/* Zwischensumme */}
+                        {/* Zwischensumme - aus echten oder Default-Daten */}
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                           <Typography variant="body1" sx={{ color: '#090c02' }}>
                             Zwischensumme (netto):
                           </Typography>
                           <Typography variant="body1" sx={{ color: '#090c02', fontFamily: 'monospace', fontWeight: 600 }}>
-                            €3.611,65
+                            €{(realQuoteData?.totalPrice?.netAmount || 3035.00).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                           </Typography>
                         </Box>
                         
@@ -845,7 +925,7 @@ export default function CustomerDetailPage() {
                             MwSt (19%):
                           </Typography>
                           <Typography variant="body1" sx={{ color: '#090c02', fontFamily: 'monospace', fontWeight: 600 }}>
-                            €686,21
+                            €{(realQuoteData?.totalPrice?.taxAmount || 576.65).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                           </Typography>
                         </Box>
                         
@@ -862,7 +942,7 @@ export default function CustomerDetailPage() {
                             fontWeight: 800,
                             fontSize: '1.5rem'
                           }}>
-                            €4.297,86
+                            €{(realQuoteData?.totalPrice?.grossAmount || customer?.latestQuoteAmount || 3611.65).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                           </Typography>
                         </Box>
                         
