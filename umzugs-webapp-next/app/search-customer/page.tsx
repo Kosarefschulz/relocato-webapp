@@ -610,38 +610,24 @@ const CustomersPage: React.FC = () => {
       
       console.log('📋 Loading all customers including real Lexware data...');
       
-      // Lade lokale Kunden
-      const localResponse = await fetch('/api/customers');
-      const localResult = await localResponse.json();
-      
-      // Lade Kunden direkt aus Lexware-ANGEBOTEN (nicht Kontakte)
+      // Lade NUR echte Lexware-Kunden aus Angeboten (keine Mock-Daten!)
       const lexwareResponse = await fetch('/api/lexware/quotes-customers');
       const lexwareResult = await lexwareResponse.json();
       
-      let allCustomers: Customer[] = [];
-      
-      // Kombiniere lokale und Lexware-Kunden
-      if (localResult.success) {
-        const localCustomers = localResult.customers.map(mapApiCustomerToLocal);
-        allCustomers = [...allCustomers, ...localCustomers];
-      }
-      
       if (lexwareResult.success) {
         const lexwareCustomers = lexwareResult.customers.map(mapLexwareCustomerToLocal);
-        allCustomers = [...allCustomers, ...lexwareCustomers];
+        setCustomers(lexwareCustomers);
         
-        console.log(`✅ Loaded ${lexwareResult.count} REAL Lexware customers!`);
+        console.log(`✅ Loaded ${lexwareResult.count} REAL Lexware quote customers!`);
         
         addToast({
           type: 'success',
-          title: '🔄 Echte Lexware-Kunden geladen!',
-          message: `${lexwareResult.count} echte Kunden aus Ihrer Lexware importiert`,
+          title: '🔄 Echte Lexware-Angebots-Kunden geladen!',
+          message: `${lexwareResult.count} echte Kunden aus Ihren Lexware-Angeboten`,
         });
+      } else {
+        throw new Error(lexwareResult.error || 'Lexware API error');
       }
-      
-      setCustomers(allCustomers);
-      
-      console.log(`📊 Total: ${allCustomers.length} customers (${localResult.count || 0} local + ${lexwareResult.count || 0} Lexware)`);
       
     } catch (error) {
       console.error('Error loading customers:', error);

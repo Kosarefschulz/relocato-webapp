@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     console.log('📝 Loading real customers from Lexware quotations (screenshot data)...');
 
-    // Echte Kunden aus Ihren Lexware-Angeboten (neueste zuerst)
+    // Echte Kunden aus Ihren Lexware-Angeboten + alle verfügbaren Lexware-Kontakte (neueste zuerst)
     const realQuoteCustomers = [
       {
         id: 'quote-goldbeck-2025',

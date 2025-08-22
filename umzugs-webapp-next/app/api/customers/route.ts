@@ -26,15 +26,14 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.warn('⚠️ Supabase customers table not found, creating demo data...');
+      console.warn('⚠️ Supabase customers table not found, returning empty array...');
       
-      // Falls Tabelle nicht existiert, gib Demo-Daten zurück
-      const demoCustomers = getDemoCustomers();
+      // Keine Mock-Daten - leeres Array zurückgeben
       return NextResponse.json({
         success: true,
-        customers: demoCustomers,
-        message: 'Demo customers loaded (Supabase table not available)',
-        count: demoCustomers.length
+        customers: [],
+        message: 'No local customers (Supabase table not available)',
+        count: 0
       });
     }
 
@@ -48,13 +47,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error fetching customers:', error);
     
-    // Fallback zu Demo-Daten
-    const demoCustomers = getDemoCustomers();
+    // Keine Fallback-Daten - nur echte Lexware-Kunden verwenden
     return NextResponse.json({
       success: true,
-      customers: demoCustomers,
-      message: 'Fallback to demo data due to database error',
-      count: demoCustomers.length
+      customers: [],
+      message: 'No customers due to database error - using only Lexware data',
+      count: 0
     });
   }
 }

@@ -54,206 +54,22 @@ export class SupabaseService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('⚠️ Supabase customers table not accessible, using mock data:', error.message);
+        console.warn('⚠️ Supabase customers table not accessible:', error.message);
         
-        // Return mock customers for demo purposes
-        return this.getMockCustomers();
+        // Keine Mock-Daten mehr - nur echte Lexware-Kunden verwenden
+        return [];
       }
       
       return this.mapSupabaseCustomersToLocal(data || []);
     } catch (error) {
       console.error('Error fetching customers:', error);
       
-      // Return mock customers as fallback
-      return this.getMockCustomers();
+      // Keine Mock-Daten mehr - nur echte Daten verwenden
+      return [];
     }
   }
 
-  // Mock customers for demo/testing - NEUESTE KUNDEN AUS IHREM SCREENSHOT ZUERST
-  private getMockCustomers(): Customer[] {
-    return [
-      {
-        id: 'latest-1',
-        name: 'Goldbeck West GmbH',
-        email: 'info@goldbeck-west.de',
-        phone: '+49 521 94420',
-        movingDate: '2025-08-22',
-        createdAt: new Date('2025-08-22T14:22:00'), // Neuester Zeitstempel
-        fromAddress: 'Bielefeld Zentrum, Niederwall 23',
-        toAddress: 'Gütersloh Industriegebiet, Carl-Bertelsmann-Straße 50',
-        apartment: { rooms: 0, area: 800, floor: 0, hasElevator: true },
-        services: ['Büroumzug', 'Industrieumzug'],
-        notes: 'Feuchtigkeitsschäden - AG0066 vom 22.08.2025 - gültig bis 21.09.2025',
-        status: 'pending',
-        priority: 'high',
-        company: 'Goldbeck West GmbH',
-        volume: 120,
-        customerNumber: 'AG-0066',
-        latestQuoteAmount: 3611.65,
-        salesNotes: [{
-          id: 'lexware-goldbeck',
-          content: 'Lexware ID: GOLDBECK-2025-0066',
-          createdAt: new Date('2025-08-22'),
-          createdBy: 'Lexware Import',
-          type: 'other'
-        }]
-      },
-      {
-        id: 'latest-2',
-        name: 'Alexander Betz',
-        email: 'alexander.betz@gmail.com',
-        phone: '+49 175 9876543',
-        movingDate: '2025-08-21',
-        createdAt: new Date('2025-08-21T16:15:00'), // Zweit-neuester Zeitstempel
-        fromAddress: 'Paderborn, Westernstraße 45',
-        toAddress: 'Bielefeld, Arndtstraße 12',
-        apartment: { rooms: 4, area: 95, floor: 2, hasElevator: false },
-        services: ['Komplettservice', 'Möbelmontage'],
-        notes: 'Angebot - AG0065 vom 21.08.2025 - gültig bis 20.09.2025',
-        status: 'pending',
-        priority: 'high',
-        company: '',
-        volume: 64,
-        customerNumber: 'AG-0065',
-        latestQuoteAmount: 3855.60,
-        salesNotes: [{
-          id: 'lexware-betz',
-          content: 'Lexware ID: BETZ-2025-0065',
-          createdAt: new Date('2025-08-21'),
-          createdBy: 'Lexware Import',
-          type: 'other'
-        }]
-      },
-      {
-        id: 'latest-3',
-        name: 'Tessa Philip',
-        email: 'tessa.philip@web.de',
-        phone: '+49 171 2345678',
-        movingDate: '2025-08-21',
-        createdAt: new Date('2025-08-21T14:30:00'), // Dritt-neuester Zeitstempel
-        fromAddress: 'Detmold, Lange Straße 88',
-        toAddress: 'Lemgo, Mittelstraße 22',
-        apartment: { rooms: 3, area: 75, floor: 1, hasElevator: false },
-        services: ['Standardservice', 'Verpackung'],
-        notes: 'Angebot - AG0064 vom 21.08.2025 - gültig bis 20.09.2025',
-        status: 'pending',
-        priority: 'medium',
-        company: '',
-        volume: 41,
-        customerNumber: 'AG-0064',
-        latestQuoteAmount: 2479.00,
-        salesNotes: [{
-          id: 'lexware-philip',
-          content: 'Lexware ID: PHILIP-2025-0064',
-          createdAt: new Date('2025-08-21'),
-          createdBy: 'Lexware Import',
-          type: 'other'
-        }]
-      },
-      {
-        id: 'mock-1',
-        name: 'Familie Müller',
-        email: 'mueller@example.com',
-        phone: '+49 30 12345678',
-        movingDate: '2025-08-25',
-        fromAddress: 'Berlin Mitte, Unter den Linden 1',
-        toAddress: 'Hamburg Altona, Große Bergstraße 15',
-        apartment: { rooms: 4, area: 85, floor: 3, hasElevator: false },
-        services: ['Komplettservice', 'Möbelmontage'],
-        notes: 'Familiärer Umzug mit 2 Kindern. Klaviertransport erforderlich.',
-        status: 'active',
-        priority: 'high',
-        company: '',
-        volume: 45,
-        customerNumber: 'K-2025-001',
-        salesNotes: []
-      },
-      {
-        id: 'mock-2',
-        name: 'Schmidt GmbH',
-        email: 'office@schmidt-gmbh.de',
-        phone: '+49 40 98765432',
-        movingDate: '2025-08-27',
-        fromAddress: 'München Zentrum, Marienplatz 8',
-        toAddress: 'Frankfurt Westend, Taunusanlage 21',
-        apartment: { rooms: 0, area: 200, floor: 5, hasElevator: true },
-        services: ['Büroumzug', 'IT-Service'],
-        notes: 'Büroumzug am Wochenende. Sensible IT-Ausrüstung.',
-        status: 'pending',
-        priority: 'medium',
-        company: 'Schmidt GmbH',
-        volume: 75,
-        customerNumber: 'K-2025-002',
-        salesNotes: [{
-          id: 'lexware-note-1',
-          content: 'Lexware ID: LW-12345',
-          createdAt: new Date(),
-          createdBy: 'System',
-          type: 'other'
-        }]
-      },
-      {
-        id: 'mock-3',
-        name: 'Familie Weber',
-        email: 'weber.familie@gmail.com',
-        phone: '+49 221 55567890',
-        movingDate: '2025-08-30',
-        fromAddress: 'Düsseldorf Altstadt, Königsallee 45',
-        toAddress: 'Köln Ehrenfeld, Venloer Straße 123',
-        apartment: { rooms: 2, area: 55, floor: 1, hasElevator: false },
-        services: ['Transport', 'Verpackung'],
-        notes: 'Kleine 2-Zimmer Wohnung. Viele Bücher und Kunstwerke.',
-        status: 'reached',
-        priority: 'low',
-        company: '',
-        volume: 32,
-        customerNumber: 'K-2025-003',
-        salesNotes: []
-      },
-      {
-        id: 'mock-4',
-        name: 'Dr. Hans Zimmermann',
-        email: 'h.zimmermann@praxis-mitte.de',
-        phone: '+49 30 77788899',
-        movingDate: '2025-09-05',
-        fromAddress: 'Berlin Charlottenburg, Kurfürstendamm 100',
-        toAddress: 'Berlin Prenzlauer Berg, Kastanienallee 77',
-        apartment: { rooms: 3, area: 75, floor: 2, hasElevator: true },
-        services: ['Praxisumzug', 'Spezialverpackung'],
-        notes: 'Arztpraxis-Umzug. Medizinische Geräte vorhanden.',
-        status: 'active',
-        priority: 'high',
-        company: 'Praxis Dr. Zimmermann',
-        volume: 55,
-        customerNumber: 'K-2025-004',
-        salesNotes: [{
-          id: 'lexware-note-2',
-          content: 'Lexware ID: LW-67890',
-          createdAt: new Date(),
-          createdBy: 'System',
-          type: 'other'
-        }]
-      },
-      {
-        id: 'mock-5',
-        name: 'Lisa & Thomas Klein',
-        email: 'klein.paar@web.de',
-        phone: '+49 89 33344455',
-        movingDate: '2025-09-10',
-        fromAddress: 'Stuttgart Mitte, Königstraße 28',
-        toAddress: 'Nürnberg Altstadt, Hauptmarkt 5',
-        apartment: { rooms: 3, area: 68, floor: 4, hasElevator: false },
-        services: ['Teilservice', 'Endreinigung'],
-        notes: 'Junges Paar, erste gemeinsame Wohnung.',
-        status: 'pending',
-        priority: 'medium',
-        company: '',
-        volume: 38,
-        customerNumber: 'K-2025-005',
-        salesNotes: []
-      }
-    ];
-  }
+  // Keine Mock-Daten mehr - nur echte Lexware-Kunden verwenden
 
   async getCustomer(customerId: string): Promise<Customer | null> {
     try {
