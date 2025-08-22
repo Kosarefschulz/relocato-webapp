@@ -610,12 +610,12 @@ const CustomersPage: React.FC = () => {
       
       console.log('📋 Loading all customers including real Lexware data...');
       
-      // Lade NUR echte Lexware-Kunden aus Angeboten (keine Mock-Daten!)
-      const lexwareResponse = await fetch('/api/lexware/quotes-customers');
+      // Lade NUR echte Lexware-Kunden aus ANGEBOTEN (korrekte voucherlist API!)
+      const lexwareResponse = await fetch('/api/lexware/quotations-list');
       const lexwareResult = await lexwareResponse.json();
       
       if (lexwareResult.success) {
-        const lexwareCustomers = lexwareResult.customers.map(mapLexwareCustomerToLocal);
+        const lexwareCustomers = lexwareResult.quotations.map(mapLexwareCustomerToLocal);
         setCustomers(lexwareCustomers);
         
         console.log(`✅ Loaded ${lexwareResult.count} REAL Lexware quote customers!`);
@@ -1040,18 +1040,9 @@ const CustomersPage: React.FC = () => {
   useEffect(() => {
     loadCustomers();
     
-    // Starte automatische Lexware-Synchronisation alle 5 Minuten
-    if (process.env.NEXT_PUBLIC_LEXWARE_API_KEY) {
-      console.log('🚀 Starte automatische Lexware-Synchronisation...');
-      lexwareSyncService.startAutoSync(5); // Alle 5 Minuten
-      
-      addToast({
-        type: 'info',
-        title: '🔄 Auto-Sync aktiviert',
-        message: 'Lexware wird alle 5 Minuten automatisch synchronisiert',
-      });
-    }
-
+    // Auto-Sync deaktiviert wegen Rate Limiting
+    // Die echten Angebotsdaten werden direkt über quotations-list API geladen
+    
     // Cleanup beim Verlassen der Komponente
     return () => {
       lexwareSyncService.stopAutoSync();
