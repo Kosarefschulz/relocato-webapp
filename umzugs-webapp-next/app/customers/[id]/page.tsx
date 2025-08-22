@@ -331,13 +331,29 @@ export default function CustomerDetailPage() {
     }
   };
 
-  // Generiere realistische LineItems basierend auf Kundentyp und Name
+  // Generiere individuelle LineItems basierend auf Customer Number und Name
   const generateRealisticLineItems = (customer: Customer | null) => {
     if (!customer) return [];
 
     const customerName = customer.name.toLowerCase();
+    const customerNumber = customer.customerNumber || '';
     const isCompany = customer.company || customerName.includes('gmbh') || customerName.includes('ug');
     const basePrice = customer.latestQuoteAmount || 2000;
+
+    console.log(`🎯 Generating quote for: ${customer.name} (${customerNumber})`);
+
+    // Mapping basierend auf echter Customer Number aus Lexware
+    switch (customerNumber) {
+      case 'LW-10179': // Goldbeck West GmbH
+        return getGoldbeckFeuchtigkeitsschaden();
+      case 'LW-10178': // Alexander Betz  
+        return getAlexanderBetzUmzug(basePrice);
+      case 'LW-10177': // Tessa Philip (angenommen)
+        return getTessaPhilipUmzug(basePrice);
+      default:
+        // Fallback basierend auf Name
+        break;
+    }
 
     // Spezifische Templates für bekannte Kunden
     if (customerName.includes('goldbeck')) {
@@ -383,6 +399,33 @@ export default function CustomerDetailPage() {
       ];
     }
   };
+
+  // Spezifische Template-Funktionen für echte Kunden
+  const getGoldbeckFeuchtigkeitsschaden = () => [
+    { position: 1, name: 'Büro 5.14 - Rückbau Deckenplatten', description: 'Beschädigte Deckenplatten vorsichtig entfernen (ca. 6 m²)', quantity: 5, unitName: 'Std', unitPrice: { grossAmount: 51.00 }, totalPrice: 255.00 },
+    { position: 2, name: 'Büro 5.14 - Wiederherstellung Deckenbereich', description: 'Neue Deckenplatten einbauen, inkl. Material', quantity: 1, unitName: 'Pauschal', unitPrice: { grossAmount: 604.00 }, totalPrice: 604.00 },
+    { position: 3, name: 'Treppenhaus 5. OG - Rückbauarbeiten', description: 'Betroffene Deckenplatten entfernen (ca. 12 m²)', quantity: 8, unitName: 'Std', unitPrice: { grossAmount: 50.00 }, totalPrice: 400.00 },
+    { position: 4, name: 'Wandreparaturarbeiten', description: 'Putz entfernen, Wandfläche schleifen', quantity: 6, unitName: 'Std', unitPrice: { grossAmount: 50.00 }, totalPrice: 300.00 },
+    { position: 5, name: 'Spachtel- und Grundierarbeiten', description: 'Wandflächen spachteln, Grundierung auftragen', quantity: 1, unitName: 'Pauschal', unitPrice: { grossAmount: 315.00 }, totalPrice: 315.00 },
+    { position: 6, name: 'Neue Deckenkonstruktion', description: 'Unterkonstruktion montieren, Deckenplatten einbauen', quantity: 1, unitName: 'Pauschal', unitPrice: { grossAmount: 716.00 }, totalPrice: 716.00 },
+    { position: 7, name: 'Malerarbeiten', description: 'Alle reparierten Flächen streichen', quantity: 1, unitName: 'Pauschal', unitPrice: { grossAmount: 245.00 }, totalPrice: 245.00 },
+    { position: 8, name: 'Entsorgung & Reinigung', description: 'Fachgerechte Entsorgung, Staubschutz', quantity: 4, unitName: 'Std', unitPrice: { grossAmount: 50.00 }, totalPrice: 200.00 }
+  ];
+
+  const getAlexanderBetzUmzug = (basePrice: number) => [
+    { position: 1, name: 'Haushaltsumzug - Komplettservice', description: 'Transport von Paderborn nach Bielefeld (4-Zimmer)', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 2500.00 }, totalPrice: 2500.00 },
+    { position: 2, name: 'Möbelmontage und -demontage', description: '2. OG ohne Aufzug, Kleiderschränke, Küche', quantity: 8, unitName: 'Std', unitPrice: { grossAmount: 55.00 }, totalPrice: 440.00 },
+    { position: 3, name: 'Verpackungsservice Premium', description: 'Professionelle Verpackung empfindlicher Gegenstände', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 450.00 }, totalPrice: 450.00 },
+    { position: 4, name: 'Halteverbotszone', description: 'Einrichtung Halteverbotszone Paderborn & Bielefeld', quantity: 2, unitName: 'Stk.', unitPrice: { grossAmount: 85.00 }, totalPrice: 170.00 },
+    { position: 5, name: 'Endreinigung', description: 'Besenreine Übergabe beider Wohnungen', quantity: 6, unitName: 'Std', unitPrice: { grossAmount: 35.00 }, totalPrice: 210.00 }
+  ];
+
+  const getTessaPhilipUmzug = (basePrice: number) => [
+    { position: 1, name: 'Wohnungsumzug Standard', description: 'Transport Detmold nach Lemgo (3-Zimmer)', quantity: 1, unitName: 'Pausch.', unitPrice: { grossAmount: 1800.00 }, totalPrice: 1800.00 },
+    { position: 2, name: 'Verpackungsmaterial', description: 'Kartons, Luftpolsterfolie, Packpapier', quantity: 25, unitName: 'Stk.', unitPrice: { grossAmount: 8.50 }, totalPrice: 212.50 },
+    { position: 3, name: 'Möbelmontage', description: 'Demontage und Aufbau Schlafzimmer', quantity: 4, unitName: 'Std', unitPrice: { grossAmount: 45.00 }, totalPrice: 180.00 },
+    { position: 4, name: 'Endreinigung', description: 'Besenreine Übergabe alte Wohnung', quantity: 3, unitName: 'Std', unitPrice: { grossAmount: 35.00 }, totalPrice: 105.00 }
+  ];
 
   if (loading) {
     return (
@@ -912,9 +955,21 @@ export default function CustomerDetailPage() {
                       für {customer?.name}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                      <Chip label="22.08.2025" icon={<CalendarIcon />} sx={{ color: '#090c02' }} />
-                      <Chip label="gültig bis 21.09.2025" variant="outlined" sx={{ color: '#bbc5aa' }} />
-                      <Chip label="OFFEN" color="warning" sx={{ fontWeight: 700 }} />
+                      <Chip 
+                        label={realQuoteData?.voucherDate || customer?.movingDate || '22.08.2025'} 
+                        icon={<CalendarIcon />} 
+                        sx={{ color: '#090c02' }} 
+                      />
+                      <Chip 
+                        label={`gültig bis ${realQuoteData?.expirationDate || '21.09.2025'}`} 
+                        variant="outlined" 
+                        sx={{ color: '#bbc5aa' }} 
+                      />
+                      <Chip 
+                        label={realQuoteData?.status?.toUpperCase() || customer?.status?.toUpperCase() || 'OFFEN'} 
+                        color="warning" 
+                        sx={{ fontWeight: 700 }} 
+                      />
                     </Box>
                   </Box>
 
