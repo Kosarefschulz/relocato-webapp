@@ -680,35 +680,18 @@ const ModernDashboard: React.FC = () => {
                         position: 'relative'
                       }}>
                         
-                        {/* Elegant Slow-Motion Icon Box */}
+                        {/* Einfache Icons ohne Umrandung */}
                         <Box 
                           className="icon-box"
                           sx={{ 
-                            width: { xs: 80, sm: 90, md: 110 },
-                            height: { xs: 80, sm: 90, md: 110 },
-                            borderRadius: '30px',
-                            background: item.gradient,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
                             mb: 3,
                             transition: 'all 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                            boxShadow: `0 15px 35px ${item.color}30`,
-                            color: '#e6eed6',
-                            position: 'relative',
-                            '&::before': {
-                              content: '""',
-                              position: 'absolute',
-                              top: -3,
-                              left: -3,
-                              right: -3,
-                              bottom: -3,
-                              background: item.gradient,
-                              borderRadius: '35px',
-                              opacity: 0,
-                              transition: 'opacity 1.0s ease-in-out',
-                              zIndex: -1,
-                              filter: 'blur(10px)',
+                            color: item.color,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            '& svg': {
+                              fontSize: { xs: 48, sm: 56, md: 64 },
+                              filter: `drop-shadow(0 4px 8px ${item.color}40)`,
                             }
                           }}
                         >
