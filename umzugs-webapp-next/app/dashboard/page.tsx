@@ -640,13 +640,14 @@ const ModernDashboard: React.FC = () => {
                           {item.badge ? (
                             <Chip 
                               label={item.badge}
-                              size="small"
+                              size="medium"
                               sx={{
                                 backgroundColor: item.badgeColor || item.color,
-                                color: 'white',
+                                color: '#e6eed6',
                                 fontWeight: 700,
-                                fontSize: '0.7rem',
-                                height: 24,
+                                fontSize: '0.75rem',
+                                height: 28,
+                                minWidth: 50,
                                 boxShadow: `0 4px 12px ${item.color}40`,
                               }}
                             />
@@ -676,10 +677,12 @@ const ModernDashboard: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         textAlign: 'center',
-                        p: { xs: 3, sm: 4, md: 5 }, // Mehr Padding für größere Cards
-                        pt: { xs: 4, sm: 5, md: 6 }, // Extra Padding oben für Badges
+                        p: { xs: 2, sm: 3, md: 4 }, // Reduziertes Padding für bessere Balance
+                        pt: { xs: 6, sm: 7, md: 8 }, // Deutlich mehr Platz oben für Badges
+                        pb: { xs: 3, sm: 4, md: 5 }, // Mehr Platz unten
+                        px: { xs: 2, sm: 3, md: 4 }, // Seitlicher Padding
                         position: 'relative',
-                        minHeight: { xs: 180, sm: 200, md: 220 } // Mindesthöhe für vollständige Anzeige
+                        minHeight: { xs: 200, sm: 220, md: 240 } // Noch größere Cards
                       }}>
                         
                         {/* Einfache Icons ohne Umrandung */}
