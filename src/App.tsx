@@ -17,6 +17,7 @@ import { realtimeService } from './services/realtimeService';
 
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import GlassDashboard from './components/GlassDashboard';
 import CustomerSearch from './components/CustomerSearch';
 import CreateQuote from './components/CreateQuote';
 import CreateQuoteMultiCompany from './components/CreateQuote.multicompany';
@@ -73,6 +74,9 @@ import TrelloImportPage from './pages/TrelloImportPage';
 import DebugShareLinksPage from './pages/DebugShareLinksPage';
 import RealtimeDashboard from './components/RealtimeDashboard';
 import QuoteLayoutEditor from './components/QuoteLayoutEditor/QuoteLayoutEditor';
+import AnimatedBackground from './components/AnimatedBackground';
+import GlassSidebar from './components/GlassSidebar';
+import GlassLayout from './components/GlassLayout';
 
 
 export const AuthContext = React.createContext<{
@@ -146,7 +150,7 @@ function AppRoutes({ user }: { user: User | null }) {
       {/* Dashboard */}
       <Route 
         path="/dashboard" 
-        element={<Dashboard />} 
+        element={<GlassDashboard />} 
       />
       
       {/* Customer List */}
@@ -403,6 +407,7 @@ function App() {
   const user = { uid: 'dummy-user', email: 'user@example.com', displayName: 'User' } as User;
   const [aiEnabled, setAiEnabled] = useState(false);
   const [showOnlineUsers, setShowOnlineUsers] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Automatische Synchronisation beim App-Start
   useEffect(() => {
@@ -494,7 +499,15 @@ function App() {
         <SimpleAuth>
           <VisibilityFix />
           <AuthContext.Provider value={{ user, login, logout, resetPassword, loginWithGoogle }}>
-            <AppRoutes user={user} />
+            {/* Global Animated Background */}
+            <AnimatedBackground />
+            
+            {/* Global Sidebar */}
+            <GlassSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+            {/* Main App Content */}
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <AppRoutes user={user} />
+            </div>
             
             {/* Real-time Notifications */}
             <RealtimeNotifications />
