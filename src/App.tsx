@@ -28,6 +28,8 @@ import CustomerDetails from './components/CustomerDetails';
 import InvoicesList from './components/InvoicesList';
 import SalesPage from './pages/SalesPage';
 import CalendarView from './components/CalendarView';
+import GlassCalendar from './components/GlassCalendar';
+import GlassAPIHub from './components/GlassAPIHub';
 import CalendarImportEnhanced from './components/CalendarImportEnhanced';
 import DispositionPage from './pages/DispositionPage';
 import SharePage from './pages/SharePage';
@@ -77,6 +79,10 @@ import QuoteLayoutEditor from './components/QuoteLayoutEditor/QuoteLayoutEditor'
 import AnimatedBackground from './components/AnimatedBackground';
 import GlassSidebar from './components/GlassSidebar';
 import GlassLayout from './components/GlassLayout';
+import GlassWorkflowBuilder from './components/GlassWorkflowBuilder';
+import GlassAIInsights from './components/GlassAIInsights';
+import GlassInventory from './components/GlassInventory';
+import GlassDisposition from './components/GlassDisposition';
 
 
 export const AuthContext = React.createContext<{
@@ -204,7 +210,7 @@ function AppRoutes({ user }: { user: User | null }) {
       {/* Calendar View */}
       <Route 
         path="/calendar" 
-        element={<CalendarView />} 
+        element={<GlassCalendar />} 
       />
       
       {/* Calendar Import */}
@@ -216,7 +222,7 @@ function AppRoutes({ user }: { user: User | null }) {
       {/* Disposition */}
       <Route 
         path="/disposition" 
-        element={<DispositionPage />} 
+        element={<GlassDisposition />} 
       />
       
       {/* Migration Tool */}
@@ -291,6 +297,12 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/admin-tools" 
         element={<AdminToolsPage />} 
+      />
+      
+      {/* API Hub */}
+      <Route 
+        path="/api-hub" 
+        element={<GlassAPIHub />} 
       />
       
       {/* Email Client */}
@@ -391,6 +403,24 @@ function AppRoutes({ user }: { user: User | null }) {
       <Route 
         path="/quote-designer" 
         element={<QuoteLayoutEditor />} 
+      />
+      
+      {/* Workflow Builder */}
+      <Route 
+        path="/workflow-builder" 
+        element={<GlassWorkflowBuilder />} 
+      />
+      
+      {/* AI Insights */}
+      <Route 
+        path="/ai-insights" 
+        element={<GlassAIInsights />} 
+      />
+      
+      {/* Inventory Management */}
+      <Route 
+        path="/inventory" 
+        element={<GlassInventory />} 
       />
       
       {/* Default Route */}

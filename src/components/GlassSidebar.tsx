@@ -120,6 +120,20 @@ const GlassSidebar: React.FC<GlassSidebarProps> = ({ isOpen, onToggle }) => {
       section: 'admin'
     },
     {
+      title: 'API Hub',
+      icon: <SettingsIcon />,
+      path: '/api-hub',
+      badge: '30',
+      section: 'admin'
+    },
+    {
+      title: 'Workflow Builder',
+      icon: <SettingsIcon />,
+      path: '/workflow-builder',
+      badge: 'NEU',
+      section: 'admin'
+    },
+    {
       title: 'Einstellungen',
       icon: <SettingsIcon />,
       path: '/settings',
@@ -188,7 +202,7 @@ const GlassSidebar: React.FC<GlassSidebarProps> = ({ isOpen, onToggle }) => {
         <aside className={`glass-sidebar ${isOpen ? 'active' : ''}`}>
           {/* Header */}
           <div className="sidebar-header">
-            <div className="sidebar-logo">Relocato</div>
+            <div className="sidebar-logo">Wertvoll CRM</div>
             <button className="sidebar-close" onClick={onToggle}>
               <CloseIcon />
             </button>
