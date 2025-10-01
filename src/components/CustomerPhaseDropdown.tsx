@@ -50,7 +50,7 @@ const CustomerPhaseDropdown: React.FC<CustomerPhaseDropdownProps> = ({
   readonly = false,
   variant = 'dropdown'
 }) => {
-  const [phase, setPhase] = useState<CustomerPhase>(currentPhase);
+  const [phase, setPhase] = useState<CustomerPhase>(currentPhase || 'angerufen');
   const [updating, setUpdating] = useState(false);
 
   const handlePhaseChange = async (newPhase: CustomerPhase) => {
