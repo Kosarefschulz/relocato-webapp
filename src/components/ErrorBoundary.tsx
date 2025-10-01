@@ -24,6 +24,17 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
+
+    // Log to external service or show detailed error on mobile
+    if (typeof window !== 'undefined') {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      });
+    }
   }
 
   private handleReset = () => {
@@ -71,6 +82,28 @@ class ErrorBoundary extends Component<Props, State> {
               Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie, die Seite neu zu laden.
             </Typography>
             {this.state.error && (
+              <>
+                <Typography variant="body2" color="error" sx={{ mb: 1, fontWeight: 600 }}>
+                  Fehler: {this.state.error.message}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  component="pre"
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    bgcolor: 'grey.100',
+                    maxHeight: 200,
+                    overflow: 'auto',
+                    textAlign: 'left',
+                    fontSize: '0.7rem'
+                  }}
+                >
+                  {this.state.error.stack}
+                </Typography>
+              </>
+            )}
+            {!this.state.error && (
               <Typography
                 variant="caption"
                 component="pre"
