@@ -69,6 +69,7 @@ import DispositionLinkButton from './DispositionLinkButton';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import MobileLayout from './MobileLayout';
 import { useMobileLayout } from '../hooks/useMobileLayout';
+import '../styles/customerDetailsUnified.css';
 
 const HeroSection = motion(Box);
 
@@ -536,23 +537,63 @@ const CustomerDetails: React.FC = () => {
                     Neues Angebot
                   </Button>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     startIcon={<LocationIcon />}
                     onClick={() => setRoutePlannerOpen(true)}
                     disabled={!customer.fromAddress || !customer.toAddress}
                     size="small"
                     fullWidth={isMobile}
-                    sx={{ minHeight: { xs: 44, sm: 36 } }}
+                    disableRipple
+                    disableElevation
+                    sx={{
+                      minHeight: { xs: 44, sm: 36 },
+                      background: 'linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important',
+                      color: '#ffffff !important',
+                      border: 'none !important',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important',
+                        backgroundColor: 'transparent !important',
+                      },
+                      '&::before': {
+                        display: 'none !important',
+                      },
+                      '&::after': {
+                        display: 'none !important',
+                      },
+                      '& .MuiTouchRipple-root': {
+                        display: 'none !important',
+                      }
+                    }}
                   >
                     Route planen
                   </Button>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     startIcon={<AddAPhotoIcon />}
                     onClick={() => setTabValue(2)}
                     size="small"
                     fullWidth={isMobile}
-                    sx={{ minHeight: { xs: 44, sm: 36 } }}
+                    disableRipple
+                    disableElevation
+                    sx={{
+                      minHeight: { xs: 44, sm: 36 },
+                      background: 'linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important',
+                      color: '#ffffff !important',
+                      border: 'none !important',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important',
+                        backgroundColor: 'transparent !important',
+                      },
+                      '&::before': {
+                        display: 'none !important',
+                      },
+                      '&::after': {
+                        display: 'none !important',
+                      },
+                      '& .MuiTouchRipple-root': {
+                        display: 'none !important',
+                      }
+                    }}
                   >
                     Fotos hinzufügen
                   </Button>

@@ -69,13 +69,14 @@ import CustomerCard from './CustomerCard';
 import { useMobileLayout } from '../hooks/useMobileLayout';
 import { supabase } from '../config/supabase';
 import { useDebounce } from '../hooks/useDebounce';
+import { GlassCard, SearchBox, HeaderBox, CustomerCard as StyledCustomerCard } from '../styles/CustomersList.styles';
 
 // Motion components
-const MotionCard = motion(Card);
+const MotionCard = motion(GlassCard);
 
 // Skeleton loader for initial load
 const CustomerSkeleton = () => (
-  <Card sx={{ mb: 2 }}>
+  <GlassCard sx={{ mb: 2 }}>
     <CardContent>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
@@ -90,7 +91,7 @@ const CustomerSkeleton = () => (
         <Skeleton variant="rectangular" width={80} height={32} />
       </Box>
     </CardContent>
-  </Card>
+  </GlassCard>
 );
 
 // Customer row component for virtualization
@@ -145,18 +146,16 @@ const CustomerRow = React.memo(({
   }
 
   return (
-    <Box style={style} sx={{ px: 3 }}>
+    <Box style={style} sx={{ px: 3, pb: 2 }}>
       <MotionCard
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
-        sx={{ 
+        sx={{
           cursor: 'pointer',
-          transition: 'all 0.2s',
-          '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: theme.shadows[4],
-          },
+          mb: 3,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          border: '1px solid #e0e0e0',
         }}
         onClick={() => !selectMode && onClick()}
         onMouseEnter={onHover}
@@ -520,8 +519,8 @@ const CustomersListPerformance: React.FC = () => {
     return sorted;
   }, [customers, debouncedSearchTerm, sortBy, sortOrder]);
 
-  // Virtual scrolling setup
-  const itemHeight = isMobile ? 140 : 120;
+  // Virtual scrolling setup - mit Abstand zwischen Karten
+  const itemHeight = isMobile ? 164 : 144; // Erhöht um 24px für Abstände
   const { visibleItems, totalHeight, containerProps, viewportProps } = useVirtualizedList(
     filteredAndSortedCustomers,
     {

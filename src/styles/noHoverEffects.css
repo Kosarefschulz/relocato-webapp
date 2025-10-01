@@ -1,0 +1,142 @@
+/* Alle Hover-Effekte und Overlays komplett deaktivieren */
+
+/* MUI Ripple und Hover Overlays entfernen */
+.MuiButton-root::before,
+.MuiButton-root::after,
+.MuiButtonBase-root::before,
+.MuiButtonBase-root::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+}
+
+/* TouchRipple komplett deaktivieren */
+.MuiTouchRipple-root,
+.MuiTouchRipple-ripple,
+.MuiTouchRipple-rippleVisible,
+.MuiTouchRipple-child,
+.MuiRipple-root {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Button Hover States - keine Änderung */
+.MuiButton-root:hover::before,
+.MuiButton-root:hover::after,
+.MuiButtonBase-root:hover::before,
+.MuiButtonBase-root:hover::after {
+  display: none !important;
+  opacity: 0 !important;
+  background: none !important;
+}
+
+/* Pseudo-Elemente entfernen */
+.MuiButton-root:hover,
+.MuiButtonBase-root:hover {
+  background-color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Keine Hover-Overlays */
+.MuiButton-root:hover .MuiButton-label,
+.MuiButtonBase-root:hover {
+  opacity: 1 !important;
+  color: #ffffff !important;
+}
+
+/* Backdrop/Overlay Effekte entfernen */
+.MuiBackdrop-root,
+.MuiButton-root .MuiButton-overlay,
+.MuiButtonBase-root .MuiButtonBase-overlay {
+  display: none !important;
+}
+
+/* Keine Focus-Visible Effekte außer Outline */
+.MuiButton-root:focus-visible::before,
+.MuiButton-root:focus-visible::after,
+.MuiButtonBase-root:focus-visible::before,
+.MuiButtonBase-root:focus-visible::after {
+  display: none !important;
+}
+
+/* Pointer Events normal lassen aber keine visuellen Effekte */
+.MuiButton-root {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Keine Transitions für Hover */
+.MuiButton-root,
+.MuiButton-root * {
+  transition-property: box-shadow, transform !important;
+  transition-duration: 0.2s !important;
+}
+
+/* Active State auch keine Änderung */
+.MuiButton-root:active,
+.MuiButtonBase-root:active {
+  background: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Disabled State */
+.MuiButton-root.Mui-disabled {
+  opacity: 0.6 !important;
+  pointer-events: none !important;
+}
+
+/* DARK MODE - Keine weißen Overlays */
+[data-theme='dark'] .MuiButton-root::before,
+[data-theme='dark'] .MuiButton-root::after,
+[data-theme='dark'] .MuiButtonBase-root::before,
+[data-theme='dark'] .MuiButtonBase-root::after,
+.dark-mode .MuiButton-root::before,
+.dark-mode .MuiButton-root::after,
+.dark-mode .MuiButtonBase-root::before,
+.dark-mode .MuiButtonBase-root::after {
+  display: none !important;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+[data-theme='dark'] .MuiButton-root:hover,
+[data-theme='dark'] .MuiButtonBase-root:hover,
+.dark-mode .MuiButton-root:hover,
+.dark-mode .MuiButtonBase-root:hover {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background-color: transparent !important;
+  opacity: 1 !important;
+}
+
+/* Dark Mode Ripple entfernen */
+[data-theme='dark'] .MuiTouchRipple-root,
+[data-theme='dark'] .MuiTouchRipple-ripple,
+.dark-mode .MuiTouchRipple-root,
+.dark-mode .MuiTouchRipple-ripple {
+  display: none !important;
+}
+
+/* Dark Mode Button States */
+[data-theme='dark'] .MuiButton-root:hover::before,
+[data-theme='dark'] .MuiButton-root:hover::after,
+.dark-mode .MuiButton-root:hover::before,
+.dark-mode .MuiButton-root:hover::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-color: transparent !important;
+}
+
+/* Sicherstellen dass keine State Layer im Dark Mode */
+[data-theme='dark'] .MuiButton-root .MuiTouchRipple-root,
+[data-theme='dark'] .MuiButton-root .MuiTouchRipple-child,
+.dark-mode .MuiButton-root .MuiTouchRipple-root,
+.dark-mode .MuiButton-root .MuiTouchRipple-child {
+  background: none !important;
+  background-color: transparent !important;
+}

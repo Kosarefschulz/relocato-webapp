@@ -1,0 +1,249 @@
+/* Rümpel Schmiede Design - Logo mittig mit Farbverlauf */
+
+/* Basis Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Haupthintergrund mit Farbverlauf wie im Logo */
+html, body, #root {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background-attachment: fixed !important;
+  min-height: 100vh !important;
+  position: relative !important;
+}
+
+/* Alternative Farbverläufe */
+.gradient-ruempel-1 {
+  background: linear-gradient(120deg, #4a5568 0%, #a0616a 50%, #d98080 100%) !important;
+}
+
+.gradient-ruempel-2 {
+  background: linear-gradient(45deg, #5c6f82 0%, #8e5f6f 25%, #b97575 50%, #e08888 75%, #f5a0a0 100%) !important;
+}
+
+/* Container transparent für Verlauf-Sichtbarkeit */
+.MuiContainer-root,
+main,
+.main-content {
+  background: transparent !important;
+}
+
+/* Logo Container - Mittig platziert */
+.logo-container,
+.app-logo,
+.brand-logo {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 0 !important;
+  opacity: 0.15 !important;
+  pointer-events: none !important;
+}
+
+/* Header mit Logo */
+.app-header,
+.MuiAppBar-root {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Logo Styling */
+.logo-text {
+  font-family: 'Arial Black', sans-serif !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  user-select: none !important;
+}
+
+.logo-text-ruempel {
+  color: #e74c3c !important;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3) !important;
+  font-size: 72px !important;
+  display: block !important;
+}
+
+.logo-text-schmiede {
+  color: #34495e !important;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3) !important;
+  font-size: 72px !important;
+  display: block !important;
+}
+
+/* Hammer Icon */
+.logo-hammer {
+  width: 80px !important;
+  height: 80px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  margin-left: 20px !important;
+}
+
+/* Cards mit semi-transparentem Hintergrund */
+.MuiCard-root,
+.MuiPaper-root {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 20px !important;
+}
+
+.MuiCard-root:hover {
+  background: rgba(255, 255, 255, 0.98) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Text Kontrast */
+.MuiTypography-root {
+  color: #2c3e50 !important;
+}
+
+.MuiTypography-h1,
+.MuiTypography-h2,
+.MuiTypography-h3,
+.MuiTypography-h4,
+.MuiTypography-h5,
+.MuiTypography-h6 {
+  color: #1a1a1a !important;
+  font-weight: 700 !important;
+}
+
+/* Buttons im Rümpel-Stil */
+.MuiButton-contained,
+.MuiButton-containedPrimary {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3) !important;
+}
+
+.MuiButton-contained:hover {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4) !important;
+}
+
+.MuiButton-outlined {
+  border: 2px solid #34495e !important;
+  color: #34495e !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+}
+
+.MuiButton-outlined:hover {
+  background: #34495e !important;
+  color: white !important;
+}
+
+/* Input Fields */
+.MuiTextField-root .MuiOutlinedInput-root {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: #e74c3c !important;
+  border-width: 2px !important;
+}
+
+/* Chips */
+.MuiChip-root {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(52, 73, 94, 0.3) !important;
+}
+
+.MuiChip-colorPrimary {
+  background: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Avatar mit Rümpel-Farben */
+.MuiAvatar-root {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3) !important;
+}
+
+/* Scrollbar im Rümpel-Stil */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #e74c3c 0%, #34495e 100%);
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #c0392b 0%, #2c3e50 100%);
+}
+
+/* Logo als Hintergrund-Watermark */
+body::before {
+  content: 'Rümpel';
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  font-size: 120px;
+  font-weight: 900;
+  color: rgba(231, 76, 60, 0.08);
+  font-family: 'Arial Black', sans-serif;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body::after {
+  content: 'Schmiede';
+  position: fixed;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  font-size: 120px;
+  font-weight: 900;
+  color: rgba(52, 73, 94, 0.08);
+  font-family: 'Arial Black', sans-serif;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translate(-50%, -50%) translateY(0px) rotate(-15deg); }
+  50% { transform: translate(-50%, -50%) translateY(-10px) rotate(-15deg); }
+  100% { transform: translate(-50%, -50%) translateY(0px) rotate(-15deg); }
+}
+
+body::before,
+body::after {
+  animation: float 6s ease-in-out infinite;
+}
+
+body::after {
+  animation-delay: 3s;
+}
+
+/* Progress Bar in Rümpel-Farben */
+.MuiLinearProgress-root {
+  background: rgba(52, 73, 94, 0.2) !important;
+}
+
+.MuiLinearProgress-bar {
+  background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%) !important;
+}

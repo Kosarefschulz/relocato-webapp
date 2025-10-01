@@ -1,0 +1,230 @@
+/* Modern Clean Design - wie im Screenshot */
+
+/* Haupthintergrund */
+body,
+#root {
+  background: #ffffff !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container und Layout */
+.MuiContainer-root,
+[data-testid="customers-list"],
+.customers-list-container {
+  background: #ffffff !important;
+  min-height: 100vh;
+}
+
+/* Sidebar Styling (falls vorhanden) */
+.MuiDrawer-paper,
+nav,
+aside {
+  background: #6b7280 !important;
+  color: #ffffff !important;
+}
+
+.MuiDrawer-paper .MuiTypography-root,
+nav .MuiTypography-root,
+aside .MuiTypography-root {
+  color: #ffffff !important;
+}
+
+/* Hauptbereich */
+main,
+.main-content {
+  background: #ffffff !important;
+  padding: 24px;
+}
+
+/* Cards - Clean white */
+.MuiCard-root,
+.MuiPaper-root {
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+  border: none !important;
+  border-radius: 8px !important;
+}
+
+.MuiCard-root:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Text - Dunkles Grau für gute Lesbarkeit */
+.MuiTypography-root {
+  color: #374151 !important;
+}
+
+.MuiTypography-h1,
+.MuiTypography-h2,
+.MuiTypography-h3,
+.MuiTypography-h4,
+.MuiTypography-h5,
+.MuiTypography-h6 {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+/* Chips - Subtil */
+.MuiChip-root {
+  background: #f3f4f6 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.MuiChip-label {
+  color: #374151 !important;
+  font-weight: 500 !important;
+}
+
+.MuiChip-root.MuiChip-colorPrimary {
+  background: #6366f1 !important;
+  border: none !important;
+}
+
+.MuiChip-root.MuiChip-colorPrimary .MuiChip-label {
+  color: #ffffff !important;
+}
+
+/* Input Fields */
+.MuiTextField-root .MuiOutlinedInput-root {
+  background: #ffffff !important;
+  border-radius: 6px !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root fieldset {
+  border-color: #d1d5db !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root:hover fieldset {
+  border-color: #9ca3af !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: #6366f1 !important;
+  border-width: 2px !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root {
+  color: #6b7280 !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-input {
+  color: #111827 !important;
+}
+
+/* Buttons */
+.MuiButton-contained {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  border-radius: 6px !important;
+}
+
+.MuiButton-contained:hover {
+  background: #4f46e5 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.MuiButton-outlined {
+  border-color: #d1d5db !important;
+  color: #374151 !important;
+  background: #ffffff !important;
+  text-transform: none !important;
+  border-radius: 6px !important;
+}
+
+.MuiButton-outlined:hover {
+  border-color: #9ca3af !important;
+  background: #f9fafb !important;
+}
+
+/* Icon Buttons */
+.MuiIconButton-root {
+  color: #6b7280 !important;
+}
+
+.MuiIconButton-root:hover {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+/* Avatar - Moderne Farbe */
+.MuiAvatar-root {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* Tables */
+.MuiTable-root {
+  background: #ffffff !important;
+}
+
+.MuiTableCell-root {
+  color: #374151 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.MuiTableCell-head {
+  font-weight: 600 !important;
+  color: #111827 !important;
+  background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Dialog */
+.MuiDialog-paper {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+}
+
+/* Skeleton */
+.MuiSkeleton-root {
+  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%) !important;
+}
+
+/* Progress */
+.MuiLinearProgress-root {
+  background: #e5e7eb !important;
+}
+
+.MuiLinearProgress-bar {
+  background: #6366f1 !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Remove all blur and glass effects */
+* {
+  backdrop-filter: none !important;
+}
+
+/* Ensure clean edges */
+.MuiPaper-elevation1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+}
+
+.MuiPaper-elevation2 {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12) !important;
+}

@@ -1,0 +1,156 @@
+/* ULTIMATIVE LÖSUNG - ALLE HOVER EFFEKTE TÖTEN */
+
+/* Globale Regel für ALLE Buttons */
+* button,
+* button::before,
+* button::after,
+* .MuiButton-root,
+* .MuiButton-root::before,
+* .MuiButton-root::after,
+* .MuiButtonBase-root,
+* .MuiButtonBase-root::before,
+* .MuiButtonBase-root::after {
+  transition: none !important;
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+}
+
+/* Hover States komplett blockieren */
+* button:hover,
+* .MuiButton-root:hover,
+* .MuiButtonBase-root:hover {
+  filter: brightness(1) !important;
+  opacity: 1 !important;
+  transform: none !important;
+  background-color: inherit !important;
+}
+
+/* Material UI State Layer KOMPLETT entfernen */
+.MuiButton-root > *:not(.MuiButton-label):not(.MuiButton-startIcon):not(.MuiButton-endIcon),
+.MuiButtonBase-root > *:not(.MuiButton-label):not(.MuiButton-startIcon):not(.MuiButton-endIcon) {
+  display: none !important;
+}
+
+/* Ripple und TouchRipple ULTIMATIV blockieren */
+.MuiTouchRipple-root,
+.MuiTouchRipple-ripple,
+.MuiTouchRipple-rippleVisible,
+.MuiTouchRipple-ripplePulsate,
+.MuiTouchRipple-child,
+.MuiTouchRipple-childLeaving,
+.MuiTouchRipple-childPulsate,
+.MuiRipple-root,
+.MuiRipple-ripple,
+.MuiRipple-rippleVisible,
+.MuiRipple-ripplePulsate,
+.MuiButtonBase-root .MuiTouchRipple-root,
+.MuiButton-root .MuiTouchRipple-root {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  animation: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* CSS Variables die MUI nutzt überschreiben */
+.MuiButton-root,
+.MuiButtonBase-root {
+  --mui-overlays-1: transparent !important;
+  --mui-overlays-2: transparent !important;
+  --mui-overlays-3: transparent !important;
+  --mui-overlays-4: transparent !important;
+  --mui-overlays-5: transparent !important;
+  --mui-overlays-6: transparent !important;
+  --mui-overlays-7: transparent !important;
+  --mui-overlays-8: transparent !important;
+  --mui-action-hover-opacity: 0 !important;
+  --mui-action-selected-opacity: 0 !important;
+  --mui-action-disabled-opacity: 0 !important;
+  --mui-action-focus-opacity: 0 !important;
+}
+
+/* Pseudo Elemente ULTIMATIV */
+button::before,
+button::after,
+.MuiButton-root::before,
+.MuiButton-root::after,
+.MuiButtonBase-root::before,
+.MuiButtonBase-root::after {
+  content: none !important;
+  display: none !important;
+  position: static !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Dark Mode spezifisch - KEIN WEISS */
+[data-theme='dark'] button:hover,
+.dark-mode button:hover,
+html[data-theme='dark'] button:hover,
+body[data-theme='dark'] button:hover,
+#root[data-theme='dark'] button:hover {
+  background-color: transparent !important;
+  background-image: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+}
+
+/* Webkit spezifische Fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  button:hover,
+  .MuiButton-root:hover,
+  .MuiButtonBase-root:hover {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+  }
+}
+
+/* Firefox spezifische Fixes */
+@-moz-document url-prefix() {
+  button:hover::before,
+  button:hover::after,
+  .MuiButton-root:hover::before,
+  .MuiButton-root:hover::after {
+    display: none !important;
+  }
+}
+
+/* Inline Styles überschreiben */
+[style*="background"] button:hover,
+[style*="background-color"] button:hover {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background-color: transparent !important;
+}
+
+/* Z-Index Management */
+.MuiButton-root,
+.MuiButtonBase-root,
+button {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.MuiButton-root > *,
+.MuiButtonBase-root > *,
+button > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Alles was Overlay sein könnte */
+.MuiButton-root .MuiTouchRipple-root,
+.MuiButton-root::before,
+.MuiButton-root::after,
+.MuiButtonBase-root .MuiTouchRipple-root,
+.MuiButtonBase-root::before,
+.MuiButtonBase-root::after {
+  z-index: -1 !important;
+  display: none !important;
+}

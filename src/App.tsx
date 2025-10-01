@@ -43,11 +43,13 @@ import FollowUpManager from './components/FollowUpManager';
 import EmailImportMonitor from './components/EmailImportMonitor';
 import PDFTemplateManager from './components/PDFTemplateManager';
 import VolumeScanner from './components/VolumeScanner';
+import ImportCustomers from './pages/ImportCustomers';
 // Import test utils for development
 import './utils/emailTestUtils';
 import './utils/addCustomersFromScreenshots';
 import './utils/debugEnv';
 import './utils/testGoogleSheets';
+import './styles/ruempelSchmiede.css';
 import { startHealthMonitoring } from './utils/startHealthMonitoring';
 import EmailImportSettings from './components/EmailImportSettings';
 import FailedEmailRecovery from './components/FailedEmailRecovery';
@@ -232,9 +234,15 @@ function AppRoutes({ user }: { user: User | null }) {
       />
       
       {/* Admin Import Tool */}
-      <Route 
-        path="/admin-import" 
-        element={<AdminImport />} 
+      <Route
+        path="/admin-import"
+        element={<AdminImport />}
+      />
+
+      {/* Import Customers from CSV */}
+      <Route
+        path="/import-customers"
+        element={<ImportCustomers />}
       />
       
       {/* Photo Gallery */}

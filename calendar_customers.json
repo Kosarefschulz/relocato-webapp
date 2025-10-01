@@ -1,0 +1,5492 @@
+[
+  {
+    "customer_number": "KAL-604081-001",
+    "name": "(200€ Kartenzahlungen und 421\\,18€ in bar) Insgesamt 621\\,18€ U",
+    "email": "",
+    "phone": "",
+    "from_address": "Seestraße 15, Horn-Bad Meinberg, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-002",
+    "name": "(Marius) Ausladehilfe - 1029\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Holzminden ",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-08-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-003",
+    "name": "(Marius) Ausladehilfe 75CBM",
+    "email": "",
+    "phone": "",
+    "from_address": "Hannover",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-08-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1.657€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-004",
+    "name": "❗️RenoTrupp: Guido Schmidt 36.600€",
+    "email": "",
+    "phone": "",
+    "from_address": "Sonnenweg 6 Hiddenhausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-005",
+    "name": "❗️RT Reno: Klußmeyer Sven - 24.126€",
+    "email": "",
+    "phone": "017638953805",
+    "from_address": "Potsdamer Straße 82, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-006",
+    "name": "❗️RT: RM Sascha Gretenkord 3000€",
+    "email": "",
+    "phone": "",
+    "from_address": "Iburger Straße 196, Hohne, Lengerich, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-007",
+    "name": "2x Ausldehilfe für München Hr. Schurr",
+    "email": "",
+    "phone": "",
+    "from_address": "Bad salzuflen ",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-008",
+    "name": "4 Umzugshelfer RELOCATO Benny",
+    "email": "",
+    "phone": "",
+    "from_address": "Erichshagener Feld 20, Erichshagen, Nienburg/Weser, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-009",
+    "name": "Abriss Garage in Essen 16.400€",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-010",
+    "name": "Ahmed Eldistawy - 1000€ in bar bezahlt",
+    "email": "",
+    "phone": "015738132924",
+    "from_address": "Stiftstraße 2, Soest, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-011",
+    "name": "Akash Yadav 1889\\",
+    "email": "",
+    "phone": "0176",
+    "from_address": "Hauptstraße 178, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-012",
+    "name": "Alexander Betz 3890€ #RC",
+    "email": "",
+    "phone": "",
+    "from_address": "Zum Hönerbrock 45, Enger, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-29",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-013",
+    "name": "Alta Klinik - 593\\",
+    "email": "",
+    "phone": "052126055541",
+    "from_address": "ALTA Klinik, Alfred-Bozi-Straße 3, 33602 Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-014",
+    "name": "Aman Fkadu - 3.195\\",
+    "email": "",
+    "phone": "01566360938",
+    "from_address": "Schmiedestraße 25, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-015",
+    "name": "André Fischer",
+    "email": "",
+    "phone": "",
+    "from_address": "Landerweg 23, Oerlinghausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-19",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 980€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-016",
+    "name": "Andreas Duschik - 1729\\",
+    "email": "",
+    "phone": "01758018387",
+    "from_address": "Goldregenweg 5, Kernstadt, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-017",
+    "name": "Andreas Janik (Voss) - 1.010\\,01€ Tima und Mischa mit kleine",
+    "email": "",
+    "phone": "01719573196",
+    "from_address": "Korbmacherstraße 2A, Rehme, Bad Oeynhausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-018",
+    "name": "Andreas Milde - 3000€ Markus Dima und 3 AH",
+    "email": "",
+    "phone": "01714536531",
+    "from_address": "Sipe 4, Berge, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-019",
+    "name": "Andreas Milde drei Ausladehilfen organisieren",
+    "email": "",
+    "phone": "01714536531",
+    "from_address": "Sipe 4, Berge, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-020",
+    "name": "Andreas Pocholski",
+    "email": "",
+    "phone": "017697706993",
+    "from_address": "Fallerslebenstraße 8A, Schloß Holte-Stukenbrock, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1.700€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-021",
+    "name": "Andreas Schulz 2 Mann",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 5.000€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-022",
+    "name": "Angelika Wöpkemeier",
+    "email": "",
+    "phone": "017676813872",
+    "from_address": "Schäferweg 16, Hiddenhausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1500€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-023",
+    "name": "Anika feger",
+    "email": "",
+    "phone": "017623870006",
+    "from_address": "Am Frölenberg 21, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-024",
+    "name": "Anke Bleimund - 667\\",
+    "email": "",
+    "phone": "015771764897",
+    "from_address": "Horstheider Weg 12, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-11",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-025",
+    "name": "Ann-Kathrin Walter 2.590\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Hohenstaufenring 67, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-026",
+    "name": "Annika Gievers(IS24)-3.148\\",
+    "email": "",
+    "phone": "01782400105",
+    "from_address": "Österwieher Straße 70 Verl, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-12",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-027",
+    "name": "Asja Micieli",
+    "email": "",
+    "phone": "01756822852",
+    "from_address": "Freckenhorster Straße 29, Warendorf, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-028",
+    "name": "auslade. Hilfe\\, Benny",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-029",
+    "name": "Ausladehilfe (Benjamin)",
+    "email": "",
+    "phone": "",
+    "from_address": "Baunatal, Hessen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-07-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 732€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-030",
+    "name": "Ausladehilfe (Schurr München) - 948\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Dietrich-Schröder-Straße 23, Mengede, Dortmund, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-07-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-031",
+    "name": "Ausladehilfe für Benny - Ausladehilfe 910\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-19",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-032",
+    "name": "Ausladehilfe für Marius",
+    "email": "",
+    "phone": "",
+    "from_address": "Bramsche",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-033",
+    "name": "Ausladehilfe für Marius 803\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Halle westfalen",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-08-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-034",
+    "name": "Ausladehilfe Marius",
+    "email": "",
+    "phone": "",
+    "from_address": "Münster ",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-035",
+    "name": "Ausladehilfe Marius 1130\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-036",
+    "name": "Axel Erfkamp /Brigitte Erfkamp",
+    "email": "",
+    "phone": "",
+    "from_address": "Sankt-Omer-Straße 17, 32756 Detmold, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": null,
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-037",
+    "name": "Ayten Zengin 2.300€",
+    "email": "",
+    "phone": "01793722529",
+    "from_address": "Talstraße 19, Oesede, Georgsmarienhütte, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-23",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-038",
+    "name": "Beate Prinz",
+    "email": "",
+    "phone": "017668641300",
+    "from_address": "Heinestraße 1A, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-039",
+    "name": "Benedikt Harding",
+    "email": "",
+    "phone": "015238301810",
+    "from_address": "Zur Verlach 21, Hilden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-040",
+    "name": "Benedikt Harding 5.5k",
+    "email": "",
+    "phone": "",
+    "from_address": "Zur Verlach 21 40 723 Hilden",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-11",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-041",
+    "name": "Benny Ausladehilfe in Osnabrück",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-042",
+    "name": "Betina Streinau",
+    "email": "",
+    "phone": "",
+    "from_address": "Hinter den Höfen 1, Bad Driburg, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-043",
+    "name": "Bianca Koal - entladen 3999\\,99 €",
+    "email": "",
+    "phone": "01727383918",
+    "from_address": "Am Blanken Boom 2, Preußisch Ströhen, Rahden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-044",
+    "name": "Bianca Koal 3999\\,99 € - Beladen Lukas und Ruben",
+    "email": "",
+    "phone": "01727383918",
+    "from_address": "Am Blanken Boom 2, Preußisch Ströhen, Rahden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-045",
+    "name": "Bianca Raven - 4.418\\",
+    "email": "",
+    "phone": "017645843617",
+    "from_address": "Schiefer Brink 6, Extertal, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-046",
+    "name": "Bianca Raven - 4.418\\,77 Bar",
+    "email": "",
+    "phone": "017645843617",
+    "from_address": "Schiefer Brink 6, Extertal, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-047",
+    "name": "Bianca Raven - 4.418\\,77€ Bar",
+    "email": "",
+    "phone": "017645843617",
+    "from_address": "Schiefer Brink 6, Extertal, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-09",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-048",
+    "name": "Bianka Jesse-Klott",
+    "email": "",
+    "phone": "01728335539",
+    "from_address": "Nelkenweg 26 Rheda-Wiedenbrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-049",
+    "name": "Birgit Volkland",
+    "email": "",
+    "phone": "017676649392",
+    "from_address": "Borgholzhausen ",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-050",
+    "name": "Boroslavski Rest abholen ?",
+    "email": "",
+    "phone": "",
+    "from_address": "Waldstraße 45, Mühlhausen/Thüringen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-051",
+    "name": "Boroslawski Klaus für die Eltern",
+    "email": "",
+    "phone": "01723415756",
+    "from_address": "Waldstraße 45, Mühlhausen/Thüringen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-052",
+    "name": "Boroslawski Klaus für die Eltern 4.448\\",
+    "email": "",
+    "phone": "01723415756",
+    "from_address": "Waldstraße 45, Mühlhausen/Thüringen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-053",
+    "name": "Brigitte Beckschwarte",
+    "email": "",
+    "phone": "",
+    "from_address": "St-Barbara-Straße 16, Lippetal, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-054",
+    "name": "Brigitte Krause - 1.387\\",
+    "email": "",
+    "phone": "01754907420",
+    "from_address": "Rosenheide 1E, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-055",
+    "name": "Brigitte u. Rolf Stern - 1.999\\,50€ - 1200€ Umzug",
+    "email": "",
+    "phone": "01777543620",
+    "from_address": "Elser Bruch 65, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-056",
+    "name": "Brigitte u. Rolf Stern Entrümpelung",
+    "email": "",
+    "phone": "01777543620",
+    "from_address": "Elser Bruch 65, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-23",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-057",
+    "name": "Britta Bank",
+    "email": "",
+    "phone": "01711006497",
+    "from_address": "Limberger Straße 76, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-058",
+    "name": "Britta Bank - 3599\\",
+    "email": "",
+    "phone": "01711006497",
+    "from_address": "Limberger Straße 76, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-059",
+    "name": "BT: Fr. Glaw - 1.190€",
+    "email": "",
+    "phone": "015175002402",
+    "from_address": "Komturstraße 22, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-060",
+    "name": "Cards&Arts Verlags- und Vertriebsgesellschaft mbH",
+    "email": "",
+    "phone": "0520116843",
+    "from_address": "Künsebecker Weg 51A, Halle (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-061",
+    "name": "Cards&Arts Verlags- und Vertriebsgesellschaft mbH - 16.992\\",
+    "email": "",
+    "phone": "0520116843",
+    "from_address": "Künsebecker Weg 51A, Halle (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-062",
+    "name": "Carmen Frean Chapero",
+    "email": "",
+    "phone": "015168190495",
+    "from_address": "Staumühler Straße 180, Staumühle, Hövelhof, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 2950€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-063",
+    "name": "Carmen Lienard",
+    "email": "",
+    "phone": "017621154587",
+    "from_address": "Montessoriweg 7, Schötmar, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-064",
+    "name": "Carolina Klein (1900 €)",
+    "email": "",
+    "phone": "01775305094",
+    "from_address": "Viktoriastraße 27, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-065",
+    "name": "Christel Klüter - 2.761\\",
+    "email": "",
+    "phone": "017621638268",
+    "from_address": "Engelstraße 18, Bünde, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-066",
+    "name": "Christiane Faehsler 2k",
+    "email": "",
+    "phone": "01621737782",
+    "from_address": "Hohenzollernstraße 4, Gütersloh",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-067",
+    "name": "Christina Nolte",
+    "email": "",
+    "phone": "016098066000",
+    "from_address": "August-Bebel-Straße 108, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-14",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-068",
+    "name": "Claudia Bäger",
+    "email": "",
+    "phone": "015233680400",
+    "from_address": "Vorsteherweg 4, Enger, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 2400€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-069",
+    "name": "Claudia Dierkes",
+    "email": "",
+    "phone": "015126460522",
+    "from_address": "Ploče, Kroatien",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-070",
+    "name": "Colin Atkins - 687\\",
+    "email": "",
+    "phone": "01713552159",
+    "from_address": "Hermann-Windel-Straße 17, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-071",
+    "name": "Dana Vowinckel",
+    "email": "",
+    "phone": "015782272787",
+    "from_address": "Schneidemühler Straße 91B, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1.500€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-072",
+    "name": "Daniel Kababgi - 1.217\\",
+    "email": "",
+    "phone": "017645767677",
+    "from_address": "Vulsiekshof 55, Großdornberg, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-073",
+    "name": "Daniela Wancke",
+    "email": "",
+    "phone": "017651871921",
+    "from_address": "Iburger Straße 78, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-074",
+    "name": "Detlev Heumann - 1791\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Am Speckenbach 18, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-075",
+    "name": "Doris Lüking",
+    "email": "",
+    "phone": "",
+    "from_address": "Strandweg 11, Brake, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-076",
+    "name": "Doris März - 1356\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Holperdorper Straße 33, Lienen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-077",
+    "name": "Doris Mattson",
+    "email": "",
+    "phone": "01701120639",
+    "from_address": "Alte Verler Straße 22, Sennestadt, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-19",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-078",
+    "name": "Eckert 1.598\\,44 €",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-03",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-079",
+    "name": "Elke Fahle",
+    "email": "",
+    "phone": "",
+    "from_address": "An der Rehwiese 20, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-080",
+    "name": "Ellerbeck 2999\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Damenweg 20, Sutthausen, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-081",
+    "name": "Ellerbeck Streicharbeiten",
+    "email": "",
+    "phone": "015118432991",
+    "from_address": "Ellerstraße 25, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-03",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-082",
+    "name": "Ellerbeck Streicharbeiten - 3.543\\",
+    "email": "",
+    "phone": "015118432991",
+    "from_address": "Ellerstraße 25, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-083",
+    "name": "Emilia Kirste",
+    "email": "",
+    "phone": "",
+    "from_address": "Hengstweg 10, Quelle, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-19",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-084",
+    "name": "Emilia Kirste - 5500€ wegen schaden",
+    "email": "",
+    "phone": "",
+    "from_address": "Hengstweg 10, Quelle, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-085",
+    "name": "ETW GmbH Transport Schaltanlage 535\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Fichtenweg 9, 33649 Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-086",
+    "name": "Eva Mari Tönsmann",
+    "email": "",
+    "phone": "017631398055",
+    "from_address": "Ernst-Rein-Straße 54, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1800€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-087",
+    "name": "Eva Neumann",
+    "email": "",
+    "phone": "01622017885",
+    "from_address": "Feuerdornwinkel, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 780€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-088",
+    "name": "Fam Winnemöller 1.734\\",
+    "email": "",
+    "phone": "025865839971",
+    "from_address": "Breede 25, Beelen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-089",
+    "name": "Fam. Klose (Arzt von Murad)",
+    "email": "",
+    "phone": "015224592762",
+    "from_address": "Magnolienweg 2A, Gütersloh, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-090",
+    "name": "Familie Oelmeyer",
+    "email": "",
+    "phone": "017672404894",
+    "from_address": "Bahnhofstraße 2, Wesselburen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1990€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-091",
+    "name": "Familie Wagner",
+    "email": "",
+    "phone": "045232310",
+    "from_address": "Eichendorffplatz 3, Bad Nenndorf, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-18",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 2.015€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-092",
+    "name": "Familie Wagner - 1000 Euro",
+    "email": "",
+    "phone": "0452323",
+    "from_address": "Eichendorffplatz 3, Bad Nenndorf, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-093",
+    "name": "Farhat Jabeen - 990\\",
+    "email": "",
+    "phone": "017635996883",
+    "from_address": "Splittenbrede 9, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-094",
+    "name": "Fliesenleger Start Hiddenhausen",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-095",
+    "name": "Fr. Filiz Temiz 4k",
+    "email": "",
+    "phone": "015141678274",
+    "from_address": "Luttermannsiedlung 16, Bünde, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-11-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-096",
+    "name": "Fr. Fried/ Hayder Dhahir",
+    "email": "",
+    "phone": "",
+    "from_address": "Josefstraße 2, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-097",
+    "name": "Fr. Hort Lydia 1.800€ (sind in einer Gemeinde\\, kommen auch ein",
+    "email": "",
+    "phone": "01756369418",
+    "from_address": "Vogelsang 1, Lemgo, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-03",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-098",
+    "name": "Fr. Melanie Hainke (1300 Euro)",
+    "email": "",
+    "phone": "01729237425",
+    "from_address": "Detmolder Straße 171, Lohe, Bad Oeynhausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-099",
+    "name": "Fr. Oberdieck - 839\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Birkenstraße 52, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-100",
+    "name": "Fr. Tina Möller 2.260€ = 1.800€ schaden Wohnzimmerschrank bespr",
+    "email": "",
+    "phone": "017697335700",
+    "from_address": "Turmstraße 52, Lohe, Bad Oeynhausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-29",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-101",
+    "name": "Francke Umzug -",
+    "email": "",
+    "phone": "",
+    "from_address": "Gotenstraße 9, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-102",
+    "name": "Frank Schniedermeier(IS24)-1.302\\,16€ Sergej und Josiah mit Sp",
+    "email": "",
+    "phone": "015170850147",
+    "from_address": "Dr-Grasso-Straße 15, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-103",
+    "name": "Franziska Weßler",
+    "email": "",
+    "phone": "",
+    "from_address": "Von-Möller-Straße 46, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-104",
+    "name": "Frau",
+    "email": "",
+    "phone": "0170203222867",
+    "from_address": "Am Baumhof 19, Rietberg, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-105",
+    "name": "Frau Butz - 1200\\,71 € für Bett und Schrank An und Aufbau K",
+    "email": "",
+    "phone": "",
+    "from_address": "Hülsenbuschweg 3A, Lübbecke, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-106",
+    "name": "Frau Marondel (Messe)",
+    "email": "",
+    "phone": "",
+    "from_address": "Am Mühlenbach 29, Schuckenbaum, Leopoldshöhe, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2026-02-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 7.317€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-107",
+    "name": "Frau Sigrid Milius - 2362\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Jöllenbecker Straße 21A, Werther (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-108",
+    "name": "Frau Tugce Tasdemir 1.386\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Wesereschstraße 88, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-109",
+    "name": "Frau Ulrike Engel 1194\\,00€ - 50\\,00€ rabatt wegen scha",
+    "email": "",
+    "phone": "054048998502",
+    "from_address": "Reinhildisstraße 1, Westerkappeln, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-110",
+    "name": "Frau Ursula Geiler",
+    "email": "",
+    "phone": "052222368896",
+    "from_address": "An der Landwehr 6, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-111",
+    "name": "Frau Ursula Geiler 4.994\\",
+    "email": "",
+    "phone": "052222368896",
+    "from_address": "An der Landwehr 6, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-112",
+    "name": "Frau Ursula Geiler 4.994\\,73 €",
+    "email": "",
+    "phone": "052222368896",
+    "from_address": "An der Landwehr 6, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-113",
+    "name": "Gabriele Roth",
+    "email": "",
+    "phone": "01707339502",
+    "from_address": "Am Urberg 14A, Bad Iburg, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-114",
+    "name": "Gabriele Roth 5.496\\,98€ - 400\\,00€ wegen Schaden",
+    "email": "",
+    "phone": "01707339502",
+    "from_address": "Am Urberg 14A, Bad Iburg, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-115",
+    "name": "Gabriele Wattenberg",
+    "email": "",
+    "phone": "015231929497",
+    "from_address": "Fahrenplatz 23, Dörentrup, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 2.400€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-116",
+    "name": "Georg Rode",
+    "email": "",
+    "phone": "05221981649",
+    "from_address": "Schumannstraße 26, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-117",
+    "name": "Georg Rode - 4.750€ Viktor \\, Ruslan und Kollegen ? (Koffer",
+    "email": "",
+    "phone": "05221981649",
+    "from_address": "Schumannstraße 26, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-118",
+    "name": "Gerd Ellerbeck",
+    "email": "",
+    "phone": "",
+    "from_address": "Damenweg 20, Sutthausen, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-119",
+    "name": "Gerd Ellerbeck 1.793\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Im Freeden 7, Bissendorf, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-120",
+    "name": "Gessica Stella",
+    "email": "",
+    "phone": "015788918590",
+    "from_address": "Heeper Straße 10, Bielefeld",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-121",
+    "name": "Ghazaleh Khorsandifard",
+    "email": "",
+    "phone": "017647147124",
+    "from_address": "Ammerweg 8, Kernstadt, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-29",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1.350€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-122",
+    "name": "GHK Domo Fr. Rother",
+    "email": "",
+    "phone": "05382955023",
+    "from_address": "Herz- und Diabeteszentrum NRW, Georgstraße 11, Innenstadt, 32545",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-123",
+    "name": "Gietzen-Wieland RM Auftrag",
+    "email": "",
+    "phone": "",
+    "from_address": "Bernhard-Kramer-Straße 16, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-124",
+    "name": "Habchi - 2x Osnabrück",
+    "email": "",
+    "phone": "017681487804",
+    "from_address": "Hasestraße 44, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-125",
+    "name": "Hannelore Peters 1.528\\",
+    "email": "",
+    "phone": "01725614707",
+    "from_address": "Sternstraße 1, Ubbedissen, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-23",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-126",
+    "name": "Hans-Udo Möller - IS24 (2300€)",
+    "email": "",
+    "phone": "015156062444",
+    "from_address": "Bessemerweg 2, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-127",
+    "name": "Heike Koch (1990\\,00 €)",
+    "email": "",
+    "phone": "",
+    "from_address": "Sternstraße 1, Ubbedissen, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-128",
+    "name": "Heike Meyer zu Bentrup - REST Keller",
+    "email": "",
+    "phone": "",
+    "from_address": "An der Wegböhne 2, Rheda-Wiedenbrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-129",
+    "name": "Heike Meyer zu Bentrup 2.624\\",
+    "email": "",
+    "phone": "",
+    "from_address": "An der Wegböhne 2, Rheda-Wiedenbrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-130",
+    "name": "Heinz Hildebrand",
+    "email": "",
+    "phone": "",
+    "from_address": "Ginsterstraße 36, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-131",
+    "name": "Herr Löffler",
+    "email": "",
+    "phone": "",
+    "from_address": "Viktoriastrasse 14, 32257 Bünde",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-132",
+    "name": "Hildegard Palazzolo 2000€ 1000€ bezahlt Rest",
+    "email": "",
+    "phone": "",
+    "from_address": "Unter den Ulmen 27, Innenstadt, Gütersloh, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-133",
+    "name": "Hr. Aliaksei Petrashkevich - 1.781\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Herforder Straße 3, Innenstadt, Bad Oeynhausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-23",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-134",
+    "name": "Hr. Helmut Gröger",
+    "email": "",
+    "phone": "01724245151",
+    "from_address": "Joseph-Haydn-Straße 41, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2026-01-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-135",
+    "name": "Hr. Josef Schnelting",
+    "email": "",
+    "phone": "",
+    "from_address": "Versmolder Straße 25, Greffen, Harsewinkel, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-29",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-136",
+    "name": "Hubertus Fischer - 655\\",
+    "email": "",
+    "phone": "015789530484",
+    "from_address": "Osnabrücker Straße, Ostercappeln, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-137",
+    "name": "Hüseyin Dumlu 3.969\\",
+    "email": "",
+    "phone": "01622701920",
+    "from_address": "Graf-von-Stauffenberg-Straße 2, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-138",
+    "name": "Inge-Lise Rasmussen - 2.854\\",
+    "email": "",
+    "phone": "016090160644",
+    "from_address": "Zum Meierhof 16, Verl, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-139",
+    "name": "Inge-Lise Rasmussen - 2.854\\,51€ (hat erst nur 2500€ gezahlt)",
+    "email": "",
+    "phone": "016090160644",
+    "from_address": "Zum Meierhof 16, Verl, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-03",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-140",
+    "name": "Irina Atschkassow",
+    "email": "",
+    "phone": "01776977390",
+    "from_address": "Arndtstraße 27, Innenstadt, Bad Oeynhausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-11-29",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-141",
+    "name": "Isabell Hagen - 2.682\\,32€ auf 2650€ glatt",
+    "email": "",
+    "phone": "",
+    "from_address": "Viktoriastraße 8, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-142",
+    "name": "Jan Schmidt 1.219\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-143",
+    "name": "Jan Schmidt Auslagerung",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-144",
+    "name": "Jara Herwig - 1.137\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Am Vogelsang 4, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-145",
+    "name": "Jari Kreuzinger - 1.259\\,88€ 2SUB Dennis",
+    "email": "",
+    "phone": "01737063016",
+    "from_address": "Ernteweg 14, Bokel, Halle (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-146",
+    "name": "Jean-Claude Hagenstein",
+    "email": "",
+    "phone": "01705450354",
+    "from_address": "Alter Berg 6, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-147",
+    "name": "Johann Schmidt 3.500€ KK",
+    "email": "",
+    "phone": "017622016143",
+    "from_address": "Neubrückenstraße 2, Büren, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-148",
+    "name": "Johanna Dannehl",
+    "email": "",
+    "phone": "017681653350",
+    "from_address": "Bielefeld",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-149",
+    "name": "Joline Langner - 1.748\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Irland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-150",
+    "name": "Juliana Lima",
+    "email": "",
+    "phone": "01723724204",
+    "from_address": "Ost-Contrescarpe 13 31737 Rinteln Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-151",
+    "name": "Julius Sicking",
+    "email": "",
+    "phone": "",
+    "from_address": "Minden ",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 699€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-152",
+    "name": "Jürgen Harder 2.728\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Tannenbergplatz 2, Espelkamp, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-23",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-153",
+    "name": "Justin Korte - 1.498\\",
+    "email": "",
+    "phone": "01605661517",
+    "from_address": "Sudetenstraße 15, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-14",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-154",
+    "name": "Kai Donges - 831\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Hafenstraße 6, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-08-12",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-155",
+    "name": "Karin Clausen",
+    "email": "",
+    "phone": "015155600134",
+    "from_address": "Osterrade 2, Bovenau, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-11",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-156",
+    "name": "Karin Nelling - 2.163\\",
+    "email": "",
+    "phone": "052501886",
+    "from_address": "Droste-Hülshoff-Straße 7 Delbrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-157",
+    "name": "Kerstin Watermann (immo) - 1954\\",
+    "email": "",
+    "phone": "01774950287",
+    "from_address": "Dankerser Straße 23, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-158",
+    "name": "KingCans Lager",
+    "email": "",
+    "phone": "01777998069",
+    "from_address": "Erwitter Straße 34, Geseke, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-159",
+    "name": "KingCans Lager - 5050\\",
+    "email": "",
+    "phone": "01777998069",
+    "from_address": "Erwitter Straße 34, Geseke, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-160",
+    "name": "Kingshuk Karuri",
+    "email": "",
+    "phone": "",
+    "from_address": "Im Lohfeld 119, Kernstadt, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-161",
+    "name": "Kingshuk Karuri 2.907\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Im Lohfeld 119, Kernstadt, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-162",
+    "name": "Lars Liessmann - 1176\\",
+    "email": "",
+    "phone": "01629069396",
+    "from_address": "Johannisstraße 30, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-163",
+    "name": "Lars Schuerstedt - 5.498\\",
+    "email": "",
+    "phone": "015739103228",
+    "from_address": "An der Else 11, Kirchlengern, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-164",
+    "name": "Lasrich 1690 Euro",
+    "email": "",
+    "phone": "052424184448",
+    "from_address": "Heinrich-Püts-Straße 27, Rheda-Wiedenbrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-165",
+    "name": "Leonore Galuschka",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-166",
+    "name": "Leonore Galuschka - 4.779\\,64€ auf 4500 Glatt wegen schaden",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-167",
+    "name": "Linda König 2899\\",
+    "email": "",
+    "phone": "",
+    "from_address": "34 Rue de Romainville, 75019 Paris, Frankreich",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-03",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-168",
+    "name": "Lisa Hüttemann - 650\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Albrechtstraße 37, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-169",
+    "name": "Lisa Weiss-Kosiek",
+    "email": "",
+    "phone": "",
+    "from_address": "Diebrocker Straße 32, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-11",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-170",
+    "name": "Lisa Zimmer 5.899\\",
+    "email": "",
+    "phone": "01723269483",
+    "from_address": "Jahnstraße 1A, Lotte, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-171",
+    "name": "LUKAS - Dachreinigung bei Schmidt",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-172",
+    "name": "lüking zwei Regale im Keller noch abholen Entrümpelung und dann",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-173",
+    "name": "Manuela Brechmann 2.077\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Steinhorster Straße 6, Steinhorst, Delbrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-174",
+    "name": "Maria Brundo (365) - 1.286\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Beckumer Straße 11, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-18",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-175",
+    "name": "Maria Krause Empf.",
+    "email": "",
+    "phone": "",
+    "from_address": "Am Schnatbach 6, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-176",
+    "name": "Marion Kwiotek - 1.043\\",
+    "email": "",
+    "phone": "015128985482",
+    "from_address": "Saturnring 18, 32130 Enger",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-177",
+    "name": "Markus Frank (3500€) Markus \\, Lukas \\, Dima",
+    "email": "",
+    "phone": "01714536531",
+    "from_address": "Siebenbürger Straße 10, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-178",
+    "name": "Markus Wrenger - 1.898\\,65€ Tima\\, Sergej\\, und Josiah (Spr",
+    "email": "",
+    "phone": "015789239922",
+    "from_address": "Im Horst 2c Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-179",
+    "name": "Marten Klein - 1.368\\",
+    "email": "",
+    "phone": "017623299002",
+    "from_address": "Osterstraße 95, Münster, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-180",
+    "name": "Marvin Inkmann",
+    "email": "",
+    "phone": "",
+    "from_address": "Ravensberger Straße 2, Halle (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-181",
+    "name": "Merlin Hertel - 949\\",
+    "email": "",
+    "phone": "015119130902",
+    "from_address": "Habsburgerring 3, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-182",
+    "name": "Mert Becker 849\\",
+    "email": "",
+    "phone": "015510994684",
+    "from_address": "Kirchstraße 9, Damme, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-183",
+    "name": "Mia Lübeck - 1.807\\",
+    "email": "",
+    "phone": "01702747690",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-18",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-184",
+    "name": "Mia Lübeck Partner - 965\\,51€ Rechnungsadresse siehe unten",
+    "email": "",
+    "phone": "01702747690",
+    "from_address": "Am Bollholz 17A, Ubbedissen, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-185",
+    "name": "Michael Buch",
+    "email": "",
+    "phone": "",
+    "from_address": "Lerchenstraße 2, Hagen, Hagen am Teutoburger Wald, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-186",
+    "name": "Michael Schaper",
+    "email": "",
+    "phone": "01755986521",
+    "from_address": "Am Schildkamp 16, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-187",
+    "name": "Michaela Heine",
+    "email": "",
+    "phone": "",
+    "from_address": "Falscheider Str. 17, 32584 Löhne, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-188",
+    "name": "Mirco Schröder - 1.249\\",
+    "email": "",
+    "phone": "015205758293",
+    "from_address": "Dorotheenstraße 5, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-189",
+    "name": "Möller Tech (Mike Schuh) - 2.500€ abzüglich noch 10% Markus\\, M",
+    "email": "",
+    "phone": "",
+    "from_address": "Gütersloher Straße 153, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-190",
+    "name": "Möller Tech (Mike Schuh) 3.800€ anzüglich noch 10% Marcel\\, Mar",
+    "email": "",
+    "phone": "",
+    "from_address": "Gütersloher Straße 153, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-191",
+    "name": "Möllerring - KK 2.968\\,16€ Rechnung ausgedruckt schicken",
+    "email": "",
+    "phone": "015124290125",
+    "from_address": "Riemsloher Straße 6, Melle-Mitte, Melle, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-192",
+    "name": "Monika de Reus 2000euro bezahlt Rest Überweisung",
+    "email": "",
+    "phone": "01707853040",
+    "from_address": "Veilchenweg 12, Werl-Aspe, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-14",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-193",
+    "name": "Nick Borislavski - 2100€ in bar (er soll sich nochmal meld",
+    "email": "",
+    "phone": "01723415756",
+    "from_address": "Dörener Weg 112, Kernstadt, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-194",
+    "name": "Nico Engelke - 999\\",
+    "email": "",
+    "phone": "01719387828",
+    "from_address": "Grüner Weg 1, Rahden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-195",
+    "name": "Nils Koßenjans - 1.168\\",
+    "email": "",
+    "phone": "015110039743",
+    "from_address": "Am Kalvarienberg, Münster, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-196",
+    "name": "Noel Koch Mobilitas GmbH",
+    "email": "",
+    "phone": "",
+    "from_address": "Breite Straße 28, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-197",
+    "name": "Norbert Ruthe ( 600€ in Bar bezahlt und 300€ müssen die no",
+    "email": "",
+    "phone": "",
+    "from_address": " -Detmolderstrasse 25, Oerlinghausen",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-198",
+    "name": "Oleksandr Kiyenko",
+    "email": "",
+    "phone": "017685978288",
+    "from_address": "Herforder Straße 3, Bünde, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-199",
+    "name": "Olga Maurer",
+    "email": "",
+    "phone": "01726000862",
+    "from_address": "Rolfshof 44, 33104 Paderborn",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-200",
+    "name": "OZ Marketing Hr. Öztürk 1.252\\",
+    "email": "",
+    "phone": "054150797170",
+    "from_address": "Lindenstr. 51b 49191 belm",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-201",
+    "name": "Paul Ulrich Bosse 1156\\,09€ +25€ Karton",
+    "email": "",
+    "phone": "017630385089",
+    "from_address": "Bismarckstraße 34, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-202",
+    "name": "Paul Württemberger",
+    "email": "",
+    "phone": "015112362476",
+    "from_address": "Lemförder Straße 3, Hannover, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-203",
+    "name": "Paul Württemberger -",
+    "email": "",
+    "phone": "015112362476",
+    "from_address": "Lemförder Straße 3, Hannover, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-204",
+    "name": "Paul Württemberger - 4.991\\",
+    "email": "",
+    "phone": "015112362476",
+    "from_address": "Lemförder Straße 3, Hannover, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-29",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-205",
+    "name": "Petra Dau-Schmidt",
+    "email": "",
+    "phone": "",
+    "from_address": "Mühlenstraße 70 49828, Neuhausen auf den Fildern, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-29",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-206",
+    "name": "Petra Dau-Schmidt 3.368\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Mühlenstraße 70 49828, Neuhausen auf den Fildern, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-207",
+    "name": "Petra Jerrentrup - 1.994\\",
+    "email": "",
+    "phone": "057339934073",
+    "from_address": "Schulgarten 20, Vlotho, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-208",
+    "name": "Petrus van Amerongen - 1.598\\",
+    "email": "",
+    "phone": "015756204446",
+    "from_address": "Birkenstraße 48, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-209",
+    "name": "Pia Dullweber - 2.051\\",
+    "email": "",
+    "phone": "01742075716",
+    "from_address": "Bäckerstraße 60, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-210",
+    "name": "Pratt Graham - 1.289\\",
+    "email": "",
+    "phone": "01703867598",
+    "from_address": "Niederwall 65, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-211",
+    "name": "Rabe Melanie",
+    "email": "",
+    "phone": "",
+    "from_address": "Heckenrosenweg 9, Kuhweide, Meppen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-02",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-212",
+    "name": "Rainer Bremermann",
+    "email": "",
+    "phone": "017681700327",
+    "from_address": "Fuchskaute 32, Fröndenberg/Ruhr, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-14",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-213",
+    "name": "Rainer Bremermann(365)-6.855\\",
+    "email": "",
+    "phone": "017681700327",
+    "from_address": "Fuchskaute 32, Fröndenberg/Ruhr, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-12",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-214",
+    "name": "Ralf Sundermeier",
+    "email": "",
+    "phone": "01709393642",
+    "from_address": "Im Tale 3, Löhne, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-03",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1.950€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-215",
+    "name": "Ralph Bredemeier",
+    "email": "",
+    "phone": "015129680612",
+    "from_address": "Teutoburger Straße 46, Halle (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-216",
+    "name": "Raphael Zirbs",
+    "email": "",
+    "phone": "",
+    "from_address": "Heeper Straße 270, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-11",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-217",
+    "name": "Raphael Zirbs 4494\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Heeper Straße 270, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-218",
+    "name": "Rebekka Biener 787\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Martinistraße 84 Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-219",
+    "name": "René Sakschewski - 2.447\\",
+    "email": "",
+    "phone": "01773109160",
+    "from_address": "Bergstraße 9, Rinteln, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-19",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-220",
+    "name": "Reno RT: Jakob Schweisstechnik 2.475\\,20€ Markus und Kevin",
+    "email": "",
+    "phone": "015128512151",
+    "from_address": "Northeimer Straße 5, Einbeck, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-221",
+    "name": "Reno: Matter - Büro aufbauen",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-222",
+    "name": "RenoTrupp: Guido Schmidt 36.600€",
+    "email": "",
+    "phone": "",
+    "from_address": "Lemgoer Straße 67, Brake, Lemgo, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-223",
+    "name": "Rimu Patil - 1.289\\",
+    "email": "",
+    "phone": "015901460341",
+    "from_address": "Borchener Straße, 33098 Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-224",
+    "name": "Robert Rinke",
+    "email": "",
+    "phone": "",
+    "from_address": "Großer Kamp 2, Ebbendorf, Hilter am Teutoburger Wald, Deutschlan",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-225",
+    "name": "Roswitha Rosemann - 1.400€ Martin und drei Ausladehöfen",
+    "email": "",
+    "phone": "015226136840",
+    "from_address": "Auf dem Kampe, Ostercappeln, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-226",
+    "name": "RT Bad: Manfred Gärtner 4.298€",
+    "email": "",
+    "phone": "",
+    "from_address": "Berlinger Straße 1, Venne, Ostercappeln, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-227",
+    "name": "RT Reno: Christopher Francke - Boden Wohnzimmer",
+    "email": "",
+    "phone": "015172424512",
+    "from_address": "Treppenstraße 26, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-228",
+    "name": "RT Reno: Klußmeyer Sven - 24.126€",
+    "email": "",
+    "phone": "017638953805",
+    "from_address": "Potsdamer Straße 82, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-229",
+    "name": "RT Rümpel Schmiede: Stefan Döring 790€",
+    "email": "",
+    "phone": "01733091002",
+    "from_address": "Caroline Oetker Stift, Hochstraße 2, 33615 Bielefeld, Deutschlan",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-230",
+    "name": "RT Schmiede: Bernd Hinrechs 1.500€",
+    "email": "",
+    "phone": "",
+    "from_address": "Seetorstraße 5A, 31737 Rinteln, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-12-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-231",
+    "name": "RT Schmiede: Fr. Sträßer 450€",
+    "email": "",
+    "phone": "015204428232",
+    "from_address": "Stapenhorststraße 157, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-232",
+    "name": "RT Schmiede: Norbert Fuest",
+    "email": "",
+    "phone": "",
+    "from_address": "Nimmersather Str. 14, 33803 Steinhagen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-233",
+    "name": "RT Schmiede: Norbert Fuest 3.000€",
+    "email": "",
+    "phone": "",
+    "from_address": "Nimmersather Str. 14, 33803 Steinhagen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-234",
+    "name": "RT Umzug: Norbert Deckert 1.000€",
+    "email": "",
+    "phone": "",
+    "from_address": "Ringstraße 20, 33184 Altenbeken, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-235",
+    "name": "RT: (Markus) RM Susanne Kunde 2473€",
+    "email": "",
+    "phone": "",
+    "from_address": "Falkestraße 18, Hameln, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-236",
+    "name": "RT: (Markus) Rümpel Meister in Gütersloh 1283€ + 200€ RE eigen",
+    "email": "",
+    "phone": "",
+    "from_address": "Wilhelm-Wolf-Straße 11, Innenstadt, Gütersloh, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-237",
+    "name": "RT: A. Bührdel - Keller ❗️",
+    "email": "",
+    "phone": "01722564025",
+    "from_address": "Gaudigstraße 8, Theesen, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-238",
+    "name": "RT: A. Bührdel 2.200€",
+    "email": "",
+    "phone": "01722564025",
+    "from_address": "Gaudigstraße 8, Theesen, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-239",
+    "name": "RT: Bäckerei Kraume (350€)",
+    "email": "",
+    "phone": "0521122011",
+    "from_address": "Am Wellbach 11, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-240",
+    "name": "RT: Bernward Böker 1240€",
+    "email": "",
+    "phone": "",
+    "from_address": "Marie-Curie-Straße 1, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-11",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-241",
+    "name": "RT: Christian Pein 5.000€ Benny und Matze",
+    "email": "",
+    "phone": "017661685121",
+    "from_address": "Spinnereistraße 23A, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-242",
+    "name": "RT: Christian Pein 5.000€ Benny\\, Kevin",
+    "email": "",
+    "phone": "017661685121",
+    "from_address": "Spinnereistraße 23A, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-08",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-243",
+    "name": "RT: Christian Pein 5.000€ Kevin und Benny",
+    "email": "",
+    "phone": "017661685121",
+    "from_address": "Spinnereistraße 23A, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-244",
+    "name": "RT: Conny Couch abholen 200€",
+    "email": "",
+    "phone": "01717313084",
+    "from_address": "Diesterwegstraße 77, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-245",
+    "name": "RT: Folgeauftrag Wieland Gietzen - Eigenabrechnung",
+    "email": "",
+    "phone": "",
+    "from_address": "Bernhard-Kramer-Straße 16, 33609 Bielefeld",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-246",
+    "name": "RT: Frau Anna Krat 500€ (Empfehlung Valentin)",
+    "email": "",
+    "phone": "017632374391",
+    "from_address": "Bielefelder Straße 87B, Lenzinghausen, Spenge, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-247",
+    "name": "RT: Hr. Schwarze Zimmer 122 500€",
+    "email": "",
+    "phone": "01731951415",
+    "from_address": "Caroline Oetker Stift, Hochstraße 2, 33615 Bielefeld, Deutschlan",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-248",
+    "name": "RT: Ilona Büchen-Kühl 2300€ RM Auftrag",
+    "email": "",
+    "phone": "",
+    "from_address": "Schenkendorfstraße 151, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-04",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-249",
+    "name": "RT: Michael Puckrandt 1720€",
+    "email": "",
+    "phone": "",
+    "from_address": "Haseldehnen 22, Alt-Georgsmarienhütte, Georgsmarienhütte, Deutsc",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-25",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-250",
+    "name": "RT: Peter Bellmann 3.000€",
+    "email": "",
+    "phone": "",
+    "from_address": "flurblick 23 illmtal weinstraße ",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-251",
+    "name": "RT: Peter Wurms Terasse",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-24",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-252",
+    "name": "RT: RM Alex Keilbach",
+    "email": "",
+    "phone": "",
+    "from_address": "Gertrudstraße 12, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-253",
+    "name": "RT: RM Alex Keilbach 792€",
+    "email": "",
+    "phone": "",
+    "from_address": "Gertrudstraße 12, Innenstadt, Minden, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-23",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-254",
+    "name": "RT: Sascha Thör 4.000€ SCHLÜSSEL",
+    "email": "",
+    "phone": "015560416591",
+    "from_address": "Ostweg 27, Ostkilver, Rödinghausen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-12",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-255",
+    "name": "RT: Schmiede: Fr. S. Potthast 790€",
+    "email": "",
+    "phone": "015787873225",
+    "from_address": "Pöppelmannstraße 3, Jöllenbeck, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-256",
+    "name": "RT: Sigrid Roski",
+    "email": "",
+    "phone": "",
+    "from_address": "Josef-Kreuser-Straße 23, 53340 Meckenheim, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-257",
+    "name": "RT: Silke Giesbrecht 1690 €",
+    "email": "",
+    "phone": "",
+    "from_address": "Baumheide 10, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-258",
+    "name": "RT: Thomas Ruhnke 1590 €",
+    "email": "",
+    "phone": "",
+    "from_address": "Flurstraße 2A, Steinheim, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-259",
+    "name": "Sabine Brandt - 1.762\\",
+    "email": "",
+    "phone": "015758099252",
+    "from_address": "Westfalenstraße 7, Petershagen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-04-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-260",
+    "name": "Sabine Krenz 1.297\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Wöstefeld 7B, Pye, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-261",
+    "name": "Sandra Sandfort 1298\\,58 (Immoscout24)",
+    "email": "",
+    "phone": "",
+    "from_address": "Bleichstraße 30, Warendorf, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-09-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-262",
+    "name": "Sigrid Ewertz",
+    "email": "",
+    "phone": "015770254414",
+    "from_address": "Am Feldkamp 30, Herzlake, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-23",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-263",
+    "name": "Sigrid Ewertz - 2.446\\",
+    "email": "",
+    "phone": "015770254414",
+    "from_address": "Am Feldkamp 30, Herzlake, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-264",
+    "name": "Silke Klapprodt-Buchholz 1.497\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Benter Weg 61A, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-12",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-265",
+    "name": "Silke Klapprodt-Buchholz 790€ (Markus)",
+    "email": "",
+    "phone": "",
+    "from_address": "Benter Weg 61A, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-19",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-266",
+    "name": "Silke Richter",
+    "email": "",
+    "phone": "017695660586",
+    "from_address": "Moldestraße 11, Lemförde",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-267",
+    "name": "Silke Richter - 3.300\\",
+    "email": "",
+    "phone": "017695660586",
+    "from_address": "Moldestraße 11, Lemförde",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-268",
+    "name": "Sonja Senica - 2500€ in bar erhalten",
+    "email": "",
+    "phone": "015233871162",
+    "from_address": "Rauschenberg 8, Ense, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-03",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-269",
+    "name": "Sooyeon Song - 1.767\\",
+    "email": "",
+    "phone": "01773353628",
+    "from_address": "Lothringer Weg 17, Kernstadt, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-270",
+    "name": "Sophia Eirich - 2.466\\",
+    "email": "",
+    "phone": "017631103196",
+    "from_address": "Am Hövelwald 1, Wickede (Ruhr), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-271",
+    "name": "Stefan Raab - 5.397\\",
+    "email": "",
+    "phone": "01776961696",
+    "from_address": "Woldemarstraße 7, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-272",
+    "name": "Stefan Rüdebusch 1.664\\",
+    "email": "",
+    "phone": "017622914044",
+    "from_address": "Schnelter Straße 10, Lastrup, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-27",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-273",
+    "name": "Stefan Theiling 2.298\\,49€ (nur 1500€ bezahlt)",
+    "email": "",
+    "phone": "015221633839",
+    "from_address": "Bünder Straße 252, Löhne, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-274",
+    "name": "Stefanie Krüger - 1200€ SUPI für 750€ netto",
+    "email": "",
+    "phone": "",
+    "from_address": "Rheiner Landstraße 66, Osnabrück, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-14",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-275",
+    "name": "Stephan Michael Ogorzelski - 1.589\\,65€ 2 Maxim\\, Viktor",
+    "email": "",
+    "phone": "01741784326",
+    "from_address": "Meierstraße 51, Innenstadt, Herford, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-07-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-276",
+    "name": "Streichen: Ingo Walthart (400€)",
+    "email": "",
+    "phone": "017643724750",
+    "from_address": "Vinner Straße 161, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-277",
+    "name": "Susanne Schröder-Jez (365) -",
+    "email": "",
+    "phone": "",
+    "from_address": "Siegfriedstraße 24, Werther (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-12",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-278",
+    "name": "Susanne Schröder-Jez 1.108\\,78 €",
+    "email": "",
+    "phone": "",
+    "from_address": "Siegfriedstraße 24, Werther (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-02-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-279",
+    "name": "Sylwester Kabat - 5.512\\,71€ neuer Preis 5.472\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Herzebrock jahnstraße 22b",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-10-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-280",
+    "name": "Thomas Gundler - 2.456\\",
+    "email": "",
+    "phone": "01704689709",
+    "from_address": "Hermannstraße 26A, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-281",
+    "name": "Thomas Möcking 2.162\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Eickumer Straße 60, Jöllenbeck, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-282",
+    "name": "Thomas von Sassen",
+    "email": "",
+    "phone": "",
+    "from_address": "Dammstraße 4, Innenstadt, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-12-14",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-283",
+    "name": "Tobias Schütz",
+    "email": "",
+    "phone": "",
+    "from_address": "Herforder Straße 103, Bad Salzuflen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-15",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1099€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-284",
+    "name": "Udo Richter 1906\\",
+    "email": "",
+    "phone": "01796792026",
+    "from_address": "Teutoburger Weg 53A, Schloß Holte-Stukenbrock, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-22",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-285",
+    "name": "UT RELO: Hr. Thorsten Fischer",
+    "email": "",
+    "phone": "",
+    "from_address": "Heinrichstraße 4, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-11-07",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-286",
+    "name": "UZ: Ausladehilfe (Benjamin) - 352€",
+    "email": "",
+    "phone": "",
+    "from_address": "Kirchlengern",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-06-11",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-287",
+    "name": "UZ: Ausladehilfe Marius 1142\\,40€",
+    "email": "",
+    "phone": "",
+    "from_address": "Dortmund, Nordrhein-Westfalen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-288",
+    "name": "UZ: Ausladehilfe Marius 1542\\,24€",
+    "email": "",
+    "phone": "",
+    "from_address": "Heringen, Hessen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-17",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-289",
+    "name": "UZ: Ausladehilfe Marius 1660\\,05€",
+    "email": "",
+    "phone": "",
+    "from_address": "Südbrookmerland, Niedersachsen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-10",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-290",
+    "name": "UZ: Hr. Gerd Vilardi 866\\,80€",
+    "email": "",
+    "phone": "",
+    "from_address": "Stieghorster Straße 74, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-08-12",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-291",
+    "name": "UZ: Steffan Fröhlich -2.968\\,04 €",
+    "email": "",
+    "phone": "",
+    "from_address": "Feierabendweg 16, Mettmann, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2024-09-26",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-292",
+    "name": "Valerie Betz (Krankenkasse versuchen abrechnen)",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-05",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-293",
+    "name": "Vera Krüger",
+    "email": "",
+    "phone": "",
+    "from_address": "Burgstraße 1A, Preußisch Oldendorf, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-21",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-294",
+    "name": "Verkehrswacht Bielefeld - 900€ Rechnung stellen",
+    "email": "",
+    "phone": "01556186686",
+    "from_address": "Otto-Brenner-Straße 168, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-13",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-295",
+    "name": "Volker Dellinger - 1.975\\",
+    "email": "",
+    "phone": "016095942996",
+    "from_address": "Heisenbergstraße 11, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-03-20",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-296",
+    "name": "Volker Peitz",
+    "email": "",
+    "phone": "015207466240",
+    "from_address": "Arnikaweg 129, Kernstadt, Paderborn, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-297",
+    "name": "Volker Raap - streichen (Summe gesamt mit Umzug 3.998\\,67€)",
+    "email": "",
+    "phone": "015117952764",
+    "from_address": "Max-Planck-Straße 60, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-28",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-298",
+    "name": "Volker Raap 2335€ gezahlt",
+    "email": "",
+    "phone": "015117952764",
+    "from_address": "Max-Planck-Straße 60, Bielefeld, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-18",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-299",
+    "name": "Walter Moritz",
+    "email": "",
+    "phone": "052033197",
+    "from_address": "Ziegelstraße 22, Werther (Westfalen), Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-01-16",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "Preis: 1997€€",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-300",
+    "name": "Weßler - 970\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Preußisch Oldendorf, Nordrhein-Westfalen, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-14",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-301",
+    "name": "Wilfried Gaus - 1.298\\",
+    "email": "",
+    "phone": "",
+    "from_address": "Noch nicht angegeben",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-302",
+    "name": "Wolter Andrea",
+    "email": "",
+    "phone": "",
+    "from_address": "Sundernstraße 5, Tecklenburg, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-05-06",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-303",
+    "name": "Xenia Möller",
+    "email": "",
+    "phone": "",
+    "from_address": "Kampweg 40, 32312 Lübbecke, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-10-31",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-304",
+    "name": "Yasin Belmiloudi",
+    "email": "",
+    "phone": "",
+    "from_address": "Allee 37, 33161 Hövelhof",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-08-01",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  },
+  {
+    "customer_number": "KAL-604081-305",
+    "name": "Zahra Sobhani - 1.249€ Sozialamt",
+    "email": "",
+    "phone": "017641351083",
+    "from_address": "Friedrich-Petri-Straße 39, Lage, Deutschland",
+    "to_address": "Noch nicht angegeben",
+    "moving_date": "2025-06-30",
+    "apartment": 0,
+    "services": [
+      "Umzug"
+    ],
+    "sales_status": "customer",
+    "status": "active",
+    "is_deleted": false,
+    "notes": "",
+    "source": "Kalender Import"
+  }
+]

@@ -1,0 +1,366 @@
+/* MAXIMALER KONTRAST - Schwarze Schrift auf weißem Hintergrund */
+
+/* Grundlegende Resets für maximalen Kontrast */
+* {
+  color: #000000 !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+/* Hintergrund dunkelgrau */
+html, body, #root {
+  background: #d0d0d0 !important;
+  background-color: #d0d0d0 !important;
+}
+
+/* Hauptcontainer dunkelgrau */
+.MuiContainer-root,
+main {
+  background: #d0d0d0 !important;
+  background-color: #d0d0d0 !important;
+}
+
+/* Cards und Paper weiß für Kontrast mit Abstand */
+.MuiPaper-root,
+.MuiCard-root,
+.MuiDialog-paper {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+/* Spezielle Card-Abstände - WICHTIG */
+.MuiCard-root {
+  margin: 0 !important;
+  margin-bottom: 24px !important;
+  border-radius: 8px !important;
+}
+
+/* Motion Cards auch mit Abstand */
+div[class*="MotionCard"],
+div[style*="position"] .MuiCard-root {
+  margin-bottom: 24px !important;
+}
+
+/* Karten in Listen */
+.MuiList-root .MuiCard-root,
+.MuiBox-root .MuiCard-root {
+  margin-bottom: 24px !important;
+}
+
+/* Virtualized List Items */
+div[style*="position: absolute"] {
+  padding-bottom: 24px !important;
+}
+
+/* Container für Karten */
+.customers-list-container .MuiCard-root,
+[data-testid="customer-card"] {
+  margin-bottom: 24px !important;
+}
+
+/* ALLE Texte SCHWARZ */
+p, span, div, a, h1, h2, h3, h4, h5, h6,
+.MuiTypography-root,
+.MuiTypography-h1,
+.MuiTypography-h2,
+.MuiTypography-h3,
+.MuiTypography-h4,
+.MuiTypography-h5,
+.MuiTypography-h6,
+.MuiTypography-body1,
+.MuiTypography-body2,
+.MuiTypography-subtitle1,
+.MuiTypography-subtitle2,
+.MuiTypography-caption,
+.MuiTypography-overline {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Links auch schwarz */
+a, a:hover, a:visited, a:active {
+  color: #000000 !important;
+  text-decoration: underline !important;
+}
+
+/* Buttons mit starkem Kontrast */
+.MuiButton-root {
+  color: #000000 !important;
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700 !important;
+}
+
+.MuiButton-contained,
+.MuiButton-containedPrimary {
+  color: #ffffff !important;
+  background: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+.MuiButton-contained:hover,
+.MuiButton-containedPrimary:hover {
+  color: #ffffff !important;
+  background: #333333 !important;
+}
+
+/* Input Felder mit schwarzem Text */
+input, textarea, select,
+.MuiInputBase-root,
+.MuiOutlinedInput-root,
+.MuiInput-root,
+.MuiTextField-root input,
+.MuiTextField-root textarea,
+.MuiOutlinedInput-input,
+.MuiInputBase-input {
+  color: #000000 !important;
+  background: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* Labels auch schwarz */
+label,
+.MuiFormLabel-root,
+.MuiInputLabel-root {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Placeholder text dunkelgrau */
+input::placeholder,
+textarea::placeholder,
+.MuiInputBase-input::placeholder {
+  color: #666666 !important;
+  opacity: 1 !important;
+}
+
+/* Chips mit maximalem Kontrast */
+.MuiChip-root {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.MuiChip-label {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* Icons schwarz */
+.MuiSvgIcon-root,
+.MuiIcon-root,
+svg {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+.MuiIconButton-root {
+  color: #000000 !important;
+}
+
+/* Tabellen mit schwarzem Text */
+.MuiTable-root,
+.MuiTableCell-root,
+.MuiTableHead-root,
+.MuiTableBody-root,
+th, td {
+  color: #000000 !important;
+  background: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+.MuiTableCell-head {
+  font-weight: 900 !important;
+  background: #f0f0f0 !important;
+}
+
+/* Cards mit starken Rahmen */
+.MuiCard-root,
+.MuiPaper-root {
+  border: 1px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+/* Avatar mit Kontrast */
+.MuiAvatar-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Listen */
+.MuiListItem-root,
+.MuiListItemText-primary,
+.MuiListItemText-secondary {
+  color: #000000 !important;
+}
+
+/* Dialoge */
+.MuiDialog-paper,
+.MuiDialogTitle-root,
+.MuiDialogContent-root,
+.MuiDialogContentText-root,
+.MuiDialogActions-root {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Tooltips */
+.MuiTooltip-tooltip {
+  background: #000000 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Menüs */
+.MuiMenu-paper,
+.MuiMenuItem-root {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.MuiMenuItem-root:hover {
+  background: #f0f0f0 !important;
+}
+
+/* Checkboxen */
+.MuiCheckbox-root {
+  color: #000000 !important;
+}
+
+.MuiCheckbox-root.Mui-checked {
+  color: #000000 !important;
+}
+
+/* Radio Buttons */
+.MuiRadio-root {
+  color: #000000 !important;
+}
+
+/* Switches */
+.MuiSwitch-root .MuiSwitch-thumb {
+  background: #000000 !important;
+}
+
+.MuiSwitch-root .MuiSwitch-track {
+  background: #cccccc !important;
+}
+
+/* Progress */
+.MuiLinearProgress-root {
+  background: #cccccc !important;
+}
+
+.MuiLinearProgress-bar {
+  background: #000000 !important;
+}
+
+.MuiCircularProgress-root {
+  color: #000000 !important;
+}
+
+/* Tabs */
+.MuiTab-root {
+  color: #000000 !important;
+}
+
+.MuiTabs-indicator {
+  background: #000000 !important;
+}
+
+/* Breadcrumbs */
+.MuiBreadcrumbs-root,
+.MuiBreadcrumbs-li {
+  color: #000000 !important;
+}
+
+/* Alerts */
+.MuiAlert-root {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Skeleton */
+.MuiSkeleton-root {
+  background: #cccccc !important;
+}
+
+/* Divider */
+.MuiDivider-root {
+  background: #000000 !important;
+}
+
+/* Focus sichtbar machen */
+*:focus {
+  outline: 2px solid #000000 !important;
+  outline-offset: 2px !important;
+}
+
+/* Scrollbar auch sichtbar */
+::-webkit-scrollbar {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0 !important;
+  border: 1px solid #000000 !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000000 !important;
+  border-radius: 0 !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333333 !important;
+}
+
+/* Entferne ALLE Transparenzen und Effekte */
+* {
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+/* Force black text überall */
+body * {
+  color: #000000 !important;
+}
+
+/* ABSOLUT SICHER - Abstände zwischen allen Karten */
+.MuiCard-root + .MuiCard-root {
+  margin-top: 24px !important;
+}
+
+/* Jede Karte mit Abstand unten */
+.MuiCard-root,
+div[class*="Card"],
+div[role="article"],
+div[class*="customer"] {
+  margin-bottom: 24px !important;
+  display: block !important;
+}
+
+/* Box-Komponenten mit Karten darin */
+.MuiBox-root > .MuiCard-root {
+  margin-bottom: 24px !important;
+}
+
+/* Absolut positionierte Elemente */
+div[style*="position: absolute"] > .MuiCard-root,
+div[style*="position: absolute"] > div > .MuiCard-root {
+  margin-bottom: 24px !important;
+}
+
+/* Wrapper um Karten */
+.MuiCard-root:not(:last-child) {
+  margin-bottom: 24px !important;
+}
+
+/* Extra padding für Container */
+.MuiContainer-root {
+  padding-top: 24px !important;
+  padding-bottom: 24px !important;
+}

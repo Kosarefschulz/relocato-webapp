@@ -1,0 +1,245 @@
+/* Verbesserungen für CustomerDetails Seite - Bessere Lesbarkeit */
+
+/* Karten mit besserem Kontrast */
+.MuiCard-root {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Dark Mode Karten */
+[data-theme='dark'] .MuiCard-root,
+.dark-mode .MuiCard-root {
+  background: rgba(30, 30, 30, 0.98) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Schwarze Schrift für bessere Lesbarkeit auf weißen Karten */
+.MuiCard-root .MuiTypography-root {
+  color: #1a1a1a !important;
+  font-weight: 500 !important;
+}
+
+/* Überschriften in Karten */
+.MuiCard-root .MuiTypography-h6,
+.MuiCard-root .MuiTypography-h5,
+.MuiCard-root .MuiTypography-h4 {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+/* Dunklere Farbe für sekundären Text */
+.MuiCard-root .MuiTypography-body2,
+.MuiCard-root .MuiTypography-caption {
+  color: #424242 !important;
+}
+
+/* Dark Mode Text */
+[data-theme='dark'] .MuiCard-root .MuiTypography-root,
+.dark-mode .MuiCard-root .MuiTypography-root {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .MuiCard-root .MuiTypography-body2,
+[data-theme='dark'] .MuiCard-root .MuiTypography-caption,
+.dark-mode .MuiCard-root .MuiTypography-body2,
+.dark-mode .MuiCard-root .MuiTypography-caption {
+  color: #b3b3b3 !important;
+}
+
+/* Paper Components - ähnliche Behandlung */
+.MuiPaper-root {
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+[data-theme='dark'] .MuiPaper-root,
+.dark-mode .MuiPaper-root {
+  background: rgba(30, 30, 30, 0.98) !important;
+}
+
+/* Chips mit besserem Kontrast */
+.MuiChip-root {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  font-weight: 500 !important;
+}
+
+.MuiChip-label {
+  color: #000000 !important;
+  font-weight: 500 !important;
+}
+
+[data-theme='dark'] .MuiChip-root,
+.dark-mode .MuiChip-root {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme='dark'] .MuiChip-label,
+.dark-mode .MuiChip-label {
+  color: #ffffff !important;
+}
+
+/* Tabs mit besserem Kontrast */
+.MuiTab-root {
+  color: #000000 !important;
+  font-weight: 500 !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: #5a6b7e !important;
+  font-weight: 600 !important;
+}
+
+[data-theme='dark'] .MuiTab-root,
+.dark-mode .MuiTab-root {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .MuiTab-root.Mui-selected,
+.dark-mode .MuiTab-root.Mui-selected {
+  color: #90caf9 !important;
+}
+
+/* Icons in Karten */
+.MuiCard-root .MuiSvgIcon-root {
+  color: #5a6b7e !important;
+}
+
+[data-theme='dark'] .MuiCard-root .MuiSvgIcon-root,
+.dark-mode .MuiCard-root .MuiSvgIcon-root {
+  color: #90caf9 !important;
+}
+
+/* Buttons mit besserem Kontrast */
+.MuiButton-contained {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.MuiButton-outlined {
+  border-color: #5a6b7e !important;
+  color: #5a6b7e !important;
+  font-weight: 600 !important;
+}
+
+.MuiButton-text {
+  color: #5a6b7e !important;
+  font-weight: 600 !important;
+}
+
+[data-theme='dark'] .MuiButton-outlined,
+.dark-mode .MuiButton-outlined {
+  border-color: #90caf9 !important;
+  color: #90caf9 !important;
+}
+
+[data-theme='dark'] .MuiButton-text,
+.dark-mode .MuiButton-text {
+  color: #90caf9 !important;
+}
+
+/* TextField Labels und Input */
+.MuiInputLabel-root {
+  color: #424242 !important;
+  font-weight: 500 !important;
+}
+
+.MuiInputBase-root {
+  color: #000000 !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.23) !important;
+}
+
+[data-theme='dark'] .MuiInputLabel-root,
+.dark-mode .MuiInputLabel-root {
+  color: #b3b3b3 !important;
+}
+
+[data-theme='dark'] .MuiInputBase-root,
+.dark-mode .MuiInputBase-root {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .MuiOutlinedInput-notchedOutline,
+.dark-mode .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.23) !important;
+}
+
+/* List Items */
+.MuiListItemText-primary {
+  color: #000000 !important;
+  font-weight: 500 !important;
+}
+
+.MuiListItemText-secondary {
+  color: #616161 !important;
+}
+
+[data-theme='dark'] .MuiListItemText-primary,
+.dark-mode .MuiListItemText-primary {
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .MuiListItemText-secondary,
+.dark-mode .MuiListItemText-secondary {
+  color: #b3b3b3 !important;
+}
+
+/* Divider mit besserem Kontrast */
+.MuiDivider-root {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme='dark'] .MuiDivider-root,
+.dark-mode .MuiDivider-root {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Alert Messages */
+.MuiAlert-root {
+  font-weight: 500 !important;
+}
+
+.MuiAlert-standardInfo {
+  background-color: #e3f2fd !important;
+  color: #0d47a1 !important;
+}
+
+.MuiAlert-standardSuccess {
+  background-color: #e8f5e9 !important;
+  color: #1b5e20 !important;
+}
+
+.MuiAlert-standardWarning {
+  background-color: #fff3e0 !important;
+  color: #e65100 !important;
+}
+
+.MuiAlert-standardError {
+  background-color: #ffebee !important;
+  color: #b71c1c !important;
+}
+
+/* Bessere Hover-Effekte */
+.MuiCard-root:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme='dark'] .MuiCard-root:hover,
+.dark-mode .MuiCard-root:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Focus States */
+.MuiButton-root:focus-visible,
+.MuiIconButton-root:focus-visible {
+  outline: 2px solid #5a6b7e !important;
+  outline-offset: 2px !important;
+}

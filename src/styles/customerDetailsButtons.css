@@ -1,0 +1,200 @@
+/* Einheitliches Design für CustomerDetails Action Buttons */
+
+/* Alle Action Buttons mit Gradient Background - Klein und kompakt */
+.MuiButton-contained,
+.MuiButton-containedPrimary,
+.MuiButton-containedSecondary,
+.MuiButton-root.MuiButton-contained,
+.MuiButton-root {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.2px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  font-size: 0.875rem !important;
+  min-height: 36px !important;
+  transition: none !important;
+}
+
+/* Hover-Effekt komplett überschreiben - KEINE Änderung */
+.MuiButton-contained:hover,
+.MuiButton-containedPrimary:hover,
+.MuiButton-containedSecondary:hover,
+.MuiButton-root.MuiButton-contained:hover,
+.MuiButton-root:hover,
+.MuiButton-root:hover:not(:disabled),
+button:hover {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  transform: none !important;
+}
+
+/* Spezifisch für Route planen und Fotos hinzufügen Buttons */
+button:has(.MuiSvgIcon-root):has(span:contains("Route planen")),
+button:has(.MuiSvgIcon-root):has(span:contains("Fotos hinzufügen")),
+[aria-label*="Route planen"],
+[aria-label*="Fotos hinzufügen"] {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+/* Outline Buttons überschreiben falls sie verwendet werden */
+.MuiButton-outlined,
+.MuiButton-outlined.MuiButton-outlinedPrimary,
+.MuiButton-outlined.MuiButton-outlinedSecondary {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.2px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  padding: 6px 12px !important;
+  font-size: 0.875rem !important;
+  min-height: 36px !important;
+}
+
+.MuiButton-outlined:hover,
+.MuiButton-outlined.MuiButton-outlinedPrimary:hover,
+.MuiButton-outlined.MuiButton-outlinedSecondary:hover {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  transform: none !important;
+  border: none !important;
+}
+
+/* Icons in Buttons immer weiß */
+.MuiButton-root .MuiSvgIcon-root {
+  color: #ffffff !important;
+}
+
+/* Button Text immer weiß und gut lesbar */
+.MuiButton-root .MuiButton-label,
+.MuiButton-root span {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Disabled Buttons */
+.MuiButton-root:disabled {
+  background: linear-gradient(135deg, #9a9a9a 0%, #7a7a7a 100%) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: none !important;
+}
+
+/* Focus State */
+.MuiButton-root:focus-visible {
+  outline: 3px solid #5a6b7e !important;
+  outline-offset: 2px !important;
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 600px) {
+  .MuiButton-contained,
+  .MuiButton-containedPrimary,
+  .MuiButton-root.MuiButton-contained,
+  .MuiButton-outlined {
+    padding: 6px 10px !important;
+    font-size: 0.8125rem !important;
+    min-height: 32px !important;
+  }
+}
+
+/* Stack/Grid Container für Buttons - kompakt */
+.MuiStack-root > .MuiButton-root,
+.MuiGrid-root > .MuiGrid-item > .MuiButton-root {
+  width: auto !important;
+  min-height: 36px !important;
+  max-height: 40px !important;
+}
+
+/* Speziell für die Action Button Gruppe */
+.customer-actions-container .MuiButton-root {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  margin: 4px !important;
+  padding: 6px 12px !important;
+  font-size: 0.875rem !important;
+  min-height: 36px !important;
+  max-height: 40px !important;
+}
+
+/* Icons kleiner machen */
+.MuiButton-root .MuiSvgIcon-root {
+  font-size: 1.2rem !important;
+  margin-right: 4px !important;
+}
+
+/* Spezifisch für problematische Hover States */
+.MuiButton-root.MuiButton-outlinedSecondary:hover,
+.MuiButton-root.MuiButton-textSecondary:hover,
+.MuiButton-root[aria-label*="Route"]:hover,
+.MuiButton-root[aria-label*="Fotos"]:hover,
+button:contains("Route planen"):hover,
+button:contains("Fotos hinzufügen"):hover {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Sicherstellen dass MUI Ripple Effekte nicht stören */
+.MuiButton-root .MuiTouchRipple-root {
+  display: none !important;
+}
+
+/* AGGRESSIVE Dark Mode Fix - Keine weißen Hover States */
+body[data-theme='dark'] button,
+body.dark-mode button,
+[data-theme='dark'] button,
+.dark-mode button {
+  position: relative !important;
+  isolation: isolate !important;
+}
+
+body[data-theme='dark'] button::before,
+body[data-theme='dark'] button::after,
+body.dark-mode button::before,
+body.dark-mode button::after,
+[data-theme='dark'] button::before,
+[data-theme='dark'] button::after,
+.dark-mode button::before,
+.dark-mode button::after {
+  display: none !important;
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
+/* Hover state im Dark Mode - Gradient bleibt */
+body[data-theme='dark'] button:hover,
+body.dark-mode button:hover,
+[data-theme='dark'] button:hover,
+.dark-mode button:hover {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background-color: transparent !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Alle MUI State Layers deaktivieren */
+.MuiButton-root .MuiTouchRipple-root,
+.MuiButton-root .MuiTouchRipple-ripple,
+.MuiButton-root .MuiTouchRipple-child,
+.MuiButtonBase-root .MuiTouchRipple-root {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

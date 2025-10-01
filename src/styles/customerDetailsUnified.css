@@ -1,0 +1,346 @@
+/* Einheitliches Design für CustomerDetails - wie Dashboard */
+/* HÖCHSTE PRIORITÄT - Überschreibt alle anderen Styles */
+
+/* Hauptcontainer mit Gradient Background */
+body,
+#root,
+.customer-details-container,
+#root > div > div {
+  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  min-height: 100vh !important;
+}
+
+/* Cards wie im Dashboard - SPEZIFISCH für CustomerDetails */
+body .MuiCard-root,
+body .MuiPaper-root,
+#root .MuiCard-root,
+#root .MuiPaper-root,
+.MuiCard-root,
+.MuiPaper-root {
+  background: rgba(30, 30, 30, 0.95) !important;
+  background-color: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Hover-Effekt für Cards */
+.MuiCard-root:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Text in Cards - weiß wie im Dashboard - HÖCHSTE PRIORITÄT */
+body .MuiCard-root .MuiTypography-root,
+body .MuiPaper-root .MuiTypography-root,
+#root .MuiCard-root .MuiTypography-root,
+#root .MuiPaper-root .MuiTypography-root,
+.MuiCard-root .MuiTypography-root,
+.MuiPaper-root .MuiTypography-root,
+.MuiCard-root *,
+.MuiPaper-root * {
+  color: #ffffff !important;
+}
+
+/* Sekundärer Text */
+body .MuiCard-root .MuiTypography-body2,
+body .MuiCard-root .MuiTypography-caption,
+body .MuiPaper-root .MuiTypography-body2,
+body .MuiPaper-root .MuiTypography-caption,
+.MuiCard-root .MuiTypography-body2,
+.MuiCard-root .MuiTypography-caption,
+.MuiPaper-root .MuiTypography-body2,
+.MuiPaper-root .MuiTypography-caption {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Tabs Styling wie Dashboard */
+.MuiTabs-root {
+  background: rgba(30, 30, 30, 0.8) !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+}
+
+.MuiTab-root {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.MuiTab-root:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+}
+
+.MuiTabs-indicator {
+  display: none !important;
+}
+
+/* Input Fields wie im Dashboard */
+.MuiTextField-root {
+  margin: 8px 0 !important;
+}
+
+.MuiInputBase-root {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #90caf9 !important;
+  border-width: 2px !important;
+}
+
+.MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: #90caf9 !important;
+}
+
+/* Chips wie im Dashboard */
+.MuiChip-root {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.MuiChip-root:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.MuiChip-label {
+  color: #ffffff !important;
+}
+
+/* Icons */
+.MuiSvgIcon-root {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.MuiIconButton-root {
+  color: rgba(255, 255, 255, 0.8) !important;
+  transition: all 0.2s ease !important;
+}
+
+.MuiIconButton-root:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Avatar/Badge Styling */
+.MuiAvatar-root {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  width: 56px !important;
+  height: 56px !important;
+}
+
+/* Divider */
+.MuiDivider-root {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Lists */
+.MuiListItem-root {
+  color: #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+.MuiListItem-root:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.MuiListItemText-primary {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.MuiListItemText-secondary {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Buttons - einheitlich */
+.MuiButton-contained {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+.MuiButton-contained:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Alert Messages */
+.MuiAlert-root {
+  background: rgba(30, 30, 30, 0.9) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.MuiAlert-standardInfo {
+  border-color: #90caf9 !important;
+}
+
+.MuiAlert-standardSuccess {
+  border-color: #66bb6a !important;
+}
+
+.MuiAlert-standardWarning {
+  border-color: #ffb74d !important;
+}
+
+.MuiAlert-standardError {
+  border-color: #f44336 !important;
+}
+
+/* Skeleton Loading */
+.MuiSkeleton-root {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiSkeleton-pulse {
+  animation: MuiSkeleton-keyframes-pulse 1.5s ease-in-out 0.5s infinite !important;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Hero Section / Header */
+.hero-section,
+.customer-header {
+  background: rgba(30, 30, 30, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  margin-bottom: 24px !important;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 4px 12px !important;
+  border-radius: 20px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+}
+
+.status-active {
+  background: rgba(76, 175, 80, 0.2) !important;
+  color: #4caf50 !important;
+  border: 1px solid #4caf50 !important;
+}
+
+.status-pending {
+  background: rgba(255, 152, 0, 0.2) !important;
+  color: #ff9800 !important;
+  border: 1px solid #ff9800 !important;
+}
+
+.status-inactive {
+  background: rgba(244, 67, 54, 0.2) !important;
+  color: #f44336 !important;
+  border: 1px solid #f44336 !important;
+}
+
+/* Mobile Optimierungen */
+@media (max-width: 600px) {
+  .MuiCard-root,
+  .MuiPaper-root {
+    border-radius: 8px !important;
+    margin: 8px !important;
+  }
+
+  .hero-section,
+  .customer-header {
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+  }
+}
+
+/* Dark Mode ist bereits Standard - keine separaten Dark Mode Styles nötig */
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.MuiCard-root,
+.MuiPaper-root {
+  animation: fadeIn 0.4s ease-out !important;
+}
+
+/* ULTIMATIVE OVERRIDE - Stelle sicher dass KEINE weißen Backgrounds durchkommen */
+* .MuiCard-root,
+* .MuiPaper-root,
+body * .MuiCard-root,
+body * .MuiPaper-root,
+#root * .MuiCard-root,
+#root * .MuiPaper-root {
+  background: rgba(30, 30, 30, 0.95) !important;
+  background-color: rgba(30, 30, 30, 0.95) !important;
+}
+
+/* Override für alle möglichen weißen Hintergründe */
+[style*="background: white"],
+[style*="background-color: white"],
+[style*="background: #fff"],
+[style*="background-color: #fff"],
+[style*="background: rgb(255"],
+[style*="background-color: rgb(255"] {
+  background: rgba(30, 30, 30, 0.95) !important;
+  background-color: rgba(30, 30, 30, 0.95) !important;
+}

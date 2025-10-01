@@ -1,0 +1,161 @@
+/* Improve CustomersList readability */
+body {
+  background: #f5f6fa !important;
+}
+
+.MuiContainer-root[class*="CustomersList"],
+[data-testid="customers-list"],
+.customers-list-container,
+#root > div {
+  background: #f5f6fa !important;
+  min-height: 100vh;
+}
+
+/* Improve card contrast */
+.MuiCard-root {
+  background: white !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #e0e0e0 !important;
+}
+
+.MuiCard-root:hover {
+  background: white !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+/* Improve text readability */
+.MuiTypography-root {
+  color: #000000 !important;
+}
+
+.MuiTypography-h1,
+.MuiTypography-h2,
+.MuiTypography-h3,
+.MuiTypography-h4,
+.MuiTypography-h5,
+.MuiTypography-h6 {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* Improve chip visibility */
+.MuiChip-root {
+  background: white !important;
+  border: 1px solid #d0d0d0 !important;
+}
+
+.MuiChip-label {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+/* Improve input fields */
+.MuiTextField-root .MuiOutlinedInput-root {
+  background: white !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root fieldset {
+  border-color: rgba(0, 0, 0, 0.23) !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root:hover fieldset {
+  border-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: #3f51b5 !important;
+  border-width: 2px !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-input {
+  color: #000000 !important;
+}
+
+/* Improve button contrast */
+.MuiButton-contained {
+  background: #3f51b5 !important;
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+.MuiButton-contained:hover {
+  background: #303f9f !important;
+}
+
+.MuiButton-outlined {
+  border-color: rgba(0, 0, 0, 0.23) !important;
+  color: #000000 !important;
+  background: white !important;
+}
+
+.MuiButton-outlined:hover {
+  border-color: rgba(0, 0, 0, 0.4) !important;
+  background: rgba(255, 255, 255, 1) !important;
+}
+
+/* Improve icon button visibility */
+.MuiIconButton-root {
+  color: #000000 !important;
+}
+
+.MuiIconButton-root:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #000000 !important;
+}
+
+/* Improve avatar contrast */
+.MuiAvatar-root {
+  background: #3f51b5 !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* Better table readability */
+.MuiTable-root {
+  background: white !important;
+}
+
+.MuiTableCell-root {
+  color: #000000 !important;
+}
+
+.MuiTableCell-head {
+  font-weight: 700 !important;
+  color: #000000 !important;
+  background: #f8f9fa !important;
+}
+
+/* Fix skeleton loaders */
+.MuiSkeleton-root {
+  background: rgba(0, 0, 0, 0.11) !important;
+}
+
+/* Fix dialog backgrounds */
+.MuiDialog-paper {
+  background: white !important;
+}
+
+/* Improve scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
