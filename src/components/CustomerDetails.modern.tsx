@@ -51,7 +51,7 @@ import {
   Cancel as CancelIcon
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Customer, Quote, Invoice } from '../types';
+import { Customer, Quote, Invoice, CustomerPhase } from '../types';
 import { databaseService as googleSheetsService } from '../config/database.config';
 import emailHistoryService from '../services/emailHistoryService';
 import CustomerInfo from './CustomerInfo';
@@ -64,6 +64,7 @@ import DarkModeToggle from './DarkModeToggle';
 import RoutePlanner from './RoutePlanner';
 import ShareCustomerButton from './ShareCustomerButton';
 import DispositionLinkButton from './DispositionLinkButton';
+import CustomerPhaseDropdown from './CustomerPhaseDropdown';
 // import SalesActions from './SalesActions'; // Temporarily disabled
 // import SalesStatus from './SalesStatus'; // Temporarily disabled
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
@@ -489,6 +490,23 @@ const CustomerDetails: React.FC = () => {
                       )}
                     </Stack>
                   </Box>
+                </Box>
+              </Grid>
+
+              {/* Customer Phase Dropdown */}
+              <Grid item xs={12} md={4}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>
+                    Status:
+                  </Typography>
+                  <CustomerPhaseDropdown
+                    customerId={customer.id}
+                    currentPhase={customer.currentPhase}
+                    onPhaseChange={(newPhase: CustomerPhase) => {
+                      setCustomer({ ...customer, currentPhase: newPhase });
+                    }}
+                    variant="dropdown"
+                  />
                 </Box>
               </Grid>
               

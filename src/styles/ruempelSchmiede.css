@@ -7,10 +7,9 @@
   box-sizing: border-box;
 }
 
-/* Haupthintergrund mit Farbverlauf wie im Logo */
+/* Haupthintergrund - transparent für AnimatedBackground */
 html, body, #root {
-  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
-  background-attachment: fixed !important;
+  background: transparent !important;
   min-height: 100vh !important;
   position: relative !important;
 }

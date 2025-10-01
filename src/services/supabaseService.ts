@@ -71,16 +71,21 @@ export class SupabaseService {
           .or(`firebase_id.eq.${customerId},customer_number.eq.${customerId}`)
           .eq('is_deleted', false);
       }
-      
-      const { data, error } = await query.single();
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) {
         console.error('❌ Customer query error:', error);
         return null;
       }
-      
-      console.log('✅ Customer found:', data?.name || data?.id);
-      return data ? this.mapSupabaseCustomerToLocal(data) : null;
+
+      if (!data) {
+        console.warn('⚠️ Customer not found:', customerId);
+        return null;
+      }
+
+      console.log('✅ Customer found:', data.name || data.id);
+      return this.mapSupabaseCustomerToLocal(data);
     } catch (error) {
       console.error('Error fetching customer:', error);
       return null;
@@ -707,6 +712,9 @@ export class SupabaseService {
       updatedAt: new Date(data.updated_at),
       salesStatus: data.sales_status,
       status: data.status,
+      currentPhase: data.current_phase,
+      phaseUpdatedAt: data.phase_updated_at ? new Date(data.phase_updated_at) : undefined,
+      phaseHistory: data.phase_history || [],
       cancelledAt: data.cancelled_at ? new Date(data.cancelled_at) : undefined,
       notes: data.notes,
       volume: data.volume,
@@ -740,6 +748,8 @@ export class SupabaseService {
       services: customer.services,
       sales_status: customer.salesStatus,
       status: customer.status,
+      current_phase: customer.currentPhase,
+      phase_history: customer.phaseHistory,
       cancelled_at: customer.cancelledAt instanceof Date ? customer.cancelledAt.toISOString() : customer.cancelledAt,
       notes: customer.notes,
       volume: customer.volume,

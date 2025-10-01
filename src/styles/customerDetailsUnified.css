@@ -1,12 +1,12 @@
 /* Einheitliches Design für CustomerDetails - wie Dashboard */
 /* HÖCHSTE PRIORITÄT - Überschreibt alle anderen Styles */
 
-/* Hauptcontainer mit Gradient Background */
+/* Hauptcontainer - transparent für AnimatedBackground */
 body,
 #root,
 .customer-details-container,
 #root > div > div {
-  background: linear-gradient(135deg, #5a6b7e 0%, #8b5a6b 35%, #c97979 70%, #e89090 100%) !important;
+  background: transparent !important;
   min-height: 100vh !important;
 }
 
@@ -16,13 +16,23 @@ body .MuiPaper-root,
 #root .MuiCard-root,
 #root .MuiPaper-root,
 .MuiCard-root,
-.MuiPaper-root {
+.MuiPaper-root,
+.MuiPaper-elevation0,
+.MuiPaper-elevation1,
+.MuiPaper-elevation2,
+.MuiPaper-elevation3,
+.MuiPaper-elevation4,
+.MuiPaper-elevation8,
+.MuiPaper-elevation12,
+.MuiPaper-elevation16,
+.MuiPaper-elevation24 {
   background: rgba(30, 30, 30, 0.95) !important;
   background-color: rgba(30, 30, 30, 0.95) !important;
   backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Hover-Effekt für Cards */
@@ -39,9 +49,36 @@ body .MuiPaper-root .MuiTypography-root,
 #root .MuiPaper-root .MuiTypography-root,
 .MuiCard-root .MuiTypography-root,
 .MuiPaper-root .MuiTypography-root,
-.MuiCard-root *,
-.MuiPaper-root * {
+.MuiCard-root h1,
+.MuiCard-root h2,
+.MuiCard-root h3,
+.MuiCard-root h4,
+.MuiCard-root h5,
+.MuiCard-root h6,
+.MuiCard-root p,
+.MuiCard-root div,
+.MuiPaper-root h1,
+.MuiPaper-root h2,
+.MuiPaper-root h3,
+.MuiPaper-root h4,
+.MuiPaper-root h5,
+.MuiPaper-root h6,
+.MuiPaper-root p,
+.MuiPaper-root div {
   color: #ffffff !important;
+}
+
+/* Links in Cards */
+.MuiCard-root a,
+.MuiPaper-root a {
+  color: #90caf9 !important;
+  text-decoration: none;
+}
+
+.MuiCard-root a:hover,
+.MuiPaper-root a:hover {
+  color: #64b5f6 !important;
+  text-decoration: underline;
 }
 
 /* Sekundärer Text */
@@ -53,7 +90,26 @@ body .MuiPaper-root .MuiTypography-caption,
 .MuiCard-root .MuiTypography-caption,
 .MuiPaper-root .MuiTypography-body2,
 .MuiPaper-root .MuiTypography-caption {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Icons in Cards */
+.MuiCard-root .MuiSvgIcon-root,
+.MuiPaper-root .MuiSvgIcon-root {
   color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Chips in Cards */
+.MuiCard-root .MuiChip-root,
+.MuiPaper-root .MuiChip-root {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.MuiCard-root .MuiChip-root .MuiChip-label,
+.MuiPaper-root .MuiChip-root .MuiChip-label {
+  color: #ffffff !important;
 }
 
 /* Tabs Styling wie Dashboard */
@@ -93,6 +149,15 @@ body .MuiPaper-root .MuiTypography-caption,
   background: rgba(255, 255, 255, 0.05) !important;
   border-radius: 8px !important;
   color: #ffffff !important;
+}
+
+.MuiInputBase-input {
+  color: #ffffff !important;
+}
+
+.MuiInputBase-input::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+  opacity: 1 !important;
 }
 
 .MuiOutlinedInput-notchedOutline {
@@ -183,22 +248,24 @@ body .MuiPaper-root .MuiTypography-caption,
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Buttons - einheitlich */
-.MuiButton-contained {
+/* Buttons - einheitlich ohne Hover */
+.MuiButton-contained,
+.MuiButton-root {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   backdrop-filter: blur(10px) !important;
   font-weight: 500 !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  transition: all 0.2s ease !important;
+  transition: none !important;
 }
 
-.MuiButton-contained:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+.MuiButton-contained:hover,
+.MuiButton-root:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Alert Messages */
@@ -329,7 +396,18 @@ body .MuiPaper-root .MuiTypography-caption,
 body * .MuiCard-root,
 body * .MuiPaper-root,
 #root * .MuiCard-root,
-#root * .MuiPaper-root {
+#root * .MuiPaper-root,
+.customer-details-container .MuiCard-root,
+.customer-details-container .MuiPaper-root {
+  background: rgba(30, 30, 30, 0.95) !important;
+  background-color: rgba(30, 30, 30, 0.95) !important;
+}
+
+/* Spezifisch für die weißen Cards in den Screenshots */
+.MuiBox-root .MuiCard-root,
+.MuiBox-root .MuiPaper-root,
+.MuiGrid-root .MuiCard-root,
+.MuiGrid-root .MuiPaper-root {
   background: rgba(30, 30, 30, 0.95) !important;
   background-color: rgba(30, 30, 30, 0.95) !important;
 }
@@ -340,7 +418,27 @@ body * .MuiPaper-root,
 [style*="background: #fff"],
 [style*="background-color: #fff"],
 [style*="background: rgb(255"],
-[style*="background-color: rgb(255"] {
+[style*="background-color: rgb(255"],
+.MuiPaper-root[style*="background"],
+.MuiCard-root[style*="background"] {
   background: rgba(30, 30, 30, 0.95) !important;
   background-color: rgba(30, 30, 30, 0.95) !important;
+}
+
+/* Entferne alle MUI Overlays und State Layers */
+.MuiCard-root::before,
+.MuiCard-root::after,
+.MuiPaper-root::before,
+.MuiPaper-root::after,
+.MuiButtonBase-root::before,
+.MuiButtonBase-root::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Disable MUI TouchRipple komplett */
+.MuiTouchRipple-root,
+.MuiTouchRipple-ripple {
+  display: none !important;
+  opacity: 0 !important;
 }

@@ -23,8 +23,8 @@ import CreateQuote from './components/CreateQuote';
 import CreateQuoteMultiCompany from './components/CreateQuote.multicompany';
 import NewCustomer from './components/NewCustomer';
 import QuotesList from './components/QuotesList';
-import CustomersList from './components/CustomersList';
-import CustomerDetails from './components/CustomerDetails';
+import GlassCustomersList from './components/GlassCustomersList';
+import CustomerDetails from './components/CustomerDetails.modern';
 import InvoicesList from './components/InvoicesList';
 import SalesPage from './pages/SalesPage';
 import CalendarView from './components/CalendarView';
@@ -49,6 +49,7 @@ import './utils/emailTestUtils';
 import './utils/addCustomersFromScreenshots';
 import './utils/debugEnv';
 import './utils/testGoogleSheets';
+import './utils/autoSortCustomerPhases';
 import './styles/ruempelSchmiede.css';
 import { startHealthMonitoring } from './utils/startHealthMonitoring';
 import EmailImportSettings from './components/EmailImportSettings';
@@ -85,6 +86,7 @@ import GlassWorkflowBuilder from './components/GlassWorkflowBuilder';
 import GlassAIInsights from './components/GlassAIInsights';
 import GlassInventory from './components/GlassInventory';
 import GlassDisposition from './components/GlassDisposition';
+import PipelineDashboard from './pages/PipelineDashboard';
 
 
 export const AuthContext = React.createContext<{
@@ -162,27 +164,33 @@ function AppRoutes({ user }: { user: User | null }) {
       />
       
       {/* Customer List */}
-      <Route 
-        path="/customers" 
-        element={<CustomersList />} 
+      <Route
+        path="/customers"
+        element={<GlassCustomersList />}
+      />
+
+      {/* Pipeline Dashboard */}
+      <Route
+        path="/pipeline"
+        element={<PipelineDashboard />}
       />
       
       {/* Customer Details */}
-      <Route 
-        path="/customer/:id" 
-        element={<CustomerDetails />} 
+      <Route
+        path="/customer/:customerId"
+        element={<CustomerDetails />}
       />
-      <Route 
-        path="/customer-details/:customerId" 
-        element={<CustomerDetails />} 
+      <Route
+        path="/customer-details/:customerId"
+        element={<CustomerDetails />}
       />
-      <Route 
-        path="/edit-customer/:customerId" 
-        element={<CustomerDetails />} 
+      <Route
+        path="/edit-customer/:customerId"
+        element={<CustomerDetails />}
       />
-      <Route 
-        path="/customers/:customerId" 
-        element={<CustomerDetails />} 
+      <Route
+        path="/customers/:customerId"
+        element={<CustomerDetails />}
       />
       
       {/* Quotes List */}

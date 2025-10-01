@@ -12,7 +12,6 @@ import {
   Menu as MenuIcon
 } from '@mui/icons-material';
 import './GlassDashboard.css';
-import GlassCustomerList from './GlassCustomerList';
 import GlassAICard from './GlassAICard';
 import GlassInventoryCard from './GlassInventoryCard';
 import GlassDispositionCard from './GlassDispositionCard';
@@ -32,6 +31,12 @@ const GlassDashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const dashboardItems: DashboardItem[] = [
+    {
+      title: 'Pipeline',
+      description: 'Kunden nach Phasen',
+      icon: <MenuIcon />,
+      path: '/pipeline'
+    },
     {
       title: 'Kunde suchen',
       description: 'Bestehenden Kunden finden',
@@ -120,9 +125,39 @@ const GlassDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Customer List */}
+      {/* Customer Button */}
       <div style={{ maxWidth: '1400px', margin: '0 auto 40px', padding: '0 20px' }}>
-        <GlassCustomerList limit={3} showViewAll={true} />
+        <button
+          onClick={() => navigate('/customers')}
+          style={{
+            width: '100%',
+            padding: '20px',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '12px',
+            color: '#ffffff',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.1) 100%)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+          }}
+        >
+          <SearchIcon />
+          Alle Kunden
+        </button>
       </div>
 
       {/* Dashboard Grid with AI Card */}

@@ -1,3 +1,107 @@
+// Customer Phase Enum - Phasen im Kundenprozess
+export type CustomerPhase =
+  | 'angerufen'
+  | 'nachfassen'
+  | 'angebot_erstellt'
+  | 'besichtigung_geplant'
+  | 'durchfuehrung'
+  | 'rechnung'
+  | 'bewertung'
+  | 'archiviert';
+
+// Phase Configuration with display info
+export interface PhaseConfig {
+  value: CustomerPhase;
+  label: string;
+  iconName: string; // Material-UI icon name
+  color: string;
+  description: string;
+}
+
+export const CUSTOMER_PHASES: PhaseConfig[] = [
+  {
+    value: 'angerufen',
+    label: 'Angerufen',
+    iconName: 'Phone',
+    color: '#3b82f6', // Blue
+    description: 'Erstkontakt hergestellt'
+  },
+  {
+    value: 'nachfassen',
+    label: 'Nachfassen',
+    iconName: 'PhoneCallback',
+    color: '#06b6d4', // Cyan
+    description: 'Kunde nochmal kontaktieren'
+  },
+  {
+    value: 'angebot_erstellt',
+    label: 'Angebot erstellt',
+    iconName: 'Description',
+    color: '#8b5cf6', // Purple
+    description: 'Angebot wurde erstellt und versandt'
+  },
+  {
+    value: 'besichtigung_geplant',
+    label: 'Besichtigung geplant',
+    iconName: 'Event',
+    color: '#f59e0b', // Amber
+    description: 'Besichtigungstermin vereinbart'
+  },
+  {
+    value: 'durchfuehrung',
+    label: 'Durchführung',
+    iconName: 'LocalShipping',
+    color: '#14b8a6', // Teal
+    description: 'Umzug wird durchgeführt'
+  },
+  {
+    value: 'rechnung',
+    label: 'Rechnung',
+    iconName: 'Receipt',
+    color: '#10b981', // Green
+    description: 'Rechnung erstellt/versendet'
+  },
+  {
+    value: 'bewertung',
+    label: 'Bewertung',
+    iconName: 'Star',
+    color: '#f97316', // Orange
+    description: 'Warte auf Kundenbewertung'
+  },
+  {
+    value: 'archiviert',
+    label: 'Archiviert',
+    iconName: 'Archive',
+    color: '#6b7280', // Gray
+    description: 'Prozess abgeschlossen'
+  }
+];
+
+// Phase History Entry
+export interface PhaseHistoryEntry {
+  phase: CustomerPhase;
+  changedAt: Date | string;
+  previousPhase?: CustomerPhase;
+  changedBy?: string;
+}
+
+export interface SalesNote {
+  id: string;
+  content: string;
+  createdAt: Date;
+  createdBy: string;
+  type: 'call' | 'email' | 'meeting' | 'other';
+}
+
+export interface CustomerNote {
+  id: string;
+  content: string;
+  createdAt: Date;
+  createdBy: string;
+  category?: 'general' | 'wichtig' | 'besichtigung' | 'preisverhandlung' | 'sonstiges';
+  isInternal?: boolean; // Interne Notizen, die nicht für Kunden sichtbar sind
+}
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -46,7 +150,10 @@ export interface Customer {
   source?: string; // Woher kam der Kunde (Website, Empfehlung, etc.)
   customerNumber?: string;
   company?: string; // Firmenname (optional)
-  status?: string; // Kundenstatus
+  status?: string; // Kundenstatus (deprecated - use currentPhase)
+  currentPhase?: CustomerPhase; // Aktuelle Phase im Kundenprozess
+  phaseUpdatedAt?: Date | string; // Zeitpunkt der letzten Phasenänderung
+  phaseHistory?: PhaseHistoryEntry[]; // Historie aller Phasenänderungen
   address?: string; // Zusätzliche Adresse
   city?: string; // Stadt
   zip?: string; // PLZ
@@ -69,23 +176,6 @@ export interface Customer {
   salesNotes?: SalesNote[]; // Vertriebsnotizen
   notReachedCount?: number; // Anzahl der erfolglosen Kontaktversuche
   lastNotReachedAt?: Date | string; // Zeitpunkt des letzten erfolglosen Versuchs
-}
-
-export interface SalesNote {
-  id: string;
-  content: string;
-  createdAt: Date;
-  createdBy: string;
-  type: 'call' | 'email' | 'meeting' | 'other';
-}
-
-export interface CustomerNote {
-  id: string;
-  content: string;
-  createdAt: Date;
-  createdBy: string;
-  category?: 'general' | 'wichtig' | 'besichtigung' | 'preisverhandlung' | 'sonstiges';
-  isInternal?: boolean; // Interne Notizen, die nicht für Kunden sichtbar sind
 }
 
 export interface Quote {

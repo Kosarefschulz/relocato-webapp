@@ -183,13 +183,31 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
         }}
         sx={{
           '& .MuiOutlinedInput-root': {
-            backgroundColor: 'background.paper',
+            backgroundColor: 'rgba(255, 255, 255, 0.05) !important',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#ffffff',
             '&:hover': {
-              boxShadow: 2
+              backgroundColor: 'rgba(255, 255, 255, 0.08) !important',
+              borderColor: 'rgba(255, 255, 255, 0.2)'
             },
             '&.Mui-focused': {
-              boxShadow: 3
+              backgroundColor: 'rgba(255, 255, 255, 0.08) !important',
+              borderColor: 'rgba(255, 255, 255, 0.3)'
+            },
+            '& input': {
+              color: '#ffffff !important',
+              '&::placeholder': {
+                color: 'rgba(255, 255, 255, 0.5) !important',
+                opacity: 1
+              }
+            },
+            '& fieldset': {
+              border: 'none !important'
             }
+          },
+          '& .MuiInputAdornment-root svg': {
+            color: 'rgba(255, 255, 255, 0.7) !important'
           }
         }}
       />

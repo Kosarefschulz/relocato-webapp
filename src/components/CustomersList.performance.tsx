@@ -154,8 +154,16 @@ const CustomerRow = React.memo(({
         sx={{
           cursor: 'pointer',
           mb: 3,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          border: '1px solid #e0e0e0',
+          background: 'rgba(30, 30, 30, 0.95) !important',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          color: '#ffffff !important',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 12px 40px 0 rgba(0, 0, 0, 0.4)',
+            borderColor: 'rgba(255, 255, 255, 0.15)',
+          },
         }}
         onClick={() => !selectMode && onClick()}
         onMouseEnter={onHover}
@@ -174,19 +182,24 @@ const CustomerRow = React.memo(({
               />
             )}
             
-            <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 2 }}>
+            <Avatar sx={{ bgcolor: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)', mr: 2, background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)' }}>
               {customer.name.charAt(0).toUpperCase()}
             </Avatar>
             
             <Box sx={{ flexGrow: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h6" component="div">
+                <Typography variant="h6" component="div" sx={{ color: '#ffffff !important' }}>
                   {customer.name}
                 </Typography>
-                <Chip 
+                <Chip
                   label={customer.customerNumber || customer.id}
                   size="small"
-                  sx={{ ml: 2 }}
+                  sx={{
+                    ml: 2,
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#ffffff !important',
+                  }}
                 />
                 {customer.salesStatus === 'reached' && (
                   <Chip
@@ -213,10 +226,9 @@ const CustomerRow = React.memo(({
                   />
                 )}
                 {customer.createdAt && (
-                  <Typography 
-                    variant="caption" 
-                    color="text.secondary"
-                    sx={{ ml: 'auto' }}
+                  <Typography
+                    variant="caption"
+                    sx={{ ml: 'auto', color: 'rgba(255, 255, 255, 0.7) !important' }}
                   >
                     Importiert: {formatDate(customer.createdAt)}
                   </Typography>
@@ -226,8 +238,8 @@ const CustomerRow = React.memo(({
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 1 }}>
                 {customer.email && (
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <EmailIcon fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
+                    <EmailIcon fontSize="small" sx={{ mr: 0.5, color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8) !important' }}>
                       {customer.email}
                     </Typography>
                   </Box>
@@ -235,14 +247,17 @@ const CustomerRow = React.memo(({
                 
                 {customer.phone && (
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <PhoneIcon fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary"
+                    <PhoneIcon fontSize="small" sx={{ mr: 0.5, color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <Typography
+                      variant="body2"
                       component="a"
                       href={`tel:${cleanPhoneNumber(customer.phone)}`}
                       onClick={(e) => e.stopPropagation()}
-                      sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                      sx={{
+                        textDecoration: 'none',
+                        color: 'rgba(255, 255, 255, 0.8) !important',
+                        '&:hover': { textDecoration: 'underline' }
+                      }}
                     >
                       {customer.phone}
                     </Typography>
@@ -251,8 +266,8 @@ const CustomerRow = React.memo(({
                 
                 {customer.movingDate && (
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <CalendarIcon fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
+                    <CalendarIcon fontSize="small" sx={{ mr: 0.5, color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8) !important' }}>
                       Umzug: {formatDate(customer.movingDate)}
                     </Typography>
                   </Box>
@@ -261,8 +276,8 @@ const CustomerRow = React.memo(({
               
               {(customer.fromAddress || customer.toAddress) && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                  <LocationIcon fontSize="small" color="action" />
-                  <Typography variant="body2" color="text.secondary">
+                  <LocationIcon fontSize="small" sx={{ color: 'rgba(255, 255, 255, 0.7)' }} />
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8) !important' }}>
                     {customer.fromAddress && `Von: ${customer.fromAddress}`}
                     {customer.fromAddress && customer.toAddress && ' → '}
                     {customer.toAddress && `Nach: ${customer.toAddress}`}
@@ -278,6 +293,7 @@ const CustomerRow = React.memo(({
                     e.stopPropagation();
                     onCreateQuote();
                   }}
+                  sx={{ color: 'rgba(255, 255, 255, 0.8)' }}
                 >
                   <DescriptionIcon />
                 </IconButton>

@@ -1,5 +1,87 @@
 # Projekt: Umzugsapp
 
+## Kunden-Pipeline-System
+
+### Übersicht
+Die App verfügt über ein vollständiges Pipeline-Management-System mit 8 Phasen zur Kundenverwaltung.
+
+### Kundenphasen
+Jeder Kunde durchläuft folgende Phasen:
+1. **Angerufen** (📞 Blue) - Erstkontakt hergestellt
+2. **Nachfassen** (🔄 Cyan) - Kunde nochmal kontaktieren
+3. **Angebot erstellt** (📄 Purple) - Angebot versandt
+4. **Besichtigung geplant** (📅 Amber) - Termin vereinbart
+5. **Durchführung** (🚚 Teal) - Umzug läuft
+6. **Rechnung** (💰 Green) - Rechnung erstellt
+7. **Bewertung** (⭐ Orange) - Warte auf Feedback
+8. **Archiviert** (📦 Gray) - Abgeschlossen
+
+### Features
+
+#### Pipeline-Dashboard (`/pipeline`)
+- Übersicht aller Phasen mit Kundenanzahl
+- Klick auf Phase → Gefilterte Kundenliste
+- Farb-codierte Phase-Cards
+- Material-UI Icons
+
+#### Kundendetails
+- Phase-Dropdown zum Ändern der Phase
+- Automatisches Speichern in Supabase
+- Phase-Historie wird getrackt
+
+#### Kundenliste
+- Phase-Badge bei jedem Kunden
+- Farbcodierung nach Phase
+
+### Supabase Schema
+```sql
+-- Tabelle: customers
+current_phase: customer_phase (ENUM)
+phase_updated_at: TIMESTAMP
+phase_history: JSONB[]
+```
+
+### Migrationen
+- `20251001_add_customer_phase.sql` - Initiale Phase-Struktur
+- `20251001_update_customer_phase_add_nachfassen.sql` - "Nachfassen" hinzufügen
+
+### Verwendung
+```typescript
+// Phase ändern
+await databaseService.updateCustomer(customerId, {
+  currentPhase: 'angebot_erstellt'
+});
+
+// Nach Phase filtern
+const customers = await databaseService.getCustomers();
+const inPhase = customers.filter(c => c.currentPhase === 'rechnung');
+```
+
+### Automatisches Sortieren
+
+Die App enthält ein Script zum automatischen Sortieren der Kunden basierend auf Kalenderdaten:
+
+**Browser Console:**
+```javascript
+// Manuelle Zuordnungen basierend auf Kalender anwenden
+await applyManualPhaseAssignments()
+
+// Automatisches Sortieren nach Regeln
+await autoSortCustomerPhases()
+```
+
+**Sortier-Regeln:**
+- **Termine vor 24. September** → `archiviert`
+- **Termine 24.-30. September** → `durchfuehrung` (letzte Woche)
+- **Termine ab 1. Oktober:**
+  - **UT/RT (Umzugstermine)** → `durchfuehrung`
+  - **BT (Besichtigungstermine)** → `besichtigung_geplant`
+- **Ohne Datum** → `angerufen`
+
+**Datei:** `src/utils/autoSortCustomerPhases.ts`
+
+# Projekt: Umzugsapp
+
 ## Technologie-Stack
 - Frontend: React mit TypeScript
 - Backend: Supabase (Edge Functions)
