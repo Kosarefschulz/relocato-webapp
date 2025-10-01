@@ -84,23 +84,25 @@ class ErrorBoundary extends Component<Props, State> {
             {this.state.error && (
               <>
                 <Typography variant="body2" color="error" sx={{ mb: 1, fontWeight: 600 }}>
-                  Fehler: {this.state.error.message}
+                  Fehler: {this.state.error?.message || 'Unbekannter Fehler'}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  component="pre"
-                  sx={{
-                    mt: 2,
-                    p: 2,
-                    bgcolor: 'grey.100',
-                    maxHeight: 200,
-                    overflow: 'auto',
-                    textAlign: 'left',
-                    fontSize: '0.7rem'
-                  }}
-                >
-                  {this.state.error.stack}
-                </Typography>
+                {this.state.error?.stack && (
+                  <Typography
+                    variant="caption"
+                    component="pre"
+                    sx={{
+                      mt: 2,
+                      p: 2,
+                      bgcolor: 'grey.100',
+                      maxHeight: 200,
+                      overflow: 'auto',
+                      textAlign: 'left',
+                      fontSize: '0.7rem'
+                    }}
+                  >
+                    {this.state.error.stack}
+                  </Typography>
+                )}
               </>
             )}
             {!this.state.error && (
