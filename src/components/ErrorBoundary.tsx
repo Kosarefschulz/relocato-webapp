@@ -105,25 +105,6 @@ class ErrorBoundary extends Component<Props, State> {
                 )}
               </>
             )}
-            {!this.state.error && (
-              <Typography
-                variant="caption"
-                component="pre"
-                sx={{
-                  mt: 2,
-                  p: 2,
-                  bgcolor: 'grey.100',
-                  borderRadius: 1,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  textAlign: 'left',
-                  maxHeight: 200,
-                  overflow: 'auto'
-                }}
-              >
-                {this.state.error.message}
-              </Typography>
-            )}
             <Button
               variant="contained"
               onClick={this.handleReset}
