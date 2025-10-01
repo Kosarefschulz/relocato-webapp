@@ -558,8 +558,8 @@ function App() {
             {/* Real-time Notifications */}
             <RealtimeNotifications />
             
-            {/* Online Users Widget */}
-            {showOnlineUsers && (
+            {/* Online Users Widget - Disabled */}
+            {/* {showOnlineUsers && (
               <Box
                 sx={{
                   position: 'fixed',
@@ -571,7 +571,7 @@ function App() {
               >
                 <OnlineUsers />
               </Box>
-            )}
+            )} */}
             
             {/* PWA Install Prompt - Only show when user is logged in */}
             {/* {user && <PWAInstallPrompt />} */}
