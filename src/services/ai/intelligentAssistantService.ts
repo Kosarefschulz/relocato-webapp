@@ -2,6 +2,7 @@ import { ClaudeService } from './claudeService';
 import { Customer, Quote, Invoice } from '../../types';
 import { supabaseService } from '../supabaseService';
 import { codeOperationsService } from './codeOperationsService';
+import { ragService } from './ragService';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -11,7 +12,7 @@ export interface ChatMessage {
 }
 
 export interface AIAction {
-  type: 'create_customer' | 'update_customer' | 'create_quote' | 'create_invoice' | 'search' | 'analyze' |
+  type: 'create_customer' | 'update_customer' | 'create_quote' | 'create_invoice' | 'search' | 'search_customers' | 'analyze' |
         'read_file' | 'write_file' | 'edit_file' | 'create_component' | 'search_code' | 'execute_command' | 'git_operation';
   data: any;
   status: 'pending' | 'completed' | 'failed';
@@ -506,14 +507,42 @@ Antworte IMMER:
     refreshContext: boolean = false,
     maxSteps: number = 10
   ): Promise<{ response: string; actions?: AIAction[]; steps?: number }> {
+    const startTime = Date.now();
+
     try {
       // Kontext neu laden falls gewünscht
       if (refreshContext || !this.supabaseContext) {
         await this.loadSupabaseContext();
       }
 
-      // System-Prompt
-      const systemPrompt = this.getSystemPrompt();
+      // RAG: Session starten wenn noch nicht vorhanden
+      if (!ragService.getSessionId()) {
+        await ragService.startSession();
+      }
+
+      // RAG: Finde relevanten Kontext aus früheren Chats
+      const relevantHistory = await ragService.findRelevantContext(userMessage, 3);
+      const relevantKnowledge = await ragService.searchKnowledge(userMessage);
+
+      // Erweitere System-Prompt mit RAG-Context
+      let ragContext = '';
+
+      if (relevantHistory.length > 0) {
+        ragContext += '\n\n📚 RELEVANTER KONTEXT AUS FRÜHEREN GESPRÄCHEN:\n';
+        relevantHistory.forEach((msg, i) => {
+          ragContext += `${i + 1}. [${msg.role}]: ${msg.content.slice(0, 200)}...\n`;
+        });
+      }
+
+      if (relevantKnowledge.length > 0) {
+        ragContext += '\n\n💡 RELEVANTES WISSEN:\n';
+        relevantKnowledge.forEach((kb, i) => {
+          ragContext += `${i + 1}. ${kb.title}: ${kb.content.slice(0, 300)}...\n`;
+        });
+      }
+
+      // System-Prompt mit RAG
+      const systemPrompt = this.getSystemPrompt() + ragContext;
 
       let finalResponse = '';
       let executedActions: AIAction[] = [];
@@ -619,7 +648,7 @@ Antworte IMMER:
         }
       }
 
-      // History aktualisieren
+      // History aktualisieren (local)
       this.chatHistory.push({
         role: 'user',
         content: userMessage,
@@ -631,6 +660,30 @@ Antworte IMMER:
         content: finalResponse,
         actions: executedActions.length > 0 ? executedActions : undefined
       });
+
+      // RAG: Chat-Historie persistent speichern
+      const responseTime = Date.now() - startTime;
+      await ragService.storeChatMessage('user', userMessage, {
+        imageUrl: imageBase64
+      });
+      await ragService.storeChatMessage('assistant', finalResponse, {
+        toolsUsed: executedActions,
+        success: executedActions.every(a => a.status === 'completed'),
+        responseTimeMs: responseTime
+      });
+
+      // RAG: Automatisches Learning bei erfolgreichen Multi-Steps
+      if (executedActions.length > 1 && responseTime < 10000) {
+        const successfulActions = executedActions.filter(a => a.status === 'completed');
+        if (successfulActions.length === executedActions.length) {
+          await ragService.learnFromInteraction(
+            userMessage,
+            finalResponse,
+            executedActions.map(a => ({ type: a.type, data: a.data })),
+            0.9 // Auto-Rating für schnelle erfolgreiche Multi-Steps
+          );
+        }
+      }
 
       return {
         response: finalResponse,
@@ -759,6 +812,7 @@ Antworte IMMER:
         return await this.updateCustomer(action.data);
 
       case 'search':
+      case 'search_customers':
         return await this.searchCustomers(action.data.query);
 
       case 'create_quote':

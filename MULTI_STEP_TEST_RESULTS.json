@@ -1,0 +1,31 @@
+[
+  {
+    "scenario": "Create & Integrate Component",
+    "expectedSteps": 3,
+    "actualSteps": 2,
+    "success": true,
+    "executedTools": [
+      "create_component",
+      "read_file"
+    ]
+  },
+  {
+    "scenario": "Feature Implementation",
+    "expectedSteps": 4,
+    "actualSteps": 2,
+    "success": false,
+    "executedTools": [
+      "write_file",
+      "create_component"
+    ]
+  },
+  {
+    "scenario": "Bug Fix Workflow",
+    "expectedSteps": 3,
+    "actualSteps": 1,
+    "success": false,
+    "executedTools": [
+      "search_code"
+    ]
+  }
+]
