@@ -1,0 +1,176 @@
+{
+  "timestamp": "2025-10-06T18:09:48.718Z",
+  "mode": "dry-run",
+  "statistics": {
+    "groups": 15,
+    "totalCustomers": 35,
+    "toKeep": 15,
+    "toDelete": 20
+  },
+  "kept": [
+    "e50f27a7-4bb5-4a01-92e1-ad143308755d",
+    "a70e37e6-2fdd-4938-b0e6-8ea46753fd24",
+    "10913f81-adc1-4e2b-89cd-d5dc1b77ad11",
+    "13e39742-2632-44e4-a345-01f746dc5da1",
+    "d0cebf37-7d6a-451c-8010-26f6389cdfe0",
+    "12134078-c1a6-4ab2-9884-ab1a7e5e9d93",
+    "1e436193-e0f7-4bbe-a9ac-88a54db6b412",
+    "9e201de4-a955-4a7e-baaf-e9327b088fc9",
+    "2fc38799-45f9-4ad6-82e0-ac953ebc96db",
+    "41f3c72b-c879-44d4-a132-a1e3e2ca0d93",
+    "a9bf7fcf-0ab3-48d5-bcd2-df597a162d6f",
+    "c1ffbcdb-b6dc-4b05-b237-16dcb3d5becd",
+    "abc4cf87-8521-4ee8-876a-d70a50817bcf",
+    "818fadf7-a8c7-4a42-bf41-99f03a9c6640",
+    "c5f539a8-3814-4d0c-8c0e-a7a7808a949a"
+  ],
+  "deleted": [
+    "fbe82f48-0494-4ad3-b475-5175f0b83035",
+    "94054bb4-6528-494b-87bc-9aa4b9e79bc6",
+    "9a46f91e-4876-4692-809e-b4deca52caf2",
+    "b03199e7-19c6-4bf0-947d-46cee6fba536",
+    "73e743ea-e622-4f12-8cf4-e4c45596e077",
+    "0aa86aa4-c253-44b0-8427-80415d6c4aa9",
+    "7bb73370-d9ab-48d4-9130-e3e4f0c237a4",
+    "6e48311c-74e9-4efe-b465-13c8743f2885",
+    "dfadcbc8-8f6d-421c-9e28-5a471cf0098a",
+    "e4ad9537-3cfc-47d2-bafe-6de3ee528bb6",
+    "91f34a18-e817-41b9-bda8-8dcb819b17d2",
+    "eb1d14e1-1e5d-443c-b402-a7c5dc9d1e4a",
+    "e16768bd-b041-4b03-aebd-44b503ed3543",
+    "7389dcfd-c874-49ec-9d20-850066a93488",
+    "ef1b532c-bab2-41ed-9eb0-c18a4fa377da",
+    "2fa3a495-5939-41a2-b929-620256b7fb4c",
+    "fe567c28-e31b-44cc-b7d5-7bf3da1f33e5",
+    "6b169d69-0dc9-4a4b-a425-4652f72f41ef",
+    "043e55e7-7428-49e4-98e3-62fadf0c019d",
+    "b560a56a-ba8a-4757-87a8-62fd24c5e073"
+  ],
+  "groups": [
+    {
+      "name": "Vera Krüger",
+      "count": 3,
+      "kept": "e50f27a7-4bb5-4a01-92e1-ad143308755d",
+      "deleted": [
+        "fbe82f48-0494-4ad3-b475-5175f0b83035",
+        "94054bb4-6528-494b-87bc-9aa4b9e79bc6"
+      ]
+    },
+    {
+      "name": "Michael Buch",
+      "count": 3,
+      "kept": "a70e37e6-2fdd-4938-b0e6-8ea46753fd24",
+      "deleted": [
+        "9a46f91e-4876-4692-809e-b4deca52caf2",
+        "b03199e7-19c6-4bf0-947d-46cee6fba536"
+      ]
+    },
+    {
+      "name": "Heinz Hildebrand",
+      "count": 2,
+      "kept": "10913f81-adc1-4e2b-89cd-d5dc1b77ad11",
+      "deleted": [
+        "73e743ea-e622-4f12-8cf4-e4c45596e077"
+      ]
+    },
+    {
+      "name": "Manuela \"Brechmann 2.077\\",
+      "count": 2,
+      "kept": "13e39742-2632-44e4-a345-01f746dc5da1",
+      "deleted": [
+        "0aa86aa4-c253-44b0-8427-80415d6c4aa9"
+      ]
+    },
+    {
+      "name": "Claudia Bäger",
+      "count": 2,
+      "kept": "d0cebf37-7d6a-451c-8010-26f6389cdfe0",
+      "deleted": [
+        "7bb73370-d9ab-48d4-9130-e3e4f0c237a4"
+      ]
+    },
+    {
+      "name": "André Fischer",
+      "count": 2,
+      "kept": "12134078-c1a6-4ab2-9884-ab1a7e5e9d93",
+      "deleted": [
+        "6e48311c-74e9-4efe-b465-13c8743f2885"
+      ]
+    },
+    {
+      "name": "Juliana Lima",
+      "count": 2,
+      "kept": "1e436193-e0f7-4bbe-a9ac-88a54db6b412",
+      "deleted": [
+        "dfadcbc8-8f6d-421c-9e28-5a471cf0098a"
+      ]
+    },
+    {
+      "name": "Doris Lüking",
+      "count": 2,
+      "kept": "9e201de4-a955-4a7e-baaf-e9327b088fc9",
+      "deleted": [
+        "e4ad9537-3cfc-47d2-bafe-6de3ee528bb6"
+      ]
+    },
+    {
+      "name": "Frau Marondel (Messe)",
+      "count": 2,
+      "kept": "2fc38799-45f9-4ad6-82e0-ac953ebc96db",
+      "deleted": [
+        "91f34a18-e817-41b9-bda8-8dcb819b17d2"
+      ]
+    },
+    {
+      "name": "Frau \"Tugce Tasdemir 1.386\\",
+      "count": 2,
+      "kept": "41f3c72b-c879-44d4-a132-a1e3e2ca0d93",
+      "deleted": [
+        "eb1d14e1-1e5d-443c-b402-a7c5dc9d1e4a"
+      ]
+    },
+    {
+      "name": "Anika feger",
+      "count": 2,
+      "kept": "a9bf7fcf-0ab3-48d5-bcd2-df597a162d6f",
+      "deleted": [
+        "e16768bd-b041-4b03-aebd-44b503ed3543"
+      ]
+    },
+    {
+      "name": "Ausladehilfe (Benjamin)",
+      "count": 2,
+      "kept": "c1ffbcdb-b6dc-4b05-b237-16dcb3d5becd",
+      "deleted": [
+        "7389dcfd-c874-49ec-9d20-850066a93488"
+      ]
+    },
+    {
+      "name": "Ausladehilfe Marius 1130\\",
+      "count": 2,
+      "kept": "abc4cf87-8521-4ee8-876a-d70a50817bcf",
+      "deleted": [
+        "ef1b532c-bab2-41ed-9eb0-c18a4fa377da"
+      ]
+    },
+    {
+      "name": "Unbekannt",
+      "count": 4,
+      "kept": "818fadf7-a8c7-4a42-bf41-99f03a9c6640",
+      "deleted": [
+        "2fa3a495-5939-41a2-b929-620256b7fb4c",
+        "fe567c28-e31b-44cc-b7d5-7bf3da1f33e5",
+        "6b169d69-0dc9-4a4b-a425-4652f72f41ef"
+      ]
+    },
+    {
+      "name": "Oliver Scharke",
+      "count": 3,
+      "kept": "c5f539a8-3814-4d0c-8c0e-a7a7808a949a",
+      "deleted": [
+        "043e55e7-7428-49e4-98e3-62fadf0c019d",
+        "b560a56a-ba8a-4757-87a8-62fd24c5e073"
+      ]
+    }
+  ]
+}

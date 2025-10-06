@@ -1,0 +1,239 @@
+[
+  {
+    "datum": "2025-09-01",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0057",
+    "kundenname": "Schwarze-Rainer",
+    "filename": "2025-09-01_Einnahme_RE2025-0057_Schwarze-Rainer.pdf",
+    "status": "matched",
+    "matchedCustomerId": "d4aaa769-2bef-4093-97ca-d33268cf6928",
+    "matchedCustomerName": "RT: Hr. Schwarze Zimmer 122 500€"
+  },
+  {
+    "datum": "2025-09-01",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0058",
+    "kundenname": "Buck-",
+    "filename": "2025-09-01_Einnahme_RE2025-0058_Buck-.pdf",
+    "status": "matched",
+    "matchedCustomerId": "9460e3a7-8df9-4f89-961c-58038d299be2",
+    "matchedCustomerName": "Herr Christian Buck"
+  },
+  {
+    "datum": "2025-09-01",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0059",
+    "kundenname": "Bührdel-A",
+    "filename": "2025-09-01_Einnahme_RE2025-0059_Bührdel-A.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "8e8529e8-ef2b-4b33-bf19-d5d48966dd0c",
+    "matchedCustomerName": "A. Bührdel",
+    "allMatches": [
+      {
+        "id": "8e8529e8-ef2b-4b33-bf19-d5d48966dd0c",
+        "name": "A. Bührdel"
+      },
+      {
+        "id": "6ab4b4e3-fbdc-4739-bea1-8a3ccb32e632",
+        "name": "RT: A. Bührdel - Keller ❗️"
+      },
+      {
+        "id": "755cd0e2-88f7-41cd-ac52-82a575568cac",
+        "name": "RT: A. Bührdel 2.200€"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-03",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0060",
+    "kundenname": "Buch",
+    "filename": "2025-09-03_Einnahme_RE2025-0060_Buch.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "9a46f91e-4876-4692-809e-b4deca52caf2",
+    "matchedCustomerName": "Michael Buch",
+    "allMatches": [
+      {
+        "id": "9a46f91e-4876-4692-809e-b4deca52caf2",
+        "name": "Michael Buch"
+      },
+      {
+        "id": "3085c42b-82d4-487b-b631-cf67563d7ac9",
+        "name": "Buchmann-Niedick (IS24)"
+      },
+      {
+        "id": "a70e37e6-2fdd-4938-b0e6-8ea46753fd24",
+        "name": "Michael Buch"
+      },
+      {
+        "id": "a9cf3694-9281-47ae-bd7d-aeb93c79d179",
+        "name": "Silke Klapprodt-Buchholz 1.497\\"
+      },
+      {
+        "id": "20e0fd4a-52b0-44f1-bb7e-41a992dc1cb0",
+        "name": "Silke Klapprodt-Buchholz 790€ (Markus)"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-05",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0062",
+    "kundenname": "Lienard-Carmen",
+    "filename": "2025-09-05_Einnahme_RE2025-0062_Lienard-Carmen.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "c05c829b-e060-4bf3-9a50-b8015964921e",
+    "matchedCustomerName": "Carmen Lienard (google)",
+    "allMatches": [
+      {
+        "id": "c05c829b-e060-4bf3-9a50-b8015964921e",
+        "name": "Carmen Lienard (google)"
+      },
+      {
+        "id": "897d6768-2dc9-4ab8-96c8-ab4c74fd85f1",
+        "name": "Carmen Lienard"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-05",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0063",
+    "kundenname": "Krat-Anna",
+    "filename": "2025-09-05_Einnahme_RE2025-0063_Krat-Anna.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "a7e576c0-bda4-4cad-92d5-1bbd165c130a",
+    "matchedCustomerName": "Anna Krat",
+    "allMatches": [
+      {
+        "id": "a7e576c0-bda4-4cad-92d5-1bbd165c130a",
+        "name": "Anna Krat"
+      },
+      {
+        "id": "924e70ea-2d2d-49e4-baac-eb0756eeca53",
+        "name": "RT: Frau Anna Krat 500€ (Empfehlung Valentin)"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-08",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0064",
+    "kundenname": "Lima-Juliana",
+    "filename": "2025-09-08_Einnahme_RE2025-0064_Lima-Juliana.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "dfadcbc8-8f6d-421c-9e28-5a471cf0098a",
+    "matchedCustomerName": "Juliana Lima",
+    "allMatches": [
+      {
+        "id": "dfadcbc8-8f6d-421c-9e28-5a471cf0098a",
+        "name": "Juliana Lima"
+      },
+      {
+        "id": "1e436193-e0f7-4bbe-a9ac-88a54db6b412",
+        "name": "Juliana Lima"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-16",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0066",
+    "kundenname": "Zengin-Ayten",
+    "filename": "2025-09-16_Einnahme_RE2025-0066_Zengin-Ayten.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "e47fcecd-ef1a-4594-9021-218df90c6c64",
+    "matchedCustomerName": "Ayten Zengin 2.300€",
+    "allMatches": [
+      {
+        "id": "e47fcecd-ef1a-4594-9021-218df90c6c64",
+        "name": "Ayten Zengin 2.300€"
+      },
+      {
+        "id": "b14a81dc-848e-4f4e-9c94-7c9ef710c0c2",
+        "name": "Ayten Zengin 2.300€"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-24",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0067",
+    "kundenname": "Francke-Christopher",
+    "filename": "2025-09-24_Einnahme_RE2025-0067_Francke-Christopher.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "b6490262-7b58-4be2-bd50-8266ad6c040c",
+    "matchedCustomerName": "Francke Umzug -",
+    "allMatches": [
+      {
+        "id": "b6490262-7b58-4be2-bd50-8266ad6c040c",
+        "name": "Francke Umzug -"
+      },
+      {
+        "id": "08d05e5e-4eb5-483d-9fea-05f953fb00de",
+        "name": "RT Reno: Christopher Francke - Boden Wohnzimmer"
+      },
+      {
+        "id": "096c56cf-488f-46ca-9d36-98fa80657630",
+        "name": "RT Reno: Christopher Francke - Boden Wohnzimmer"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-26",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0068",
+    "kundenname": "Klußmeyer-Sven",
+    "filename": "2025-09-26_Einnahme_RE2025-0068_Klußmeyer-Sven.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "8ef882c7-d10b-46d2-95ed-3c61c6455297",
+    "matchedCustomerName": "❗️RT Reno: Klußmeyer Sven - 24.126€",
+    "allMatches": [
+      {
+        "id": "8ef882c7-d10b-46d2-95ed-3c61c6455297",
+        "name": "❗️RT Reno: Klußmeyer Sven - 24.126€"
+      },
+      {
+        "id": "5246572c-f6ff-49d1-bf24-90e20868a62f",
+        "name": "RT Reno: Klußmeyer Sven - 24.126€"
+      },
+      {
+        "id": "149e3e9e-b5d9-4859-a4e0-68c83fb9bd36",
+        "name": "RT Reno: Klußmeyer Sven - 24.126€"
+      }
+    ]
+  },
+  {
+    "datum": "2025-09-26",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0069",
+    "kundenname": "Sammelkunde",
+    "filename": "2025-09-26_Einnahme_RE2025-0069_Sammelkunde.pdf",
+    "status": "no_customer_match",
+    "matchedCustomerId": null
+  },
+  {
+    "datum": "2025-09-30",
+    "typ": "Einnahme",
+    "rechnungsnummer": "RE2025-0070",
+    "kundenname": "Betz-Alexander",
+    "filename": "2025-09-30_Einnahme_RE2025-0070_Betz-Alexander.pdf",
+    "status": "multiple_matches",
+    "matchedCustomerId": "0298244b-68a8-4004-8e01-5084c327882d",
+    "matchedCustomerName": "Alexander Betz",
+    "allMatches": [
+      {
+        "id": "0298244b-68a8-4004-8e01-5084c327882d",
+        "name": "Alexander Betz"
+      },
+      {
+        "id": "57e52926-0dbf-4f53-a782-43df2ea7cec4",
+        "name": "Alexander Betz 3890€ #RC"
+      },
+      {
+        "id": "23115b9c-48f0-44f6-97bc-dadafa454bd8",
+        "name": "Valerie Betz (Krankenkasse versuchen abrechnen)"
+      }
+    ]
+  }
+]
