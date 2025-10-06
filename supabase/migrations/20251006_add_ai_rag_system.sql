@@ -8,6 +8,31 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- ============================================
+-- CHAT-SESSIONS TABELLE (ZUERST! - wird von ai_chat_history referenziert)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS public.ai_chat_sessions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+  -- User
+  user_id TEXT,
+  user_name TEXT,
+
+  -- Session Info
+  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  ended_at TIMESTAMP WITH TIME ZONE,
+  last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+  -- Statistiken
+  message_count INTEGER DEFAULT 0,
+  total_tokens_used INTEGER DEFAULT 0,
+  tools_used_count JSONB, -- {"create_customer": 3, "search": 5}
+
+  -- Metadata
+  metadata JSONB
+);
+
+-- ============================================
 -- CHAT-HISTORIE TABELLE (mit Embeddings)
 -- ============================================
 
@@ -42,31 +67,6 @@ CREATE TABLE IF NOT EXISTS public.ai_chat_history (
 
   -- Index für schnelle Abfragen
   CONSTRAINT fk_session FOREIGN KEY (session_id) REFERENCES ai_chat_sessions(id) ON DELETE CASCADE
-);
-
--- ============================================
--- CHAT-SESSIONS TABELLE
--- ============================================
-
-CREATE TABLE IF NOT EXISTS public.ai_chat_sessions (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-
-  -- User
-  user_id TEXT,
-  user_name TEXT,
-
-  -- Session Info
-  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  ended_at TIMESTAMP WITH TIME ZONE,
-  last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-
-  -- Statistiken
-  message_count INTEGER DEFAULT 0,
-  total_tokens_used INTEGER DEFAULT 0,
-  tools_used_count JSONB, -- {"create_customer": 3, "search": 5}
-
-  -- Metadata
-  metadata JSONB
 );
 
 -- ============================================
