@@ -65,6 +65,8 @@ import RoutePlanner from './RoutePlanner';
 import ShareCustomerButton from './ShareCustomerButton';
 import DispositionLinkButton from './DispositionLinkButton';
 import CustomerPhaseDropdown from './CustomerPhaseDropdown';
+import OfferManager from './OfferManager';
+import CustomerFileManager from './CustomerFileManager';
 // import SalesActions from './SalesActions'; // Temporarily disabled
 // import SalesStatus from './SalesStatus'; // Temporarily disabled
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
@@ -689,6 +691,8 @@ const CustomerDetails: React.FC = () => {
                 <Tab label="Angebote" icon={<Chip size="small" label={tabCount.quotes} />} iconPosition="end" disabled={editMode} />
                 <Tab label="Rechnungen" icon={<Chip size="small" label={tabCount.invoices} />} iconPosition="end" disabled={editMode} />
                 <Tab label="E-Mails" icon={<Chip size="small" label={tabCount.emails} />} iconPosition="end" disabled={editMode} />
+                <Tab label="Dateien" disabled={editMode} />
+                <Tab label="PDF-Angebote" disabled={editMode} />
               </Tabs>
             </Box>
           )}
@@ -759,6 +763,21 @@ const CustomerDetails: React.FC = () => {
           <TabPanel value={tabValue} index={5}>
             <Box sx={{ p: { xs: 2, md: 3 } }}>
               <CustomerCommunication customer={customer} />
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={6}>
+            <Box sx={{ p: { xs: 2, md: 3 } }}>
+              <CustomerFileManager customerId={customer.id} />
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={7}>
+            <Box sx={{ p: { xs: 2, md: 3 } }}>
+              <OfferManager
+                customerId={customer.id}
+                onOfferCreated={loadCustomerData}
+              />
             </Box>
           </TabPanel>
         </Paper>

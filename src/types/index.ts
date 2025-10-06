@@ -170,6 +170,7 @@ export interface Customer {
   subtotal?: number; // Zwischensumme
   tax?: number; // Steuer
   total?: number; // Gesamtsumme
+  estimatedPrice?: number; // Geschätzter/Geparster Preis aus PDF
   salesStatus?: 'reached' | 'not_reached' | 'cancelled' | string; // Verkaufsstatus
   salutation?: string; // Anrede
   cancelledReason?: string; // Grund für Stornierung

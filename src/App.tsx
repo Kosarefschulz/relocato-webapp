@@ -87,6 +87,10 @@ import GlassAIInsights from './components/GlassAIInsights';
 import GlassInventory from './components/GlassInventory';
 import GlassDisposition from './components/GlassDisposition';
 import PipelineDashboard from './pages/PipelineDashboard';
+import PdfBulkImportPage from './pages/PdfBulkImportPage';
+import { emailAutoSyncService } from './services/emailAutoSyncService';
+import IntelligentAssistant from './components/IntelligentAssistant';
+import PostMoveCalculator from './components/PostMoveCalculator';
 
 
 export const AuthContext = React.createContext<{
@@ -206,9 +210,15 @@ function AppRoutes({ user }: { user: User | null }) {
       />
       
       {/* Accounting Dashboard */}
-      <Route 
-        path="/accounting" 
-        element={<AccountingDashboard />} 
+      <Route
+        path="/accounting"
+        element={<AccountingDashboard />}
+      />
+
+      {/* PDF Bulk Import */}
+      <Route
+        path="/pdf-import"
+        element={<PdfBulkImportPage />}
       />
       
       {/* Sales Page */}
@@ -264,15 +274,27 @@ function AppRoutes({ user }: { user: User | null }) {
       />
       
       {/* Analytics Dashboard */}
-      <Route 
-        path="/analytics" 
-        element={<AnalyticsDashboard />} 
+      <Route
+        path="/analytics"
+        element={<AnalyticsDashboard />}
       />
-      
+
+      {/* AI Intelligent Assistant */}
+      <Route
+        path="/ai-assistant"
+        element={<IntelligentAssistant />}
+      />
+
+      {/* Post Move Calculator (Nachberechnung) */}
+      <Route
+        path="/post-move-calculator"
+        element={<PostMoveCalculator />}
+      />
+
       {/* Quote Templates */}
-      <Route 
-        path="/templates" 
-        element={<QuoteTemplateManager />} 
+      <Route
+        path="/templates"
+        element={<QuoteTemplateManager />}
       />
       
       {/* PDF Templates */}
@@ -470,11 +492,15 @@ function App() {
     
     // Prüfe ob Auto-Sync aktiviert ist
     const autoSyncEnabled = localStorage.getItem('autoSyncEnabled') === 'true';
-    
+
     if (autoSyncEnabled) {
       console.log('🔄 Starte automatische Google Sheets Synchronisation...');
       autoSyncService.startAutoSync(5); // Alle 5 Minuten
     }
+
+    // Starte E-Mail Auto-Sync
+    console.log('📧 Starte automatische E-Mail-Synchronisation...');
+    emailAutoSyncService.startAutoSync();
     
     // Prüfe AI Config
     checkAIConfig();
@@ -504,6 +530,7 @@ function App() {
     // Cleanup bei Unmount
     return () => {
       autoSyncService.stopAutoSync();
+      emailAutoSyncService.stopAutoSync();
       window.removeEventListener('showOnlineUsersChanged', handleShowOnlineUsersChange);
     };
   }, []);

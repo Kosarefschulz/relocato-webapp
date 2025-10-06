@@ -911,3 +911,6 @@ export class SupabaseService {
 
 // Create singleton instance
 export const supabaseService = new SupabaseService();
+
+// Re-export supabase client for direct access
+export { supabase } from '../config/supabase';

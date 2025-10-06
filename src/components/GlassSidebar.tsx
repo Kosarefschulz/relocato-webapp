@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
   Menu as MenuIcon,
   Close as CloseIcon,
   Dashboard as DashboardIcon,
-  Search as SearchIcon, 
+  Search as SearchIcon,
   PersonAdd as PersonAddIcon,
   Description as DescriptionIcon,
   Receipt as ReceiptIcon,
@@ -17,7 +17,9 @@ import {
   Assignment as DispositionIcon,
   Analytics as AnalyticsIcon,
   Settings as SettingsIcon,
-  Logout as LogoutIcon
+  Logout as LogoutIcon,
+  SmartToy as AIIcon,
+  Calculate as CalculateIcon
 } from '@mui/icons-material';
 import './GlassSidebar.css';
 
@@ -64,6 +66,13 @@ const GlassSidebar: React.FC<GlassSidebarProps> = ({ isOpen, onToggle }) => {
       section: 'customers'
     },
     {
+      title: 'PDF Import',
+      icon: <DescriptionIcon />,
+      path: '/pdf-import',
+      badge: 'NEU',
+      section: 'customers'
+    },
+    {
       title: 'Angebote',
       icon: <DescriptionIcon />,
       path: '/quotes',
@@ -74,6 +83,13 @@ const GlassSidebar: React.FC<GlassSidebarProps> = ({ isOpen, onToggle }) => {
       title: 'Buchhaltung',
       icon: <ReceiptIcon />,
       path: '/accounting',
+      section: 'business'
+    },
+    {
+      title: 'Nachberechnung',
+      icon: <CalculateIcon />,
+      path: '/post-move-calculator',
+      badge: 'NEU',
       section: 'business'
     },
     {
@@ -111,6 +127,13 @@ const GlassSidebar: React.FC<GlassSidebarProps> = ({ isOpen, onToggle }) => {
       title: 'Analytics',
       icon: <AnalyticsIcon />,
       path: '/analytics',
+      section: 'tools'
+    },
+    {
+      title: 'KI-Assistent',
+      icon: <AIIcon />,
+      path: '/ai-assistant',
+      badge: 'NEU',
       section: 'tools'
     },
     {

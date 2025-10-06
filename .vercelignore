@@ -1,0 +1,10 @@
+# Ignore test files
+test-*.js
+MULTI_STEP_TEST_RESULTS.json
+AI_ASSISTANT_TEST_REPORT.json
+
+# Ignore local scripts
+start-code-backend.sh
+
+# Code backend wird separat deployed
+code-backend.js

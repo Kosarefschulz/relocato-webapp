@@ -103,12 +103,6 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
   // Load folders on mount
   useEffect(() => {
     loadFolders();
-    setupWebSocket();
-    
-    return () => {
-      // Cleanup WebSocket
-      emailService.disconnect();
-    };
   }, []);
 
   // Load emails when folder changes
@@ -116,11 +110,19 @@ const EmailClientProfessional: React.FC<EmailClientProfessionalProps> = ({ onErr
     loadEmails();
   }, [selectedFolder, page]);
 
-  // Setup WebSocket for real-time updates (not used with IONOS)
-  const setupWebSocket = () => {
-    // IONOS service doesn't support real-time updates
-    // We'll rely on manual refresh instead
-  };
+  // Setup auto-refresh für aktuellste E-Mails
+  useEffect(() => {
+    // Auto-refresh alle 30 Sekunden
+    const refreshInterval = setInterval(() => {
+      if (selectedFolder === 'INBOX' && page === 1) {
+        console.log('🔄 Auto-refreshing emails...');
+        loadEmails();
+      }
+    }, 30000); // 30 Sekunden
+
+    return () => clearInterval(refreshInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFolder, page]);
 
   // Load folders
   const loadFolders = async () => {
