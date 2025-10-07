@@ -318,9 +318,18 @@ const CustomerDetails: React.FC = () => {
   const calculateCustomerStats = () => {
     const totalQuotes = quotes.length;
     const acceptedQuotes = quotes.filter(q => q.status === 'accepted').length;
-    const totalRevenue = quotes
+    let totalRevenue = quotes
       .filter(q => q.status === 'accepted' || q.status === 'invoiced')
       .reduce((sum, q) => sum + q.price, 0);
+
+    // Parse Umsatz aus Notizen falls keine Quotes vorhanden
+    if (totalRevenue === 0 && customer?.notes) {
+      const umsatzMatch = customer.notes.match(/Umsatz:\s*([\d,.]+)€/);
+      if (umsatzMatch) {
+        totalRevenue = parseFloat(umsatzMatch[1].replace(',', '.'));
+      }
+    }
+
     const conversionRate = totalQuotes > 0 ? (acceptedQuotes / totalQuotes) * 100 : 0;
 
     return { totalQuotes, acceptedQuotes, totalRevenue, conversionRate };
